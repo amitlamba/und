@@ -1,0 +1,214 @@
+{
+  "didEvents": {
+    "events": [
+      {
+        "name": "Charged",
+        "dateFilter": {
+          "operator": "Between",
+          "values": [
+            "2018-03-26T18:30:00.000Z",
+            "2018-04-26T18:29:59.999Z"
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              5656
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "LessThan"
+          },
+          {
+            "values": [],
+            "name": "Day of week"
+          },
+          {
+            "values": [
+              1000
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "GreaterThan"
+          },
+          {
+            "values": [10,12,13,14],
+            "name": "Time of day"
+          }
+        ],
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [
+            5
+          ],
+          "whereFilterName": "Count"
+        }
+      },
+      {
+        "name": "App Uninstalled",
+        "dateFilter": {
+          "operator": "Before",
+          "values": ["2015-04-04"]
+        },
+        "propertyFilters": [
+          {
+            "values": [],
+            "name": "First Time"
+          },
+          {
+            "values": [2],
+            "name": "Day of week"
+          },
+          {
+            "values": [3],
+            "name": "Day of month"
+          },
+          {
+            "values": [10,12,13,14],
+            "name": "Time of day"
+          }
+        ],
+        "whereFilter": {
+          "operator": "Equals",
+          "values": [
+            56
+          ],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "After",
+          "values": [
+            "2018-04-09T18:30:00.000Z"
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              5000
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "GreaterThan"
+          },
+          {
+            "values": [
+              5
+            ],
+            "name": "Quantity",
+            "type": "number",
+            "operator": "GreaterThan"
+          },
+          {
+            "values": [3],
+            "name": "Day of week"
+          },
+          {
+            "values": [
+              3
+            ],
+            "name": "Quantity",
+            "type": "number",
+            "operator": "LessThan"
+          },
+          {
+            "values": [
+              "radioactive material"
+            ],
+            "name": "Product",
+            "type": "string",
+            "operator": "Contains"
+          }
+        ],
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [3],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [
+    {
+      "globalFilterType": "Demographics",
+      "name": "age",
+      "values": [
+        "50"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "Technographics",
+      "name": "Device",
+      "values": [
+        "Mobile Phone"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "Technographics",
+      "name": "Browser",
+      "values": [],
+      "operator": "Exists"
+    },
+    {
+      "globalFilterType": "UserProperties",
+      "name": "User Property Name",
+      "values": [
+        "Colour"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "UserProperties",
+      "name": "User Property Name",
+      "values": [
+        "Weight"
+      ],
+      "operator": "DoesNotContain"
+    }
+  ],
+  "geographyFilters": [
+    {
+      "country": {
+        "id": "231",
+        "name": "United States"
+      },
+      "state": {
+        "id": "3953",
+        "name": "New Jersey"
+      },
+      "city": {
+        "id": "47800",
+        "name": "Phillipsburg"
+      }
+    },
+    {
+      "country": {
+        "id": "166",
+        "name": "Pakistan"
+      },
+      "state": {
+        "id": "2728",
+        "name": "Punjab"
+      },
+      "city": {
+        "id": "31439",
+        "name": "Lahore"
+      }
+    }
+  ],
+  "type": "Behaviour"
+}

@@ -1,0 +1,43 @@
+
+
+ext {
+    bootRedisVersion = '1.4.7.RELEASE'
+    dataRedisVersion = '2.0.0.RELEASE'
+    jedisVersion = '2.9.0'
+}
+
+
+
+jar {
+    group = 'com.und'
+    baseName = 'emailsendservice'
+    version = '0.2.0'
+}
+
+
+
+dependencies {
+    compile('org.springframework.cloud:spring-cloud-starter-stream-kafka')
+    compile('org.springframework.cloud:spring-cloud-stream-binder-kafka')
+    compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    compile('org.springframework.boot:spring-boot-starter-data-mongodb')
+    compile('org.springframework.boot:spring-boot-starter-data-rest')
+    compile('org.springframework.boot:spring-boot-starter-mail')
+    compile("org.springframework.boot:spring-boot-starter-freemarker")
+
+
+    compile('org.postgresql:postgresql')
+    compile group: 'org.jsoup', name: 'jsoup', version: '1.11.3'
+    compile( "com.amazonaws:aws-java-sdk-ses:1.11.221")
+    compile( "com.amazonaws:aws-java-sdk-sns:1.11.221")
+
+    compile(
+            "org.springframework.boot:spring-boot-starter-redis:$bootRedisVersion",
+            "org.springframework.data:spring-data-redis:$dataRedisVersion",
+            "redis.clients:jedis:$jedisVersion",
+    )
+
+
+
+}
+

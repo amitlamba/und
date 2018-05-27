@@ -1,0 +1,45 @@
+# config context path to "/" by setting an empty string
+server:
+  port: 7777
+  servlet:
+    context-path:
+
+spring:
+  application:
+    name: event-api
+  jackson:
+    serialization:
+      INDENT_OUTPUT: true
+  data:
+    mongodb:
+      database: eventdb
+     # username: eventuser
+     # password: password
+      host: 192.168.0.109
+      port: 27017
+
+security:
+  header:
+    token: Authorization
+    username: UserName
+  secret: mySecret
+  expiration: 604800
+  route:
+    authentication:
+      path: auth
+      refresh: refresh
+
+
+
+kafka:
+  ip: 192.168.0.109
+  port: 6667
+  topic:
+    event: event
+    eventUser: event-user
+#logging:
+#  level:
+#    org.springframework:
+#      security: DEBUG
+
+

@@ -1,0 +1,146 @@
+[
+  {
+    "name": "Added to cart",
+    "properties": [
+      {
+        "dataType": "number",
+        "name": "Amount",
+        "options": []
+      },
+      {
+        "dataType": "string",
+        "name": "Category",
+        "options": [
+          "Shoes",
+          "Watches",
+          "Hoodies",
+          "Jeans",
+          "T-Shirts"
+        ]
+      },
+      {
+        "dataType": "string",
+        "name": "Product",
+        "options": []
+      },
+      {
+        "dataType": "number",
+        "name": "Quantity",
+        "options": []
+      }
+    ]
+  },
+  {
+    "name": "Removed from cart",
+    "properties": [
+      {
+        "dataType": "number",
+        "name": "Amount",
+        "options": []
+      },
+      {
+        "dataType": "string",
+        "name": "Category",
+        "options": [
+          "Shoes",
+          "Watches",
+          "Hoodies",
+          "Jeans",
+          "T-Shirts"
+        ]
+      },
+      {
+        "dataType": "string",
+        "name": "Product",
+        "options": []
+      },
+      {
+        "dataType": "number",
+        "name": "Quantity",
+        "options": []
+      }
+    ]
+  },
+  {
+    "name": "Product Viewed",
+    "properties": [
+      {
+        "dataType": "number",
+        "name": "Amount",
+        "options": []
+      },
+      {
+        "dataType": "string",
+        "name": "Category",
+        "options": [
+          "Shoes",
+          "Watches",
+          "Hoodies",
+          "Jeans",
+          "T-Shirts"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Charged",
+    "properties": [
+      {
+        "dataType": "number",
+        "name": "Amount",
+        "options": []
+      },
+      {
+        "dataType": "string",
+        "name": "Category",
+        "options": [
+          "Shoes",
+          "Watches",
+          "Hoodies",
+          "Jeans",
+          "T-Shirts"
+        ]
+      },
+      {
+        "dataType": "date",
+        "name": "Delivery Date",
+        "options": []
+      },
+      {
+        "dataType": "string",
+        "name": "Payment Mode",
+        "options": []
+      },
+      {
+        "dataType": "string",
+        "name": "Product",
+        "options": []
+      }
+    ]
+  },
+  {
+    "name": "UTM Visited",
+    "properties": [
+      {
+        "dataType": "string",
+        "name": "UTM source",
+        "options": []
+      },
+      {
+        "dataType": "string",
+        "name": "UTM medium",
+        "options": []
+      },
+      {
+        "dataType": "string",
+        "name": "UTM campaign",
+        "options": []
+      },
+      {
+        "dataType": "string",
+        "name": "Session referrer",
+        "options": []
+      }
+    ]
+  }
+]

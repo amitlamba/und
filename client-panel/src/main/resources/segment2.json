@@ -1,0 +1,154 @@
+{
+  //Events
+  "did": [
+    {
+      "name": "Users who did these Events",
+      "joinCondition": {
+        "count": 3,
+        "condType": "AllOf/AnyOf",
+        "events": [
+          {
+            "name": "Event Name Unique",
+            "dateFilter": {
+              "operator": "Date Operators",
+              "values": [],
+              "valueUnit": "w/m/d/y"
+            },
+            "propertyFilters": [
+              {
+                "propertyName": "",
+                "propertyType": "",
+                "operator": "Date Operators",
+                "values": [],
+                "valueUnit": "w/m/d/y"
+              }
+            ],
+            "whereFilter": {
+              "count": {
+                "operator": "",
+                "values": []
+              },
+              "sumOfValuesOf": {
+                "propertyName": "",
+                "operator": "",
+                "values": []
+              }
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "didNot": [
+    {
+      "name": "Users who did these Events",
+      "joinCondition": {
+        "condType": "AnyOf",
+        "events": [
+          {
+            "name": "Event Name Unique",
+            "dateFilter": {
+              "operator": "Date Operators",
+              "values": [],
+              "valueUnit": "w/m/d/y"
+            },
+            "propertyFilters": [
+              {
+                "propertyName": "",
+                "propertyType": "",
+                "operator": "Date Operators",
+                "values": [],
+                "valueUnit": "w/m/d/y"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+
+
+
+
+  "globalFIlters": {
+    "UserProperties": [
+      {
+        "propertyName": "User Property Name",
+        "propertyType": "date/string/number",
+        "operator": "",
+        "values": [],
+        "valueUnit": "w/m/d/y"
+      },
+      {
+        "propertyName": "User Property Name",
+        "propertyType": "date/string/number",
+        "operator": "",
+        "values": [],
+        "valueUnit": "w/m/d/y"
+      }
+    ]
+  },
+  "Demographics": [
+    {
+      "age": "18-25",
+      "gender": "M"
+    }
+  ],
+  "Geography": [
+    {
+      "country": {
+        "id": 10,
+        "name": "India"
+      },
+      "state": {
+        "id": 20,
+        "name": "Haryana"
+      },
+      "city": {
+        "id": 25,
+        "name": "Gurugram"
+      }
+    }
+  ],
+  "Technographics": [
+    {
+      "Browser":["Chrome","Firefox","Internet Explorer","Mobile Application","Opera","Others","Safari","Sea Monkey","UC Browser"],
+      "Device":["Desktop","Mobile","Tablet","TV"],
+      "OS":["Android","Blackberry","Ios","Linux","Mac","Others","Windows"]
+    }
+  ],
+  "Reachability": [
+    {
+      "hasDeviceToken":["Yes","No"],
+      "hasEmailAddress":["Yes","No"],
+      "hasPhoneNumber":["Yes","No"],
+      "unsubscribedPush":["Yes","No"],
+      "unsubscribedEmail":["Yes","No"],
+      "unsubscribedSMS":["Yes","gitNo"]
+    }
+  ],
+  "AppFields": [
+    {
+      "App Version":{
+        "Operator":["Equals","Contains","Does not Contain","not equals"],
+        "Versions":[0,1,2,3,4]
+      },
+      "Make":{
+        "Operator":["Equals","Contains","Does not Contain","not equals"],
+        "Versions":["Apple","Samsung","Motorola","Sony","HTC","Xiaomi"]
+      },
+      "Models":{
+        "Operator":["Equals","Contains","Does not Contain","not equals"],
+        "Versions":["Iphone 6","Iphone 8","Iphone 7","Moto g3"]
+      },
+      "OS Version":{
+        "Operator":["Equals","Contains","Does not Contain","not equals"],
+        "Versions":["4.0.1","4.4.1","9.2","9.1","6.0.1"]
+      },
+      "SDK Version":{
+        "Operator":["Equals","Contains","Does not Contain","not equals"],
+        "Versions":[9001,9002,9003,9004]
+      }
+    }
+  ]
+}

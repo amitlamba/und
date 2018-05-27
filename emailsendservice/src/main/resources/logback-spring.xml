@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--<configuration debug="true" scan="true" scanPeriod="10 seconds" >-->
+<configuration>
+
+
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <springProfile name="dev">
+        <logger name="com.und" level="DEBUG" additivity="false">
+            <appender-ref ref="FILE"/>
+        </logger>
+    </springProfile>
+    <springProfile name="staging">
+        <logger name="com.und" level="INFO" additivity="false">
+            <appender-ref ref="FILE"/>
+        </logger>
+    </springProfile>
+
+    <springProfile name="prod">
+        <logger name="com.und" level="WARN" additivity="false">
+            <appender-ref ref="FILE"/>
+        </logger>
+    </springProfile>
+
+    <if condition='property("spring.profiles.active").contains("dev")'>
+        <then>
+            <logger name="com.und.web" level="DEBUG" additivity="false">
+                <appender-ref ref="CONSOLE"/>
+            </logger>
+        </then>
+        <else>
+            <logger name="com.und.web" level="WARN" additivity="false">
+                <appender-ref ref="FILE"/>
+            </logger>
+        </else>
+    </if>
+
+
+
+
+</configuration>

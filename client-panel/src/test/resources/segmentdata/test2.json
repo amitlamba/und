@@ -1,0 +1,89 @@
+{
+  "didEvents": {
+    "events": [
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "Before",
+          "type":"date",
+          "values": ["2014-05-07"]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              "category1"
+            ],
+            "name": "Category",
+            "type": "string",
+            "operator": "Contains"
+          }
+        ],
+        "whereFilter": {
+          "operator": "Equals",
+          "values": [
+            200
+          ],
+          "whereFilterName": "SumOfValuesOf"
+        }
+      },
+      {
+        "name": "Charged",
+        "dateFilter": {
+          "operator": "Before",
+          "type":"date",
+          "values": ["2014-05-07"]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              "credit Card"
+            ],
+            "name": "Payment Mode",
+            "type": "string",
+            "operator": "Contains"
+          }
+        ],
+        "whereFilter": {
+          "operator": "Equals",
+          "values": [
+            2
+          ],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [
+      {
+        "name": "App Uninstalled",
+        "dateFilter": {
+          "operator": "Before",
+          "type":"date",
+          "values": ["2014-05-07"]
+        },
+        "propertyFilters": [
+          {
+            "values": [10,13,23,23],
+            "name": "Time of day"
+          }
+        ],
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [10],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [],
+  "geographyFilters": [],
+  "type": "Behaviour",
+  "name": "tt"
+}

@@ -1,0 +1,70 @@
+#name JsonTestData1
+who did(AND) added to cart, quantity, Day of week
+
+#name JsonTestData2
+who did not app uninstalled, On, time of day, day of week, day of month
+
+#name JsonTestData3
+users who did charged, amount greater than 5000 , time of day exists, delivery date after, 
+did not uninstalled app before, time of day, day of week, day of month, 
+properties demographics age = 56 gender=Male, technographics OS exists,
+locations country India, state=haryana, city=Gurgaon, country = Iraq, state=Baghdad, city= baghdad
+
+#name JsonTestData4
+who did charged, app uninstalled
+who did not, added to cart
+properties demographics, technographics, user properties, 
+locations=United States New Jersey, Phillipsburg, Pakistan Punjab Lahore
+
+#name JsonTestData5
+who did not app unistalled, charged, added to cart
+
+#name JsonTestData6
+who did (OR) added to cart will be exactly in 10 days, category clothing, quantity exists, amount= 50000
+who did not added to cart will be exactly in 10 days, category clothing, quantity exists, amount= 50000
+properties reachability hasEmailAddress doesnot exist, hasdeviceToken doesnot exist, hasPhoneNumber doesnot exist
+locations country=China state=Shanghai city=Shanghai, country=Japan state=Tokyo city=Tokyo
+ 
+#name JsonTestData7
+who did (AND) added to cart, charged, app uninstalled
+
+#name JsontestData8
+who didnot added to cart today, amount between 5000 to 15000, amount doesnot exist, amount exist 
+
+#name JsonTestData9
+users are segmented by properties and location
+
+#name JsonTestData10
+user are segmented by who did added to cart, app uninstalled, charged today or who did not added to cart, charged, app uninstalled today between 9 to 15
+
+#name JsonnTestData11
+who did added to cart first time and did not added to cart first time and properties 
+
+#name JsontestData13
+who did added to cart and did not uninstall app today and not charged in past 15 days
+
+#name JsonTestData14
+contains almost every events and fields and properties
+
+#name JsonTestData15
+contains almost every events and fields and properties
+
+#name JsonTestData16
+contains almost every events and fields and properties
+
+#name JsonTestData16
+who did added to cart today and quantity more then 5 and first time
+
+#name JsonTestData17
+who did uninstalled the app today and for the first time
+
+#name JsonTestData18
+who did charged today and for the first time 
+
+#name JsonTestData19
+who did not added to cart
+
+#name JsonTestData20
+Who added to cart and did not charged
+
+

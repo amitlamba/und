@@ -1,0 +1,250 @@
+import com.fatboyindustrial.gsonjavatime.Converters
+import com.google.gson.GsonBuilder
+import org.bson.types.ObjectId
+import java.util.*
+
+//mongoimport -h 192.168.0.109 --db eventdb --collection 1_eventmetadata --drop --file ~/downloads/mongodata.json
+enum class DataType(var typeName: String) {
+    NUMBER("Number"),
+    DATE("Date"),
+    STRING("String")
+}
+
+class EP(var name: String, var type: DataType = DataType.STRING)
+
+enum class EVENTS(var id: Int, var eventname: String, order: Int, var properties: List<EP>) {
+
+    SEARCHED(1, "searched", 10, listOf(
+            EP("Search Term")
+
+    )),
+    PRODUCTVIEWED(2, "product viewed", 20, listOf(
+            EP("Amount", DataType.NUMBER),
+            EP("Category"),
+            EP("Product")
+
+    )),
+    ADDTOCART(3, "add to cart", 30, listOf(
+            EP("Amount", DataType.NUMBER),
+            EP("Category"),
+            EP("Product", DataType.NUMBER),
+            EP("Quantity", DataType.NUMBER)
+    )),
+
+    CHARGED(4, "charged", 40, listOf(
+            EP("Amount", DataType.NUMBER),
+            EP("Category"),
+            EP("Payment Mode"),
+            EP("Product", DataType.NUMBER),
+            EP("Quantity", DataType.NUMBER),
+            EP("Delivery Date", DataType.DATE)
+    ))
+
+}
+
+class Property(var name: String, var dataType: DataType, var options: List<String>, var regex: String? = null)
+
+class EventMetadata(var name: String, var properties: MutableList<Property>)
+
+val events = mutableListOf<EVENTS>(EVENTS.SEARCHED, EVENTS.PRODUCTVIEWED, EVENTS.ADDTOCART, EVENTS.CHARGED)
+
+class Product(var id: Int, var name: String, var price: Int, var categories: MutableList<String>, var tags: MutableList<String>,
+              var properties: HashMap<String, String> = hashMapOf<String, String>())
+
+//add products
+val products = listOf<Product>(
+        Product(1, "CORE JAVA VOLUME 1", 100,
+                mutableListOf("Book", "Programming"),
+                mutableListOf("Book", "Programming"),
+                hashMapOf("Author" to "Gosling")),
+        Product(2, "CORE JAVA VOLUME 2", 200,
+                mutableListOf("Book", "Programming"),
+                mutableListOf("Book", "Programming"),
+                hashMapOf("Author" to "Gosling")),
+        Product(3, "T Shirt", 100,
+                mutableListOf("Cloth", "Shirts"),
+                mutableListOf("Casual Wear", "Man"),
+                hashMapOf("Size" to "XL", "color" to "red"))
+)
+
+
+//add ip, coordinates
+//add users, with ip,coordinates
+fun getId(): String {
+    return ObjectId.get().toString()
+}
+
+class User(var id: String?, var name: String, var email: String, var ip: String, var geo: GeoLocation)
+
+val users = listOf<User>(
+        //anonnymous user
+        User(getId(), "amit", "amit@userndot.com", "192.168.0.109",
+                GeoLocation(coordinate = Coordinate(1.2f, 1.3f))),
+        User(getId(), "shiv", "shiv@userndot.com", "192.168.0.100",
+                GeoLocation(coordinate = Coordinate(1.9f, 1.35f))),
+        User(getId(), "kamal", "kamal@userndot.com", "192.168.0.102",
+                GeoLocation(coordinate = Coordinate(1.4f, 1.45f))),
+        User(getId(), "laksh", "laksh@userndot.com", "192.168.0.105",
+                GeoLocation(coordinate = Coordinate(2.2f, 9.3f)))
+)
+
+val paymentmodes = mutableListOf<String>("Credit Card", "Net Banking", "COD")
+
+
+val systems = mutableListOf<System>()
+
+fun createEventMetadata() {
+    val events = EVENTS.values()
+    for (event in events) {
+        val name = event.eventname
+
+        var properties: MutableList<Property> = mutableListOf()
+        for(property in  event.properties) {
+            property.name
+            property.type
+        }
+    }
+}
+
+/*fun main(args: Array<String>) {
+    println(byuserEvents())
+}*/
+
+fun byuserEvents(): MutableList<String> {
+    val eventsDocument = mutableListOf<String>()
+    val system1 = System()
+    with(system1) {
+        browser = SystemDetails(name = "Firefox", version = "57.03")
+        os = SystemDetails(name = "MACOS", version = "10.03")
+
+    }
+    systems.add(system1)
+    //1. select a random user
+    // val randomUserId = Random().nextInt(4)
+    //val user = users[randomUserId]
+    for (user in users) {
+        Thread({
+            var sessionid = getId()
+            var deviceid = getId()
+            val system = systems[Random().nextInt(systems.size)]
+            eventsDocument.addAll(doevent(user, system, sessionid, deviceid))
+        }).start()
+    }
+    return eventsDocument
+}
+
+fun doevent(user: User, system: System, sessionId: String, deviceId: String): MutableList<String> {
+    val eventsDocument = mutableListOf<String>()
+    val gson = Converters.registerOffsetDateTime(GsonBuilder()).setPrettyPrinting().create()
+    //0. choose a clientid
+    val clientId = 1
+
+
+    //for that user(try multithread for multiple users at once)
+    //2. select an event randomly, keep order in mind, use next event from next ordered events
+    val randomNumberOfeventsMax = Random().nextInt(30)
+    val maxsize = events.size
+    var currenteventId = Random().nextInt(maxsize)
+    val searchedProducts = mutableListOf<Product>()
+    val viwedProducts = mutableListOf<Product>()
+    val addedToCarts = hashMapOf<Product, Int>()
+    for (i in 1..randomNumberOfeventsMax) {
+        val delay = Random().nextInt(30) * 1000L
+        Thread.sleep(delay)
+        var event = events[currenteventId]
+        var realevent: Event? = null
+        if (event == EVENTS.CHARGED && addedToCarts.isEmpty()) {
+            currenteventId -= 1
+            event = EVENTS.ADDTOCART
+        }
+        when (event) {
+            EVENTS.SEARCHED -> {
+                realevent = Event(getId(), EVENTS.SEARCHED.eventname, clientId)
+                val product = products[Random().nextInt(products.size)]
+                searchedProducts.add(product)
+                realevent.attributes = hashMapOf(
+                        "Searched Term" to product.name
+                )
+
+            }
+            EVENTS.PRODUCTVIEWED -> {
+                realevent = Event(getId(), EVENTS.PRODUCTVIEWED.eventname, clientId)
+                val product = products[Random().nextInt(products.size)]
+                viwedProducts.add(product)
+                realevent.attributes = hashMapOf(
+                        "product" to product.name,
+                        "amount" to product.price,
+                        "category" to product.categories
+
+                )
+            }
+            EVENTS.ADDTOCART -> {
+                realevent = Event(getId(), EVENTS.ADDTOCART.eventname, clientId)
+                var product = products[Random().nextInt(products.size)]
+                //fixme get quantity as well if charged
+                if (!viwedProducts.isEmpty()) {
+                    product = viwedProducts[Random().nextInt(viwedProducts.size)]
+                }
+                val quantity = Random().nextInt(4)
+                addedToCarts.put(product, quantity)
+                realevent.attributes = hashMapOf(
+                        "product" to product.name,
+                        "amount" to product.price,
+                        "category" to product.categories,
+                        "quantity" to quantity
+
+                )
+            }
+            EVENTS.CHARGED -> {
+                realevent = Event(getId(), EVENTS.CHARGED.eventname, clientId)
+                var product = products[Random().nextInt(products.size)]
+                //fixme get quantity as well if charged
+                var totalPrice = 0
+                if (!addedToCarts.isEmpty()) {
+                    //product = addedToCarts[Random().nextInt(viwedProducts.size)]
+                    val lineItems = mutableListOf<LineItem>()
+                    //addedToCarts.add(product)
+                    for ((i, q) in addedToCarts) {
+                        val lineItem = LineItem()
+                        lineItem.price = i.price * q
+                        totalPrice += lineItem.price
+                        lineItem.currency = "USD"
+                        lineItem.product = i.name
+                        lineItem.categories = i.categories
+                        lineItem.tags = i.tags
+                        lineItem.quantity = q
+                        lineItems.add(lineItem)
+                    }
+                    realevent.lineItem = lineItems
+                }
+                realevent.attributes = hashMapOf(
+                        "amount" to totalPrice,
+                        "deliverydate" to product.categories,
+                        "payment mode" to paymentmodes[Random().nextInt(paymentmodes.size)]
+
+                )
+            }
+
+        }
+        realevent.geoDetails = GeoDetails()
+        realevent.geoDetails.ip = user.ip
+        realevent.geoDetails.geolocation = user.geo
+        realevent.system = system
+        realevent.userIdentified = user.id != null
+        realevent.userId = "" + (user.id)
+        realevent.sessionId = sessionId
+        realevent.deviceId = deviceId
+        eventsDocument.add(gson.toJson(realevent))
+        println(gson.toJson(realevent))
+        if (currenteventId == events.size - 1) {
+            break
+        }
+        var x = Random().nextInt(maxsize - currenteventId) + currenteventId
+        while (x < currenteventId) {
+            x = Random().nextInt(maxsize - currenteventId) + currenteventId
+        }
+        currenteventId = x
+    }
+    return eventsDocument
+
+}

@@ -1,0 +1,138 @@
+{
+  "didEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "After",
+          "values": [
+            "2018-04-02T18:30:00.000Z"
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              5000
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "GreaterThan"
+          },
+          {
+            "values": [
+              5
+            ],
+            "name": "Quantity",
+            "type": "number",
+            "operator": "GreaterThan"
+          },
+          {
+            "values": [10,12,14,16],
+            "name": "Time of day"
+          },
+          {
+            "values": [3],
+            "name": "Day of week"
+          },
+          {
+            "values": [
+              "Footwear"
+            ],
+            "name": "Category",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": ["Yes"],
+            "name": "First Time"
+          }
+        ],
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [3],
+          "whereFilterName": "Count"
+        }
+      },
+      {
+        "name": "App Uninstalled",
+        "dateFilter": {
+          "operator": "On",
+          "values": [
+            "2018-04-10T18:30:00.000Z"
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [10,12,13,14],
+            "name": "Time of day"
+          },
+          {
+            "values": [2],
+            "name": "Day of week"
+          },
+          {
+            "values": [3],
+            "name": "Day of month"
+          },
+          {
+            "values": ["Yes"],
+            "name": "First Time"
+          }
+        ],
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [4],
+          "whereFilterName": "Count"
+        }
+      },
+      {
+        "name": "Charged",
+        "dateFilter": {
+          "operator": "InThePast",
+          "values": [
+            10
+          ],
+          "valueUnit": "days"
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              5000
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "Equals"
+          },
+          {
+            "values": [2],
+            "name": "Day of week"
+          },
+          {
+            "values": ["Card"],
+            "name": "Payment Mode",
+            "type": "string",
+            "operator": "Exists"
+          }
+        ],
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [4],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [
+  ],
+  "geographyFilters": [],
+  "type": "Behaviour"
+}

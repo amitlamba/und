@@ -1,0 +1,153 @@
+package com.und.model.jpa
+
+
+import com.und.model.CampaignStatus
+import org.hibernate.annotations.CreationTimestamp
+import org.hibernate.annotations.UpdateTimestamp
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import javax.persistence.*
+import javax.validation.constraints.NotNull
+
+@Entity
+@Table(name = "campaign")
+class Campaign {
+
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "campaign_id_seq")
+    @SequenceGenerator(name = "campaign_id_seq", sequenceName = "campaign_id_seq", allocationSize = 1)
+    var id: Long? = null
+
+    @Column(name = "client_id")
+    @NotNull
+    var clientID: Long? = null
+
+    @Column(name = "appuser_id")
+    @NotNull
+    var appuserID: Long? = null
+
+    @Column(name = "name")
+    @NotNull
+    var name: String = ""
+
+    @Column(name = "campaign_type") //Email / SMS / Notifications etc
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    var campaignType: CampaignType? = null
+
+    @Column(name = "segmentation_id") //TODO Foreign Key
+    @NotNull
+    var segmentationID: Long? = null
+
+
+    @Column(name = "schedule")
+    @NotNull
+    var schedule: String? = null
+
+    @Column(name = "campaign_status", updatable = false, insertable = false)
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    var status: CampaignStatus = CampaignStatus.CREATED
+
+    @OneToOne(mappedBy = "campaign",
+            cascade = arrayOf(CascadeType.ALL),
+            orphanRemoval = true)
+    var emailCampaign: EmailCampaign? = null
+        set(value) {
+            field = value
+            field?.campaign = this
+        }
+
+    @OneToOne(mappedBy = "campaign",
+            cascade = arrayOf(CascadeType.ALL),
+            orphanRemoval = true)
+    var smsCampaign: SmsCampaign? = null
+        set(value) {
+            field = value
+            field?.campaign = this
+        }
+
+    @field:CreationTimestamp
+    @Column(name = "date_created")
+    lateinit var dateCreated: LocalDateTime
+
+    @field:UpdateTimestamp
+    @Column(name = "date_modified")
+    lateinit var dateModified: LocalDateTime
+
+    //TODO add sms, and push campaign later
+}
+
+enum class CampaignType {
+    EMAIL,
+    SMS,
+    MOBILE_PUSH_NOTIFICATION
+}
+
+
+class Schedule {
+    var oneTime: ScheduleOneTime? = null
+    var multipleDates: ScheduleMultipleDates? = null
+    var recurring: ScheduleRecurring? = null
+}
+
+class ScheduleOneTime {
+    var nowOrLater: Now? = Now.Later
+    var campaignDateTime: CampaignTime? = null
+}
+
+class ScheduleMultipleDates {
+    var campaignDateTimeList: List<CampaignTime> = mutableListOf()
+}
+
+class ScheduleRecurring {
+    lateinit var cronExpression: String
+    var scheduleStartDate: LocalDate? = null
+    var scheduleEnd: ScheduleEnd? = null
+}
+
+
+class ScheduleEnd {
+    var endType: ScheduleEndType? = null
+    var endsOn: LocalDate? = null
+    var occurrences: Int = 0
+}
+
+enum class ScheduleEndType {
+    NeverEnd,
+    EndsOnDate,
+    Occurrences
+}
+
+
+class CampaignTime {
+    lateinit var date: LocalDate
+    var hours: Int? = 0
+    var minutes: Int? = 0
+    lateinit var ampm: AmPm
+
+    fun toLocalDateTime(): LocalDateTime {
+        var hours = hours ?: 0
+        val minutes = minutes ?: 0
+
+        ampm.let {
+            if (it == AmPm.PM) {
+                hours += 12
+            }
+        }
+        val localTime = LocalTime.of(hours, minutes)
+        return LocalDateTime.of(date, localTime)
+    }
+}
+
+enum class Now {
+    Now,
+    Later
+}
+
+enum class AmPm {
+    AM,
+    PM
+}

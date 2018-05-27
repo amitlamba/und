@@ -1,0 +1,655 @@
+{
+  "didEvents": {
+    "events": [
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "After",
+          "values": [
+            "2018-04-09T18:30:00.000Z"
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              "Gaming"
+            ],
+            "name": "Category",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": [
+              "Laptop"
+            ],
+            "name": "Product",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": [
+              1
+            ],
+            "name": "Quantity",
+            "type": "number",
+            "operator": "Equals"
+          },
+          {
+            "values": [
+              10
+            ],
+            "name": "Quantity",
+            "type": "number",
+            "operator": "LessThan"
+          },
+          {
+            "values": [
+              "Yes"
+            ],
+            "name": "First Time"
+          },
+          {
+            "values": [
+              95000
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "Equals"
+          },
+          {
+            "values": [
+              "Wednesday"
+            ],
+            "name": "Day of week"
+          },
+          {
+            "values": [
+              "3"
+            ],
+            "name": "Day of month"
+          },
+          {
+            "values": [
+              0
+            ],
+            "name": "Quantity",
+            "type": "number",
+            "operator": "GreaterThan"
+          },
+          {
+            "values": [
+              "Backlit Keyboard"
+            ],
+            "name": "Product",
+            "type": "string",
+            "operator": "Contains"
+          }
+        ],
+        "whereFilter": {
+          "operator": "Equals",
+          "values": [
+            2
+          ],
+          "whereFilterName": "Count"
+        }
+      },
+      {
+        "name": "App Uninstalled",
+        "dateFilter": {
+          "operator": "On",
+          "values": [
+            "2018-04-09T18:30:00.000Z"
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              "Yes"
+            ],
+            "name": "First Time"
+          },
+          {
+            "values": [
+              "Sunday"
+            ],
+            "name": "Day of week"
+          },
+          {
+            "values": [
+              "6"
+            ],
+            "name": "Day of month"
+          },
+          {
+            "values": [
+              "Monday"
+            ],
+            "name": "Day of week"
+          },
+          {
+            "values": [
+              "7"
+            ],
+            "name": "Day of month"
+          }
+        ],
+        "whereFilter": {
+          "operator": "Equals",
+          "values": [
+            2
+          ],
+          "whereFilterName": "Count"
+        }
+      },
+      {
+        "name": "Charged",
+        "dateFilter": {
+          "operator": "Between",
+          "values": [
+            "2018-04-18T18:30:00.000Z",
+            "2018-04-26T18:29:59.999Z"
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              5000
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "GreaterThan"
+          },
+          {
+            "values": [
+              "Gaming"
+            ],
+            "name": "Category",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": [
+              "2018-03-26T18:30:00.000Z",
+              "2018-04-26T18:29:59.999Z"
+            ],
+            "name": "Delivery Date",
+            "type": "date",
+            "operator": "Between"
+          },
+          {
+            "values": [],
+            "name": "Payment Mode",
+            "type": "string",
+            "operator": "Exists"
+          },
+          {
+            "values": [
+              "PhonePe"
+            ],
+            "name": "Payment Mode",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": [
+              "Yes"
+            ],
+            "name": "First Time"
+          },
+          {
+            "values": [
+              "Friday"
+            ],
+            "name": "Day of week"
+          },
+          {
+            "values": [
+              "4"
+            ],
+            "name": "Day of month"
+          }
+        ],
+        "whereFilter": {
+          "operator": "Equals",
+          "values": [
+            1
+          ],
+          "whereFilterName": "Count"
+        }
+      },
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "On",
+          "values": [
+            "2018-04-16T18:30:00.000Z"
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              "Clothing"
+            ],
+            "name": "Category",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": [
+              "Jeans"
+            ],
+            "name": "Product",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": [
+              "Slim Fit"
+            ],
+            "name": "Category",
+            "type": "string",
+            "operator": "Contains"
+          },
+          {
+            "values": [
+              "Armani"
+            ],
+            "name": "Product",
+            "type": "string",
+            "operator": "Contains"
+          },
+          {
+            "values": [
+              10000
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "GreaterThan"
+          },
+          {
+            "values": [
+              "Thursday"
+            ],
+            "name": "Day of week"
+          },
+          {
+            "values": [
+              "6"
+            ],
+            "name": "Day of month"
+          }
+        ],
+        "whereFilter": {
+          "operator": "Equals",
+          "values": [
+            2
+          ],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "On",
+          "values": [
+            "2018-04-09T18:30:00.000Z"
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              "Car"
+            ],
+            "name": "Category",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": [
+              "Lamborghini Aventador"
+            ],
+            "name": "Product",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": [
+              6000000
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "GreaterThan"
+          },
+          {
+            "values": [
+              1
+            ],
+            "name": "Quantity",
+            "type": "number",
+            "operator": "Equals"
+          },
+          {
+            "values": [
+              "Yes"
+            ],
+            "name": "First Time"
+          },
+          {
+            "values": [
+              "Friday"
+            ],
+            "name": "Day of week"
+          },
+          {
+            "values": [
+              "6"
+            ],
+            "name": "Day of month"
+          }
+        ]
+      },
+      {
+        "name": "App Uninstalled",
+        "dateFilter": {
+          "operator": "Today",
+          "values": [
+            "2018-04-26"
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              "Yes"
+            ],
+            "name": "First Time"
+          },
+          {
+            "values": [
+              "Wednesday"
+            ],
+            "name": "Day of week"
+          },
+          {
+            "values": [
+              "22"
+            ],
+            "name": "Day of month"
+          },
+          {
+            "values": [11,12,13,14],
+            "name": "Time of day"
+          }
+        ]
+      },
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "Between",
+          "values": [
+            "2018-03-26T18:30:00.000Z",
+            "2018-04-26T18:29:59.999Z"
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              500000
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "GreaterThan"
+          },
+          {
+            "values": [
+              "Car"
+            ],
+            "name": "Category",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": [
+              "Maruti Suzuki Swift"
+            ],
+            "name": "Product",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": [11,12,13,14],
+            "name": "Time of day"
+          },
+          {
+            "values": [
+              "Yes"
+            ],
+            "name": "First Time"
+          },
+          {
+            "values": [
+              "Friday"
+            ],
+            "name": "Day of week"
+          },
+          {
+            "values": [
+              "15"
+            ],
+            "name": "Day of month"
+          },
+          {
+            "values": [],
+            "name": "Quantity",
+            "type": "number",
+            "operator": "Exists"
+          },
+          {
+            "values": [],
+            "name": "Product",
+            "type": "string",
+            "operator": "Exists"
+          }
+        ]
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [
+    {
+      "globalFilterType": "Demographics",
+      "name": "age",
+      "values": [],
+      "operator": "Exists"
+    },
+    {
+      "globalFilterType": "Technographics",
+      "name": "Device",
+      "values": [
+        "Laptop"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "Demographics",
+      "name": "gender",
+      "values": [
+        "Male"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "Technographics",
+      "name": "Browser",
+      "values": [
+        "Chrome"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "Technographics",
+      "name": "OS",
+      "values": [
+        "Windows"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "Demographics",
+      "name": "age",
+      "values": [
+        "23"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "Reachability",
+      "name": "hasDeviceToken",
+      "values": [],
+      "operator": "Exists"
+    },
+    {
+      "globalFilterType": "Reachability",
+      "name": "hasEmailAddress",
+      "values": [],
+      "operator": "Exists"
+    },
+    {
+      "globalFilterType": "Reachability",
+      "name": "hasPhoneNumber",
+      "values": [
+        "9416923222"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "AppFields",
+      "name": "OS Version",
+      "values": [],
+      "operator": "Exists"
+    },
+    {
+      "globalFilterType": "AppFields",
+      "name": "SDK Version",
+      "values": [
+        "2.365"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "AppFields",
+      "name": "App Version",
+      "values": [
+        "23.65689"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "AppFields",
+      "name": "Make",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "AppFields",
+      "name": "Models",
+      "values": [],
+      "operator": "Exists"
+    }
+  ],
+  "geographyFilters": [
+    {
+      "country": {
+        "id": "101",
+        "name": "India"
+      },
+      "state": {
+        "id": "10",
+        "name": "Delhi"
+      },
+      "city": {
+        "id": "707",
+        "name": "New Delhi"
+      }
+    },
+    {
+      "country": {
+        "id": "231",
+        "name": "United States"
+      },
+      "state": {
+        "id": "3956",
+        "name": "New York"
+      },
+      "city": {
+        "id": "48019",
+        "name": "New York"
+      }
+    },
+    {
+      "country": {
+        "id": "230",
+        "name": "United Kingdom"
+      },
+      "state": {
+        "id": "3842",
+        "name": "England"
+      },
+      "city": {
+        "id": "41816",
+        "name": "London"
+      }
+    },
+    {
+      "country": {
+        "id": "205",
+        "name": "Spain"
+      },
+      "state": {
+        "id": "3264",
+        "name": "Barcelona"
+      },
+      "city": {
+        "id": "38254",
+        "name": "Barcelona"
+      }
+    },
+    {
+      "country": {
+        "id": "75",
+        "name": "France"
+      },
+      "state": {
+        "id": "1278",
+        "name": "Paris"
+      },
+      "city": {
+        "id": "17726",
+        "name": "Paris"
+      }
+    },
+    {
+      "country": {
+        "id": "181",
+        "name": "Russia"
+      },
+      "state": {
+        "id": "3029",
+        "name": "Moscow"
+      },
+      "city": {
+        "id": "36718",
+        "name": "Moscow"
+      }
+    }
+  ],
+  "type": "Behaviour"
+}

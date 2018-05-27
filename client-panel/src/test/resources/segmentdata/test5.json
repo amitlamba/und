@@ -1,0 +1,122 @@
+{
+  "didEvents": {
+    "events": [
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "Before",
+          "values": [
+            "2018-04-25T18:30:00.000Z"
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [5],
+            "name": "Amount",
+            "type": "number",
+            "operator": "Equals"
+          },
+          {
+            "values": [
+              2,
+              3
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "Between"
+          }
+        ],
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [23],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [
+    {
+      "values": [
+        "25"
+      ],
+      "globalFilterType": "UserProperties",
+      "name": "User Property Name",
+      "type": "string",
+      "operator": "Contains"
+    },
+    {
+      "values": [
+        "40"
+      ],
+      "globalFilterType": "UserProperties",
+      "name": "User Property Name",
+      "type": "string",
+      "operator": "Contains"
+    },
+    {
+      "values": [
+        "25-35"
+      ],
+      "globalFilterType": "Demographics",
+      "name": "age",
+      "type": "string",
+      "operator": "NotEquals"
+    },
+    {
+      "values": [
+        "Chrome"
+      ],
+      "globalFilterType": "Technographics",
+      "name": "Browser",
+      "type": "string",
+      "operator": "Contains"
+    },
+    {
+      "values": [
+        "Firefox"
+      ],
+      "globalFilterType": "Technographics",
+      "name": "Browser",
+      "type": "string",
+      "operator": "Contains"
+    },
+    {
+      "values": [
+        "Mobile"
+      ],
+      "globalFilterType": "Technographics",
+      "name": "Device",
+      "type": "string",
+      "operator": "Equals"
+    },
+    {
+      "values": [
+        "Tablet"
+      ],
+      "globalFilterType": "Technographics",
+      "name": "Device",
+      "type": "string",
+      "operator": "Contains"
+    },
+    {
+      "values": [
+        "9.1"
+      ],
+      "globalFilterType": "AppFields",
+      "name": "OS Version",
+      "type": "string",
+      "operator": "Equals"
+    }
+  ],
+  "geographyFilters": [],
+  "type": "Behaviour"
+}

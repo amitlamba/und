@@ -1,0 +1,37 @@
+# config context path to "/" by setting an empty string
+server:
+  port: 9595
+  contextPath:
+
+
+
+# JACKSON
+spring:
+  application:
+    name: auth-service
+  thymeleaf:
+    cache: false
+  jackson:
+    serialization:
+      INDENT_OUTPUT: true
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/und
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password:  postgres
+  redis:
+    host:
+    port:
+
+security:
+  header:
+    token: Authorization
+    username: UserName
+  secret: mySecret
+  expiration: 604800
+  route:
+    authentication:
+      path: auth
+      userdetail: userdetail
+      validate: auth/validate

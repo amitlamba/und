@@ -1,0 +1,44 @@
+{
+  "didEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [
+      {
+        "name": "App Uninstalled",
+        "dateFilter": {
+          "operator": "On",
+          "values": ["2015-04-04"]
+        },
+        "propertyFilters": [
+          {
+            "values": [2],
+            "name": "Day of month"
+          },
+          {
+            "values": [2],
+            "name": "Day of week"
+          },
+          {
+            "values": [10,11,12,13],
+            "name": "Time of day"
+          }
+        ],
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [2],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [],
+  "geographyFilters": [],
+  "type": "Behaviour"
+}

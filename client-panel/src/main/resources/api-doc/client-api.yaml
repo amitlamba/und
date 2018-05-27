@@ -1,0 +1,169 @@
+swagger: '2.0'
+info:
+  description: >-
+    This is Rest api documentation for client api of und platform.  You can find
+    out more about Und  at [http://userndot.com](http://userndot.com) or on
+    [http://nestros.com](http://nestros.com). For this sample, you can use the
+    api key `test-key` to test the authorization filters.
+  version: 1.0.0
+  title: UND Client Authentication
+  termsOfService: 'http://userndot.com/terms/'
+  contact:
+    email: api@userndot.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+host: localhost:8080
+basePath: /
+tags:
+  - name: Pre Auth
+    description: login and registration apis
+    externalDocs:
+      decription: Find out more about how authentication works
+      url: http://nestros.com
+schemes:
+  - http
+paths:
+  /register:
+    get:
+      tags:
+        - Register
+      summary: attempts to open a registration form.
+      description: sregistration form field as sent as reponse, if user is not already logged in,
+                                        else jwt token
+      responses:
+        '200':
+          description: response fill this form
+          schema:
+             $ref: '#/definitions/RegistrationRequest'
+        '405':
+          description: Already logged In, valid Token in header
+          schema:
+            $ref: '#/definitions/SecurityAuthenticationResponse'
+    post:
+      tags:
+        - Register
+      summary: submit registration form.
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: registration form
+          required: true
+          schema:
+            $ref: '#/definitions/RegistrationRequest'
+      responses:
+        '200':
+          description: response on succesful auth with a new key
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/ErrorFieldValidationResponse'
+  /auth:
+    get:
+      tags:
+        - Login
+      summary: attempts to open a login form
+      description: sends response wether user is logged in already if jwt token is in header,
+                    else send a response form to request for username and password
+      responses:
+        '200':
+          description: response fill this form
+          schema:
+             $ref: '#/definitions/RestAuthenticationRequest'
+        '405':
+          description: Already logged In, valid Token in header
+          schema:
+            $ref: '#/definitions/SecurityAuthenticationResponse'
+    post:
+      tags:
+        - Login
+      summary: attempt authentication by providing username and password
+      description: ''
+      operationId: login
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: username and password
+          required: true
+          schema:
+            $ref: '#/definitions/RestAuthenticationRequest'
+      responses:
+        '200':
+          description: response on succesful auth with a new key
+          schema:
+             $ref: '#/definitions/SecurityAuthenticationResponse'
+        '422':
+          description: Invalid input
+          schema:
+            $ref: '#/definitions/SecurityAuthenticationResponse'
+definitions:
+  RestAuthenticationRequest:
+    type: object
+    required:
+      - username
+      - password
+    properties:
+      username:
+        type: String
+        example: admin
+      password:
+        type: string
+        example: admin
+  SecurityAuthenticationResponse:
+    type: object
+    properties:
+      token:
+        type: String
+        example: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJhZG1pbiIsImF1ZGllbmNlIjoid2ViIiwiY3JlYXRlZCI6MTUwNjE1NjAzMjM5OCwiZXhwIjoxNTA2NzYwODMyfQ.dT30W8X3Tp7n1GNNBx0PKkxKauoUThiepoDJA2BeSg741Up55diSRPj8aEZq-mMFgfiXsXXYtiFJSzvQ4y2SAw
+        description: jwt token, this token should be send in header for all subsequent request
+      error:
+        type: string
+        example: username can't be empty
+        description: error messages
+  RegistrationRequest:
+    type: object
+    required:
+      - email
+    properties:
+      email:
+        type: String
+        example: anil@alphabet.com
+      company:
+        type: string
+        example: alphabet
+      firstname:
+        type: string
+        example: anil
+      lastname:
+        type: string
+        example: maheshwari
+      mobile:
+        type: int32
+        example: 9868704438
+      country:
+        type: string
+        example: India
+      comments:
+        type: string
+        example: need to evaluate
+  FieldMessage:
+    properties:
+      name:
+        type: string
+      message:
+        type: string
+  ErrorFieldValidationResponse:
+    type: object
+    additionalProperties:
+      $ref: '#/definitions/FieldMessage'
+
+

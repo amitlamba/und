@@ -1,0 +1,164 @@
+{
+  "didEvents": {
+    "events": [
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "WillBeExactly",
+          "values": [
+            10
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              "Clothing"
+            ],
+            "name": "Category",
+            "type": "string",
+            "operator": "NotEquals"
+          },
+          {
+            "values": [],
+            "name": "Quantity",
+            "type": "number",
+            "operator": "DoesNotExist"
+          },
+          {
+            "values": [],
+            "name": "First Time"
+          }
+        ],
+        "whereFilter": {
+          "operator": "Between",
+          "values": [
+            2,
+            10
+          ],
+          "whereFilterName": "SumOfValuesOf"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "WillBeExactly",
+          "values": [
+            10
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              "Clothing"
+            ],
+            "name": "Category",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": [],
+            "name": "Quantity",
+            "type": "number",
+            "operator": "Exists"
+          },
+          {
+            "values": [],
+            "name": "First Time"
+          },
+          {
+            "values": [
+              50000
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "Equals"
+          }
+        ],
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [5],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [
+    {
+      "globalFilterType": "AppFields",
+      "name": "App Version",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "Demographics",
+      "name": "age",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "Technographics",
+      "name": "OS",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "Reachability",
+      "name": "hasEmailAddress",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "Reachability",
+      "name": "hasDeviceToken",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "Reachability",
+      "name": "hasPhoneNumber",
+      "values": [],
+      "operator": "DoesNotExist"
+    }
+  ],
+  "geographyFilters": [
+    {
+      "country": {
+        "id": "44",
+        "name": "China"
+      },
+      "state": {
+        "id": "763",
+        "name": "Shanghai"
+      },
+      "city": {
+        "id": "12304",
+        "name": "Shanghai"
+      }
+    },
+    {
+      "country": {
+        "id": "109",
+        "name": "Japan"
+      },
+      "state": {
+        "id": "1959",
+        "name": "Tokyo"
+      },
+      "city": {
+        "id": "25085",
+        "name": "Tokyo"
+      }
+    }
+  ],
+  "type": "Behaviour"
+}

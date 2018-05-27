@@ -1,0 +1,97 @@
+{
+  "didEvents": {
+    "events": [
+      {
+        "name": "Charged",
+        "dateFilter": {
+          "operator": "Before",
+          "values": [
+            "2018-05-02"
+          ],
+          "valueUnit": "days"
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              20
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "GreaterThan",
+            "valueUnit": "days"
+          },
+          {
+            "values": [
+              30
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "Equals",
+            "valueUnit": "days"
+          }
+        ],
+        "whereFilter": {
+          "operator": "Equals",
+          "values": [
+            5
+          ],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [
+    {
+      "values": [
+        "222"
+      ],
+      "globalFilterType": "UserProperties",
+      "name": "User Property Name",
+      "type": "string",
+      "operator": "DoesNotContain"
+    },
+    {
+      "values": [
+        "0-18",
+        "25-35"
+      ],
+      "globalFilterType": "Demographics",
+      "name": "age",
+      "type": "string",
+      "operator": "Contains"
+    },
+    {
+      "values": [
+        "Chrome",
+        "Firefox"
+      ],
+      "globalFilterType": "Technographics",
+      "name": "Browser",
+      "type": "string",
+      "operator": "DoesNotContain"
+    },
+    {
+      "values": [
+        "2"
+      ],
+      "globalFilterType": "UserProperties",
+      "name": "User Property Name",
+      "type": "string",
+      "operator": "NotEquals"
+    }
+  ],
+  "geographyFilters": [],
+  "type": "Behaviour"
+},
+"geographyFilters": [],
+"type": "Behaviour"
+}

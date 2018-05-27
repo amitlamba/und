@@ -1,0 +1,84 @@
+{
+  "didEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "Today",
+          "values": []
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              "Clothing"
+            ],
+            "name": "Category",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": [],
+            "name": "Product",
+            "type": "string",
+            "operator": "DoesNotExist"
+          },
+          {
+            "values": [
+              5,
+              10
+            ],
+            "name": "Quantity",
+            "type": "number",
+            "operator": "Between"
+          },
+          {
+            "values": [
+              5000,
+              15000
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "Between"
+          },
+          {
+            "values": [],
+            "name": "Amount",
+            "type": "number",
+            "operator": "DoesNotExist"
+          },
+          {
+            "values": [],
+            "name": "Amount",
+            "type": "number",
+            "operator": "Exists"
+          },
+          {
+            "values": [],
+            "name": "Day of week"
+          },
+          {
+            "values": [],
+            "name": "Day of month"
+          }
+        ],
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [2],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [],
+  "geographyFilters": [],
+  "type": "Behaviour"
+}

@@ -1,0 +1,73 @@
+{
+  "didEvents": {
+    "events": [
+      {
+        "name": "Charged",
+        "dateFilter": {
+          "operator": "Today",
+          "values": [
+            "2018-04-26"
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              "2018-03-26T18:30:00.000Z",
+              "2018-04-26T18:29:59.999Z"
+            ],
+            "name": "Delivery Date",
+            "type": "date",
+            "operator": "Between"
+          },
+          {
+            "values": [
+              "Laptop"
+            ],
+            "name": "Product",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": [
+              "Paytm"
+            ],
+            "name": "Payment Mode",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": [
+              50000
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "GreaterThan"
+          },
+          {
+            "values": [
+              "Yes"
+            ],
+            "name": "First Time"
+          }
+        ],
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [22],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [],
+  "geographyFilters": [],
+  "type": "Behaviour"
+}

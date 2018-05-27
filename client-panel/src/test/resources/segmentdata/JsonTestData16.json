@@ -1,0 +1,48 @@
+{
+  "didEvents": {
+    "events": [
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "Today",
+          "values": [
+            "2018-04-25T18:30:00.000Z"
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              5
+            ],
+            "name": "Quantity",
+            "type": "number",
+            "operator": "GreaterThan"
+          },
+          {
+            "values": [
+              "Yes"
+            ],
+            "name": "First Time"
+          }
+        ],
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [4],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [],
+  "geographyFilters": [],
+  "type": "Behaviour"
+}

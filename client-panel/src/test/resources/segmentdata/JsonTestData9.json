@@ -1,0 +1,143 @@
+{
+  "didEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [
+    {
+      "globalFilterType": "Demographics",
+      "name": "age",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "Demographics",
+      "name": "age",
+      "values": [],
+      "operator": "Exists"
+    },
+    {
+      "globalFilterType": "Demographics",
+      "name": "age",
+      "values": [
+        "50"
+      ],
+      "operator": "NotEquals"
+    },
+    {
+      "globalFilterType": "Demographics",
+      "name": "gender",
+      "values": [
+        "Male"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "Demographics",
+      "name": "gender",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "Technographics",
+      "name": "Browser",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "Technographics",
+      "name": "Browser",
+      "values": [
+        "Chrome"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "Technographics",
+      "name": "Device",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "Technographics",
+      "name": "Device",
+      "values": [
+        "Laptop"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "Reachability",
+      "name": "hasDeviceToken",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "Reachability",
+      "name": "hasEmailAddress",
+      "values": [
+        "laksh@userndot.com"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "Reachability",
+      "name": "unsubscribedPush",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "Reachability",
+      "name": "unsubscribedSMS",
+      "values": [],
+      "operator": "Exists"
+    }
+  ],
+  "geographyFilters": [
+    {
+      "country": {
+        "id": "101",
+        "name": "India"
+      }
+    },
+    {
+      "country": {
+        "id": "166",
+        "name": "Pakistan"
+      }
+    },
+    {
+      "country": {
+        "id": "206",
+        "name": "Sri Lanka"
+      }
+    },
+    {
+      "country": {
+        "id": "153",
+        "name": "Nepal"
+      }
+    },
+    {
+      "country": {
+        "id": "25",
+        "name": "Bhutan"
+      }
+    },
+    {
+      "country": {
+        "id": "150",
+        "name": "Myanmar"
+      }
+    }
+  ],
+  "type": "Behaviour"
+}

@@ -1,0 +1,257 @@
+{
+  "didEvents": {
+    "events": [
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "Before",
+          "values": ["2013-05-05"]
+        },
+        "propertyFilters": [
+          {
+            "values": [],
+            "name": "Day of week"
+          },
+          {
+            "values": [
+              "Shoes"
+            ],
+            "name": "Category",
+            "type": "string",
+            "operator": "Contains"
+          },
+          {
+            "values": [],
+            "name": "First Time"
+          },
+          {
+            "values": [4],
+            "name": "Day of month"
+          },
+          {
+            "values": [
+              3
+            ],
+            "name": "Quantity",
+            "type": "number",
+            "operator": "GreaterThan"
+          }
+        ],
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [
+            5
+          ],
+          "whereFilterName": "Count"
+        }
+      },
+      {
+        "name": "App Uninstalled",
+        "dateFilter": {
+          "operator": "InThePast",
+          "values": [
+            5
+          ],
+          "valueUnit": "days"
+        },
+        "propertyFilters": [
+          {
+            "values": [3],
+            "name": "Day of month"
+          },
+          {
+            "values": [11,12,13,14],
+            "name": "Time of day"
+          },
+          {
+            "values": ["Yes"],
+            "name": "First Time"
+          },
+          {
+            "values": [3],
+            "name": "Day of week"
+          }
+        ],
+        "whereFilter": {
+          "operator": "Between",
+          "values": [
+            2,
+            10
+          ],
+          "whereFilterName": "Count"
+        }
+      },
+      {
+        "name": "Charged",
+        "dateFilter": {
+          "operator": "InTheFuture",
+          "values": [
+            15
+          ],
+          "valueUnit": "days"
+        },
+        "propertyFilters": [
+          {
+            "values": [2],
+            "name": "Day of week"
+          },
+          {
+            "values": [3],
+            "name": "Day of month"
+          }
+        ],
+        "whereFilter": {
+          "operator": "LessThan",
+          "values": [
+            5
+          ],
+          "whereFilterName": "Count"
+        }
+      },
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "After",
+          "values": [
+            "2018-04-10T18:30:00.000Z"
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              26500
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "GreaterThan"
+          },
+          {
+            "values": [
+              "Gaming"
+            ],
+            "name": "Category",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": [
+              5
+            ],
+            "name": "Quantity",
+            "type": "number",
+            "operator": "GreaterThan"
+          },
+          {
+            "values": [
+              "Laptop"
+            ],
+            "name": "Product",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": [],
+            "name": "First Time"
+          }
+        ],
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [23],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [
+    {
+      "globalFilterType": "Reachability",
+      "name": "hasEmailAddress",
+      "values": [
+        "gmail.com"
+      ],
+      "operator": "DoesNotContain"
+    },
+    {
+      "globalFilterType": "Demographics",
+      "name": "gender",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "Technographics",
+      "name": "Device",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "Technographics",
+      "name": "OS",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "UserProperties",
+      "name": "User Property Name",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "AppFields",
+      "name": "OS Version",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "AppFields",
+      "name": "App Version",
+      "values": [],
+      "operator": "DoesNotExist"
+    }
+  ],
+  "geographyFilters": [
+    {
+      "country": {
+        "id": "13",
+        "name": "Australia"
+      },
+      "state": {
+        "id": "265",
+        "name": "Melbourne"
+      },
+      "city": {
+        "id": "6571",
+        "name": "Melbourne"
+      }
+    },
+    {
+      "country": {
+        "id": "101",
+        "name": "India"
+      },
+      "state": {
+        "id": "32",
+        "name": "Punjab"
+      },
+      "city": {
+        "id": "3203",
+        "name": "Jalandhar"
+      }
+    },
+    {
+      "country": {
+        "id": "75",
+        "name": "France"
+      }
+    }
+  ],
+  "type": "Behaviour"
+}

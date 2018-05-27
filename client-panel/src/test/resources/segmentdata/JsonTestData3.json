@@ -1,0 +1,143 @@
+{
+  "didEvents": {
+    "events": [
+      {
+        "name": "Charged",
+        "dateFilter": {
+          "operator": "After",
+          "values": ["2015-04-04"]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              50000
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "GreaterThan"
+          },
+          {
+            "values": [10,11,12,13],
+            "name": "Time of day",
+            "operator": "Exists"
+          },
+          {
+            "values": [2],
+            "name": "Day of month"
+          },
+          {
+            "values": ["2015-04-04"],
+            "name": "Delivery Date",
+            "type": "date",
+            "operator": "After"
+          }
+
+        ],
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [
+            5
+          ],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [
+      {
+        "name": "App Uninstalled",
+        "dateFilter": {
+          "operator": "Before",
+          "values": ["2015-04-04"]
+        },
+        "propertyFilters": [
+          {
+            "values": [10,11,12,13],
+            "name": "Time of day"
+          },
+          {
+            "values": [3],
+            "name": "Day of week"
+          },
+          {
+            "values": [3],
+            "name": "Day of month"
+          }
+        ],
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [4],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [
+    {
+      "globalFilterType": "Demographics",
+      "name": "age",
+      "values": [
+        "56"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "Technographics",
+      "name": "OS",
+      "values": [5],
+      "operator": "Exists"
+    },
+    {
+      "globalFilterType": "Demographics",
+      "name": "gender",
+      "values": [
+        "Male"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "AppFields",
+      "name": "OS Version",
+      "values": [1],
+      "operator": "DoesNotExist"
+    }
+  ],
+  "geographyFilters": [
+    {
+      "country": {
+        "id": "101",
+        "name": "India"
+      },
+      "state": {
+        "id": "13",
+        "name": "Haryana"
+      },
+      "city": {
+        "id": "1126",
+        "name": "Gurgaon"
+      }
+    },
+    {
+      "country": {
+        "id": "104",
+        "name": "Iraq"
+      },
+      "state": {
+        "id": "1730",
+        "name": "Baghdad"
+      },
+      "city": {
+        "id": "21793",
+        "name": "Baghdad"
+      }
+    }
+  ],
+  "type": "Behaviour"
+}

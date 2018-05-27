@@ -1,0 +1,29 @@
+
+dependencies {
+    compile('org.springframework.cloud:spring-cloud-starter-openfeign')
+    compile("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
+    compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+
+}
+
+
+
+
+jar {
+    group = 'com.und'
+    baseName = 'auth-client'
+    version = '0.4.0'
+}
+
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+
+

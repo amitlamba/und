@@ -1,0 +1,92 @@
+<div class="container-fluid campaigns">
+  <div class="row mt-4 px-3">
+    <!--<div class="form-group col-6">-->
+    <!--<form #myForm="ngForm" novalidate>-->
+    <!--&lt;!&ndash;FIXME: Use the common daterange picker we are using everywhere else&ndash;&gt;-->
+    <!--<my-date-range-picker name="mydaterange" [options]="myDateRangePickerOptions"-->
+    <!--[(ngModel)]="model" required></my-date-range-picker>-->
+    <!--</form>-->
+    <!--</div>-->
+    <!-- Example single danger button -->
+    <div class="btn-group ml-auto">
+      <button type="button"
+              class="btn btn-primary dropdown-toggle"
+              data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <i class="fas fa-plus mr-1"></i> Create New Campaign
+      </button>
+      <div class="dropdown-menu py-0 my-0">
+        <a class="dropdown-item list-group-item list-group-item-action"
+           [routerLink]="['sms']"
+           [routerLinkActive]="['active']">
+          <i class="fas fa-mobile-alt mr-2 "></i>SMS</a>
+        <a class="dropdown-item list-group-item list-group-item-action"
+           [routerLink]="['email']"
+           [routerLinkActive]="['active']">
+          <i class="far fa-envelope mr-2"></i>Email</a>
+        <a class="dropdown-item list-group-item list-group-item-action disabled">
+          <i class="fal fa-mobile mr-2"></i> Mobile Push</a>
+        <a class="dropdown-item list-group-item list-group-item-action disabled">
+          <i class="fab fa-chrome mr-2"></i> Web Push</a>
+      </div>
+    </div>
+  </div>
+  <div class="table-responsive mt-1">
+    <table class="table table-bordered my-3">
+      <thead style="background-color: rgba(0, 0, 0, .03);">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Campaign Name</th>
+        <th scope="col">Campaign Type</th>
+        <th scope="col">Created On</th>
+        <th scope="col">Frequency</th>
+        <th scope="col">Status</th>
+        <th scope="col">Action</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let campaignItem of campaigns;">
+        <th scope="row">{{campaignItem.id}}</th>
+        <td>{{campaignItem.name.charAt(0).toUpperCase()+ campaignItem.name.slice(1).toLowerCase()}}</td>
+        <td>{{campaignItem.campaignType}}</td>
+        <td>{{campaignItem.dateCreated | date:'medium'}}</td>
+        <td>
+          <span *ngIf="campaignItem.schedule.oneTime!==null">One Time</span>
+          <span *ngIf="campaignItem.schedule.multipleDates!==null">Multiple Dates</span>
+          <span *ngIf="campaignItem.schedule.recurring!==null">Recurring</span>
+        </td>
+        <td>{{(campaignItem.status=='CREATED'|| campaignItem.status=='RESUMED' ) ? ("Running") : ( campaignItem.status )
+          }}
+        </td>
+        <td class="text-center">
+          <button *ngIf="campaignItem.status=='PAUSED' "
+                  class="border-0 bg-light"
+                  data-toggle="tooltip" data-placement="top" title="Resume Campaign"
+                  (click)="resumeCampaignFunction(campaignItem.id)"
+                  id="playCampaignButton"><i class="fas fa-play text-primary"></i>
+          </button>
+          <button *ngIf="campaignItem.status=='CREATED' || campaignItem.status=='RESUMED'"
+                  class="border-0 bg-light"
+                  (click)="pauseCampaignFunction(campaignItem.id)"
+                  data-toggle="tooltip" data-placement="top" title="Pause Campaign"
+                  id="pauseCampaignButton"><i class="far fa-pause-circle text-primary"></i>
+          </button>
+          <button class="border-0 bg-light"
+                  (click)="stopCampaignFunction(campaignItem.id)"
+                  [disabled]="campaignItem.status=='DELETED' || campaignItem.status=='STOPPED'"
+                  data-toggle="tooltip" data-placement="top" title="Stop Campaign"
+                  id="stopCampaignButton"><i class="far fa-stop-circle text-primary"
+                                             [ngClass]="{'text-muted':campaignItem.status=='DELETED'|| campaignItem.status=='STOPPED'}"></i>
+          </button>
+          <button class="border-0 bg-light"
+                  (click)="deleteCampaignFunction(campaignItem.id)"
+                  [disabled]="campaignItem.status=='DELETED'"
+                  data-toggle="tooltip" data-placement="top" title="Delete Campaign"
+                  id="deleteCampaignButton"><i class="far fa-trash-alt text-primary"
+                                               [ngClass]="{'text-muted':campaignItem.status=='DELETED'}"></i>
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

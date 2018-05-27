@@ -1,0 +1,41 @@
+
+
+
+jar {
+    group = 'com.und'
+    baseName = 'client-panel'
+    version = '0.2.0'
+}
+
+
+dependencies {
+    compile('org.springframework.cloud:spring-cloud-starter-stream-kafka')
+    compile('org.springframework.cloud:spring-cloud-stream-binder-kafka')
+    compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    compile('org.springframework.boot:spring-boot-starter-data-mongodb')
+    compile('org.springframework.boot:spring-boot-starter-data-rest')
+    compile("org.springframework.boot:spring-boot-starter-mobile:1.5.9.RELEASE")
+    compile('org.flywaydb:flyway-core:5.0.7')
+    compile('org.springframework.boot:spring-boot-starter-mail')
+    compile('org.springframework.boot:spring-boot-starter-security')
+
+    compile project(":auth-client")
+
+    compile("io.springfox:springfox-swagger2:$swaggerVersion")
+    compile("io.springfox:springfox-swagger-ui:$swaggerVersion")
+    compile group: 'nl.martijndwars', name: 'web-push', version: '3.0.1'
+    compile group: 'de.bytefish.fcmjava', name: 'fcmjava-core', version: '2.4'
+    compile group: 'de.bytefish.fcmjava', name: 'fcmjava-client', version: '2.4'
+
+    runtime('org.postgresql:postgresql')
+
+    testCompile group: 'org.jetbrains.spek', name: 'spek-api', version: '1.1.5'
+    testCompile group: 'org.jetbrains.spek', name: 'spek-junit-platform-engine', version: '1.1.5'
+
+
+}
+
+
+
+
+

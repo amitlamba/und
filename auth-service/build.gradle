@@ -1,0 +1,45 @@
+
+
+ext {
+    swaggerVersion = '2.7.0'
+    jjwtVersion = '0.9.0'
+    jedisVersion = '2.9.0'
+}
+
+
+
+
+jar {
+    group = 'com.und'
+    baseName = 'auth-service'
+    version = '0.1.0'
+}
+
+
+
+dependencies {
+    compile('org.springframework.cloud:spring-cloud-starter-stream-kafka')
+    compile('org.springframework.cloud:spring-cloud-stream-binder-kafka')
+    compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    compile('org.springframework.boot:spring-boot-starter-data-rest')
+    compile("org.springframework.boot:spring-boot-starter-mobile:1.5.9.RELEASE")
+    compile('org.springframework.boot:spring-boot-starter-mail')
+    compile('org.springframework.boot:spring-boot-starter-security')
+    runtime('org.postgresql:postgresql')
+
+
+    compile(
+            "io.jsonwebtoken:jjwt:$jjwtVersion",
+            "org.springframework.boot:spring-boot-starter-data-redis",
+            "redis.clients:jedis:$jedisVersion",
+
+
+    )
+
+
+}
+
+
+
+
+

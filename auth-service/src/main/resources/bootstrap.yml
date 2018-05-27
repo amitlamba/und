@@ -1,0 +1,14 @@
+spring:
+  profiles:
+    active:
+      default
+  cloud:
+    config:
+      uri: http://nestros.com:8888
+      enabled: true
+      name: auth-service
+  application:
+    name: auth-service
+  mvc:
+    view:
+      prefix:

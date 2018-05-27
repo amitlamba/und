@@ -1,0 +1,205 @@
+{
+  "didEvents": {
+    "events": [
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "InTheFuture",
+          "values": [
+            15
+          ],
+          "valueUnit": "days"
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              2500,
+              25000
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "Between"
+          },
+          {
+            "values": [],
+            "name": "Category",
+            "type": "string",
+            "operator": "Exists"
+          },
+          {
+            "values": [],
+            "name": "Product",
+            "type": "string",
+            "operator": "Exists"
+          },
+          {
+            "values": [],
+            "name": "First Time"
+          },
+          {
+            "values": [],
+            "name": "Quantity",
+            "type": "number",
+            "operator": "DoesNotExist"
+          },
+          {
+            "values": [],
+            "name": "Day of week"
+          },
+          {
+            "values": [],
+            "name": "Day of month"
+          }
+        ],
+        "whereFilter": {
+          "operator": "Equals",
+          "values": [
+            5
+          ],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "Before",
+          "values": [
+            "2018-04-25T18:30:00.000Z"
+          ]
+        },
+        "propertyFilters": [
+          {
+            "values": [
+              "Sports Wear"
+            ],
+            "name": "Category",
+            "type": "string",
+            "operator": "Equals"
+          },
+          {
+            "values": [],
+            "name": "First Time"
+          },
+          {
+            "values": [],
+            "name": "Day of week"
+          },
+          {
+            "values": [],
+            "name": "Day of month"
+          },
+          {
+            "values": [
+              2
+            ],
+            "name": "Quantity",
+            "type": "number",
+            "operator": "GreaterThan"
+          }
+        ],
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [3],
+          "whereFilterName": "Count"
+        }
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [
+    {
+      "globalFilterType": "UserProperties",
+      "name": "User Property Name",
+      "values": [
+        "age"
+      ],
+      "operator": "Contains"
+    },
+    {
+      "globalFilterType": "Demographics",
+      "name": "gender",
+      "values": [
+        "Female"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "Demographics",
+      "name": "age",
+      "values": [
+        "25"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "Technographics",
+      "name": "Browser",
+      "values": [
+        "Safari"
+      ],
+      "operator": "Equals"
+    },
+    {
+      "globalFilterType": "Technographics",
+      "name": "Device",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "Reachability",
+      "name": "hasEmailAddress",
+      "values": [],
+      "operator": "Exists"
+    },
+    {
+      "globalFilterType": "Reachability",
+      "name": "unsubscribedPush",
+      "values": [],
+      "operator": "Exists"
+    },
+    {
+      "globalFilterType": "AppFields",
+      "name": "Models",
+      "values": [],
+      "operator": "DoesNotExist"
+    },
+    {
+      "globalFilterType": "AppFields",
+      "name": "App Version",
+      "values": [],
+      "operator": "Exists"
+    }
+  ],
+  "geographyFilters": [
+    {
+      "country": {
+        "id": "101",
+        "name": "India"
+      }
+    },
+    {
+      "country": {
+        "id": "230",
+        "name": "United Kingdom"
+      },
+      "state": {
+        "id": "3842",
+        "name": "England"
+      },
+      "city": {
+        "id": "41816",
+        "name": "London"
+      }
+    }
+  ],
+  "type": "Behaviour"
+}
