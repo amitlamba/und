@@ -1,11 +1,72 @@
+buildscript {
+    ext {
+        kotlinVersion = '1.2.41'
+        springBootVersion = '2.0.0.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
+    }
+}
+
+apply plugin: 'maven'
+apply plugin: 'kotlin'
+apply plugin: 'kotlin-spring'
+apply plugin: "jacoco"
+apply plugin: 'findbugs'
+apply plugin: 'io.spring.dependency-management'
+
+group = 'com.und'
+version = '0.4.0-SNAPSHOT'
+sourceCompatibility = 1.8
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+repositories {
+    mavenCentral()
+    maven { url "https://repo.spring.io/snapshot" }
+    maven { url "https://repo.spring.io/milestone" }
+}
+
+
+ext {
+    springCloudVersion = 'Finchley.RC1'
+}
 
 dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-openfeign')
     compile("org.springframework.boot:spring-boot-starter-security:${springBootVersion}")
     compile("org.springframework.boot:spring-boot-starter-web:${springBootVersion}")
+    compile("org.jetbrains.kotlin:kotlin-reflect:${kotlinVersion}")
+    compile("org.jetbrains.kotlin:kotlin-stdlib:${kotlinVersion}")
+    compile("org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}")
 
+    testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testCompile("org.springframework.security:spring-security-test:5.0.1.RELEASE")
+    testCompile group: 'com.nhaarman', name: 'mockito-kotlin', version: '1.5.0'
+    testCompile 'org.mockito:mockito-core:1.+'
 }
 
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
 
 
 
@@ -15,6 +76,37 @@ jar {
     version = '0.4.0'
 }
 
+jacocoTestReport {
+    reports {
+        xml.enabled
+        csv.enabled
+        html.destination file("${buildDir}/reports/jacoco.Html")
+    }
+}
+tasks.withType(FindBugs) {
+    reports {
+        xml.enabled = false
+        html.enabled = true
+        reportLevel = "low"
+        ignoreFailures = true
+        html.destination file("${buildDir}/reports/findBugs.Html")
+    }
+}
+
+
+compileJava.dependsOn(processResources)
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+
+}
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier 'sources'

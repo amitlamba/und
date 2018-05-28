@@ -66,7 +66,7 @@ hs_err_pid*
 /nbactions.xml
 /build/
 /.nb-gradle/
-#.gitignore
+.classpath
 .gradle/
-src/main/java/
-src/test/java/
+.project
+.settings/

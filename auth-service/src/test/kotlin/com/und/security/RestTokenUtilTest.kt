@@ -77,8 +77,8 @@ class RestTokenUtilTest {
 
 
 
-        val (token, uc) = createToken()
-        val (laterToken, laterUc) = createToken()
+        val (token, _) = createToken()
+        val (laterToken, _) = createToken()
 
         assertThat(token).isNotEqualTo(laterToken)
     }
@@ -99,7 +99,7 @@ class RestTokenUtilTest {
     @Throws(Exception::class)
     fun getRolesFromToken() {
         `when`(dateUtilsMock.now()).thenReturn(DateUtil.now())
-        val (token, uc) = createToken()
+        val (token, _) = createToken()
         val (user, _) = restTokenUtil.validateToken(token)
 
         assertThat(user?.authorities).isEqualTo(

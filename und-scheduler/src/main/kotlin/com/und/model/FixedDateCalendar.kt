@@ -14,7 +14,6 @@ class FixedDateCalendar(
         val dateTime = millsToLocalDateTime(p0)
         if(triggeredcount >= fireTimes.size)
             return false
-        val existing = fireTimes[triggeredcount]
         if(fireTimes.contains(dateTime)) {
 
             return true
@@ -22,10 +21,7 @@ class FixedDateCalendar(
         return false
     }
 
-/*    override fun getNextIncludedTime(p0: Long): Long {
-        triggeredcount++
-       return fireTimes[triggeredcount].toEpochDay()
-    }*/
+
 
     private fun millsToLocalDateTime(millis: Long): LocalDate {
         val instant = Instant.ofEpochMilli(millis)

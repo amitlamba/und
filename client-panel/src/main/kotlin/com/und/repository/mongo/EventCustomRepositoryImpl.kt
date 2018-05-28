@@ -14,9 +14,9 @@ class EventCustomRepositoryImpl : EventCustomRepository {
     override fun usersFromEvent(query: Aggregation, clientId: Long): List<String> {
 
         val output = mongoTemplate.aggregate(query, "${clientId}_event", Document::class.java)
-        return if(output != null) {
-            output.mapNotNull { dbo -> dbo["_id"] as String}
-        } else emptyList()
+        return output?.let { aggResult ->
+            aggResult.mapNotNull { dbo -> dbo["_id"] as String }
+        } ?: emptyList()
 
     }
 }

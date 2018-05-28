@@ -66,9 +66,7 @@ hs_err_pid*
 /nbactions.xml
 /build/
 /.nb-gradle/
-/.gradle/
+.classpath
 .gradle/
-gradle/
-gradlew
-gradlew.bat
-log/
+.project
+.settings/

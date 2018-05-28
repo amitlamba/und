@@ -42,9 +42,11 @@ class EventTrackService {
         event.identity.userId = email?.userID
 
         val mongoEventId = eventService.saveEvent(event)
+        email?.let {
+            it.emailStatus = EmailStatus.CTA_PERFORMED
+            it.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(), EmailStatus.CTA_PERFORMED, mongoEventId))
+            emailSentRepository.save(it)
+        }
 
-        email?.emailStatus = EmailStatus.CTA_PERFORMED
-        email?.statusUpdates?.add(EmailStatusUpdate(LocalDateTime.now(), EmailStatus.CTA_PERFORMED, mongoEventId))
-        emailSentRepository.save(email)
     }
 }

@@ -77,14 +77,6 @@ class TemplateContentCreationServiceTest {
         template.dateModified = LocalDateTime.now()
         whenever(templateRepository.findByName("${name}")).thenReturn(Optional.of(template))
 
-        val to = "shiv@userndot.com"
-        val email = Email(clientID = 2,
-                fromEmailAddress = InternetAddress(to, "Shiv Pratap"),
-                toEmailAddresses = arrayOf(InternetAddress(to)),
-                emailSubject = null,
-                emailBody = null,
-                emailTemplateId = 4L,
-                emailTemplateName = "hello")
         val converted = templateContentCreationService.getContentFromTemplate("$name", getModelMap())
         Assert.assertThat(converted, Is("Hello, Amit Lamba"))
     }
@@ -100,14 +92,7 @@ class TemplateContentCreationServiceTest {
         template.dateModified = LocalDateTime.now()
         whenever(templateRepositoryCache.findByName("${name}")).thenReturn(Optional.of(template))
 
-        val to = "shiv@userndot.com"
-        val email = Email(clientID = 2,
-                fromEmailAddress = InternetAddress(to, "Shiv Pratap"),
-                toEmailAddresses = arrayOf(InternetAddress(to)),
-                emailSubject = null,
-                emailBody = null,
-                emailTemplateId = 4L,
-                emailTemplateName = "hello")
+
         val converted = templateContentCreationService.getContentFromTemplate("$name", getModelMap())
         Assert.assertThat(converted, Is("Hello, Amit Lamba"))
     }

@@ -25,7 +25,6 @@ class TestFixedDateCalendar {
                     .withIdentity("job1", "group1")
                     .build()
 
-            val cron = ""
             val trigger = TriggerBuilder.newTrigger()
                     .withIdentity("trigger1", "group1")
                     .startNow()

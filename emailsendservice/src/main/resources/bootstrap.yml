@@ -4,6 +4,6 @@ spring:
       uri: http://nestros.com:8888
       enabled: true
       name: emailsendservice
-      profile: shiv
+      #profile: shiv
   application:
     name: emailsendservice

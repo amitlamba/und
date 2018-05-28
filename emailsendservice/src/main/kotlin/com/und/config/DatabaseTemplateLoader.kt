@@ -37,9 +37,9 @@ class DatabaseTemplateLoader : TemplateLoader {
 
     override fun findTemplateSource(name: String): Any? {
         //id:clientId:name:subject/body
-        val template = templateRepository.findByName(name)
-        if(template.isPresent) {
-            val template = template.get()
+        val templateOption = templateRepository.findByName(name)
+        if(templateOption.isPresent) {
+            val template = templateOption.get()
             template.template = addPixelTrackingPlaceholder(template.template)
             val cachedTemplate = CachedTemplate()
             cachedTemplate.id = template.name
@@ -53,7 +53,7 @@ class DatabaseTemplateLoader : TemplateLoader {
     }
 
     private fun addPixelTrackingPlaceholder(content: String): String {
-        var doc = Jsoup.parse(content)
+        val doc = Jsoup.parse(content)
         doc.body().append("\${pixelTrackingPlaceholder}")
         return doc.body().html().toString()
     }

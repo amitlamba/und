@@ -19,7 +19,7 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-mail')
     compile('org.springframework.boot:spring-boot-starter-security')
 
-    compile project(":auth-client")
+    compile ("com.und:auth-client:0.4.0-SNAPSHOT")
 
     compile("io.springfox:springfox-swagger2:$swaggerVersion")
     compile("io.springfox:springfox-swagger-ui:$swaggerVersion")

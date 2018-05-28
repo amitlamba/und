@@ -1,25 +1,24 @@
 package com.und.security.service
 
-//import org.springframework.cloud.openfeign.FeignClient
 import com.und.security.model.AuthenticationRequest
 import com.und.security.model.Response
 import com.und.security.model.UndUserDetails
 import org.springframework.cloud.openfeign.FeignClient
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestMethod
+import org.springframework.web.bind.annotation.PostMapping
 
 
 @FeignClient("auth-service")
 interface AuthenticationServiceClient {
 
-    @RequestMapping(method = arrayOf(RequestMethod.POST), value = "/auth", consumes = arrayOf("application/json"))
+    @PostMapping(value = ["/auth"], consumes = ["application/json"])
     fun authenticate(authenticationRequest: AuthenticationRequest): Response<UndUserDetails>
 
-    @RequestMapping(method = arrayOf(RequestMethod.GET), value = "/auth/validate/{token}/", consumes = arrayOf("application/json"))
+    @GetMapping(value = ["/auth/validate/{token}/"], consumes = ["application/json"])
     fun validateToken(@PathVariable("token") token: String): Response<UndUserDetails>
 
-    @RequestMapping(method = arrayOf(RequestMethod.GET), value = "/auth/userdetail/{name}/", consumes = arrayOf("application/json"))
+    @GetMapping(value = ["/auth/userdetail/{name}/"], consumes = ["application/json"])
     fun userByName(@PathVariable("name") name: String): Response<UndUserDetails>
 
 }
