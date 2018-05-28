@@ -1,5 +1,5 @@
 import {Component, ElementRef, Input, OnChanges, OnInit, ViewChild} from '@angular/core';
-import {EmailTemplate} from "../../../_models/email";
+import {EditorSelected, EmailTemplate} from "../../../_models/email";
 import {TemplatesService} from "../../../_services/templates.service";
 import {isNullOrUndefined} from "util";
 import {Router} from "@angular/router";
@@ -15,16 +15,18 @@ import {SendersInfo} from "../../../_models/client";
   styleUrls: ['./create-email-template-form.component.scss']
 })
 export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
-  showTinymceEditor: boolean = true;
   emailTemplate: EmailTemplate;
+  // @Input() createNewTemplate;
+
   sendersInfoList: SendersInfo[] = [];
   @ViewChild("f") form: any;
 
   userFields = UserFields.USER_DETAIILS;
-  items = UserParams.params;
+  public mentionItems: string[] = UserParams.params;
+
 
   constructor(private templatesService: TemplatesService, private messageService: MessageService,
-              private settingsService: SettingsService) {
+              private settingsService: SettingsService, private router: Router) {
   }
 
   ngOnChanges() {
@@ -38,11 +40,16 @@ export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
       (sendersInfoList)=>{
         this.sendersInfoList = sendersInfoList;
       }
-    )
+    );
+    // if (this.createNewTemplate) {
+    //   this.emailTemplate.from = "";                             // to set default value of Fromdropdown
+    //   this.emailTemplate.messageType = "";                    // to set default value of MessageTypedropdown
+    //   this.emailTemplate.editorSelected = EditorSelected.tinymceEditor;
+    // }
   }
 
   onSave(form: FormData) {
-    console.log(this.emailTemplate);
+    // console.log(JSON.stringify(this.emailTemplate));
     if (this.form.valid) {
       if (this.emailTemplate.id) {
         this.templatesService.saveEmailTemplate(this.emailTemplate)
@@ -75,5 +82,20 @@ export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
       document.querySelector('textarea').value = document.querySelector('textarea').value.replace('<a href="#">Unsubscribe</a>', '');
       event.srcElement.textContent = 'Add Unsubscribe';
     }
+  }
+
+  changeEditorType($event) {
+    let changeTextEditor = confirm("Are you sure you want to change the text editor, the message body will be lost?");
+    if (changeTextEditor == true) {
+      this.emailTemplate.emailTemplateBody = '';
+      this.emailTemplate.editorSelected = $event;
+    }
+    else {
+      return false;
+    }
+  }
+
+  redirectToSendersInfoPage() {
+    this.router.navigate(['settings/email-list']);
   }
 }

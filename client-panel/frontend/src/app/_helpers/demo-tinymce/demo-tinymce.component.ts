@@ -22,7 +22,7 @@ declare var tinymce: any;
       <div>
         <textarea class="hidden" cols="60" rows="4" id="tmce" >{{htmlContent}}
         </textarea>
-        <button class="btn btn-primary" (click)="addUnsubscribeLink($event)" type="button">Add Unsubscribe</button>
+        <button class="btn btn-primary my-3" (click)="addUnsubscribeLink($event)" type="button">Add Unsubscribe</button>
       </div>
     </div>`
 })
@@ -64,7 +64,7 @@ export class DemoTinymceComponent implements OnDestroy, AfterViewInit{
       ],
       toolbar: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
       elements: "tmce",
-      setup: this.tinySetup.bind(this)
+      setup: this.tinySetup.bind(this),
     });
   }
 
@@ -93,6 +93,8 @@ export class DemoTinymceComponent implements OnDestroy, AfterViewInit{
 
   }
   addUnsubscribeLink(event) {
+    console.log(this.htmlContent);
+
     if(event.srcElement.innerHTML==='Add Unsubscribe'){
       // http://archive.tinymce.com/wiki.php/API3:method.tinymce.dom.DOMUtils.add  "Below Line Definition."\
 
@@ -100,7 +102,7 @@ export class DemoTinymceComponent implements OnDestroy, AfterViewInit{
       this.htmlContent = tinymce.activeEditor.getBody().innerHTML;
       event.srcElement.innerHTML='Remove Unsubscribe';
     }
-   else {
+    else {
       tinymce.activeEditor.dom.remove(tinymce.activeEditor.dom.select('#unsubscribe'));
       this.htmlContent = tinymce.activeEditor.getBody().innerHTML;
       event.srcElement.innerHTML='Add Unsubscribe';

@@ -1,5 +1,5 @@
 import {Component, ComponentFactoryResolver, OnInit, ViewChild, ViewContainerRef} from '@angular/core';
-import {EmailTemplate} from "../../_models/email";
+import {EditorSelected, EmailTemplate} from "../../_models/email";
 import {TemplatesService} from "../../_services/templates.service";
 import {CreateEmailTemplateFormComponent} from "./create-email-template-form/create-email-template-form.component";
 
@@ -22,6 +22,7 @@ export class EmailTemplatesComponent implements OnInit {
     this.templatesService.castEmailTemplates.subscribe(
       (emailTemplates) => {
         this.emailTemplates = emailTemplates;
+        console.log(this.emailTemplates);
       }
     );
     this.getEmailTemplates();
@@ -58,7 +59,6 @@ export class EmailTemplatesComponent implements OnInit {
     // Create component dynamically inside the ng-template
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(CreateEmailTemplateFormComponent);
     const component = this.container.createComponent(componentFactory);
-
     // Push the component so that we can keep track of which components are created
     this.components.push(component);
   }
