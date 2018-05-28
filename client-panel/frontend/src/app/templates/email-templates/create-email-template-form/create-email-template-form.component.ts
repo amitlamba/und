@@ -16,10 +16,10 @@ import {SendersInfo} from "../../../_models/client";
 })
 export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
   emailTemplate: EmailTemplate;
-  // @Input() createNewTemplate;
+  createNewTemplate: boolean = false;
 
   sendersInfoList: SendersInfo[] = [];
-  @ViewChild("f") form: any;
+  @ViewChild("emailTemplateForm") form: any;
 
   userFields = UserFields.USER_DETAIILS;
   public mentionItems: string[] = UserParams.params;
@@ -36,16 +36,21 @@ export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
     this.templatesService.castEmailTemplateForEdit.subscribe((emailTemplateForEdit) => {
       this.emailTemplate = emailTemplateForEdit;
     });
-    this.settingsService.getSendersInfoList().subscribe(
-      (sendersInfoList)=>{
-        this.sendersInfoList = sendersInfoList;
-      }
-    );
-    // if (this.createNewTemplate) {
-    //   this.emailTemplate.from = "";                             // to set default value of Fromdropdown
-    //   this.emailTemplate.messageType = "";                    // to set default value of MessageTypedropdown
-    //   this.emailTemplate.editorSelected = EditorSelected.tinymceEditor;
-    // }
+    if(this.settingsService.sendersInfoList.length > 1) {
+      this.sendersInfoList = this.settingsService.sendersInfoList;
+    } else {
+      this.settingsService.getSendersInfoList().subscribe(
+        (sendersInfoList) => {
+          this.settingsService.sendersInfoList = sendersInfoList;
+          this.sendersInfoList = this.settingsService.sendersInfoList;
+        }
+      );
+    }
+    if (this.createNewTemplate) {
+      this.emailTemplate.from = "";                             // to set default value of Fromdropdown
+      this.emailTemplate.messageType = "";                    // to set default value of MessageTypedropdown
+      this.emailTemplate.editorSelected = EditorSelected.tinymceEditor;
+    }
   }
 
   onSave(form: FormData) {

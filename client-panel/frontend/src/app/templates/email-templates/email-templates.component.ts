@@ -52,13 +52,14 @@ export class EmailTemplatesComponent implements OnInit {
   onCreateNew() {
     this.removeComponent();
     this.templatesService.emailTemplateForEdit.next(new EmailTemplate());
-    this.addComponent();
+    this.addComponent(true);
   }
 
-  addComponent() {
+  addComponent(newTemplate: boolean = false) {
     // Create component dynamically inside the ng-template
     const componentFactory = this.componentFactoryResolver.resolveComponentFactory(CreateEmailTemplateFormComponent);
     const component = this.container.createComponent(componentFactory);
+    component.instance.createNewTemplate = newTemplate;
     // Push the component so that we can keep track of which components are created
     this.components.push(component);
   }

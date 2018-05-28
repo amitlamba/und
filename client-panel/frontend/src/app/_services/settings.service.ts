@@ -9,6 +9,7 @@ import {HttpClient, HttpHeaders} from "@angular/common/http";
 export class SettingsService {
 
   serviceProvidersList: ServiceProviderCredentials[] = [];
+  sendersInfoList: SendersInfo[] = [];
 
   constructor(private httpClient: HttpClient) {
   }
