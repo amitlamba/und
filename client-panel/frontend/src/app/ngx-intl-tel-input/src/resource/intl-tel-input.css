@@ -103,7 +103,7 @@
 .intl-tel-input .country-list .flag-box, .intl-tel-input .country-list .country-name {
     margin-right: 6px; }
 .intl-tel-input.allow-dropdown input, .intl-tel-input.allow-dropdown input[type=text], .intl-tel-input.allow-dropdown input[type=tel], .intl-tel-input.separate-dial-code input, .intl-tel-input.separate-dial-code input[type=text], .intl-tel-input.separate-dial-code input[type=tel] {
-    padding-right: 90px;
+    padding-right: auto;
     padding-left: 52px;
     margin-left: 0; }
 .intl-tel-input.allow-dropdown .flag-container, .intl-tel-input.separate-dial-code .flag-container {

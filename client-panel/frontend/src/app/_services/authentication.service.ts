@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
 import 'rxjs/add/operator/map'
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpParams} from '@angular/common/http';
 import {AppSettings} from "../_settings/app-settings";
 import {RegistrationRequest, ServiceProviderCredentials, UserProfileRequest} from "../_models/client";
 import {MessageService} from "./message.service";
@@ -46,8 +46,9 @@ export class AuthenticationService {
     localStorage.removeItem('currentUser');
   }
 
-  register(registrationRequest: RegistrationRequest): Observable<any> {
-    return this.httpClient.post(AppSettings.API_ENDPOINT_AUTH_REGISTER, registrationRequest)
+  register(registrationRequest: RegistrationRequest, recaptchaToken: string): Observable<any> {
+    const params = new HttpParams().set("recaptchaToken", recaptchaToken)
+    return this.httpClient.post(AppSettings.API_ENDPOINT_AUTH_REGISTER, registrationRequest, {params})
       .pipe(
         tap(next => this.messageService.addSuccessMessage(registrationRequest.name + " registered successfuly.")),
         catchError(this.handleError<any>('register'))
