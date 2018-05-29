@@ -23,6 +23,9 @@ class ContactUs {
     @Size(min = 50, max = 500, message = "{contactUS.message.invalidSize}")
     var message: String = ""
 
+    @Size(min = 2, max = 200, message = "{contactUS.companyName.invalidSize}")
+    var companyName: String = ""
+
 }
 
 
