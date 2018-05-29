@@ -20,9 +20,15 @@ export class EmailTemplate {
   emailTemplateBody: string;
   emailTemplateSubject: string;
   parentID: number;
+  messageType: string;
   from: string;
-  messageType: MessageType;
+  editorSelected: EditorSelected;
   tags: string;
+}
+
+export enum EditorSelected {
+  tinymceEditor = "tinymceEditor",
+  textareaEditor = "textareaEditor"
 }
 
 export enum MessageType{
