@@ -29,7 +29,7 @@ class GoogleResponse {
     private var errorCodes: Array<ErrorCode>? = null
 
     internal enum class ErrorCode {
-        MissingSecret, InvalidSecret, MissingResponse, InvalidResponse;
+        MissingSecret, InvalidSecret, MissingResponse, InvalidResponse,TimeOutOrDuplicate,BadRequest;
 
 
         companion object {
@@ -41,9 +41,12 @@ class GoogleResponse {
                 errorsMap["invalid-input-secret"] = InvalidSecret
                 errorsMap["missing-input-response"] = MissingResponse
                 errorsMap["invalid-input-response"] = InvalidResponse
+                errorsMap["timeout-or-duplicate"] = TimeOutOrDuplicate
+                errorsMap["bad-request"] = BadRequest
             }
 
             @JsonCreator
+            @JvmStatic
             fun forValue(value: String): ErrorCode? {
                 return errorsMap[value.toLowerCase()]
             }

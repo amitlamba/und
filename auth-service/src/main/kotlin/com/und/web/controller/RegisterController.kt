@@ -9,6 +9,7 @@ import com.und.service.EmailService
 import com.und.service.RegistrationService
 import com.und.service.security.UserService
 import com.und.service.security.captcha.CaptchaService
+import com.und.web.controller.exception.UserAlreadyRegistered
 import com.und.web.model.*
 import com.und.web.model.ResponseStatus
 import org.springframework.beans.factory.annotation.Autowired
@@ -52,12 +53,12 @@ class RegisterController {
     @PostMapping
     fun register(@Valid @RequestBody registrationRequest: RegistrationRequest, request: HttpServletRequest) {
 
-        val response = request.getParameter("g-captcha-response")
+        val response = request.getParameter("recaptchaToken")
         val errors = registrationService.validate(registrationRequest)
-        //captchaService.processResponse(response)
+        captchaService.processResponse(response)
         if (errors.getFieldErrors().isNotEmpty()) {
             logger.error("business validation failure while registering ${registrationRequest.email} , with errors ${errors.getFieldErrors()}")
-            throw  UndBusinessValidationException(errors)
+            throw  UserAlreadyRegistered("${errors.getFieldErrors()}")
         }
         val client = registrationService.register(registrationRequest)
         registrationService.sendVerificationEmail(client)

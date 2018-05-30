@@ -4,6 +4,7 @@ import com.und.common.utils.loggerFor
 import com.und.web.controller.exception.ReCaptchaInvalidException
 import com.und.web.controller.exception.ReCaptchaUnavailableException
 import com.und.web.controller.exception.UndBusinessValidationException
+import com.und.web.controller.exception.UserAlreadyRegistered
 import com.und.web.model.FieldError
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.SignatureException
@@ -108,7 +109,7 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
     @ResponseBody
     fun processAuthError(ex: AccessDeniedException, request: WebRequest): ResponseEntity<Any> {
         logger.error("401 Status Code", ex)
-        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.accessDenied", null, request.locale), "InternalError")
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.accessDenied", null, request.locale), ex.localizedMessage)
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.UNAUTHORIZED)
     }
 
@@ -117,7 +118,7 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
     @ResponseBody
     fun processAuthError(ex: UsernameNotFoundException, request: WebRequest): ResponseEntity<Any> {
         logger.error("401 Status Code", ex)
-        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.usernameNotFound", null, request.locale), "InternalError")
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.usernameNotFound", null, request.locale), ex.localizedMessage)
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.UNAUTHORIZED)
     }
 
@@ -126,7 +127,7 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
     @ResponseBody
     fun processAuthErrorJwt(ex: MalformedJwtException, request: WebRequest): ResponseEntity<Any> {
         logger.error("401 Status Code", ex)
-        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.malformedJwt", null, request.locale), "InternalError")
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.malformedJwt", null, request.locale), ex.localizedMessage)
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.UNAUTHORIZED)
     }
 
@@ -135,7 +136,7 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
     @ResponseBody
     fun processAuthErrorJwt(ex: SignatureException, request: WebRequest): ResponseEntity<Any> {
         logger.error("401 Status Code", ex)
-        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.signatureErrorJwt", null, request.locale), "InternalError")
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.signatureErrorJwt", null, request.locale), ex.localizedMessage)
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.UNAUTHORIZED)
     }
 
@@ -144,8 +145,17 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
     @ResponseBody
     fun processAuthErrorJwt(ex: UnsupportedJwtException, request: WebRequest): ResponseEntity<Any> {
         logger.error("401 Status Code", ex)
-        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.unsupportedJwt", null, request.locale), "InternalError")
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.unsupportedJwt", null, request.locale), ex.localizedMessage)
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.UNAUTHORIZED)
+    }
+
+    @ExceptionHandler(UserAlreadyRegistered::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    fun processAuthErrorJwt(ex: UserAlreadyRegistered, request: WebRequest): ResponseEntity<Any> {
+        logger.error("401 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.alreadyregistered", null, request.locale), "Already Registered")
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
     }
 
 
