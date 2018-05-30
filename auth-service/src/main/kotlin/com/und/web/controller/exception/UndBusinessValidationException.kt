@@ -1,4 +1,4 @@
-package com.und.exception
+package com.und.web.controller.exception
 
 import com.und.web.model.ValidationError
 

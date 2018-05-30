@@ -24,16 +24,13 @@ class Client {
 
     @Column(name = "NAME", length = 255)
     @NotNull
-    @Size(min = 4, max = 255)
     lateinit var name: String
 
     @Column(name = "EMAIL", length = 255, unique = true)
     @NotNull
-    @Size(min = 4, max = 255)
     lateinit var email: String
 
     @Column(name = "PHONE", length = 50)
-    @Size(min = 4, max = 50)
     var phone: String? = null
 
     @Column(name = "email_verified")
