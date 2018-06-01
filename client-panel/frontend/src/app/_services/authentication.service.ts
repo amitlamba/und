@@ -18,9 +18,9 @@ export class AuthenticationService {
     this.token = currentUser && currentUser.token;
   }
 
-  login(username: string, password: string): Observable<any> {
-
-    return this.httpClient.post(AppSettings.API_ENDPOINT_AUTH_AUTH, {username: username, password: password})
+  login(username: string, password: string, recaptchaToken: string): Observable<any> {
+    const params = new HttpParams().set("recaptchaToken", recaptchaToken);
+    return this.httpClient.post(AppSettings.API_ENDPOINT_AUTH_AUTH, {username: username, password: password}, {params})
       .map((response: any) => {
         console.log(response);
         // login successful if there's a jwt token in the response
@@ -47,19 +47,22 @@ export class AuthenticationService {
   }
 
   register(registrationRequest: RegistrationRequest, recaptchaToken: string): Observable<any> {
-    const params = new HttpParams().set("recaptchaToken", recaptchaToken)
+    const params = new HttpParams().set("recaptchaToken", recaptchaToken);
     return this.httpClient.post(AppSettings.API_ENDPOINT_AUTH_REGISTER, registrationRequest, {params})
       .pipe(
-        tap(next => this.messageService.addSuccessMessage(registrationRequest.name + " registered successfuly.")),
-        catchError(this.handleError<any>('register'))
+        tap(next => this.messageService.addSuccessMessage(registrationRequest.name + " registered successfuly."))
+        // ,
+        // catchError(this.handleError<any>('register'))
       );
   }
 
-  forgotpassword(email: string): Observable<any> {
-    return this.httpClient.get(AppSettings.API_ENDPOINT_AUTH_REGISTER_FORGOTPASSWORD + "/" + email)
+  forgotpassword(email: string, recaptchaToken: string): Observable<any> {
+    const params = new HttpParams().set("recaptchaToken", recaptchaToken);
+    return this.httpClient.get(AppSettings.API_ENDPOINT_AUTH_REGISTER_FORGOTPASSWORD + "/" + email, {params})
       .pipe(
-        tap(next => this.messageService.addSuccessMessage("Please see your email " + email + " to reset password.")),
-        catchError(this.handleError<any>('Failed To Forgot Password'))
+        tap(next => this.messageService.addSuccessMessage("Please see your email " + email + " to reset password."))
+        // ,
+        // catchError(this.handleError<any>('Failed To Forgot Password'))
       );
   }
 

@@ -12,6 +12,8 @@ export class ForgotPasswordComponent implements OnInit {
     email: ''
   };
 
+  recaptchaToken: string = null;
+
   constructor(private authenticationService: AuthenticationService,
               private router: Router) {
   }
@@ -24,7 +26,7 @@ export class ForgotPasswordComponent implements OnInit {
   }
 
   submitEmail() {
-    this.authenticationService.forgotpassword(this.user.email + '/')
+    this.authenticationService.forgotpassword(this.user.email + '/', this.recaptchaToken)
       .subscribe(
         (response) => {
           console.log(response);
@@ -32,6 +34,10 @@ export class ForgotPasswordComponent implements OnInit {
         }
       );
 
+  }
+
+  handleCorrectCaptcha(event) {
+    this.recaptchaToken = event;
   }
 
 }

@@ -16,6 +16,7 @@ export class ContactUsComponent implements OnInit {
   showErrorMessage: boolean = false;
   preferredCountries = ['in', 'us', 'ru', 'gb'];
   errorMessage: HttpErrorResponse;
+  recaptchaToken: string = null;
   @ViewChild('contactUsForm') contactUsForm;
 
   constructor(private registerService: RegisterService) {
@@ -28,9 +29,7 @@ export class ContactUsComponent implements OnInit {
   submitContactUsForm() {
     this.loading = true;
     this.showSubmitMessage = true;
-    console.log(this.contactUs.mobileNo);
-
-    this.registerService.submitContactForm(this.contactUs)
+    this.registerService.submitContactForm(this.contactUs, this.recaptchaToken)
       .subscribe(
         (response) => {
           console.log(response);
@@ -38,7 +37,7 @@ export class ContactUsComponent implements OnInit {
           this.showSuccessMessage = true;
           this.contactUs = new ContactUs();
           this.contactUsForm.reset();
-          this.contactUsForm.mobileNo = "";
+          this.contactUs.mobileNo = "";
         },
         (error: HttpErrorResponse) => {
           this.loading = false;
@@ -48,11 +47,16 @@ export class ContactUsComponent implements OnInit {
         }
       );
   }
+
+  handleCorrectCaptcha(event) {
+    this.recaptchaToken = event;
+  }
 }
 
-class ContactUs {
+export class ContactUs {
   name: string;
   email: string;
   mobileNo: string;
   message: string;
+  companyName: string;
 }
