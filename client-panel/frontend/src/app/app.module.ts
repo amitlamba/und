@@ -91,6 +91,7 @@ import {ChartsModule} from "ng2-charts";
 import {ReportsService} from "./_services/reports.service";
 import {RegisterService} from "./_services/register.service";
 import { UserProfileComponent } from './user-profile/user-profile.component';
+import {TooltipModule} from "ngx-bootstrap";
 
 
 @NgModule({
@@ -113,7 +114,8 @@ import { UserProfileComponent } from './user-profile/user-profile.component';
     NgxIntlTelInputModule,
     BrowserModule,
     ReCaptchaModule,
-    ChartsModule
+    ChartsModule,
+    TooltipModule.forRoot(),
   ],
   declarations: [
     AppComponent,

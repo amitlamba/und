@@ -28,6 +28,8 @@ export class ContactUsComponent implements OnInit {
   submitContactUsForm() {
     this.loading = true;
     this.showSubmitMessage = true;
+    console.log(this.contactUs.mobileNo);
+
     this.registerService.submitContactForm(this.contactUs)
       .subscribe(
         (response) => {
