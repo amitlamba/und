@@ -61,7 +61,11 @@ export class AppSettings {
   public static API_ENDPOINT_CLIENT_LOCATION_STATES = AppSettings.API_ENDPOINT_CLIENT_LOCATION + "/states";
   public static API_ENDPOINT_CLIENT_LOCATION_CITIES = AppSettings.API_ENDPOINT_CLIENT_LOCATION + "/cities";
 
+  public static API_ENDPOINT_CLIENT_CONTACT_US_SAVE = AppSettings.API_ENDPOINT_CLIENT + "/contactUs/save";
+
+
   public static API_ENDPOINT_AUTH = AppSettings.API_ENDPOINT + "/auth";
+  // public static API_ENDPOINT_AUTH = "http://nestros.com:9595"
 
   public static API_ENDPOINT_AUTH_AUTH = AppSettings.API_ENDPOINT_AUTH + "/auth";
   public static API_ENDPOINT_AUTH_AUTH_VALIDATE = AppSettings.API_ENDPOINT_AUTH_AUTH + "/validate";
@@ -79,7 +83,6 @@ export class AppSettings {
   public static API_ENDPOINT_AUTH_SETTING_UPDATEUSERDETAILS = AppSettings.API_ENDPOINT_AUTH_SETTING + "/updateUserDetails";
   public static API_ENDPOINT_AUTH_SETTING_REFRESHTOKEN = AppSettings.API_ENDPOINT_AUTH_SETTING + "/refreshToken";
 
-  public static API_ENDPOINT_CONTACT_US_SAVE = AppSettings.API_ENDPOINT_CLIENT + "/contactUs/save";
 
 }
 

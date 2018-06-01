@@ -16,6 +16,7 @@ export class LoginComponent implements OnInit {
   loading = false;
   error = '';
   public token: string;
+  recaptchaToken: string = null;
 
   @Output() loginEvent = new EventEmitter();
 
@@ -36,7 +37,7 @@ export class LoginComponent implements OnInit {
     this.loading = true;
 
     const body = {username: this.model.username, password: this.model.password};
-    this.authenticationService.login(this.model.username, this.model.password).subscribe(
+    this.authenticationService.login(this.model.username, this.model.password, this.recaptchaToken).subscribe(
       (response) => {
         console.log(response);
         this.loginEvent.emit();
@@ -64,5 +65,11 @@ export class LoginComponent implements OnInit {
           }
         }
       );*/
+  }
+
+
+  handleCorrectCaptcha(event) {
+    console.log(event);
+    this.recaptchaToken = event
   }
 }
