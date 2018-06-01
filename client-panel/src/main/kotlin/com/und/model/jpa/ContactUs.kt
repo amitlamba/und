@@ -35,6 +35,8 @@ class ContactUs {
     @Column(name = "date_modified")
     lateinit var dateModified: LocalDateTime
 
+    @Column(name="company_name")
+    var companyName: String=""
 
 }
 

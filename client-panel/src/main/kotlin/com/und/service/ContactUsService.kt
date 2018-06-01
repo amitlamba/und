@@ -53,6 +53,7 @@ class ContactUsService {
         contactUS.email = webContactUs.email
         contactUS.mobileNo = webContactUs.mobileNo
         contactUS.message = webContactUs.message
+        contactUS.companyName=webContactUs.companyName
 
         return contactUS
     }

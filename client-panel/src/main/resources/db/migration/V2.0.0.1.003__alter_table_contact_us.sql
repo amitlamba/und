@@ -1,0 +1,1 @@
+ALTER TABLE contact_us ADD COLUMN company_name character varying ;

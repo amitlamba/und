@@ -1,4 +1,4 @@
-<form (ngSubmit)="onSave(f)" #emailTemplateForm="ngForm">
+<form (ngSubmit)="onSave(emailTemplateForm)" #emailTemplateForm="ngForm">
   <div class="form-group col-sm-12">
     <label for="name">Name</label>
     <input type="text" class="form-control" maxlength="100" id="name" name="name"
@@ -57,7 +57,7 @@
            value="textareaEditor"
            [(ngModel)]="emailTemplate.editorSelected"
            (click)="changeEditorType($event.target.value)">
-    <label for="textareaEmailBody" class="mb-3">Add HTML Code</label>
+    <label for="textareaEmailBody" class="mb-3">I have an HTML Template</label>
     <app-demo-tinymce *ngIf="emailTemplate.editorSelected=='tinymceEditor'"
                       id="emailBody"
                       [(htmlContent)]="emailTemplate.emailTemplateBody"></app-demo-tinymce>

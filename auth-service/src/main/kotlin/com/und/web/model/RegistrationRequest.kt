@@ -1,5 +1,6 @@
 package com.und.web.model
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import javax.validation.constraints.Email
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
@@ -21,19 +22,23 @@ class RegistrationRequest {
     @Size(min = 2, max = 30, message = "Name should contain 2 to 30 characters")
     lateinit var name: String
 
-    @Size(min = 0, max = 20, message = "Country should contain 0 to 20 characters")
+    @NotNull
+    @Size(min = 4, max = 20, message = "Country should contain 4 to 20 characters")
     var country: String? = null
 
+    @NotNull
     var address: String? = null
 
-    @Size(min = 0, max = 20, message = "Phone should contain 0 to 20 characters")
+    @NotNull
+    @Size(min = 10, max = 20, message = "Phone should contain 10 to 20 characters")
     var phone: String? = null
 
-    @Size(min = 0, max = 255, message = "First Name should contain 0 to 255 characters")
+    @NotNull
+    @Size(min = 5, max = 255, message = "First Name should contain 5 to 255 characters")
     var firstName: String? = null
 
-    @Size(min = 0, max = 255, message = "Last Name should contain 0 to 255 characters")
+    @NotNull
+    @Size(min = 5, max = 255, message = "Last Name should contain 5 to 255 characters")
     var lastName: String? = null
 
-    var recaptchaToken: String? = null
 }

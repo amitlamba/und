@@ -25,6 +25,7 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter-mobile:1.5.9.RELEASE")
     compile('org.springframework.boot:spring-boot-starter-mail')
     compile('org.springframework.boot:spring-boot-starter-security')
+    compile "org.springframework.boot:spring-boot-configuration-processor"
     runtime('org.postgresql:postgresql')
 
 

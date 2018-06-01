@@ -98,7 +98,7 @@ export class DemoTinymceComponent implements OnDestroy, AfterViewInit{
     if(event.srcElement.innerHTML==='Add Unsubscribe'){
       // http://archive.tinymce.com/wiki.php/API3:method.tinymce.dom.DOMUtils.add  "Below Line Definition."\
 
-      tinymce.activeEditor.dom.add(tinymce.activeEditor.getBody(), 'a', {href : '#' ,id : 'unsubscribe'} , 'Unsubscribe');
+      tinymce.activeEditor.dom.add(tinymce.activeEditor.getBody(), 'a', {href : '##UND_UNSUBSCRIBE_LINK##' ,id : 'unsubscribe'} , 'Unsubscribe');
       this.htmlContent = tinymce.activeEditor.getBody().innerHTML;
       event.srcElement.innerHTML='Remove Unsubscribe';
     }

@@ -1,4 +1,4 @@
-package com.und.web.controller.ErrorHandler
+package com.und.web.controller.errorHandler
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.und.common.utils.loggerFor
@@ -6,8 +6,6 @@ import com.und.eventapi.restExceptionHandler.ErrorList
 import com.und.exception.UndBusinessValidationException
 import com.und.web.model.ValidationError
 import org.hibernate.JDBCException
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.MessageSource
 import org.springframework.http.HttpStatus
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.MethodArgumentNotValidException

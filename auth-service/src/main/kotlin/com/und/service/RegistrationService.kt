@@ -1,13 +1,12 @@
 package com.und.service
 
 import com.und.common.utils.*
-import com.und.exception.UndBusinessValidationException
+import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.model.jpa.ClientVerification
 import com.und.web.model.ValidationError
 import com.und.web.model.RegistrationRequest
 import com.und.model.utils.Email
 import com.und.model.jpa.security.Client
-import com.und.model.jpa.security.EmailMessage
 import com.und.model.jpa.security.User
 import com.und.service.security.AuthorityService
 import com.und.service.security.ClientService

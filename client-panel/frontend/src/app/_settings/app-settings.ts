@@ -1,9 +1,9 @@
 export class AppSettings {
-  public static API_ENDPOINT = "http://nestros.com:8080";
+  public static API_ENDPOINT = "http://userndot.com:9595";
 
 
-  public static API_ENDPOINT_CLIENT = AppSettings.API_ENDPOINT + "/client";
-  // public static API_ENDPOINT_CLIENT = "http://localhost:9191";
+  // public static API_ENDPOINT_CLIENT = AppSettings.API_ENDPOINT + "/client";
+  public static API_ENDPOINT_CLIENT = "http://nestros.com:9191";
   // public static API_ENDPOINT_CLIENT = "http://localhost:9191";
 
   public static API_ENDPOINT_CLIENT_CLIENT = AppSettings.API_ENDPOINT_CLIENT + "/client";
@@ -61,9 +61,9 @@ export class AppSettings {
   public static API_ENDPOINT_CLIENT_LOCATION_STATES = AppSettings.API_ENDPOINT_CLIENT_LOCATION + "/states";
   public static API_ENDPOINT_CLIENT_LOCATION_CITIES = AppSettings.API_ENDPOINT_CLIENT_LOCATION + "/cities";
 
-  public static API_ENDPOINT_AUTH = AppSettings.API_ENDPOINT + "/auth";
+  public static API_ENDPOINT_AUTH = AppSettings.API_ENDPOINT + "/";
 
-  public static API_ENDPOINT_AUTH_AUTH = AppSettings.API_ENDPOINT_AUTH + "/auth";
+  public static API_ENDPOINT_AUTH_AUTH = AppSettings.API_ENDPOINT_AUTH + "/";
   public static API_ENDPOINT_AUTH_AUTH_VALIDATE = AppSettings.API_ENDPOINT_AUTH_AUTH + "/validate";
   public static API_ENDPOINT_AUTH_AUTH_USERDETAIL = AppSettings.API_ENDPOINT_AUTH_AUTH + "/userdetail";
 

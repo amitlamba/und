@@ -25,7 +25,7 @@ export class DemoFormComponent implements OnInit {
     this.demoRequest.password='aAbBcC123@!';
     this.demoRequest.country = 'India';
     this.demoRequest.address = 'Demo Admin address';
-    this.authenticationService.register(this.demoRequest)
+    this.authenticationService.register(this.demoRequest, null)
       .subscribe(
         (response) => {
           console.log(response);
