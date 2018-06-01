@@ -37,7 +37,7 @@ export class ContactUsComponent implements OnInit {
           this.showSuccessMessage = true;
           this.contactUs = new ContactUs();
           this.contactUsForm.reset();
-          this.contactUsForm.mobileNo = "";
+          this.contactUs.mobileNo = "";
         },
         (error: HttpErrorResponse) => {
           this.loading = false;
