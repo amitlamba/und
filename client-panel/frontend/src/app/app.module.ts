@@ -90,6 +90,7 @@ import {EventsGraphComponent} from './events-graph/events-graph.component';
 import {ChartsModule} from "ng2-charts";
 import {ReportsService} from "./_services/reports.service";
 import {RegisterService} from "./_services/register.service";
+import { UserProfileComponent } from './user-profile/user-profile.component';
 
 
 @NgModule({
@@ -172,7 +173,8 @@ import {RegisterService} from "./_services/register.service";
     NewVsExistingUsersGraphComponent,
     TimerangeComponent,
     ConversionEventsGraphComponent,
-    EventsGraphComponent
+    EventsGraphComponent,
+    UserProfileComponent
   ],
   providers: [
     AuthGuard,

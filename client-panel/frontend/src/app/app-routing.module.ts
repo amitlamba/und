@@ -27,6 +27,7 @@ import {LandingPageUndComponent} from "./landing-page-und/landing-page-und.compo
 import {AboutUsComponent} from "./about-us/about-us.component";
 import {TermsOfServiceComponent} from "./terms-of-service/terms-of-service.component";
 import {ContactUsComponent} from "./contact-us/contact-us.component";
+import {UserProfileComponent} from "./user-profile/user-profile.component";
 
 const routes: Routes = [
   {path: 'login', component: LoginComponent},
@@ -35,7 +36,7 @@ const routes: Routes = [
   {path: 'register', component: RegisterComponent},
   {path: 'resetpwd/:code', component: ResetPwdComponent},
   {path: 'dummyJson', component: DummyComponent},
-  {path: 'dashboard', component: HomeComponent, canActivate:[AuthGuard]},
+  {path: 'dashboard', component: HomeComponent, canActivate: [AuthGuard]},
   {path: 'settings', redirectTo: "settings/profile", pathMatch: "full", canActivate: [AuthGuard]},
   {
     path: 'settings', component: SettingsComponent, canActivate: [AuthGuard], children: [
@@ -50,7 +51,8 @@ const routes: Routes = [
     path: 'segment', component: SegmentCategoryComponent, canActivate: [AuthGuard], children: [
       {path: 'find-users', component: FindUsersComponent},
       {path: 'create-new-segment', component: CreateNewSegmentComponent},
-      {path: 'segments', component: SegmentsComponent}
+      {path: 'segments', component: SegmentsComponent},
+      {path: 'user-profile', component: UserProfileComponent}
     ]
   },
   {path: 'templates', redirectTo: "templates/email", canActivate: [AuthGuard], pathMatch: "full"},
@@ -67,9 +69,9 @@ const routes: Routes = [
       {path: 'email', component: SetupCampaignComponent}
     ]
   },
-  {path:'aboutus', component: AboutUsComponent},
-  {path:'terms-of-service', component: TermsOfServiceComponent},
-  {path:'contact-us', component: ContactUsComponent},
+  {path: 'aboutus', component: AboutUsComponent},
+  {path: 'terms-of-service', component: TermsOfServiceComponent},
+  {path: 'contact-us', component: ContactUsComponent},
   {path: '**', component: PageNotFoundComponent},
 ];
 
