@@ -133,12 +133,12 @@ export class SetupCampaignComponent implements OnInit {
     this.campaign.schedule = this.schedule;
     this.checkCampaignType();
     console.log(JSON.stringify(this.campaign));
-    // this.campaignService.saveCampaign(this.campaign).subscribe(
-    //   (campaign) => {
-    //     this.campaignService.campaigns.push(campaign);
-    //     this.router.navigate(["/campaigns"]);
-    //   }
-    // );
+    this.campaignService.saveCampaign(this.campaign).subscribe(
+      (campaign) => {
+        this.campaignService.campaigns.push(campaign);
+        this.router.navigate(["/campaigns"]);
+      }
+    );
   }
 
   checkCampaignType() {
