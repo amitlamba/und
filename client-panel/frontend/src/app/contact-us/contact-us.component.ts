@@ -1,6 +1,7 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {RegisterService} from "../_services/register.service";
 import {HttpErrorResponse} from "@angular/common/http";
+import {_RECAPTCHA_KEY} from "../_settings/app-settings";
 
 @Component({
   selector: 'app-contact-us',
@@ -17,6 +18,7 @@ export class ContactUsComponent implements OnInit {
   preferredCountries = ['in', 'us', 'ru', 'gb'];
   errorMessage: HttpErrorResponse;
   recaptchaToken: string = null;
+  _site_key = _RECAPTCHA_KEY;
   @ViewChild('contactUsForm') contactUsForm;
 
   constructor(private registerService: RegisterService) {

@@ -110,3 +110,5 @@ export class UserFields {
     UserFields.USER_MOBILE_NUMBER
   ];
 }
+
+export const _RECAPTCHA_KEY = "6Lcv4FsUAAAAAL1CEPzpEjUIxiDL93UWR2in1h1x"

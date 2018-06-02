@@ -17,6 +17,7 @@ import {SendersInfo} from "../../../_models/client";
 export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
   emailTemplate: EmailTemplate;
   createNewTemplate: boolean = false;
+  unsubscribeButtonText = "Add Unsubscribe";
 
   sendersInfoList: SendersInfo[] = [];
   @ViewChild("emailTemplateForm") form: any;
@@ -51,6 +52,7 @@ export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
       this.emailTemplate.messageType = "";                    // to set default value of MessageTypedropdown
       this.emailTemplate.editorSelected = EditorSelected.tinymceEditor;
     }
+    this.setUpUnsubscribeButtonText()
   }
 
   onSave(form: FormData) {
@@ -80,11 +82,13 @@ export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
 
   addUnsubscribeLink(event) {
     if (this.emailTemplate.emailTemplateBody.indexOf('##UND_UNSUBSCRIBE_LINK##') < 0) {
-      document.querySelector('textarea').value = document.querySelector('textarea').value + '<a href="##UND_UNSUBSCRIBE_LINK##">Unsubscribe</a>';
+      // document.querySelector('textarea').value = document.querySelector('textarea').value + '<a href="##UND_UNSUBSCRIBE_LINK##">Unsubscribe</a>';
+      this.emailTemplate.emailTemplateBody = this.emailTemplate.emailTemplateBody + '<a href="##UND_UNSUBSCRIBE_LINK##">Unsubscribe</a>';
       event.srcElement.textContent = 'Remove Unsubscribe';
     }
     else {
-      document.querySelector('textarea').value = document.querySelector('textarea').value.replace('<a href="##UND_UNSUBSCRIBE_LINK##">Unsubscribe</a>', '');
+      // document.querySelector('textarea').value = document.querySelector('textarea').value.replace('<a href="##UND_UNSUBSCRIBE_LINK##">Unsubscribe</a>', '');
+      this.emailTemplate.emailTemplateBody = this.emailTemplate.emailTemplateBody.replace('<a href="##UND_UNSUBSCRIBE_LINK##">Unsubscribe</a>','');
       event.srcElement.textContent = 'Add Unsubscribe';
     }
   }
@@ -94,6 +98,7 @@ export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
     if (changeTextEditor == true) {
       this.emailTemplate.emailTemplateBody = '';
       this.emailTemplate.editorSelected = $event;
+      this.setUpUnsubscribeButtonText()
     }
     else {
       return false;
@@ -102,5 +107,13 @@ export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
 
   redirectToSendersInfoPage() {
     this.router.navigate(['settings/email-list']);
+  }
+
+  setUpUnsubscribeButtonText() {
+    if(this.emailTemplate.emailTemplateBody.indexOf('##UND_UNSUBSCRIBE_LINK##') < 0) {
+      this.unsubscribeButtonText = "Add Unsubscribe";
+    } else {
+      this.unsubscribeButtonText = "Remove Unsubscribe";
+    }
   }
 }

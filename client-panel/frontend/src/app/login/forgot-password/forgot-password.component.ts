@@ -1,6 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {AuthenticationService} from "../../_services/authentication.service";
 import {Router} from "@angular/router";
+import {_RECAPTCHA_KEY} from "../../_settings/app-settings";
 
 @Component({
   selector: 'app-forgot-password',
@@ -11,7 +12,7 @@ export class ForgotPasswordComponent implements OnInit {
   user: any = {
     email: ''
   };
-
+  _site_key = _RECAPTCHA_KEY;
   recaptchaToken: string = null;
 
   constructor(private authenticationService: AuthenticationService,

@@ -107,9 +107,9 @@
             </div>
           </div>
         </div>
-        <div>
+        <div class="my-3">
           <re-captcha (captchaResponse)="handleCorrectCaptcha($event)"
-                      site_key="6Lcv4FsUAAAAAL1CEPzpEjUIxiDL93UWR2in1h1x" #ReCaptchaComponent></re-captcha>
+                      site_key="{{_site_key}}" #ReCaptchaComponent></re-captcha>
         </div>
         <div class="text-center my-3">
           <img *ngIf="loading" style="width:20px"

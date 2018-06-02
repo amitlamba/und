@@ -3,6 +3,7 @@ import {RegistrationRequest} from "../_models/client";
 import {AuthenticationService} from "../_services/authentication.service";
 import {Router} from "@angular/router";
 import {ReCaptchaComponent} from "angular2-recaptcha";
+import {_RECAPTCHA_KEY} from "../_settings/app-settings";
 
 @Component({
   selector: 'app-register',
@@ -12,6 +13,7 @@ import {ReCaptchaComponent} from "angular2-recaptcha";
 export class RegisterComponent implements OnInit {
   // Angular2 ReCaptcha Component used from https://github.com/xmaestro/angular2-recaptcha
   @ViewChild('ReCaptchaComponent') captcha: ReCaptchaComponent;
+  _site_key = _RECAPTCHA_KEY;
   recaptchaToken: string = null
 
   constructor(private authenticationService: AuthenticationService, private router: Router) {
