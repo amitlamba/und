@@ -18,7 +18,7 @@ export class HttpRequestInterceptor implements HttpInterceptor {
       var token = currentUser && currentUser.token;
       const dupReq = req.clone({headers: req.headers.set('authorization', token)});
       console.log("Interceptor Dup Request");
-      console.log(dupReq);
+      // console.log(dupReq);
       return next.handle(dupReq)
         // .retry(2)
         .map((event: HttpEvent<any>) => {
@@ -38,7 +38,7 @@ export class HttpRequestInterceptor implements HttpInterceptor {
         });
     } else {
       console.log("Interceptor Request");
-      console.log(req);
+      // console.log(req);
       return next.handle(req);
     }
   }
