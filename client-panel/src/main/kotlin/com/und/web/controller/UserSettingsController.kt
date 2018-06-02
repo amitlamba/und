@@ -123,15 +123,15 @@ class UserSettingsController {
         return null
     }
 
-
-
-    @PostMapping(value = ["unsubscribe-link/save"])
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(value = ["/unsubscribe-link/save"])
     fun saveUnSubscribeLink(@Valid @RequestBody request: UnSubscribeLink) {
         val clientID = AuthenticationUtils.clientID
         userSettingsService.saveUnSubscribeLink(request, clientID)
     }
 
-    @GetMapping(value = ["unsubscribe-link/get"])
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = ["/unsubscribe-link/get"])
     fun getUnsubscribeLink(): UnSubscribeLink {
         val clientID = AuthenticationUtils.clientID
         return userSettingsService.getUnSubscribeLink(clientID)
