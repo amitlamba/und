@@ -1,11 +1,10 @@
-package com.und.web.controller.errorHandler
+package com.und.web.controller.errorhandler
 
 import com.und.common.utils.loggerFor
 import com.und.web.controller.exception.ReCaptchaInvalidException
 import com.und.web.controller.exception.ReCaptchaUnavailableException
 import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.web.controller.exception.UserAlreadyRegistered
-import com.und.web.model.FieldError
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.SignatureException
 import io.jsonwebtoken.UnsupportedJwtException
