@@ -42,7 +42,6 @@ import {SegmentsComponent} from './segment-category/segments/segments.component'
 import {DidEventsComponent} from './segment-category/did-events/did-events.component';
 import {ResetPwdComponent} from './login/reset-pwd/reset-pwd.component';
 import {Daterangepicker} from "ng2-daterangepicker";
-import {MyDateRangePickerModule} from 'mydaterangepicker';
 import {DidEventComponent} from './segment-category/did-events/did-event/did-event.component';
 import {FilterComponent} from './segment-category/did-events/did-event/filter/filter.component';
 
@@ -90,6 +89,7 @@ import {ReportsService} from "./_services/reports.service";
 import {RegisterService} from "./_services/register.service";
 import {UserProfileComponent} from './user-profile/user-profile.component';
 import {TooltipModule} from "ngx-bootstrap";
+import {Select2Module} from "ng2-select2";
 
 
 @NgModule({
@@ -101,8 +101,8 @@ import {TooltipModule} from "ngx-bootstrap";
     AppRoutingModule,
     MentionModule,
     Daterangepicker,
-    MyDateRangePickerModule,
     BrowserAnimationsModule,
+    Select2Module,
     CronEditorModule,
     TimezonePickerModule,
     BsDropdownModule.forRoot(),
