@@ -46,7 +46,7 @@ export class LoginComponent implements OnInit {
         this.router.navigate(['/dashboard']);
       },
       (error: HttpErrorResponse) => {
-        this.error = 'Username or password is incorrect';
+        this.error = 'Error: Some Error Occurred while logging in. Please confirm, you are entering correct email and password.';
         this.loading = false;
         console.log("this.error: " + this.error + ", this.loading: " + this.loading);
       }
