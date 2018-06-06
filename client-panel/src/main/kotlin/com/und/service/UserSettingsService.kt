@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 import javax.annotation.PostConstruct
 import com.fasterxml.jackson.module.kotlin.*
-import com.und.exception.UndBusinessValidationException
+import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.model.jpa.ClientSettingsEmail
 import com.und.repository.jpa.ClientSettingsEmailRepository
 import com.und.web.model.ValidationError

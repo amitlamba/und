@@ -22,12 +22,14 @@ declare var tinymce: any;
       <div>
         <textarea class="hidden" cols="60" rows="4" id="tmce" >{{htmlContent}}
         </textarea>
-        <button class="btn btn-primary" (click)="addUnsubscribeLink($event)" type="button">Add Unsubscribe</button>
+        <button class="btn btn-primary my-3" (click)="addUnsubscribeLink($event)" type="button">{{unsubscribeButtonText}}</button>
       </div>
     </div>`
 })
 export class DemoTinymceComponent implements OnDestroy, AfterViewInit{
   @ViewChild('tmce') tmce: ElementRef;
+
+  unsubscribeButtonText = "Add Unsubscribe";
 
   localHtmlContent: string = "Text";
   @Input() get htmlContent(): string {
@@ -51,6 +53,11 @@ export class DemoTinymceComponent implements OnDestroy, AfterViewInit{
 
   ngAfterViewInit() {
     console.log(this.htmlContent);
+    if (this.htmlContent.indexOf('##UND_UNSUBSCRIBE_LINK##') < 0) {
+      this.unsubscribeButtonText = "Add Unsubscribe";
+    } else {
+      this.unsubscribeButtonText = "Remove Unsubscribe";
+    }
     tinymce.init({
       mode: 'exact',
       height: 100,
@@ -64,7 +71,7 @@ export class DemoTinymceComponent implements OnDestroy, AfterViewInit{
       ],
       toolbar: 'insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image',
       elements: "tmce",
-      setup: this.tinySetup.bind(this)
+      setup: this.tinySetup.bind(this),
     });
   }
 
@@ -93,14 +100,16 @@ export class DemoTinymceComponent implements OnDestroy, AfterViewInit{
 
   }
   addUnsubscribeLink(event) {
-    if(event.srcElement.innerHTML==='Add Unsubscribe'){
+    console.log(this.htmlContent);
+
+    if(this.htmlContent.indexOf('##UND_UNSUBSCRIBE_LINK##') < 0){
       // http://archive.tinymce.com/wiki.php/API3:method.tinymce.dom.DOMUtils.add  "Below Line Definition."\
 
-      tinymce.activeEditor.dom.add(tinymce.activeEditor.getBody(), 'a', {href : '#' ,id : 'unsubscribe'} , 'Unsubscribe');
+      tinymce.activeEditor.dom.add(tinymce.activeEditor.getBody(), 'a', {href : '##UND_UNSUBSCRIBE_LINK##' ,id : 'unsubscribe'} , 'Unsubscribe');
       this.htmlContent = tinymce.activeEditor.getBody().innerHTML;
       event.srcElement.innerHTML='Remove Unsubscribe';
     }
-   else {
+    else {
       tinymce.activeEditor.dom.remove(tinymce.activeEditor.dom.select('#unsubscribe'));
       this.htmlContent = tinymce.activeEditor.getBody().innerHTML;
       event.srcElement.innerHTML='Add Unsubscribe';

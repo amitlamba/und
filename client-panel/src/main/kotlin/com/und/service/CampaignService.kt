@@ -3,7 +3,7 @@ package com.und.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.common.utils.loggerFor
 import com.und.config.EventStream
-import com.und.exception.UndBusinessValidationException
+import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.model.CampaignStatus
 import com.und.model.JobActionStatus
 import com.und.model.JobDescriptor

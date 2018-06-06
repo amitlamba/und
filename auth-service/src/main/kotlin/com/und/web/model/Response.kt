@@ -1,5 +1,7 @@
 package com.und.web.model
 
+import com.und.web.controller.errorhandler.ValidationError
+
 data class Response (
         var status: ResponseStatus = ResponseStatus.EMPTY,
         var data: Data = Data(),

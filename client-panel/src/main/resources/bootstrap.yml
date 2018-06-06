@@ -4,9 +4,18 @@ spring:
       uri: http://nestros.com:8888
       enabled: true
       name: client-panel
-      profile: shiv
+      #profile: shiv
   application:
     name: client-panel
   mvc:
     view:
       prefix:
+  zipkin:
+    base-url: http://springbootzipkin:7777
+    sender:
+      type: kafka
+  sleuth:
+    sampler:
+      probability: 1
+  kafka:
+    bootstrap-servers: ${KAFKA_IP}:${KAFKA_PORT}

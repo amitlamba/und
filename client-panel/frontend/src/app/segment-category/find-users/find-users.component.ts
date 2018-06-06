@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {SegmentService} from "../../_services/segment.service";
 import {Segment} from "../../_models/segment";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-find-users',
@@ -11,7 +12,8 @@ export class FindUsersComponent implements OnInit {
 
   newSegment: Segment;
 
-  constructor(private segmentService: SegmentService) {
+  constructor(private segmentService: SegmentService,
+              private router:Router) {
     this.newSegment = new Segment();
     // this.newSegment.didEvents = new DidEvents();
     // this.newSegment.didNotEvents = new DidEvents();
@@ -25,4 +27,8 @@ export class FindUsersComponent implements OnInit {
   ngOnInit() {
   }
 
+  findUserByIdentity() {
+      this.router.navigate(['/segment/find-users/user-profile']);
+    // this.router.navigate(["segment","find-users","user-profile"]);
+  }
 }

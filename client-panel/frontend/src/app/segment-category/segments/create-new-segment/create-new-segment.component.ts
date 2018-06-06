@@ -27,8 +27,8 @@ export class CreateNewSegmentComponent implements OnInit {
   }
 
   save() {
-    console.log(this.newSegment);
-    this.segmentForm.reset();
+    // console.log(this.newSegment);
+    // this.segmentForm.reset();
     this.segmentService.saveSegment(this.newSegment).subscribe(
       (segment) => {
         this.segmentService.segments.push(segment);

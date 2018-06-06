@@ -31,27 +31,22 @@ class User {
 
     @Column(name = "USERNAME", length = 255, unique = true)
     @NotNull
-    @Size(min = 4, max = 255)
     lateinit var username: String
 
     @Column(name = "PASSWORD", length = 100)
     @NotNull
-    @Size(min = 4, max = 100)
     lateinit var password: String
 
     @Column(name = "FIRSTNAME", length = 255)
     @NotNull
-    @Size(min = 4, max = 255)
     lateinit var firstname: String
 
     @Column(name = "LASTNAME", length = 255)
     @NotNull
-    @Size(min = 4, max = 255)
     lateinit var lastname: String
 
     @Column(name = "EMAIL", length = 255)
     @NotNull
-    @Size(min = 4, max = 255)
     lateinit var email: String
 
     @Column(name = "ENABLED")
@@ -65,15 +60,12 @@ class User {
 
     @Column(name = "SECRET", length = 255)
     @NotNull
-    @Size(min = 4, max = 255)
     lateinit var clientSecret: String
 
     @Column(name = "KEY", length = 255)
-    @Size(min = 4, max = 50)
     var key: String? = null
 
     @Column(name = "PHONE", length = 15)
-    @Size(min = 10, max = 15)
     var mobile: String? = null
 
     @ManyToMany(fetch = FetchType.EAGER)

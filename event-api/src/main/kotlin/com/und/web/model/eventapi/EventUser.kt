@@ -26,29 +26,33 @@ class EventUser {
 
     //TODO Use custom validators here
 
-    @Size(min=10,max=10,message = "{eventUser.mobile.invalidSize}")
-    @Pattern(regexp = "[0-9]*",message = "{eventUser.mobile.invalidDigits}")
+    @Size(min = 10, max = 10, message = "{eventUser.mobile.invalidSize}")
+    @Pattern(regexp = "[0-9]*", message = "{eventUser.mobile.invalidDigits}")
     var mobile: String? = null
 
     @Size(min = 2, max = 30, message = "{eventUser.firstName.invalidSize}")
-    @Pattern(regexp = "[A-Za-z][a-zA-Z\\s]*",message = "{eventUser.firstName.invalid}")
+    @Pattern(regexp = "[A-Za-z][a-zA-Z\\s]*", message = "{eventUser.firstName.invalid}")
     var firstName: String? = null
 
     @Size(min = 2, max = 30, message = "{eventUser.lastName.invalidSize}")
-    @Pattern(regexp = "[A-Za-z][a-zA-Z\\s]*",message = "{eventUser.lastName.invalid}")
+    @Pattern(regexp = "[A-Za-z][a-zA-Z\\s]*", message = "{eventUser.lastName.invalid}")
     var lastName: String? = null
 
-    @Pattern(regexp = "[A-Za-z]+",message = "{eventUser.gender.invalidCharacters}")
+    @Pattern(regexp = "[A-Za-z]+", message = "{eventUser.gender.invalidCharacters}")
     var gender: String? = null
 
-    @Pattern(regexp="(\\d{4})[-](0?[1-9]|1[012])[-](0?[1-9]|[12][0-9]|3[01])",message = "{eventUser.dob.invalid}")
+    @Pattern(regexp = "(\\d{4})[-](0?[1-9]|1[012])[-](0?[1-9]|[12][0-9]|3[01])", message = "{eventUser.dob.invalid}")
     var dob: String? = null
 
     @Size(min = 2, max = 40, message = "{eventUser.country.invalidSize}")
-    @Pattern(regexp = "[A-Za-z][a-zA-Z\\s]*",message = "{eventUser.country.invalid}")
+    @Pattern(regexp = "[A-Za-z][a-zA-Z\\s]*", message = "{eventUser.country.invalid}")
     var country: String? = null
 
-    @Pattern(regexp = "^(\\+?\\d{1,3})",message = "{eventUser.countryCode.invalid}")
+    var city: String? = null
+
+    var address: String? = null
+
+    @Pattern(regexp = "^(\\+?\\d{1,3})", message = "{eventUser.countryCode.invalid}")
     var countryCode: String? = null
 
     var clientId: Int = -1 //client id , user is associated with, this can come from collection
@@ -57,7 +61,6 @@ class EventUser {
 
     //FIXME creation date can't keep changing
     var creationDate: LocalDateTime = LocalDateTime.now()
-
 
 
 }

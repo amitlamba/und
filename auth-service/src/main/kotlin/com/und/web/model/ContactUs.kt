@@ -9,27 +9,21 @@ class ContactUs {
 
     var id: Long? = null
 
-    @NotNull
-    @Size(min = 2, max = 100)
-    @Pattern(regexp = "[A-Za-z][a-zA-Z\\s]*")
+    @Size(min = 2, max = 100, message = "{contactUS.name.invalidSize}")
+    @Pattern(regexp = "[A-Za-z][a-zA-Z\\s]*", message = "{contactUS.name.invalid}")
     var name: String = ""
 
-    @NotNull
-    @Email()
-    @Size(max = 200)
+    @Email(message = "{contactUS.email.invalid}")
     var email: String = ""
 
-    @NotNull
-    @Size(min = 10, max = 15)
-    @Pattern(regexp = "[0-9]*")
+    @Size(min = 10, max = 15, message = "{contactUS.mobileNo.invalidSize}")
+    @Pattern(regexp = "[0-9]*", message = "{contactUS.mobileNo.invalidDigits}")
     var mobileNo: String = ""
 
-    //FIXME It is wrong
-
-    @Size(min = 50, max = 500)
+    @Size(min = 50, max = 500, message = "{contactUS.message.invalidSize}")
     var message: String = ""
 
-    @Size(min = 2, max = 500)
+    @Size(min = 2, max = 200, message = "{contactUS.companyName.invalidSize}")
     var companyName: String = ""
 
 }

@@ -3,6 +3,7 @@ import {Router} from '@angular/router';
 import {HttpClient, HttpErrorResponse} from '@angular/common/http';
 import 'rxjs/add/operator/map';
 import {AuthenticationService} from "../_services/authentication.service";
+import {_RECAPTCHA_KEY} from "../_settings/app-settings";
 
 
 @Component({
@@ -16,6 +17,8 @@ export class LoginComponent implements OnInit {
   loading = false;
   error = '';
   public token: string;
+  _site_key = _RECAPTCHA_KEY;
+  recaptchaToken: string = null;
 
   @Output() loginEvent = new EventEmitter();
 
@@ -36,14 +39,14 @@ export class LoginComponent implements OnInit {
     this.loading = true;
 
     const body = {username: this.model.username, password: this.model.password};
-    this.authenticationService.login(this.model.username, this.model.password).subscribe(
+    this.authenticationService.login(this.model.username, this.model.password, this.recaptchaToken).subscribe(
       (response) => {
         console.log(response);
         this.loginEvent.emit();
         this.router.navigate(['/dashboard']);
       },
       (error: HttpErrorResponse) => {
-        this.error = 'Username or password is incorrect';
+        this.error = 'Error: Some Error Occurred while logging in. Please confirm, you are entering correct email and password.';
         this.loading = false;
         console.log("this.error: " + this.error + ", this.loading: " + this.loading);
       }
@@ -64,5 +67,11 @@ export class LoginComponent implements OnInit {
           }
         }
       );*/
+  }
+
+
+  handleCorrectCaptcha(event) {
+    console.log(event);
+    this.recaptchaToken = event
   }
 }

@@ -133,7 +133,7 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
         httpSecurity.headers().cacheControl()
     }
 
-    @Bean(name = arrayOf(BeanIds.AUTHENTICATION_MANAGER))
+    @Bean(name = [BeanIds.AUTHENTICATION_MANAGER])
     @Throws(Exception::class)
     override fun authenticationManagerBean(): AuthenticationManager {
         return super.authenticationManagerBean()

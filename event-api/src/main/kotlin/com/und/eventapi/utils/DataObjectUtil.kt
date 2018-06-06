@@ -94,6 +94,7 @@ fun com.und.model.mongo.eventapi.EventUser.copyNonNull(eventUser: EventUser): co
     copyEventUser.identity.googleId = unchanged(eventUser.googleId, identity.googleId)
     copyEventUser.identity.mobile = unchanged(eventUser.mobile, identity.mobile)
     copyEventUser.identity.email = unchanged(eventUser.email, identity.email)
+    copyEventUser.identity.undId = unchanged(eventUser.undId, identity.undId)
 
     copyEventUser.standardInfo = StandardInfo()
     copyEventUser.standardInfo.firstname = unchanged(eventUser.firstName, standardInfo.firstname)
@@ -101,7 +102,8 @@ fun com.und.model.mongo.eventapi.EventUser.copyNonNull(eventUser: EventUser): co
     copyEventUser.standardInfo.gender = unchanged(eventUser.gender, standardInfo.gender)
     copyEventUser.standardInfo.dob = unchanged(eventUser.dob, standardInfo.dob)
     copyEventUser.standardInfo.country = unchanged(eventUser.country, standardInfo.country)
-    //copyEventUser.standardInfo.countryCode = unchanged(eventUser.countryCode, standardInfo.countryCode)
+    copyEventUser.standardInfo.City = unchanged(eventUser.city, standardInfo.City)
+    copyEventUser.standardInfo.Address = unchanged(eventUser.address, standardInfo.Address)
 
     return copyEventUser
 }

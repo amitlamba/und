@@ -1,126 +1,128 @@
-package com.und.web.controller.ErrorHandler
+package com.und.web.controller.errorhandler
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.und.common.utils.loggerFor
-import com.und.eventapi.restExceptionHandler.ErrorList
-import com.und.exception.UndBusinessValidationException
-import com.und.web.model.ValidationError
-import org.hibernate.JDBCException
+import com.und.web.controller.exception.EventUserNotFoundException
+import com.und.web.controller.exception.UndBusinessValidationException
+
+import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.MessageSource
+import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.validation.BindException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.context.request.WebRequest
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import java.lang.Exception
-import javax.naming.AuthenticationException
+import java.util.*
 
 
 @RestControllerAdvice
-class RestErrorHandler {
+class RestErrorHandler : ResponseEntityExceptionHandler() {
 
     companion object {
 
-        protected val logger = loggerFor(RestErrorHandler::class.java)
+        protected val logger: Logger = loggerFor(RestErrorHandler::class.java)
+    }
+
+    @Autowired
+    lateinit var messageSource: MessageSource
+
+
+    override fun handleBindException(ex: BindException, headers: HttpHeaders, status: HttpStatus, request: WebRequest): ResponseEntity<Any> {
+        logger.error("400 Status Code", ex)
+        val result = ex.bindingResult
+        val fieldErrors = result.fieldErrors
+        val errors = formatFieldErrors(request.locale, fieldErrors)
+        return handleExceptionInternal(ex, errors, HttpHeaders(), HttpStatus.BAD_REQUEST, request)
+    }
+
+    private fun formatFieldErrors(locale: Locale, fieldErrors: List<org.springframework.validation.FieldError>): List<FieldError> {
+        return fieldErrors
+                .filter {it.defaultMessage != null }
+                .map {
+                    FieldError(field = it.field,
+                            message = messageSource.getMessage(it, locale)
+                    )
+                }
+
     }
 
 
-    @ExceptionHandler(JDBCException::class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ResponseBody
-    fun processOtherError(ex: Exception): String {
-        logger.debug("Handling INTERNAL SEREVR error")
-        logger.error("error occured", ex)
-        return "Something Wrong happened Try after some time!"
-
+    //@ExceptionHandler(MethodArgumentNotValidException::class)
+    //@ResponseStatus(HttpStatus.BAD_REQUEST)
+    override fun handleMethodArgumentNotValid(ex: MethodArgumentNotValidException, headers: HttpHeaders, status: HttpStatus, request: WebRequest): ResponseEntity<Any> {
+        logger.error("400 Status Code", ex)
+        val result = ex.bindingResult
+        val fieldErrors = result.fieldErrors
+        val errors = formatFieldErrors(request.locale, fieldErrors)
+        return handleExceptionInternal(ex, errors, HttpHeaders(), HttpStatus.BAD_REQUEST, request)
     }
-
-    @ExceptionHandler(AccessDeniedException::class, AuthenticationException::class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ResponseBody
-    fun processAuthEroor(ex: Exception): String {
-        logger.debug("Handling INTERNAL SERVER error")
-        logger.error("error occurred", ex)
-        return "Access Denied!"
-
-    }
-
 
     @ExceptionHandler(InvalidFormatException::class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    @ResponseBody
-    fun handleInvalidFormatException(ex: Exception): String {
-        logger.debug("Handling INTERNAL SEREVR error")
-        logger.error("error occured", ex)
-        return "Invalid access token"
-
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleInvalidFormatException(ex: InvalidFormatException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("400 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.invalidJSON", null, request.locale), "InvalidJson")
+        return handleExceptionInternal(ex, bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST, request)
     }
 
-    @ExceptionHandler(HttpMessageNotReadableException::class)
-    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
-    @ResponseBody
-    fun handleHttpMessageNotReadableException(ex: HttpMessageNotReadableException): String {
-        logger.debug("Handling INTERNAL SEREVR error")
-        logger.error("error occured", ex)
-        return "Invalid data sent"
+
+    @ExceptionHandler(Exception::class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    fun handleInternal(ex: RuntimeException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("500 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.error", null, request.locale), "InternalError")
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
     @ExceptionHandler(UndBusinessValidationException::class)
-    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody
-    fun businessValidationError(ex: UndBusinessValidationException): ValidationError {
-        logger.debug("Handling INTERNAL SERVER ERROR")
-        logger.error("error occurred", ex)
-        return ex.error
+    fun businessValidationError(ex: UndBusinessValidationException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("400 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.error", null, request.locale), ex.localizedMessage)
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR)
+    }
 
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException::class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    fun processAuthError(ex: org.springframework.security.access.AccessDeniedException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("401 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.accessDenied", null, request.locale), ex.localizedMessage)
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.UNAUTHORIZED)
+    }
+
+    @ExceptionHandler(UsernameNotFoundException::class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    fun processAuthError(ex: UsernameNotFoundException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("401 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.usernameNotFound", null, request.locale), ex.localizedMessage)
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.UNAUTHORIZED)
+    }
+
+    @ExceptionHandler(EventUserNotFoundException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    fun eventUser(ex: EventUserNotFoundException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("401 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.eventUserNotFound", null, request.locale), ex.localizedMessage)
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
     }
 
 
-    @ExceptionHandler(MethodArgumentNotValidException::class)
-    @ResponseStatus(HttpStatus.NOT_ACCEPTABLE)
-    fun handleFieldErrors(ex: MethodArgumentNotValidException): ErrorList {
 
-        var errorList: List<com.und.eventapi.restExceptionHandler.FieldError> = listOf()
-        val result = ex.bindingResult
-        val fieldErrors = result.fieldErrors
-        fieldErrors
-                .filter { it != null && it.defaultMessage != null }
-                .forEach {
-                    errorList = listOf(
-                            com.und.eventapi.restExceptionHandler.FieldError(field = it.field,
-                                    message = it.defaultMessage)
-                    )
-                }
-        return ErrorList(errorList)
-    }
 
-/*    private fun processFieldErrors(fieldErrors: List<FieldError>): ValidationError {
-        val dto = ValidationError()
-        for (fieldError in fieldErrors) {
-            val localizedErrorMessage = resolveLocalizedErrorMessage(fieldError)
-            logger.debug("Adding error message: {} to field: {}", localizedErrorMessage, fieldError.field)
-            dto.addFieldError(fieldError.field, localizedErrorMessage)
-        }
-        return dto
-    }
 
-    private fun resolveLocalizedErrorMessage(fieldError: FieldError): String {
-        //TODO FIXME error message to be picked from localised files
-        val currentLocale = LocaleContextHolder.getLocale()
-        var localizedErrorMessage = messageSource.getMessage(fieldError, currentLocale)
 
-        //If a message was not found, return the most accurate field error code instead.
-        //You can remove this check if you prefer to get the default error message.
-        if (localizedErrorMessage == fieldError.defaultMessage) {
-            val fieldErrorCodes = fieldError.codes
-            if(fieldErrorCodes != null) {
-                localizedErrorMessage = fieldErrorCodes[0] ?: ""
-            }
-        }
-
-        return localizedErrorMessage
-    }*/
 }

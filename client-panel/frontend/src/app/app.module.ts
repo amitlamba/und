@@ -1,6 +1,6 @@
-import {Injectable, NgModule} from '@angular/core';
+import {NgModule} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {FormsModule} from '@angular/forms';
 //used to create fake backend
 import {MockBackend} from '@angular/http/testing';
 
@@ -42,7 +42,6 @@ import {SegmentsComponent} from './segment-category/segments/segments.component'
 import {DidEventsComponent} from './segment-category/did-events/did-events.component';
 import {ResetPwdComponent} from './login/reset-pwd/reset-pwd.component';
 import {Daterangepicker} from "ng2-daterangepicker";
-import {MyDateRangePickerModule} from 'mydaterangepicker';
 import {DidEventComponent} from './segment-category/did-events/did-event/did-event.component';
 import {FilterComponent} from './segment-category/did-events/did-event/filter/filter.component';
 
@@ -50,7 +49,6 @@ import {PageNotFoundComponent} from './shared/page-not-found/page-not-found.comp
 import {TestComponent} from './test/test.component';
 import {ExpComponent} from './test/exp/exp.component';
 import {SettingsService} from "./_services/settings.service";
-import {OwlDateTimeModule, OwlNativeDateTimeModule} from 'ng-pick-datetime';
 import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import {SegmentService} from "./_services/segment.service";
 import {GlobalFiltersComponent} from './segment-category/global-filters/global-filters.component';
@@ -62,7 +60,6 @@ import {GlobalFilterComponent} from './segment-category/global-filters/global-fi
 import {GeographyFilterComponent} from "./segment-category/geography-filters/geography-filter/geography-filter.component";
 import {CreateNewSegmentComponent} from './segment-category/segments/create-new-segment/create-new-segment.component';
 import {UsersByBehaviourComponent} from './segment-category/find-users/users-by-behaviour/users-by-behaviour.component';
-import {Select2Module} from "ng2-select2";
 
 import {CampaignsComponent} from './campaigns/campaigns.component';
 import {SetupCampaignComponent} from './campaigns/setup-campaign/setup-campaign.component';
@@ -90,6 +87,9 @@ import {EventsGraphComponent} from './events-graph/events-graph.component';
 import {ChartsModule} from "ng2-charts";
 import {ReportsService} from "./_services/reports.service";
 import {RegisterService} from "./_services/register.service";
+import {UserProfileComponent} from './user-profile/user-profile.component';
+import {TooltipModule} from "ngx-bootstrap";
+import {Select2Module} from "ng2-select2";
 
 
 @NgModule({
@@ -101,18 +101,15 @@ import {RegisterService} from "./_services/register.service";
     AppRoutingModule,
     MentionModule,
     Daterangepicker,
-    MyDateRangePickerModule,
     BrowserAnimationsModule,
-    OwlDateTimeModule,
-    OwlNativeDateTimeModule,
     Select2Module,
     CronEditorModule,
     TimezonePickerModule,
     BsDropdownModule.forRoot(),
     NgxIntlTelInputModule,
-    BrowserModule,
     ReCaptchaModule,
-    ChartsModule
+    ChartsModule,
+    TooltipModule.forRoot(),
   ],
   declarations: [
     AppComponent,
@@ -172,7 +169,8 @@ import {RegisterService} from "./_services/register.service";
     NewVsExistingUsersGraphComponent,
     TimerangeComponent,
     ConversionEventsGraphComponent,
-    EventsGraphComponent
+    EventsGraphComponent,
+    UserProfileComponent
   ],
   providers: [
     AuthGuard,

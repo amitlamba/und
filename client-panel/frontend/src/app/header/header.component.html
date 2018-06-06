@@ -36,9 +36,9 @@
         <li class="nav-item" [routerLinkActive]="['active']" [routerLinkActiveOptions]="{exact: true}">
           <a class="nav-link" [routerLink]="['/campaigns']"><i class="fas fa-share-square"></i> Campaigns</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link disabled">Disabled</a>
-        </li>
+        <!--<li class="nav-item">-->
+          <!--<a class="nav-link disabled">Disabled</a>-->
+        <!--</li>-->
       </ul>
       <ul class="navbar-nav ml-auto">
         <li class="nav-item dropdown">
@@ -49,9 +49,10 @@
           <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
             <a class="dropdown-item" [routerLink]="['/settings/service-provider-settings']"><i class="fas fa-cog"></i>
               Settings</a>
-            <a class="dropdown-item" href="#">Another action</a>
+            <!--<a class="dropdown-item" href="#">Another action</a>-->
             <div class="dropdown-divider"></div>
-               <a class="dropdown-item" [routerLink]="['/login']" (click)="logoutUser()"><i class="fas fa-power-off"></i> Logout</a>
+            <a class="dropdown-item" [routerLink]="['/login']" (click)="logoutUser()"><i class="fas fa-power-off"></i>
+              Logout</a>
           </div>
         </li>
       </ul>

@@ -1,5 +1,5 @@
 import {Component, ElementRef, Input, OnChanges, OnInit, ViewChild} from '@angular/core';
-import {EmailTemplate} from "../../../_models/email";
+import {EditorSelected, EmailTemplate} from "../../../_models/email";
 import {TemplatesService} from "../../../_services/templates.service";
 import {isNullOrUndefined} from "util";
 import {Router} from "@angular/router";
@@ -15,16 +15,19 @@ import {SendersInfo} from "../../../_models/client";
   styleUrls: ['./create-email-template-form.component.scss']
 })
 export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
-  showTinymceEditor: boolean = true;
   emailTemplate: EmailTemplate;
+  createNewTemplate: boolean = false;
+  unsubscribeButtonText = "Add Unsubscribe";
+
   sendersInfoList: SendersInfo[] = [];
-  @ViewChild("f") form: any;
+  @ViewChild("emailTemplateForm") form: any;
 
   userFields = UserFields.USER_DETAIILS;
-  items = UserParams.params;
+  public mentionItems: string[] = UserParams.params;
+
 
   constructor(private templatesService: TemplatesService, private messageService: MessageService,
-              private settingsService: SettingsService) {
+              private settingsService: SettingsService, private router: Router) {
   }
 
   ngOnChanges() {
@@ -34,15 +37,26 @@ export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
     this.templatesService.castEmailTemplateForEdit.subscribe((emailTemplateForEdit) => {
       this.emailTemplate = emailTemplateForEdit;
     });
-    this.settingsService.getSendersInfoList().subscribe(
-      (sendersInfoList)=>{
-        this.sendersInfoList = sendersInfoList;
-      }
-    )
+    if(this.settingsService.sendersInfoList.length > 1) {
+      this.sendersInfoList = this.settingsService.sendersInfoList;
+    } else {
+      this.settingsService.getSendersInfoList().subscribe(
+        (sendersInfoList) => {
+          this.settingsService.sendersInfoList = sendersInfoList;
+          this.sendersInfoList = this.settingsService.sendersInfoList;
+        }
+      );
+    }
+    if (this.createNewTemplate) {
+      this.emailTemplate.from = "";                             // to set default value of Fromdropdown
+      this.emailTemplate.messageType = "";                    // to set default value of MessageTypedropdown
+      this.emailTemplate.editorSelected = EditorSelected.tinymceEditor;
+    }
+    this.setUpUnsubscribeButtonText()
   }
 
   onSave(form: FormData) {
-    console.log(this.emailTemplate);
+    // console.log(JSON.stringify(this.emailTemplate));
     if (this.form.valid) {
       if (this.emailTemplate.id) {
         this.templatesService.saveEmailTemplate(this.emailTemplate)
@@ -67,13 +81,39 @@ export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
   }
 
   addUnsubscribeLink(event) {
-    if (event.srcElement.textContent === 'Add Unsubscribe') {
-      document.querySelector('textarea').value = document.querySelector('textarea').value + '<a href="#">Unsubscribe</a>';
+    if (this.emailTemplate.emailTemplateBody.indexOf('##UND_UNSUBSCRIBE_LINK##') < 0) {
+      // document.querySelector('textarea').value = document.querySelector('textarea').value + '<a href="##UND_UNSUBSCRIBE_LINK##">Unsubscribe</a>';
+      this.emailTemplate.emailTemplateBody = this.emailTemplate.emailTemplateBody + '<a href="##UND_UNSUBSCRIBE_LINK##">Unsubscribe</a>';
       event.srcElement.textContent = 'Remove Unsubscribe';
     }
     else {
-      document.querySelector('textarea').value = document.querySelector('textarea').value.replace('<a href="#">Unsubscribe</a>', '');
+      // document.querySelector('textarea').value = document.querySelector('textarea').value.replace('<a href="##UND_UNSUBSCRIBE_LINK##">Unsubscribe</a>', '');
+      this.emailTemplate.emailTemplateBody = this.emailTemplate.emailTemplateBody.replace('<a href="##UND_UNSUBSCRIBE_LINK##">Unsubscribe</a>','');
       event.srcElement.textContent = 'Add Unsubscribe';
+    }
+  }
+
+  changeEditorType($event) {
+    let changeTextEditor = confirm("Are you sure you want to change the text editor, the message body will be lost?");
+    if (changeTextEditor == true) {
+      this.emailTemplate.emailTemplateBody = '';
+      this.emailTemplate.editorSelected = $event;
+      this.setUpUnsubscribeButtonText()
+    }
+    else {
+      return false;
+    }
+  }
+
+  redirectToSendersInfoPage() {
+    this.router.navigate(['settings/email-list']);
+  }
+
+  setUpUnsubscribeButtonText() {
+    if(this.emailTemplate.emailTemplateBody.indexOf('##UND_UNSUBSCRIBE_LINK##') < 0) {
+      this.unsubscribeButtonText = "Add Unsubscribe";
+    } else {
+      this.unsubscribeButtonText = "Remove Unsubscribe";
     }
   }
 }
