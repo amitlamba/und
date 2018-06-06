@@ -35,10 +35,10 @@ class RegistrationRequest {
 
     @NotNull
     @Size(min = 5, max = 255, message = "First Name should contain 5 to 255 characters")
-    var firstName: String? = null
+    lateinit var firstName: String
 
     @NotNull
     @Size(min = 5, max = 255, message = "Last Name should contain 5 to 255 characters")
-    var lastName: String? = null
+    lateinit var lastName: String
 
 }
