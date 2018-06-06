@@ -69,20 +69,12 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(InvalidFormatException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    fun handleReCaptchaInvalid(ex: RuntimeException, request: WebRequest): ResponseEntity<Any> {
+    fun handleInvalidFormatException(ex: InvalidFormatException, request: WebRequest): ResponseEntity<Any> {
         logger.error("400 Status Code", ex)
         val bodyOfResponse = GenericResponse(messageSource.getMessage("message.invalidJSON", null, request.locale), "InvalidJson")
         return handleExceptionInternal(ex, bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST, request)
     }
 
-
-    @ExceptionHandler(HttpMessageNotReadableException::class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    fun handleReCaptchaUnavailable(ex: RuntimeException, request: WebRequest): ResponseEntity<Any> {
-        logger.error("500 Status Code", ex)
-        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.unreadable.http", null, request.locale), "InvalidHTTPMessage")
-        return handleExceptionInternal(ex, bodyOfResponse, HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR, request)
-    }
 
     @ExceptionHandler(Exception::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -125,7 +117,7 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
     fun eventUser(ex: EventUserNotFoundException, request: WebRequest): ResponseEntity<Any> {
         logger.error("401 Status Code", ex)
         val bodyOfResponse = GenericResponse(messageSource.getMessage("message.eventUserNotFound", null, request.locale), ex.localizedMessage)
-        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.UNAUTHORIZED)
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
     }
 
 
