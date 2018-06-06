@@ -2,11 +2,6 @@ package com.und.web.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.common.utils.loggerFor
-import com.und.exception.UndBusinessValidationException
-import com.und.model.jpa.CampaignType
-import com.und.model.jpa.EmailCampaign
-import com.und.model.jpa.Schedule
-import com.und.model.jpa.SmsCampaign
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.CampaignService
 import com.und.web.model.Campaign

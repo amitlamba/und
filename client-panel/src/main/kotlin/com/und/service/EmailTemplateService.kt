@@ -1,6 +1,6 @@
 package com.und.service
 
-import com.und.exception.UndBusinessValidationException
+import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.model.jpa.EmailTemplate
 import com.und.model.jpa.Template
 import com.und.web.model.EmailTemplate as WebEmailTemplate

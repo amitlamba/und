@@ -1,7 +1,7 @@
 spring:
   profiles:
     active:
-      dev
+      #dev
   cloud:
     config:
       uri: http://nestros.com:8888
@@ -9,4 +9,14 @@ spring:
       name: und-scheduler
   application:
     name: und-scheduler
+  zipkin:
+    base-url: http://springbootzipkin:7777
+    sender:
+      type: kafka
+  sleuth:
+    sampler:
+      probability: 1
+  kafka:
+    bootstrap-servers: ${KAFKA_IP}:${KAFKA_PORT}
+
 

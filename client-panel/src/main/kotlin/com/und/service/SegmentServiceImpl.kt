@@ -11,6 +11,7 @@ import com.und.web.model.ConditionType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.stereotype.Service
+import java.util.stream.Collectors
 import com.und.web.model.Segment as WebSegment
 
 @Service
@@ -55,18 +56,17 @@ class SegmentServiceImpl : SegmentService {
         return if (segment != null) {
             buildWebSegment(segment)
             val queries = SegmentParserCriteria().segmentQueries(buildWebSegment(segment))
-            val userDidList = retrieveUsers(queries.didq.first, queries.didq.second,clientId)
-            val userDidNotList = retrieveUsers(queries.didntq.first, queries.didntq.second,clientId)
+            val userDidList = retrieveUsers(queries.didq.first, queries.didq.second, clientId)
+            val userDidNotList = retrieveUsers(queries.didntq.first, queries.didntq.second, clientId)
 
 
             val userList = userDidList.intersect(userDidNotList)
-            val users = userList.map {
+            userList.asSequence().map {
                 eventUserRepository.findUserById(it, clientId)
 
-            }.filterNotNull()
+            }.filter { it.isPresent }.map { it.get() }.toList()
 
 
-            return users
         } else emptyList()
     }
 
