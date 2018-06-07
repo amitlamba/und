@@ -50,6 +50,8 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
 
 
 
+
+
     private fun queryEventUser(q: Query, clientId: Long): Optional<EventUser> {
         val eventUser = mongoTemplate.findOne(q, EventUser::class.java, "${clientId}_eventUser")
         return if (eventUser == null) {

@@ -18,6 +18,7 @@ class EventUserController {
     @Autowired
     private lateinit var eventUserService: EventUserService
 
+
     @PostMapping(value = ["/google/{id}"])
     @ResponseBody
     fun findEventUserByGoogleId(@PathVariable id: String): ResponseEntity<EventUser> {
