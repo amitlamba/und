@@ -15,6 +15,7 @@ class Event(
         var lineItem: MutableList<LineItem> = mutableListOf(),
         var attributes: HashMap<String, Any> = hashMapOf(),
         var system: System = System(),
+        var agentString:String? = null,
         var creationTime: LocalDateTime = LocalDateTime.now()
 ) {
     var geoDetails = GeoDetails()

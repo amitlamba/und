@@ -16,8 +16,7 @@ class EmailTemplateService {
 
     @Autowired
     private lateinit var emailTemplateRepository: EmailTemplateRepository
-    @Autowired
-    private lateinit var templateRepository: TemplateRepository
+
 
     fun getDefaultEmailTemplates(): List<WebEmailTemplate> {
         val emailTemplates = emailTemplateRepository.findByClientID()
@@ -36,8 +35,8 @@ class EmailTemplateService {
     private fun getEmailTemplate(emailTemplateId: Long): List<WebEmailTemplate> {
         val clientId = AuthenticationUtils.clientID
         return clientId?.let {
-            listOf(emailTemplateRepository.findByIdAndClientID(emailTemplateId, clientId))
-                    .map { buildWebEmailTemplate(it) }
+            val emailTemplateOtion = emailTemplateRepository.findByIdAndClientID(emailTemplateId, clientId)
+            if (emailTemplateOtion.isPresent) listOf(buildWebEmailTemplate(emailTemplateOtion.get())) else emptyList()
         } ?: emptyList()
     }
 
@@ -50,7 +49,8 @@ class EmailTemplateService {
     fun saveEmailTemplate(webEmailTemplate: WebEmailTemplate): Long {
         val clientId = AuthenticationUtils.clientID
         if (clientId != null) {
-            val nameExists = emailTemplateRepository.existsByNameAndClientID(webEmailTemplate.name, clientId)
+            val existingTemplate = emailTemplateRepository.findByNameAndClientID(webEmailTemplate.name, clientId)
+            val nameExists = existingTemplate.isPresent && existingTemplate.get().id != webEmailTemplate.id
             if (nameExists) {
                 val error = ValidationError()
                 error.addFieldError("name", "Template with name : ${webEmailTemplate.name} already exists")

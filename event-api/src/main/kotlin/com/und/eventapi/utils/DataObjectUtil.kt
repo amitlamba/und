@@ -16,6 +16,7 @@ fun Event.copyToMongo(): MongoEvent {
     //copying system info
     val agentString = event.agentString
     if (agentString != null) {
+        mongoEvent.agentString = agentString
         val sysDetail = systemDetails(agentString)
         val system = System()
         mongoEvent.system = system
