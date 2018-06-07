@@ -18,7 +18,30 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
     }
 
     override fun findUserByGoogleId(id: String, clientId: Long): Optional<EventUser> {
-        val q = Query(Criteria.where("socialId.googleid").`is`(id))
+        val q = Query(Criteria.where("identity.googleId").`is`(id))
+        return queryEventUser(q, clientId)
+
+    }
+
+    override fun findUserByFbId(id: String, clientId: Long): Optional<EventUser> {
+        val q = Query(Criteria.where("identity.fbId").`is`(id))
+        return queryEventUser(q, clientId)
+    }
+
+    override fun findUserBySysId(id: String, clientId: Long): Optional<EventUser> {
+        val q = Query(Criteria.where("identity.googleid").`is`(id))
+        return queryEventUser(q, clientId)
+
+    }
+
+    override fun findUserByEmail(id: String, clientId: Long): Optional<EventUser> {
+        val q = Query(Criteria.where("identity.email").`is`(id))
+        return queryEventUser(q, clientId)
+
+    }
+
+    override fun findUserByMobile(id: String, clientId: Long): Optional<EventUser> {
+        val q = Query(Criteria.where("identity.googleid").`is`(id))
         return queryEventUser(q, clientId)
 
     }

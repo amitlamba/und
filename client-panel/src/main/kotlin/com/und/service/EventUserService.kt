@@ -29,35 +29,40 @@ class EventUserService {
     }
 
     fun findEventUserByEmail(id: String): EventUser? {
-        val user = eventUserRepository.findById(id)
+        val clientId = getClientId()
+        val user = eventUserRepository.findUserByEmail(id,clientId)
         return if (user.isPresent) {
             EventUser()
         } else null
     }
 
     fun findEventUserBySysId(id: String): EventUser? {
-        val user = eventUserRepository.findById(id)
+        val clientId = getClientId()
+        val user = eventUserRepository.findUserBySysId(id,clientId)
         return if (user.isPresent) {
             EventUser()
         } else null
     }
 
     fun findEventUserByFB(id: String): EventUser? {
-        val user = eventUserRepository.findById(id)
+        val clientId = getClientId()
+        val user = eventUserRepository.findUserByFbId(id,clientId)
         return if (user.isPresent) {
             EventUser()
         } else null
     }
 
     fun findEventUserByMobile(id: String): EventUser? {
-        val user = eventUserRepository.findById(id)
+        val clientId = getClientId()
+        val user = eventUserRepository.findUserByMobile(id,clientId)
         return if (user.isPresent) {
             EventUser()
         } else null
     }
 
     fun findEventUserByGoogleId(id: String): EventUser? {
-        val user = eventUserRepository.findById(id)
+        val clientId = getClientId()
+        val user = eventUserRepository.findUserByGoogleId(id,clientId)
         return if (user.isPresent) {
             EventUser()
         } else null
