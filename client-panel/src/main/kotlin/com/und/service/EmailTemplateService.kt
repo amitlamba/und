@@ -7,6 +7,7 @@ import com.und.web.model.EmailTemplate as WebEmailTemplate
 import com.und.repository.jpa.EmailTemplateRepository
 import com.und.repository.jpa.TemplateRepository
 import com.und.security.utils.AuthenticationUtils
+import com.und.web.controller.exception.EmailTemplateDuplicateNameException
 import com.und.web.model.ValidationError
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -52,9 +53,7 @@ class EmailTemplateService {
             val existingTemplate = emailTemplateRepository.findByNameAndClientID(webEmailTemplate.name, clientId)
             val nameExists = existingTemplate.isPresent && existingTemplate.get().id != webEmailTemplate.id
             if (nameExists) {
-                val error = ValidationError()
-                error.addFieldError("name", "Template with name : ${webEmailTemplate.name} already exists")
-                throw UndBusinessValidationException(error)
+                throw EmailTemplateDuplicateNameException("Template with name : ${webEmailTemplate.name} already exists")
             }
         }
         val emailTemplate = buildEmailTemplate(webEmailTemplate)
