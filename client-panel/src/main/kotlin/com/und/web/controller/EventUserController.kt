@@ -18,14 +18,13 @@ class EventUserController {
     @Autowired
     private lateinit var eventUserService: EventUserService
 
-
-    @GetMapping(value = ["/google/{id}"])
+    @PostMapping(value = ["/google/{id}"])
     @ResponseBody
     fun findEventUserByGoogleId(@PathVariable id: String): ResponseEntity<EventUser> {
 
         val eventUser = eventUserService.findEventUserByGoogleId(id)
         return if (eventUser == null) {
-            throw EventUserNotFoundException()
+            throw EventUserNotFoundException("user with google id $id not found")
         } else {
             ResponseEntity(eventUser, HttpStatus.OK)
         }
