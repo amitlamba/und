@@ -4,13 +4,20 @@ import org.springframework.stereotype.Component
 
 @Component
 class TenantProvider {
-    val local : ThreadLocal<String> = ThreadLocal.withInitial { "" }
+    val local: ThreadLocal<String> = ThreadLocal.withInitial { "" }
 
 
     val tenant: String
-        get() = if (AuthenticationUtils.isUserLoggedIn) AuthenticationUtils.id else local.get()
+        get() {
+            return if (AuthenticationUtils.isUserLoggedIn) {
+                val clientId = AuthenticationUtils.clientID
+                clientId.toString()
+            } else {
+                local.get()
+            }
+        }
 
-    fun setTenat(id : String) {
+    fun setTenat(id: String) {
         local.set(id)
     }
 }
