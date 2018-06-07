@@ -34,11 +34,10 @@ class RegistrationRequest {
     var phone: String? = null
 
     @NotNull
-    @Size(min = 5, max = 255, message = "First Name should contain 5 to 255 characters")
-    var firstName: String? = null
+    @Size(min = 2, max = 255, message = "First Name should contain 1 to 255 characters")
+    lateinit var firstName: String
 
-    @NotNull
-    @Size(min = 5, max = 255, message = "Last Name should contain 5 to 255 characters")
+    @Size(min = 1, max = 255, message = "Last Name should contain 1 to 255 characters")
     var lastName: String? = null
 
 }

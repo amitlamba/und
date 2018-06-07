@@ -79,8 +79,8 @@ class RegistrationService {
         with(user) {
             email = registrationRequest.email
             password = passwordEncoder.encode(registrationRequest.password)
-            firstname = registrationRequest.name
-            lastname = registrationRequest.name
+            firstname = registrationRequest.firstName
+            lastname = registrationRequest.lastName
 
             mobile = registrationRequest.phone
             enabled = false
