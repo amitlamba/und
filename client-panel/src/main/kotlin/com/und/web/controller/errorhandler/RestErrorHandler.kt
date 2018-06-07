@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.und.common.utils.loggerFor
 import com.und.web.controller.exception.EmailTemplateDuplicateNameException
 import com.und.web.controller.exception.EventUserNotFoundException
+import com.und.web.controller.exception.SegmentNotFoundException
 import com.und.web.controller.exception.UndBusinessValidationException
 
 import org.slf4j.Logger
@@ -120,6 +121,7 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
         val bodyOfResponse = GenericResponse(messageSource.getMessage("message.eventUserNotFound", null, request.locale), ex.localizedMessage)
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
     }
+
     @ExceptionHandler(EmailTemplateDuplicateNameException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
@@ -129,6 +131,14 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
     }
 
+    @ExceptionHandler(SegmentNotFoundException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    fun eventUser(ex: SegmentNotFoundException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("400 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.nosegmentwithid", null, request.locale), ex.localizedMessage)
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
+    }
 
 
 
