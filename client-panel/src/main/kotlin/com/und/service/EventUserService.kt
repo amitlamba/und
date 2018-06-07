@@ -21,13 +21,6 @@ class EventUserService {
         } else null
     }
 
-    private fun getClientId(): Long {
-        val clientId = AuthenticationUtils.clientID
-        return clientId?:
-            throw org.springframework.security.access.AccessDeniedException("User is not logged in")
-
-    }
-
     fun findEventUserByEmail(id: String): EventUser? {
         val user = eventUserRepository.findById(id)
         return if (user.isPresent) {
@@ -57,10 +50,17 @@ class EventUserService {
     }
 
     fun findEventUserByGoogleId(id: String): EventUser? {
-        val user = eventUserRepository.findById(id)
+        val clientId = getClientId()
+        val user = eventUserRepository.findUserByGoogleId(id, clientId)
         return if (user.isPresent) {
             EventUser()
         } else null
+    }
+
+    private fun getClientId(): Long {
+        val clientId = AuthenticationUtils.clientID
+        return clientId?:throw org.springframework.security.access.AccessDeniedException("User is not logged in")
+
     }
 
 
