@@ -1,8 +1,12 @@
 package com.und.web.controller
 
+import com.und.security.utils.AuthenticationUtils
 import com.und.service.EventUserService
+import com.und.service.SegmentService
+import com.und.web.controller.exception.EventUserListNotFoundException
 import com.und.web.controller.exception.EventUserNotFoundException
 import com.und.web.model.EventUser
+import com.und.model.mongo.eventapi.EventUser as MongoEventUser
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -18,14 +22,17 @@ class EventUserController {
     @Autowired
     private lateinit var eventUserService: EventUserService
 
+    @Autowired
+    private lateinit var segmentService: SegmentService
 
-    @PostMapping(value = ["/google/{id}"])
+
+    @GetMapping(value = ["/google/{id}"])
     @ResponseBody
     fun findEventUserByGoogleId(@PathVariable id: String): ResponseEntity<EventUser> {
 
         val eventUser = eventUserService.findEventUserByGoogleId(id)
         return if (eventUser == null) {
-            throw EventUserNotFoundException("user with google id $id not found")
+            throw EventUserListNotFoundException("user with google id $id not found")
         } else {
             ResponseEntity(eventUser, HttpStatus.OK)
         }
@@ -38,7 +45,7 @@ class EventUserController {
 
         val eventUser = eventUserService.findEventUserById(id)
         return if (eventUser == null) {
-            throw EventUserNotFoundException()
+            throw EventUserNotFoundException("user with id $id not found")
         } else {
             ResponseEntity(eventUser, HttpStatus.OK)
         }
@@ -52,7 +59,7 @@ class EventUserController {
 
         val eventUser = eventUserService.findEventUserByMobile(id)
         return if (eventUser == null) {
-            throw EventUserNotFoundException()
+            throw EventUserNotFoundException("user with mobile $id not found")
         } else {
             ResponseEntity(eventUser, HttpStatus.OK)
         }
@@ -66,7 +73,7 @@ class EventUserController {
 
         val eventUser = eventUserService.findEventUserByFB(id)
         return if (eventUser == null) {
-            throw EventUserNotFoundException()
+            throw EventUserNotFoundException("user with facebook id $id not found")
         } else {
             ResponseEntity(eventUser, HttpStatus.OK)
         }
@@ -80,7 +87,7 @@ class EventUserController {
 
         val eventUser = eventUserService.findEventUserBySysId(id)
         return if (eventUser == null) {
-            throw EventUserNotFoundException()
+            throw EventUserNotFoundException("user with sys id $id not found")
         } else {
             ResponseEntity(eventUser, HttpStatus.OK)
         }
@@ -94,11 +101,30 @@ class EventUserController {
 
         val eventUser = eventUserService.findEventUserByEmail(id)
         return if (eventUser == null) {
-            throw EventUserNotFoundException()
+            throw EventUserNotFoundException("user with email id $id not found")
         } else {
             ResponseEntity(eventUser, HttpStatus.OK)
         }
 
 
     }
+
+    @GetMapping(value = ["/segment/{id}"])
+    @ResponseBody
+    fun findEventUsersBySegment(@PathVariable id: Long): ResponseEntity<List<MongoEventUser>> {
+        val clientId = getClientId()
+        val eventUserList = segmentService.segmentUsers(id,clientId)
+        return if (eventUserList.isEmpty()) {
+            throw EventUserListNotFoundException("users with segment id $id not found")
+        } else {
+            ResponseEntity(eventUserList, HttpStatus.OK)
+        }
+    }
+
+    private fun getClientId(): Long {
+        val clientId = AuthenticationUtils.clientID
+        return clientId?:throw org.springframework.security.access.AccessDeniedException("User is not logged in")
+
+    }
+
 }
