@@ -1,6 +1,8 @@
 package com.und.repository.mongo
 
 import com.und.model.mongo.eventapi.EventUser
+import com.und.security.utils.TenantProvider
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -12,13 +14,16 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
     @Autowired
     lateinit var mongoTemplate: MongoTemplate
 
+    @Autowired
+    lateinit var tenantProvider: TenantProvider
+
     override fun findUserById(id: String, clientId: Long): Optional<EventUser> {
-        val q = Query(Criteria.where("_id").`is`(id))
+        val q = Query(Criteria.where("id").`is`(id))
         return queryEventUser(q, clientId)
     }
 
     override fun findUserByGoogleId(id: String, clientId: Long): Optional<EventUser> {
-        val q = Query(Criteria.where("socialId.googleid").`is`(id))
+        val q = Query(Criteria.where("identity.googleId").`is`(ObjectId(id)))
         return queryEventUser(q, clientId)
 
     }
