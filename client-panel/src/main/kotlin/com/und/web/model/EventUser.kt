@@ -1,5 +1,6 @@
 package com.und.web.model
 
+import com.und.model.mongo.eventapi.Communication
 import java.time.LocalDateTime
 import java.util.*
 import javax.validation.constraints.Email
@@ -15,6 +16,7 @@ class EventUser {
 
     var clientUserId: String? = null //this is id of the user client has provided
 
+    @Email
     var undId: String? = null
 
     @Email
@@ -38,7 +40,7 @@ class EventUser {
     @Pattern(regexp = "[A-za-z]")
     var gender: String? = null
 
-    @Pattern(regexp="(\\d{4})[-](0?[1-9]|1[012])[-](0?[1-9]|[12][0-9]|3[01])")
+    @Pattern(regexp = "(\\d{4})[-](0?[1-9]|1[012])[-](0?[1-9]|[12][0-9]|3[01])")
     var dob: String? = null
 
     @Size(min = 4, max = 50)
@@ -62,6 +64,9 @@ class EventUser {
     //FIXME creation date can't keep changing
     var creationDate: LocalDateTime = LocalDateTime.now()
 
+    var communication: Communication = Communication()
+
+    var markTestUserProfile: Boolean = false
 
 }
 

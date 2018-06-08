@@ -29,7 +29,7 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
     }
 
     override fun findUserBySysId(id: String, clientId: Long): Optional<EventUser> {
-        val q = Query(Criteria.where("identity.googleid").`is`(id))
+        val q = Query(Criteria.where("identity.clientUserId").`is`(id))
         return queryEventUser(q, clientId)
 
     }
@@ -41,13 +41,10 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
     }
 
     override fun findUserByMobile(id: String, clientId: Long): Optional<EventUser> {
-        val q = Query(Criteria.where("identity.googleid").`is`(id))
+        val q = Query(Criteria.where("identity.mobile").`is`(id))
         return queryEventUser(q, clientId)
 
     }
-
-
-
 
 
 

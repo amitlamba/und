@@ -27,6 +27,7 @@ class RegistrationRequest {
     var country: String? = null
 
     @NotNull
+    @Size(min = 2, max = 255, message = "Address should contain 2 to 255 characters")
     var address: String? = null
 
     @NotNull
