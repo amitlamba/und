@@ -9,8 +9,6 @@ import javax.validation.constraints.Size
 
 class EventUser {
 
-    var identity: Identity = Identity()
-
     @Email
     var email: String? = null
 
