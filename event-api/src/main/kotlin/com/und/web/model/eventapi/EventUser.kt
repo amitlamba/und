@@ -1,6 +1,5 @@
 package com.und.web.model.eventapi
 
-import com.und.model.mongo.eventapi.Communication
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -65,5 +64,7 @@ class EventUser {
 
 
 }
+
+
 
 
