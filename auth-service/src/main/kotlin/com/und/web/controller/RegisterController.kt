@@ -54,8 +54,8 @@ class RegisterController {
     fun register(@Valid @RequestBody registrationRequest: RegistrationRequest, request: HttpServletRequest) {
 
         val response = request.getParameter("recaptchaToken")
-        val errors = registrationService.validate(registrationRequest)
         captchaService.processResponse(response)
+        val errors = registrationService.validate(registrationRequest)
         if (errors.getFieldErrors().isNotEmpty()) {
             logger.error("business validation failure while registering ${registrationRequest.email} , with errors ${errors.getFieldErrors()}")
             throw  UserAlreadyRegistered("${errors.getFieldErrors()}")
@@ -77,7 +77,9 @@ class RegisterController {
     }
 
     @GetMapping(value = ["/forgotpassword/{email:.+}"])
-    fun forgotPassword(@PathVariable email: String): ResponseEntity<Response> {
+    fun forgotPassword(@PathVariable email: String, request: HttpServletRequest): ResponseEntity<Response> {
+        val response = request.getParameter("recaptchaToken")
+        captchaService.processResponse(response)
         val code = userService.generateJwtForForgotPassword(email)
         emailService.sendEmail(Email(
                 clientID = 1,

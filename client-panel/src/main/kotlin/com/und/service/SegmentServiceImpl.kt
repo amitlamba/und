@@ -7,6 +7,7 @@ import com.und.repository.jpa.SegmentRepository
 import com.und.repository.mongo.EventRepository
 import com.und.repository.mongo.EventUserRepository
 import com.und.security.utils.AuthenticationUtils
+import com.und.web.controller.exception.SegmentNotFoundException
 import com.und.web.model.ConditionType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.aggregation.Aggregation
@@ -51,9 +52,21 @@ class SegmentServiceImpl : SegmentService {
         return websegments
     }
 
+    override fun segmentById(id: Long): WebSegment {
+        val clientID = AuthenticationUtils.clientID
+        if (clientID != null) {
+            val segmentOption = segmentRepository.findByIdAndClientID(id, clientID)
+             if(segmentOption.isPresent) {
+                 return buildWebSegment(segmentOption.get())
+            }
+        }
+        throw SegmentNotFoundException("No Segment Exists with id $id")
+    }
+
     override fun segmentUsers(segmentId: Long, clientId: Long): List<EventUser> {
-        val segment = segmentRepository.findByIdAndClientID(segmentId, clientId)
-        return if (segment != null) {
+        val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
+        return if (segmentOption .isPresent) {
+            val segment = segmentOption.get()
             buildWebSegment(segment)
             val queries = SegmentParserCriteria().segmentQueries(buildWebSegment(segment))
             val userDidList = retrieveUsers(queries.didq.first, queries.didq.second, clientId)
