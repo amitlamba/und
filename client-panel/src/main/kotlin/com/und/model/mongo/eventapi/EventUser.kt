@@ -17,6 +17,7 @@ class EventUser {
     val additionalInfo: HashMap<String, Any> = hashMapOf()
     var creationTime: LocalDateTime = LocalDateTime.now()
     var communication: Communication = Communication()
+    var testUser:Boolean=false
 }
 
 

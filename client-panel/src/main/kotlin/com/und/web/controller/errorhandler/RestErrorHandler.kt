@@ -2,10 +2,7 @@ package com.und.web.controller.errorhandler
 
 import com.fasterxml.jackson.databind.exc.InvalidFormatException
 import com.und.common.utils.loggerFor
-import com.und.web.controller.exception.EmailTemplateDuplicateNameException
-import com.und.web.controller.exception.EventUserListNotFoundException
-import com.und.web.controller.exception.EventUserNotFoundException
-import com.und.web.controller.exception.UndBusinessValidationException
+import com.und.web.controller.exception.*
 
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -130,6 +127,25 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
         val bodyOfResponse = GenericResponse(messageSource.getMessage("message.eventUserListNotFound", null, request.locale), ex.localizedMessage)
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
     }
+
+    @ExceptionHandler(EventNotFoundException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    fun handleEventNotFoundException(ex: EventNotFoundException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("401 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.eventNotFound", null, request.locale), ex.localizedMessage)
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(EventsListNotFoundException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    fun handleEventListNotFoundException(ex: EventsListNotFoundException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("401 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.eventListNotFound", null, request.locale), ex.localizedMessage)
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
+    }
+
 
     @ExceptionHandler(EmailTemplateDuplicateNameException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

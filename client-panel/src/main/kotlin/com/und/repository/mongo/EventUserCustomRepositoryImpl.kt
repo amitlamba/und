@@ -1,10 +1,12 @@
 package com.und.repository.mongo
 
+import com.und.model.mongo.eventapi.Event
 import com.und.model.mongo.eventapi.EventUser
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Update
 import java.util.*
 
 class EventUserCustomRepositoryImpl : EventUserCustomRepository {
@@ -48,6 +50,24 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
 
 
 
+    override fun testUserProfile(id: String, clientId: Long, eventUser: EventUser) {
+
+        val isTestUser:Boolean=eventUser.testUser
+        val q = Query(Criteria.where("_id").`is`(id))
+        if(!isTestUser){
+            val update = Update()
+            update.set("testUser", "true")
+            updateEventUser(q,update,clientId)
+        }
+        else{
+            val update = Update()
+            update.set("testUser", "false")
+            updateEventUser(q,update,clientId)
+        }
+
+    }
+
+
 
     private fun queryEventUser(q: Query, clientId: Long): Optional<EventUser> {
         val eventUser = mongoTemplate.findOne(q, EventUser::class.java, "${clientId}_eventUser")
@@ -58,4 +78,7 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
         }
     }
 
+    private fun updateEventUser(q: Query, update: Update, clientId: Long) {
+        mongoTemplate.updateFirst(q, update, "${clientId}_eventUser")
+    }
 }

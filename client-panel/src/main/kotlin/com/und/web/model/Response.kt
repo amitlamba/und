@@ -1,14 +1,14 @@
 package com.und.web.model
 
-data class Response<T> (
+data class Response (
     var status: ResponseStatus = ResponseStatus.EMPTY,
-    var data: Data<T> = Data(),
+    var data: Data = Data(),
     var message: String? = null,
     var validationError: ValidationError? = null
 
 )
 
-data class Data<T>(
-    var value: T? = null,
+data class Data(
+    var value: Any? = null,
     var message: String? = null
 )

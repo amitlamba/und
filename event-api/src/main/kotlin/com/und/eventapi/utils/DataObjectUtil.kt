@@ -80,7 +80,7 @@ fun com.und.model.mongo.eventapi.EventUser.copyNonNull(eventUser: EventUser): co
         new == null -> old
         else -> new
     }
-    //FIXME bugs here in copying data
+
     val copyEventUser = com.und.model.mongo.eventapi.EventUser()
 
     copyEventUser.id = unchanged(eventUser.identity.userId, id)

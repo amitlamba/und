@@ -54,7 +54,6 @@ class DateFilter {
     var values: List<String> = listOf()
     var valueUnit: Unit = Unit.NONE
 }
-
 class PropertyFilter {
     var name: String = ""
     var type: DataType = DataType.string
