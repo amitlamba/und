@@ -1,9 +1,14 @@
 package com.und.repository.mongo
 
+import com.und.model.mongo.eventapi.Event
 import org.bson.Document
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
+import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.Update
+import java.util.*
 
 
 class EventCustomRepositoryImpl : EventCustomRepository {
@@ -18,5 +23,29 @@ class EventCustomRepositoryImpl : EventCustomRepository {
             aggResult.mapNotNull { dbo -> dbo["_id"] as String }
         } ?: emptyList()
 
+    }
+
+    override fun findEventById(id: String, clientId: Long): Optional<Event> {
+        val q = Query(Criteria.where("_id").`is`(id))
+        return queryEvent(q, clientId)
+    }
+
+    override fun findEventsListById(id: String, clientId: Long): List<Event>{
+        val q = Query(Criteria.where("userId").`is`(id))
+        return queryEventsList(q, clientId)
+    }
+
+    private fun queryEvent(q: Query, clientId: Long): Optional<Event> {
+        val eventDetails = mongoTemplate.findOne(q, Event::class.java, "${clientId}_event")
+        return if (eventDetails == null) {
+            Optional.empty()
+        } else {
+            Optional.of(eventDetails)
+        }
+    }
+
+    private fun queryEventsList(q: Query, clientId: Long): List<Event> {
+        val eventList = mongoTemplate.find(q, Event::class.java, "${clientId}_event")
+        return eventList
     }
 }

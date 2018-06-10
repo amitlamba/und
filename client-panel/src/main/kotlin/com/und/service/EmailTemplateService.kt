@@ -1,12 +1,14 @@
 package com.und.service
 
-import com.und.exception.UndBusinessValidationException
+import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.model.jpa.EmailTemplate
 import com.und.model.jpa.Template
 import com.und.web.model.EmailTemplate as WebEmailTemplate
 import com.und.repository.jpa.EmailTemplateRepository
 import com.und.repository.jpa.TemplateRepository
 import com.und.security.utils.AuthenticationUtils
+import com.und.web.controller.exception.EmailTemplateDuplicateNameException
+import com.und.web.controller.exception.EmailTemplateNotFoundException
 import com.und.web.model.ValidationError
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -16,8 +18,7 @@ class EmailTemplateService {
 
     @Autowired
     private lateinit var emailTemplateRepository: EmailTemplateRepository
-    @Autowired
-    private lateinit var templateRepository: TemplateRepository
+
 
     fun getDefaultEmailTemplates(): List<WebEmailTemplate> {
         val emailTemplates = emailTemplateRepository.findByClientID()
@@ -36,8 +37,8 @@ class EmailTemplateService {
     private fun getEmailTemplate(emailTemplateId: Long): List<WebEmailTemplate> {
         val clientId = AuthenticationUtils.clientID
         return clientId?.let {
-            listOf(emailTemplateRepository.findByIdAndClientID(emailTemplateId, clientId))
-                    .map { buildWebEmailTemplate(it) }
+            val emailTemplateOtion = emailTemplateRepository.findByIdAndClientID(emailTemplateId, clientId)
+            if (emailTemplateOtion.isPresent) listOf(buildWebEmailTemplate(emailTemplateOtion.get())) else emptyList()
         } ?: emptyList()
     }
 
@@ -50,17 +51,28 @@ class EmailTemplateService {
     fun saveEmailTemplate(webEmailTemplate: WebEmailTemplate): Long {
         val clientId = AuthenticationUtils.clientID
         if (clientId != null) {
-            val nameExists = emailTemplateRepository.existsByNameAndClientID(webEmailTemplate.name, clientId)
+            val existingTemplate = emailTemplateRepository.findByNameAndClientID(webEmailTemplate.name, clientId)
+            val nameExists = existingTemplate.isPresent && existingTemplate.get().id != webEmailTemplate.id
             if (nameExists) {
-                val error = ValidationError()
-                error.addFieldError("name", "Template with name : ${webEmailTemplate.name} already exists")
-                throw UndBusinessValidationException(error)
+                throw EmailTemplateDuplicateNameException("Template with name : ${webEmailTemplate.name} already exists")
             }
         }
         val emailTemplate = buildEmailTemplate(webEmailTemplate)
 
         val persistedemailTemplate = emailTemplateRepository.save(emailTemplate)
         return persistedemailTemplate.id ?: -1
+    }
+
+    fun getEmailTemplateById(id: Long): WebEmailTemplate {
+        val clientId = AuthenticationUtils.clientID
+        if (clientId != null) {
+            val emailTemplate = emailTemplateRepository.findByIdAndClientID(id, clientId)
+            if(emailTemplate.isPresent){
+                return buildWebEmailTemplate(emailTemplate.get())
+            }
+            else throw EmailTemplateNotFoundException("Email Template with id $id not found")
+        }
+        else throw org.springframework.security.access.AccessDeniedException("User is not logged in")
     }
 
     fun getUserEventAttributes() {

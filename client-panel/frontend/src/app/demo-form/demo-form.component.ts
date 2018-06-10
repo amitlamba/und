@@ -3,6 +3,7 @@ import {RegistrationRequest} from "../_models/client";
 import {AuthenticationService} from "../_services/authentication.service";
 import {ContactUs, ContactUsComponent} from "../contact-us/contact-us.component";
 import {RegisterService} from "../_services/register.service";
+import {_RECAPTCHA_KEY} from "../_settings/app-settings";
 
 @Component({
   selector: 'app-demo-form',
@@ -14,6 +15,7 @@ export class DemoFormComponent implements OnInit {
   preferredCountries = ['in', 'us', 'ru', 'gb'];
   @Input() modalDemoButton;
   contactUs: ContactUs = new ContactUs();
+  _site_key = _RECAPTCHA_KEY;
   recaptchaToken: string = null;
 
   constructor(private registerService : RegisterService) {

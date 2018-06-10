@@ -42,8 +42,7 @@ class User {
     lateinit var firstname: String
 
     @Column(name = "LASTNAME", length = 255)
-    @NotNull
-    lateinit var lastname: String
+    var lastname: String? = null
 
     @Column(name = "EMAIL", length = 255)
     @NotNull

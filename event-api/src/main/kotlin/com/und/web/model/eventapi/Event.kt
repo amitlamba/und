@@ -14,7 +14,6 @@ import javax.validation.constraints.Size
  */
 
 //FIXME handle validation for other fields and different types, e.g. @see
-@ValidateDate(message="{event.date.invalid}")
 open class Event {
 
     @Size(min=2,max=40,message="{event.name.invalidSize}")
@@ -49,20 +48,6 @@ open class Event {
     var userIdentified: Boolean = false
     var lineItem: MutableList<LineItem> = mutableListOf()
     var attributes: HashMap<String, Any> = hashMapOf()
-
-    @ValidateDateFormat(message="{event.startDate.invalid}")
-    private var startDate: LocalDate? = LocalDate.now()
-
-    @ValidateDateFormat(message="{event.endDate.invalid}")
-    private var endDate: LocalDate? = LocalDate.of(2020, 1, 1)
-
-    fun getDateStart(): LocalDate? {
-        return startDate
-    }
-
-    fun getDateEnd(): LocalDate? {
-        return endDate
-    }
 
 }
 

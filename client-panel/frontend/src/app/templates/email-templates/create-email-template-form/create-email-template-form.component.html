@@ -75,7 +75,7 @@
               required></textarea>
     <button *ngIf="emailTemplate.editorSelected=='textareaEditor'"
             class="btn btn-primary my-3"
-            (click)="addUnsubscribeLink($event)">Add Unsubscribe
+            (click)="addUnsubscribeLink($event)">{{unsubscribeButtonText}}
     </button>
   </div>
   <div class="text-right col-sm-12">

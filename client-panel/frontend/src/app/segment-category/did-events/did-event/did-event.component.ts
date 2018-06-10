@@ -1,16 +1,27 @@
 import {
-  Component, ComponentFactoryResolver, EventEmitter, Input, OnInit, Output, ViewChild,
+  Component,
+  ComponentFactoryResolver,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output,
+  ViewChild,
   ViewContainerRef
 } from '@angular/core';
 import {DaterangepickerConfig} from "ng2-daterangepicker";
-import {IMyDrpOptions} from 'mydaterangepicker';
 import {
-  DateFilter, DateOperator, Event, NumberOperator, PropertyFilter, RegisteredEvent,
-  RegisteredEventProperties, WhereFilter, WhereFilterName
+  DateFilter,
+  DateOperator,
+  Event,
+  NumberOperator,
+  PropertyFilter,
+  RegisteredEvent,
+  RegisteredEventProperties,
+  WhereFilter,
+  WhereFilterName
 } from "../../../_models/segment";
 import {SegmentService} from "../../../_services/segment.service";
 import {FilterComponent} from "./filter/filter.component";
-import index from "@angular/cli/lib/cli";
 import {DidEventsComponent} from "../did-events.component";
 import * as moment from "moment";
 
@@ -143,10 +154,6 @@ export class DidEventComponent implements OnInit {
   }
 
 
-  myDateRangePickerOptions: IMyDrpOptions = {
-    dateFormat: 'dd.mm.yyyy',
-    height: '30px'
-  };
   model: any = {
     beginDate: {year: 2018, month: 10, day: 9},
     endDate: {year: 2018, month: 10, day: 19}

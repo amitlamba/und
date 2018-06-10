@@ -7,8 +7,8 @@ import org.springframework.security.core.context.SecurityContextHolder
 
 object AuthenticationUtils {
 
-    val USER_TYPE_ADMIN: Int = 1
-    val USER_TYPE_EVENT: Int = 2
+    const val USER_TYPE_ADMIN: Int = 1
+    const val USER_TYPE_EVENT: Int = 2
 
     val isUserLoggedIn: Boolean
         get() {

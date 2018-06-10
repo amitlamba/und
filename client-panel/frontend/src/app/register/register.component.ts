@@ -3,6 +3,7 @@ import {RegistrationRequest} from "../_models/client";
 import {AuthenticationService} from "../_services/authentication.service";
 import {Router} from "@angular/router";
 import {ReCaptchaComponent} from "angular2-recaptcha";
+import {_RECAPTCHA_KEY} from "../_settings/app-settings";
 
 @Component({
   selector: 'app-register',
@@ -17,6 +18,7 @@ export class RegisterComponent implements OnInit {
   preferredCountries = ['in', 'us', 'ru', 'gb'];
   phoneNumberLength: number;
 
+  _site_key = _RECAPTCHA_KEY;
 
   constructor(private authenticationService: AuthenticationService, private router: Router) {
   }

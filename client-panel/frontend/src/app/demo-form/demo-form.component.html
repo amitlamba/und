@@ -45,7 +45,7 @@
     </div>
     <div class="form-group row">
       <re-captcha class="mx-3 ml-auto" (captchaResponse)="handleCorrectCaptcha($event)"
-                  site_key="6Lcv4FsUAAAAAL1CEPzpEjUIxiDL93UWR2in1h1x" #ReCaptchaComponent></re-captcha>
+                  site_key="{{_site_key}}" #ReCaptchaComponent></re-captcha>
     </div>
     <div class="modal-footer" *ngIf="modalDemoButton">
       <button type="button" class="btn btn-primary text-capitalize w-100 h-25"

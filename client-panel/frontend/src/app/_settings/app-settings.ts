@@ -66,6 +66,8 @@ export class AppSettings {
 
   public static API_ENDPOINT_AUTH = AppSettings.API_ENDPOINT + "/auth";
   // public static API_ENDPOINT_AUTH = "http://nestros.com:9595";
+  // public static API_ENDPOINT_AUTH = AppSettings.API_ENDPOINT + "/auth";
+  // public static API_ENDPOINT_AUTH = "http://nestros.com:9595"
 
   public static API_ENDPOINT_AUTH_AUTH = AppSettings.API_ENDPOINT_AUTH + "/auth";
   public static API_ENDPOINT_AUTH_AUTH_VALIDATE = AppSettings.API_ENDPOINT_AUTH_AUTH + "/validate";
@@ -110,3 +112,5 @@ export class UserFields {
     UserFields.USER_MOBILE_NUMBER
   ];
 }
+
+export const _RECAPTCHA_KEY = "6Lcv4FsUAAAAAL1CEPzpEjUIxiDL93UWR2in1h1x"

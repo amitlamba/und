@@ -1,13 +1,22 @@
 package com.und.web.model
 
 import java.time.LocalDateTime
+import javax.validation.constraints.NotNull
+import javax.validation.constraints.Pattern
+import javax.validation.constraints.Size
 
 
 class Segment {
 
     var id: Long? = null
 
+    @NotNull
+    @Size(min=2,max=50)
+    @Pattern(regexp = "[A-Za-z0-9-_][A-Za-z0-9-_\\s]*")
     var name: String = ""
+
+    //TODO Validations for type and conversion event
+
     var type: String = ""
     var creationDate: LocalDateTime = LocalDateTime.now()
     var conversionEvent: String? = null
@@ -45,7 +54,6 @@ class DateFilter {
     var values: List<String> = listOf()
     var valueUnit: Unit = Unit.NONE
 }
-
 class PropertyFilter {
     var name: String = ""
     var type: DataType = DataType.string

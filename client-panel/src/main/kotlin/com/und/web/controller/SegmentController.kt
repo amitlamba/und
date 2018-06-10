@@ -5,6 +5,7 @@ import com.und.model.mongo.EventMetadata
 import com.und.model.mongo.eventapi.EventUser
 import com.und.service.EventMetadataService
 import com.und.service.SegmentService
+import com.und.web.controller.exception.SegmentNotFoundException
 import com.und.web.model.Segment
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -40,24 +41,30 @@ class SegmentController {
     fun save(@RequestBody segment: Segment): ResponseEntity<Segment> {
         //FIXME Validate for unique name of segment for a client
         val persistedSegment = segmentService.createSegment(segment)
-        return ResponseEntity( persistedSegment, HttpStatus.CREATED)
+        return ResponseEntity(persistedSegment, HttpStatus.CREATED)
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/list"])
     fun list(): ResponseEntity<List<Segment>> {
         val allSegment = segmentService.allSegment()
-        return ResponseEntity( allSegment, HttpStatus.OK)
+        return ResponseEntity(allSegment, HttpStatus.OK)
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = ["/segment/{segmentId}"])
+    fun segment(@PathVariable("segmentId") segmentId: Long): ResponseEntity<Segment> {
+        val segment = segmentService.segmentById(segmentId)
+        return ResponseEntity(segment, HttpStatus.OK)
     }
 
     @GetMapping(value = ["/users/{segmentId}"])
     @PreAuthorize("hasRole('ROLE_UND_SERVICE')")
-    fun segmentUsers(@PathVariable("segmentId") segmentId :Long): List<EventUser> {
+    fun segmentUsers(@PathVariable("segmentId") segmentId: Long): List<EventUser> {
         val clientId = 2L
         val asegmentUsers = segmentService.segmentUsers(segmentId, clientId)
-        return  asegmentUsers
+        return asegmentUsers
     }
-
 
 
 }

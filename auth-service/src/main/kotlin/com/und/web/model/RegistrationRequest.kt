@@ -23,10 +23,11 @@ class RegistrationRequest {
     lateinit var name: String
 
     @NotNull
-    @Size(min = 4, max = 20, message = "Country should contain 4 to 20 characters")
+    @Size(min = 4, max = 40, message = "Country should contain 4 to 20 characters")
     var country: String? = null
 
     @NotNull
+    @Size(min = 2, max = 255, message = "Address should contain 2 to 255 characters")
     var address: String? = null
 
     @NotNull
@@ -34,11 +35,13 @@ class RegistrationRequest {
     var phone: String? = null
 
     @NotNull
-    @Size(min = 5, max = 255, message = "First Name should contain 5 to 255 characters")
-    var firstName: String? = null
+    @Size(min = 1, max = 50, message = "First Name should contain 1 to 50 characters")
+    @Pattern(regexp = "[A-Za-z][a-zA-Z\\s]*")
+    lateinit var firstName: String
 
     @NotNull
-    @Size(min = 5, max = 255, message = "Last Name should contain 5 to 255 characters")
-    var lastName: String? = null
+    @Size(min = 1, max = 50, message = "Last Name should contain 1 to 50 characters")
+    @Pattern(regexp = "[A-Za-z][a-zA-Z\\s]*")
+    lateinit var lastName: String
 
 }
