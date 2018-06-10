@@ -43,7 +43,7 @@ class StandardInfo {
     var dob: String? = null
     var languages: MutableList<String> = mutableListOf()
     var country: String? = null
-    var city: String? = null
-    var address: String? = null
+    var City: String? = null
+    var Address: String? = null
     var countryCode: String? = null
 }
