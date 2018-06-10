@@ -41,6 +41,12 @@ class EmailTemplateController {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = ["/template/{id}"])
+    fun getEmailTemplateById(@PathVariable id: Long): EmailTemplate {
+        return emailTemplateService.getEmailTemplateById(id)
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/user-event-attributes"])
     fun getUserEventAttributes() {
         emailTemplateService.getUserEventAttributes()

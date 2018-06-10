@@ -131,7 +131,7 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(EventNotFoundException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    fun handleEventNotFoundException(ex: EventNotFoundException, request: WebRequest): ResponseEntity<Any> {
+    fun eventUser(ex: EventNotFoundException, request: WebRequest): ResponseEntity<Any> {
         logger.error("401 Status Code", ex)
         val bodyOfResponse = GenericResponse(messageSource.getMessage("message.eventNotFound", null, request.locale), ex.localizedMessage)
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
@@ -140,7 +140,7 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(EventsListNotFoundException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
-    fun handleEventListNotFoundException(ex: EventsListNotFoundException, request: WebRequest): ResponseEntity<Any> {
+    fun eventUser(ex: EventsListNotFoundException, request: WebRequest): ResponseEntity<Any> {
         logger.error("401 Status Code", ex)
         val bodyOfResponse = GenericResponse(messageSource.getMessage("message.eventListNotFound", null, request.locale), ex.localizedMessage)
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
@@ -153,6 +153,15 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
     fun eventUser(ex: EmailTemplateDuplicateNameException, request: WebRequest): ResponseEntity<Any> {
         logger.error("400 Status Code", ex)
         val bodyOfResponse = GenericResponse(messageSource.getMessage("message.duplicateTemplateName", null, request.locale), ex.localizedMessage)
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(EmailTemplateNotFoundException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    fun eventUser(ex: EmailTemplateNotFoundException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("400 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.emailTemplateNotFound", null, request.locale), ex.localizedMessage)
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
     }
 

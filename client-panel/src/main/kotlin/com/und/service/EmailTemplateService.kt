@@ -8,6 +8,7 @@ import com.und.repository.jpa.EmailTemplateRepository
 import com.und.repository.jpa.TemplateRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.EmailTemplateDuplicateNameException
+import com.und.web.controller.exception.EmailTemplateNotFoundException
 import com.und.web.model.ValidationError
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -60,6 +61,18 @@ class EmailTemplateService {
 
         val persistedemailTemplate = emailTemplateRepository.save(emailTemplate)
         return persistedemailTemplate.id ?: -1
+    }
+
+    fun getEmailTemplateById(id: Long): WebEmailTemplate {
+        val clientId = AuthenticationUtils.clientID
+        if (clientId != null) {
+            val emailTemplate = emailTemplateRepository.findByIdAndClientID(id, clientId)
+            if(emailTemplate.isPresent){
+                return buildWebEmailTemplate(emailTemplate.get())
+            }
+            else throw EmailTemplateNotFoundException("Email Template with id $id not found")
+        }
+        else throw org.springframework.security.access.AccessDeniedException("User is not logged in")
     }
 
     fun getUserEventAttributes() {
