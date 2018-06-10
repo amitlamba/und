@@ -92,6 +92,7 @@ import {ReportsService} from "./_services/reports.service";
 import {RegisterService} from "./_services/register.service";
 import { UserProfileComponent } from './user-profile/user-profile.component';
 import {TooltipModule} from "ngx-bootstrap";
+import { CampaignsInfoComponent } from './campaigns-info/campaigns-info.component';
 
 
 @NgModule({
@@ -176,7 +177,8 @@ import {TooltipModule} from "ngx-bootstrap";
     TimerangeComponent,
     ConversionEventsGraphComponent,
     EventsGraphComponent,
-    UserProfileComponent
+    UserProfileComponent,
+    CampaignsInfoComponent
   ],
   providers: [
     AuthGuard,

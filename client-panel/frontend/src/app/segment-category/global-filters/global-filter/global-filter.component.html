@@ -1,13 +1,13 @@
-<div class="my-2 event-widget">
+<div class="my-3 event-widget">
   <form>
-    <div class="row d-flex flex-row ml-3">
-      <div class="form-group m-2">
+    <div class="row d-flex flex-row ml-3 mt-2">
+      <div class="form-group mx-2">
         <select class="form-control" (change)="firstFilterChanged($event.target.value)">
           <option value="" disabled selected>--Select--</option>
           <option *ngFor="let propType of firstDropDown" value="{{propType}}">{{propType}}</option>
         </select>
       </div>
-      <div *ngIf="maxOrder>=1" class="form-group m-2">
+      <div *ngIf="maxOrder>=1" class="form-group mx-2">
         <select class="form-control" name="globalFilterType"
                 (change)="secondFilterChanged($event.target.value)"
                 [(ngModel)]="secondFilterSelected">

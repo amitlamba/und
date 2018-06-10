@@ -6,7 +6,7 @@ import {HttpErrorResponse} from "@angular/common/http";
   selector: 'app-contact-us',
   templateUrl: './contact-us.component.html',
   styleUrls: ['./contact-us.component.scss',
-  '../landing-page-und/landing-page-und.component.scss']
+    '../landing-page-und/landing-page-und.component.scss']
 })
 export class ContactUsComponent implements OnInit {
   contactUs: ContactUs;
@@ -17,6 +17,8 @@ export class ContactUsComponent implements OnInit {
   preferredCountries = ['in', 'us', 'ru', 'gb'];
   errorMessage: HttpErrorResponse;
   recaptchaToken: string = null;
+  phoneNumberLength: number;
+
   @ViewChild('contactUsForm') contactUsForm;
 
   constructor(private registerService: RegisterService) {
@@ -50,6 +52,11 @@ export class ContactUsComponent implements OnInit {
 
   handleCorrectCaptcha(event) {
     this.recaptchaToken = event;
+  }
+
+  phoneNumberLengthCheck($event) {
+    console.log($event.length);
+    this.phoneNumberLength = $event.length
   }
 }
 

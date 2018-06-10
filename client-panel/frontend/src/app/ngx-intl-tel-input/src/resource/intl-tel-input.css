@@ -104,13 +104,13 @@
     margin-right: 6px; }
 .intl-tel-input.allow-dropdown input, .intl-tel-input.allow-dropdown input[type=text], .intl-tel-input.allow-dropdown input[type=tel], .intl-tel-input.separate-dial-code input, .intl-tel-input.separate-dial-code input[type=text], .intl-tel-input.separate-dial-code input[type=tel] {
     padding-right: auto;
-    padding-left: 52px;
+    padding-left: 100px;
     margin-left: 0; }
 .intl-tel-input.allow-dropdown .flag-container, .intl-tel-input.separate-dial-code .flag-container {
     right: auto;
     left: 0; }
 .intl-tel-input.allow-dropdown .selected-flag, .intl-tel-input.separate-dial-code .selected-flag {
-    width: 46px; }
+    width: 99px; }
 .intl-tel-input.allow-dropdown .flag-container:hover {
     cursor: pointer; }
 .intl-tel-input.allow-dropdown .flag-container:hover .selected-flag {

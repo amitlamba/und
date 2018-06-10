@@ -119,6 +119,7 @@ export class SetupCampaignComponent implements OnInit {
         }
       );
     }
+    console.log(this.segmentsList);
   }
 
   continueToSchedule(): void {

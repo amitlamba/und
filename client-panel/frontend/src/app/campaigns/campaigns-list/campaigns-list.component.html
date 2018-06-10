@@ -1,13 +1,5 @@
 <div class="container-fluid campaigns">
   <div class="row mt-4 px-3">
-    <!--<div class="form-group col-6">-->
-    <!--<form #myForm="ngForm" novalidate>-->
-    <!--&lt;!&ndash;FIXME: Use the common daterange picker we are using everywhere else&ndash;&gt;-->
-    <!--<my-date-range-picker name="mydaterange" [options]="myDateRangePickerOptions"-->
-    <!--[(ngModel)]="model" required></my-date-range-picker>-->
-    <!--</form>-->
-    <!--</div>-->
-    <!-- Example single danger button -->
     <div class="btn-group ml-auto">
       <button type="button"
               class="btn btn-primary dropdown-toggle"
@@ -46,7 +38,33 @@
       <tbody>
       <tr *ngFor="let campaignItem of campaigns;">
         <th scope="row">{{campaignItem.id}}</th>
-        <td>{{campaignItem.name.charAt(0).toUpperCase()+ campaignItem.name.slice(1).toLowerCase()}}</td>
+        <td>
+          {{campaignItem.name.charAt(0).toUpperCase()+ campaignItem.name.slice(1).toLowerCase()}}
+          <a (click)="getCampaignItem(campaignItem)" data-toggle="modal" data-target="#campaignInfoModal"
+             title="Campaign Info">
+            <i class="far fa-question-circle text-primary ml-2"></i></a></td>
+        <!-- Modal -->
+        <div #campaignInformationModal *ngIf="showCampaignInfoModal"
+             class="modal fade " id="campaignInfoModal" tabindex="-1" role="dialog" aria-labelledby="campaignInfoModalTitle" aria-hidden="true">
+          <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h4 class="modal-title ml-auto" id="campaignInfoModalTitle">
+                  {{modalCampaignInfoObject.name.charAt(0).toUpperCase()+ modalCampaignInfoObject.name.slice(1).toLowerCase()}}
+                </h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body bg-light">
+                <app-campaigns-info [campaignInfoObject]="modalCampaignInfoObject"></app-campaigns-info>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Okay</button>
+              </div>
+            </div>
+          </div>
+        </div>
         <td>{{campaignItem.campaignType}}</td>
         <td>{{campaignItem.dateCreated | date:'medium'}}</td>
         <td>
@@ -54,9 +72,7 @@
           <span *ngIf="campaignItem.schedule.multipleDates!==null">Multiple Dates</span>
           <span *ngIf="campaignItem.schedule.recurring!==null">Recurring</span>
         </td>
-        <td>{{(campaignItem.status=='CREATED'|| campaignItem.status=='RESUMED' ) ? ("Running") : ( campaignItem.status )
-          }}
-        </td>
+        <td>{{(campaignItem.status=='CREATED'|| campaignItem.status=='RESUMED' ) ? ("Running") : ( campaignItem.status )}}</td>
         <td class="text-center">
           <button *ngIf="campaignItem.status=='PAUSED' "
                   class="border-0 bg-light"
@@ -90,3 +106,5 @@
     </table>
   </div>
 </div>
+
+

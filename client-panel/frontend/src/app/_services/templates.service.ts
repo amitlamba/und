@@ -18,6 +18,7 @@ export class TemplatesService {
   castSmsTemplates = this.smsTemplates.asObservable();
   smsTemplateForEdit = new BehaviorSubject<SmsTemplate>(new SmsTemplate());
   castSmsTemplateForEdit = this.smsTemplateForEdit.asObservable();
+  // closeModalDialogBox:boolean = false;
 
   constructor(private httpClient: HttpClient) {
   }

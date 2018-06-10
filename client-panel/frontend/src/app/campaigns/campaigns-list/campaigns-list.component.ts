@@ -1,8 +1,10 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {IMyDrpOptions} from "mydaterangepicker";
 import {CampaignService} from "../../_services/campaign.service";
 import {Campaign} from "../../_models/campaign";
 import {HttpErrorResponse} from "@angular/common/http";
+import {SegmentService} from "../../_services/segment.service";
+import {Segment} from "../../_models/segment";
 
 @Component({
   selector: 'app-campaigns-list',
@@ -10,10 +12,14 @@ import {HttpErrorResponse} from "@angular/common/http";
   styleUrls: ['./campaigns-list.component.scss']
 })
 export class CampaignsListComponent implements OnInit {
-
+  // @ViewChild('campaignInformationModal') campaignInformationModal;
+  modalCampaignInfoObject: Campaign;
+  showCampaignInfoModal:boolean = false;
   campaigns: Campaign[];
+  changeSegmentationId: boolean = false;
 
-  constructor(private campaignService: CampaignService) {
+  constructor(private campaignService: CampaignService,
+              private segmentsService: SegmentService) {
   }
 
   ngOnInit() {
@@ -23,7 +29,6 @@ export class CampaignsListComponent implements OnInit {
   getCampaignsList() {
     this.campaignService.getCampaignList().subscribe((campaigns) => {
       this.campaigns = campaigns;
-      // console.log(campaigns);
     });
   }
   // Date Range Input Code
@@ -42,12 +47,12 @@ export class CampaignsListComponent implements OnInit {
       .subscribe(
         (campaignId) => {
           console.log(campaignId);
+          this.getCampaignsList();
         },
         (error: HttpErrorResponse) => {
           console.log("Error from resume Campaign" + error);
         }
       );
-    this.getCampaignsList();
   }
 
   pauseCampaignFunction(campaignId) {
@@ -56,12 +61,13 @@ export class CampaignsListComponent implements OnInit {
       .subscribe(
         (campaignId) => {
           console.log(campaignId);
+          this.getCampaignsList();
+
         },
         (error: HttpErrorResponse) => {
           console.log("Error from Pause Campaign Function" + error);
         }
       );
-    this.getCampaignsList();
   }
 
   stopCampaignFunction(campaignId) {
@@ -70,12 +76,13 @@ export class CampaignsListComponent implements OnInit {
       .subscribe(
         (campaignId) => {
           console.log(campaignId);
+          this.getCampaignsList();
+
         },
         (error: HttpErrorResponse) => {
           console.log("Error from Stop Campaign Function" + error);
         }
       );
-    this.getCampaignsList();
   }
 
   deleteCampaignFunction(campaignId) {
@@ -84,12 +91,18 @@ export class CampaignsListComponent implements OnInit {
       .subscribe(
         (campaignId) => {
           console.log(campaignId);
+          this.getCampaignsList();
+
         },
         (error: HttpErrorResponse) => {
           console.log("Error from Delete Campaign Function" + error);
         }
       );
-    this.getCampaignsList();
   }
-
+  getCampaignItem(campaignItem:Campaign) {
+    // this.campaignInformationModal.nativeElement.className = 'modal fade show';
+    this.modalCampaignInfoObject = campaignItem;
+    this.showCampaignInfoModal = true;
+    console.log(campaignItem);
+  }
 }

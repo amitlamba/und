@@ -6,21 +6,17 @@ import {Component, OnInit, ViewChild} from '@angular/core';
   styleUrls: ['./user-profile.component.scss']
 })
 export class UserProfileComponent implements OnInit {
-  userProfile;
-  eventsList ={
-    eventName:''
-  };
+  userProfile:string;
   @ViewChild('radioButton') radioButton;
 
   constructor() { }
 
   ngOnInit() {
-    this.userProfile = 'modeOfCommunication';
-    // console.log(this.radioButton.value);
+    this.userProfile = 'userDetails';
   }
-  myFunc() {
-    console.log(this.userProfile)
+  myValue($event){
+    console.log($event.target.value);
+    this.userProfile=$event.target.value;
+    console.log(this.userProfile);
   }
-
-
 }

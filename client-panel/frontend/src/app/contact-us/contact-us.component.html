@@ -16,9 +16,12 @@
     <div class="row mt-2 mb-3 justify-content-center mt-2">
       <div class="col-md-5 col-xs-12 px-3 mt-3 mx-2">
         <h3>Digicologies Software Pvt Ltd.</h3>
-        <p><i class="fas fa-phone fa-lg mr-4 icon-light"></i><span class="address-text">9467999902</span></p>
-        <p><i class="fas fa-envelope-square fa-lg mr-4 icon-light"></i><span class="address-text">support@userndot.com</span></p>
-        <p><i class="fas fa-map-marker fa-lg mr-4 icon-light"></i><span class="address-text">F-424, Phase 2, New Palam Vihar, Sector 112, Gurugram</span></p>
+        <p><i class="fas fa-phone fa-lg mr-4 fa-rotate-90 icon-light"></i><span class="address-text">9467999902</span>
+        </p>
+        <p><i class="far fa-envelope-open fa-lg mr-4 icon-light"></i><span
+          class="address-text">support@userndot.com</span></p>
+        <p><i class="fas fa-map-marker-alt fa-lg mr-4 icon-light"></i><span class="address-text">F-424, Phase 2, New Palam Vihar, Sector 112, Gurugram</span>
+        </p>
       </div>
       <form class="col-md-4 col-xs-12 px-3 mt-3 mx-2"
             #contactUsForm="ngForm">
@@ -67,27 +70,13 @@
           </div>
         </div>
         <div class="mb-3">
-          <!--<div class="input-group-prepend">-->
-          <!--<span class="input-group-text"><i class="fas fa-mobile-alt"></i></span>-->
-          <!--</div>-->
-          <!--<input type="number"-->
-          <!--class="form-control"-->
-          <!--name="mobileNo"-->
-          <!--placeholder="Phone Number"-->
-          <!--aria-label="Phone Number"-->
-          <!--[(ngModel)]="contactUs.mobileNo"-->
-          <!--required-->
-          <!--minlength="10"-->
-          <!--maxlength="15"-->
-          <!--[ngClass]="{'border-danger':contactUsMobileNo.errors && (contactUsMobileNo.dirty || contactUsMobileNo.touched)}"-->
-          <!--#contactUsMobileNo="ngModel">-->
           <ngx-intl-tel-input [(value)]="contactUs.mobileNo"
-                              [preferredCountries]="preferredCountries"></ngx-intl-tel-input>
-          <!--<div class="alert alert-danger col-12 mb-0 py-2" *ngIf="contactUsMobileNo.errors && (contactUsMobileNo.dirty || contactUsMobileNo.touched)">-->
-          <!--<div *ngIf="contactUsMobileNo.errors.required">-->
-          <!--Enter Mobile Number.-->
-          <!--</div>-->
-          <!--</div>-->
+                              [preferredCountries]="preferredCountries"
+                              (checkPhoneNumberLength)="phoneNumberLengthCheck($event)"></ngx-intl-tel-input>
+          <div class="alert alert-danger col-12 mb-0 py-2"
+               *ngIf='phoneNumberLength <10'>
+            Invalid Phone Number.
+          </div>
         </div>
         <div>
           <textarea name="message" id="" cols="60"
@@ -107,7 +96,7 @@
             </div>
           </div>
         </div>
-        <div>
+        <div class="mt-4">
           <re-captcha (captchaResponse)="handleCorrectCaptcha($event)"
                       site_key="6Lcv4FsUAAAAAL1CEPzpEjUIxiDL93UWR2in1h1x" #ReCaptchaComponent></re-captcha>
         </div>
@@ -121,7 +110,7 @@
         </div>
         <button class="btn btn-primary w-100"
                 (click)="submitContactUsForm()"
-                [disabled]="contactUsForm.invalid || loading || !recaptchaToken">Send it
+                [disabled]="contactUsForm.invalid || loading || !recaptchaToken || phoneNumberLength <10">Send it
         </button>
       </form>
     </div>

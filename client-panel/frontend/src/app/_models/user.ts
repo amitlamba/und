@@ -5,17 +5,6 @@ export class User {
   lastName: string;
 }
 
-export class EventUser {
-  id: string;
-  clientId: string; //client id , user is associated with, this can come from collection
-  clientUserId: string;//this is id of the user client has provided
-  socialId: SocialId;
-  standardInfo: StandardInfo;
-  additionalInfo: object;
-  //FIXME creation date can't keep changing
-  creationDate: number
-
-}
 
 export class SocialId {
   fbId: string;
@@ -44,4 +33,44 @@ export class UserParams {
     "{user.standardInfo.country}",
     "{user.standardInfo.countryCode}"
   ];
+}
+
+export class EventUser {
+  identity: Identity;
+  email: string;
+  clientUserId: string;
+  undId: string;
+  fbId: string;
+  googleId: string;
+  mobile: string;
+  firstName: string;
+  lastName: string;
+  gender: string;
+  dob: string;
+  country: string;
+  countryCode: string;
+  clientId: string;
+  additionalInfo: string;         //Please review this property again with the backend
+  creationDate: string;
+}
+
+export class Identity {
+  deviceId: string;
+  sessionId: string;
+  userId: string;
+  clientId: string;
+}
+export class Event {
+  name: string;
+  identity: Identity;
+  creationTime: string;
+  ipAddress: string;
+  city: string;
+  state: string;
+  country: string;
+  latitude: string;
+  longitude: string;
+  agentString: string;
+  userIdentified: boolean;
+  // lineitem,attributes,startDate,EndDate to be added.
 }
