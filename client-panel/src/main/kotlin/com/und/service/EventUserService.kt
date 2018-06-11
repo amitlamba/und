@@ -98,7 +98,7 @@ class EventUserService {
 
     }
 
-    private fun buildEventUser(eventUserMongo: EventUserMongo): EventUser {
+    internal fun buildEventUser(eventUserMongo: EventUserMongo): EventUser {
 
         val eventUser = EventUser()
         eventUser.firstName = eventUserMongo.standardInfo.firstname

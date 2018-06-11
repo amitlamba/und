@@ -9,8 +9,6 @@ class ServiceProviderCredentials {
     var clientID: Long? = null
     var appuserID: Long? = null
 
-    //TODO validations of service provider and service provider type
-
     @NotNull
     lateinit var serviceProviderType: String
 

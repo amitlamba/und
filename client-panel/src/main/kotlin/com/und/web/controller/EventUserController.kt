@@ -11,10 +11,11 @@ import com.und.web.model.event.Event
 import com.und.web.model.EventUser
 import com.und.web.model.Response
 import com.und.web.model.ResponseStatus
-import com.und.model.mongo.eventapi.EventUser as MongoEventUser
+import com.und.web.model.Segment
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 
@@ -115,13 +116,13 @@ class EventUserController {
 
     }
 
-    @GetMapping(value = ["/segment/{id}"])
-    @ResponseBody
-    fun findEventUsersBySegment(@PathVariable id: Long): ResponseEntity<List<MongoEventUser>> {
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(value = ["/user-list/segment"])
+    fun findEventUsersBySegment(@RequestBody segment: Segment): ResponseEntity<List<EventUser>> {
         val clientId = getClientId()
-        val eventUserList = segmentService.segmentUsers(id, clientId)
+        val eventUserList = segmentService.segmentUsers(segment, clientId)
         return if (eventUserList.isEmpty()) {
-            throw EventUserListNotFoundException("users with segment id $id not found")
+            throw EventUserListNotFoundException("users with segment ${segment.name} not found")
         } else {
             ResponseEntity(eventUserList, HttpStatus.OK)
         }

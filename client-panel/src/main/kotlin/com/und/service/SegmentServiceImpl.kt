@@ -3,6 +3,7 @@ package com.und.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.model.jpa.Segment
 import com.und.model.mongo.eventapi.EventUser
+import com.und.web.model.EventUser as EventUserWeb
 import com.und.repository.jpa.SegmentRepository
 import com.und.repository.mongo.EventRepository
 import com.und.repository.mongo.EventUserRepository
@@ -56,8 +57,8 @@ class SegmentServiceImpl : SegmentService {
         val clientID = AuthenticationUtils.clientID
         if (clientID != null) {
             val segmentOption = segmentRepository.findByIdAndClientID(id, clientID)
-             if(segmentOption.isPresent) {
-                 return buildWebSegment(segmentOption.get())
+            if (segmentOption.isPresent) {
+                return buildWebSegment(segmentOption.get())
             }
         }
         throw SegmentNotFoundException("No Segment Exists with id $id")
@@ -65,22 +66,32 @@ class SegmentServiceImpl : SegmentService {
 
     override fun segmentUsers(segmentId: Long, clientId: Long): List<EventUser> {
         val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
-        return if (segmentOption .isPresent) {
+        return if (segmentOption.isPresent) {
             val segment = segmentOption.get()
-            buildWebSegment(segment)
-            val queries = SegmentParserCriteria().segmentQueries(buildWebSegment(segment))
-            val userDidList = retrieveUsers(queries.didq.first, queries.didq.second, clientId)
-            val userDidNotList = retrieveUsers(queries.didntq.first, queries.didntq.second, clientId)
-
-
-            val userList = userDidList.intersect(userDidNotList)
-            userList.asSequence().map {
-                eventUserRepository.findUserById(it, clientId)
-
-            }.filter { it.isPresent }.map { it.get() }.toList()
-
+            getSegmentUsersList(segment, clientId)
 
         } else emptyList()
+    }
+
+    override fun segmentUsers(segment: WebSegment, clientId: Long): List<EventUserWeb> {
+        val segmentJpa=buildSegment(segment)
+        val eventUsers = getSegmentUsersList(segmentJpa, clientId)
+        return buildEventUserList(eventUsers)
+    }
+
+    private fun getSegmentUsersList(segment: Segment, clientId: Long): List<EventUser> {
+        buildWebSegment(segment)
+        val queries = SegmentParserCriteria().segmentQueries(buildWebSegment(segment))
+        val userDidList = retrieveUsers(queries.didq.first, queries.didq.second, clientId)
+        val userDidNotList = retrieveUsers(queries.didntq.first, queries.didntq.second, clientId)
+
+
+        val userList = userDidList.intersect(userDidNotList)
+        return userList.asSequence().map {
+            eventUserRepository.findUserById(it, clientId)
+
+        }.filter { it.isPresent }.map { it.get() }.toList()
+
     }
 
     private fun retrieveUsers(queries: List<Aggregation>, conditionType: ConditionType, clientId: Long): MutableSet<String> {
@@ -120,5 +131,14 @@ class SegmentServiceImpl : SegmentService {
         return websegment
     }
 
+    private fun buildEventUserList(eventUserList: List<EventUser>): List<EventUserWeb> {
+        var eventUserListWeb: List<EventUserWeb> = emptyList()
+        val eventUserService=EventUserService()
+        for (eventUser in eventUserList) {
+            val listElement = eventUserService.buildEventUser(eventUser)
+            eventUserListWeb += listElement
+        }
+        return eventUserListWeb
+    }
 
 }
