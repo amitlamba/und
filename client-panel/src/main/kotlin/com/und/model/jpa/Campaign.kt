@@ -51,7 +51,7 @@ class Campaign {
     @NotNull
     var status: CampaignStatus = CampaignStatus.CREATED
 
-    @OneToOne(mappedBy = "campaign",
+    @OneToOne(mappedBy = "campaign", fetch = FetchType.LAZY,
             cascade = arrayOf(CascadeType.ALL),
             orphanRemoval = true)
     var emailCampaign: EmailCampaign? = null
@@ -60,7 +60,7 @@ class Campaign {
             field?.campaign = this
         }
 
-    @OneToOne(mappedBy = "campaign",
+    @OneToOne(mappedBy = "campaign", fetch = FetchType.LAZY,
             cascade = arrayOf(CascadeType.ALL),
             orphanRemoval = true)
     var smsCampaign: SmsCampaign? = null
