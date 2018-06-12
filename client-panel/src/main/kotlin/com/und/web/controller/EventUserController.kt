@@ -3,10 +3,7 @@ package com.und.web.controller
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.EventUserService
 import com.und.service.SegmentService
-import com.und.web.controller.exception.EventNotFoundException
-import com.und.web.controller.exception.EventUserListNotFoundException
-import com.und.web.controller.exception.EventUserNotFoundException
-import com.und.web.controller.exception.EventsListNotFoundException
+import com.und.web.controller.exception.*
 import com.und.web.model.event.Event
 import com.und.web.model.EventUser
 import com.und.web.model.Response
@@ -18,6 +15,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 
 @CrossOrigin
@@ -118,11 +116,11 @@ class EventUserController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/user-list/segment"])
-    fun findEventUsersBySegment(@RequestBody segment: Segment): ResponseEntity<List<EventUser>> {
+    fun findEventUsersBySegment(@Valid @RequestBody segment: Segment): ResponseEntity<List<EventUser>> {
         val clientId = getClientId()
         val eventUserList = segmentService.segmentUsers(segment, clientId)
         return if (eventUserList.isEmpty()) {
-            throw EventUserListNotFoundException("users with segment ${segment.name} not found")
+            throw EventUserListBySegmentNotFoundException("Event user list not found")
         } else {
             ResponseEntity(eventUserList, HttpStatus.OK)
         }
