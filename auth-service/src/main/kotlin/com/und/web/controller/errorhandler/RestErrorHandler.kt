@@ -100,6 +100,15 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
+    @ExceptionHandler(EmailAlreadyRegisteredException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    fun emailAlreadyRegisteredError(ex: EmailAlreadyRegisteredException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("400 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.emailRegisteredError", null, request.locale), ex.localizedMessage)
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
+    }
+
     @ExceptionHandler(AccessDeniedException::class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ResponseBody
