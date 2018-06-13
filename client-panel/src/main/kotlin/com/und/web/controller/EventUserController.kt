@@ -116,7 +116,7 @@ class EventUserController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/user-list/segment"])
-    fun findEventUsersBySegment(@Valid @RequestBody segment: Segment): ResponseEntity<List<EventUser>> {
+    fun findEventUsersBySegment(@RequestBody segment: Segment): ResponseEntity<List<EventUser>> {
         val clientId = getClientId()
         val eventUserList = segmentService.segmentUsers(segment, clientId)
         return if (eventUserList.isEmpty()) {

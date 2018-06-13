@@ -10,12 +10,12 @@ class Segment {
 
     var id: Long? = null
 
-    /*@NotNull
+    @NotNull
     @Size(min = 2, max = 50)
-    @Pattern(regexp = "[A-Za-z0-9-_][A-Za-z0-9-_\\s]*")*/
+    @Pattern(regexp = "[A-Za-z0-9-_][A-Za-z0-9-_\\s]*")
     var name: String = ""
 
-//    @NotNull
+    @NotNull
     var type: String = ""
     var creationDate: LocalDateTime = LocalDateTime.now()
     var conversionEvent: String? = null
