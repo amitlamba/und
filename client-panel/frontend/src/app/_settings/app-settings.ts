@@ -3,8 +3,8 @@ export class AppSettings {
 
 
   // public static API_ENDPOINT_CLIENT = AppSettings.API_ENDPOINT + "/client";
-  public static API_ENDPOINT_CLIENT = "http://nestros.com:9191";
-  // public static API_ENDPOINT_CLIENT = "http://localhost:9191";
+  // public static API_ENDPOINT_CLIENT = "http://nestros.com:9191";
+  public static API_ENDPOINT_CLIENT = "http://localhost:9191";
 
   public static API_ENDPOINT_CLIENT_CLIENT = AppSettings.API_ENDPOINT_CLIENT + "/client";
   public static API_ENDPOINT_CLIENT_CLIENT_EMAIL = AppSettings.API_ENDPOINT_CLIENT_CLIENT + "/email";

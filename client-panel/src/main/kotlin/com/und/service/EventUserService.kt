@@ -116,7 +116,7 @@ class EventUserService {
         eventUser.fbId = eventUserMongo.identity.fbId
         eventUser.googleId = eventUserMongo.identity.googleId
         eventUser.mobile = eventUserMongo.identity.mobile
-        eventUser.undId = eventUserMongo.identity.undId
+        eventUser.undId = eventUserMongo.id
         eventUser.countryCode = eventUserMongo.standardInfo.countryCode
         eventUser.communication = eventUserMongo.communication
         return eventUser
