@@ -53,10 +53,10 @@ export class DemoTinymceComponent implements OnDestroy, AfterViewInit{
 
   ngAfterViewInit() {
     console.log(this.htmlContent);
-    if (this.htmlContent.indexOf('##UND_UNSUBSCRIBE_LINK##') < 0) {
-      this.unsubscribeButtonText = "Add Unsubscribe";
-    } else {
+    if (this.htmlContent && this.htmlContent.indexOf('##UND_UNSUBSCRIBE_LINK##') >= 0) {
       this.unsubscribeButtonText = "Remove Unsubscribe";
+    } else {
+      this.unsubscribeButtonText = "Add Unsubscribe";
     }
     tinymce.init({
       mode: 'exact',
@@ -102,17 +102,17 @@ export class DemoTinymceComponent implements OnDestroy, AfterViewInit{
   addUnsubscribeLink(event) {
     console.log(this.htmlContent);
 
-    if(this.htmlContent.indexOf('##UND_UNSUBSCRIBE_LINK##') < 0){
+    if(this.htmlContent && this.htmlContent.indexOf('##UND_UNSUBSCRIBE_LINK##') >= 0){
       // http://archive.tinymce.com/wiki.php/API3:method.tinymce.dom.DOMUtils.add  "Below Line Definition."\
 
-      tinymce.activeEditor.dom.add(tinymce.activeEditor.getBody(), 'a', {href : '##UND_UNSUBSCRIBE_LINK##' ,id : 'unsubscribe'} , 'Unsubscribe');
-      this.htmlContent = tinymce.activeEditor.getBody().innerHTML;
-      event.srcElement.innerHTML='Remove Unsubscribe';
-    }
-    else {
       tinymce.activeEditor.dom.remove(tinymce.activeEditor.dom.select('#unsubscribe'));
       this.htmlContent = tinymce.activeEditor.getBody().innerHTML;
       event.srcElement.innerHTML='Add Unsubscribe';
+    }
+    else {
+      tinymce.activeEditor.dom.add(tinymce.activeEditor.getBody(), 'a', {href : '##UND_UNSUBSCRIBE_LINK##' ,id : 'unsubscribe'} , 'Unsubscribe');
+      this.htmlContent = tinymce.activeEditor.getBody().innerHTML;
+      event.srcElement.innerHTML='Remove Unsubscribe';
     }
     // console.log(this.htmlContent);
   }
