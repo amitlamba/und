@@ -48,7 +48,7 @@ class CampaignService {
             campaignRepository.findByClientID(it)
         }
 
-        return campaigns?.map { buildWebCampaignForList(it) } ?: listOf()
+        return campaigns?.map { buildWebCampaign(it) } ?: listOf()
     }
 
 
