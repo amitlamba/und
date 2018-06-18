@@ -12,12 +12,14 @@ import {
 import {AppSettings} from "../_settings/app-settings";
 import {tap} from "rxjs/operators";
 import {Observable} from "rxjs/Observable";
+import {EventUser} from "../_models/user";
 
 @Injectable()
 export class SegmentService {
   segments: Segment[] = [];
   editSegment: Segment;
   countries: Country[];
+  eventUser: EventUser = new EventUser();
 
   constructor(private httpClient: HttpClient) {
     // this.editSegment = this.initSegment(new Segment());
@@ -173,6 +175,10 @@ export class SegmentService {
     );
   }
 
+  getSegmentById(id: number): Observable<Segment> {
+    return this.httpClient.get<Segment>(AppSettings.API_ENDPOINT_CLIENT_GET_SEGMENT_BY_ID + "/" + id);
+  }
+
   private createRegisteredEvent(name: string, properties: RegisteredEventProperties[]): RegisteredEvent {
     var registeredEvent = new RegisteredEvent();
     registeredEvent.name = name;
@@ -208,6 +214,38 @@ export class SegmentService {
         tap(next => {
         })
       );
+  }
+
+  findUserByGoogleID(googleID: string): Observable<any> {
+    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY_GOOGLE_ID + "/" + googleID);
+  }
+
+  findUserByFacebookID(facebookID: string): Observable<any> {
+    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY_FACEBOOK_ID + "/" + facebookID);
+  }
+
+  findUserByUndID(UndId: string): Observable<any> {
+    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY_UND_ID + "/" + UndId);
+  }
+
+  findUserByEmailID(emailID: string): Observable<any> {
+    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY_EMAIL_ID + "/" + emailID);
+  }
+
+  findUserByMobileNo(mobileNo: string): Observable<any> {
+    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY_MOBILE_NUMBER + "/" + mobileNo);
+  }
+
+  findUserByClientUserID(userID: string): Observable<any> {
+    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY_CLIENT_USER_ID + "/" + userID);
+  }
+
+  getEventsListByUserId(userId: string): Observable<any> {
+    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_EVENTS_LIST_BY_USER_ID + "/" + userId);
+  }
+
+  getEventDetailsByEventId(eventId: string): Observable<any> {
+    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_EVENTS_LIST_BY_USER_ID + "/" + eventId);
   }
 
   globalFiltersMetadata = {

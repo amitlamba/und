@@ -1,5 +1,4 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
-import {IMyDrpOptions} from "mydaterangepicker";
 import {CampaignService} from "../../_services/campaign.service";
 import {Campaign} from "../../_models/campaign";
 import {HttpErrorResponse} from "@angular/common/http";
@@ -14,12 +13,14 @@ import {Segment} from "../../_models/segment";
 export class CampaignsListComponent implements OnInit {
   // @ViewChild('campaignInformationModal') campaignInformationModal;
   modalCampaignInfoObject: Campaign;
-  showCampaignInfoModal:boolean = false;
+  showCampaignInfoModal: boolean = false;
   campaigns: Campaign[];
+  campaignId: number;
+  campaignConfirmationDialogText: string;
+  initCampaignsInfoComponent: boolean = false;
   changeSegmentationId: boolean = false;
 
-  constructor(private campaignService: CampaignService,
-              private segmentsService: SegmentService) {
+  constructor(private campaignService: CampaignService) {
   }
 
   ngOnInit() {
@@ -31,73 +32,96 @@ export class CampaignsListComponent implements OnInit {
       this.campaigns = campaigns;
     });
   }
+
   public model: any = {
     beginDate: {year: 2018, month: 10, day: 9},
     endDate: {year: 2018, month: 10, day: 19}
   };
 
-  resumeCampaignFunction(campaignId) {
-    console.log(campaignId);
-    this.campaignService.resumeCampaign(campaignId)
-      .subscribe(
-        (campaignId) => {
-          console.log(campaignId);
-          this.getCampaignsList();
-        },
-        (error: HttpErrorResponse) => {
-          console.log("Error from resume Campaign" + error);
-        }
-      );
-  }
-
-  pauseCampaignFunction(campaignId) {
-    console.log(campaignId);
-    this.campaignService.pauseCampaign(campaignId)
-      .subscribe(
-        (campaignId) => {
-          console.log(campaignId);
-          this.getCampaignsList();
-
-        },
-        (error: HttpErrorResponse) => {
-          console.log("Error from Pause Campaign Function" + error);
-        }
-      );
-  }
-
-  stopCampaignFunction(campaignId) {
-    console.log(campaignId);
-    this.campaignService.stopCampaign(campaignId)
-      .subscribe(
-        (campaignId) => {
-          console.log(campaignId);
-          this.getCampaignsList();
-
-        },
-        (error: HttpErrorResponse) => {
-          console.log("Error from Stop Campaign Function" + error);
-        }
-      );
-  }
-
-  deleteCampaignFunction(campaignId) {
-    console.log(campaignId);
-    this.campaignService.deleteCampaign(campaignId)
-      .subscribe(
-        (campaignId) => {
-          console.log(campaignId);
-          this.getCampaignsList();
-
-        },
-        (error: HttpErrorResponse) => {
-          console.log("Error from Delete Campaign Function" + error);
-        }
-      );
-  }
-  getCampaignItem(campaignItem:Campaign) {
+  getCampaignItem(campaignItem: Campaign) {
     // this.campaignInformationModal.nativeElement.className = 'modal fade show';
+    this.campaignService.campaignObjectForInfo.next(campaignItem);
     this.modalCampaignInfoObject = campaignItem;
     this.showCampaignInfoModal = true;
+    // this.initCampaignsInfoComponent = true;
     console.log(campaignItem);
   }
+
+  getCampaignId(campaignItem: Campaign, campaignConfirmationText: string) {
+    this.campaignId = campaignItem.id;
+    this.campaignConfirmationDialogText = campaignConfirmationText;
+    // console.log(this.campaignConfirmationDialogText);
+    // console.log(this.campaignId);
+  }
+
+  executeCampaignFunction() {
+    console.log(this.campaignId);
+    switch (this.campaignConfirmationDialogText) {
+      case "resume": {
+        console.log('inside resume');
+        console.log(this.campaignId);
+        this.campaignService.resumeCampaign(this.campaignId)
+          .subscribe(
+            (campaignId) => {
+              console.log(campaignId);
+              this.getCampaignsList();
+            },
+            (error: HttpErrorResponse) => {
+              console.log("Error from resume Campaign" + error);
+            }
+          );
+        break;
+      }
+
+      case "pause": {
+        console.log('inside Pause');
+        this.campaignService.pauseCampaign(this.campaignId)
+          .subscribe(
+            (campaignId) => {
+              console.log(campaignId);
+              this.getCampaignsList();
+
+            },
+            (error: HttpErrorResponse) => {
+              console.log("Error from Pause Campaign Function" + error);
+            }
+          );
+        break;
+      }
+
+      case "stop": {
+        console.log('inside Stop');
+        this.campaignService.stopCampaign(this.campaignId)
+          .subscribe(
+            (campaignId) => {
+              console.log(campaignId);
+              this.getCampaignsList();
+
+            },
+            (error: HttpErrorResponse) => {
+              console.log("Error from Stop Campaign Function" + error);
+            }
+          );
+        break;
+      }
+
+      case "delete": {
+        console.log('inside resume');
+        this.campaignService.deleteCampaign(this.campaignId)
+          .subscribe(
+            (campaignId) => {
+              console.log(campaignId);
+              this.getCampaignsList();
+
+            },
+            (error: HttpErrorResponse) => {
+              console.log("Error from Delete Campaign Function" + error);
+            }
+          );
+        break;
+      }
+    }
+
+  }
+
 }

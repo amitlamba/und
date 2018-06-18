@@ -36,30 +36,32 @@ export class UserParams {
 }
 
 export class EventUser {
-  identity: Identity;
-  email: string;
+  additionalInfo: any;         //Please review this property again with the backend
+  address: string;
+  city: string;
+  clientId: string;
   clientUserId: string;
-  undId: string;
-  fbId: string;
-  googleId: string;
-  mobile: string;
-  firstName: string;
-  lastName: string;
-  gender: string;
-  dob: string;
+  communication: Communication;
   country: string;
   countryCode: string;
-  clientId: string;
-  additionalInfo: string;         //Please review this property again with the backend
   creationDate: string;
+  dob: string;
+  email: string;
+  fbId: string;
+  firstName: string;
+  gender: string;
+  googleId: string;
+  lastName: string;
+  markTestUserProfile: boolean;
+  mobile: string;
+  undId: string;
 }
 
-export class Identity {
-  deviceId: string;
-  sessionId: string;
-  userId: string;
-  clientId: string;
+export class Communication {
+  email: string;
+  mobile: string;
 }
+
 export class Event {
   name: string;
   identity: Identity;
@@ -74,3 +76,12 @@ export class Event {
   userIdentified: boolean;
   // lineitem,attributes,startDate,EndDate to be added.
 }
+
+export class Identity {
+  deviceId: string;
+  sessionId: string;
+  userId: string;
+  clientId: string;
+}
+
+

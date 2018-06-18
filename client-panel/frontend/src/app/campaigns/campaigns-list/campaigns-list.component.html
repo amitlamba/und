@@ -41,30 +41,8 @@
         <td>
           {{campaignItem.name.charAt(0).toUpperCase()+ campaignItem.name.slice(1).toLowerCase()}}
           <a (click)="getCampaignItem(campaignItem)" data-toggle="modal" data-target="#campaignInfoModal"
-             title="Campaign Info">
+             tooltip="Campaign Info">
             <i class="far fa-question-circle text-primary ml-2"></i></a></td>
-        <!-- Modal -->
-        <div #campaignInformationModal *ngIf="showCampaignInfoModal"
-             class="modal fade " id="campaignInfoModal" tabindex="-1" role="dialog" aria-labelledby="campaignInfoModalTitle" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h4 class="modal-title ml-auto" id="campaignInfoModalTitle">
-                  {{modalCampaignInfoObject.name.charAt(0).toUpperCase()+ modalCampaignInfoObject.name.slice(1).toLowerCase()}}
-                </h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body bg-light">
-                <app-campaigns-info [campaignInfoObject]="modalCampaignInfoObject"></app-campaigns-info>
-              </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Okay</button>
-              </div>
-            </div>
-          </div>
-        </div>
         <td>{{campaignItem.campaignType}}</td>
         <td>{{campaignItem.dateCreated | date:'medium'}}</td>
         <td>
@@ -72,31 +50,37 @@
           <span *ngIf="campaignItem.schedule.multipleDates!==null">Multiple Dates</span>
           <span *ngIf="campaignItem.schedule.recurring!==null">Recurring</span>
         </td>
-        <td>{{(campaignItem.status=='CREATED'|| campaignItem.status=='RESUMED' ) ? ("Running") : ( campaignItem.status )}}</td>
+        <td>{{(campaignItem.status=='CREATED'|| campaignItem.status=='RESUMED' ) ? ("Running") : ( campaignItem.status
+          )}}
+        </td>
         <td class="text-center">
           <button *ngIf="campaignItem.status=='PAUSED' "
                   class="border-0 bg-light"
-                  data-toggle="tooltip" data-placement="top" title="Resume Campaign"
-                  (click)="resumeCampaignFunction(campaignItem.id)"
-                  id="playCampaignButton"><i class="fas fa-play text-primary"></i>
+                  tooltip="Resume Campaign"
+                  data-toggle="modal" data-target="#campaignActionConfirmationDialog"
+                  (click)="getCampaignId(campaignItem,'resume')"
+                  id="resumeCampaignButton"><i class="fas fa-play text-primary"></i>
           </button>
           <button *ngIf="campaignItem.status=='CREATED' || campaignItem.status=='RESUMED'"
                   class="border-0 bg-light"
-                  (click)="pauseCampaignFunction(campaignItem.id)"
-                  data-toggle="tooltip" data-placement="top" title="Pause Campaign"
+                  data-toggle="modal" data-target="#campaignActionConfirmationDialog"
+                  (click)="getCampaignId(campaignItem,'pause')"
+                  tooltip="Pause Campaign"
                   id="pauseCampaignButton"><i class="far fa-pause-circle text-primary"></i>
           </button>
           <button class="border-0 bg-light"
-                  (click)="stopCampaignFunction(campaignItem.id)"
+                  data-toggle="modal" data-target="#campaignActionConfirmationDialog"
+                  (click)="getCampaignId(campaignItem,'stop')"
                   [disabled]="campaignItem.status=='DELETED' || campaignItem.status=='STOPPED'"
-                  data-toggle="tooltip" data-placement="top" title="Stop Campaign"
+                  tooltip="Stop Campaign"
                   id="stopCampaignButton"><i class="far fa-stop-circle text-primary"
                                              [ngClass]="{'text-muted':campaignItem.status=='DELETED'|| campaignItem.status=='STOPPED'}"></i>
           </button>
           <button class="border-0 bg-light"
-                  (click)="deleteCampaignFunction(campaignItem.id)"
+                  data-toggle="modal" data-target="#campaignActionConfirmationDialog"
+                  (click)="getCampaignId(campaignItem,'delete')"
                   [disabled]="campaignItem.status=='DELETED'"
-                  data-toggle="tooltip" data-placement="top" title="Delete Campaign"
+                  tooltip="Delete Campaign"
                   id="deleteCampaignButton"><i class="far fa-trash-alt text-primary"
                                                [ngClass]="{'text-muted':campaignItem.status=='DELETED'}"></i>
           </button>
@@ -104,6 +88,54 @@
       </tr>
       </tbody>
     </table>
+  </div>
+  <!-- Campaign Information Modal -->
+  <div #campaignInformationModal *ngIf="showCampaignInfoModal"
+       class="modal fade " id="campaignInfoModal" tabindex="-1" role="dialog" aria-labelledby="campaignInfoModalTitle"
+       aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title ml-auto" id="campaignInfoModalTitle">
+            {{modalCampaignInfoObject.name.charAt(0).toUpperCase()+
+            modalCampaignInfoObject.name.slice(1).toLowerCase()}}
+          </h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body bg-light">
+          <app-campaigns-info></app-campaigns-info>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Okay</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pause,resume, stop ,delete Campaign Modal -->
+
+  <div class="modal fade" id="campaignActionConfirmationDialog" tabindex="-1" role="dialog" aria-labelledby="campaignConfirmationModalLabel"
+       aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title font-weight-bold text-capitalize ml-auto" id="campaignConfirmationModalLabel">{{campaignConfirmationDialogText}} Campaign</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" style="font-size: 1.2rem;">
+          Are you sure you want to {{campaignConfirmationDialogText}} the campaign?
+        </div>
+        `
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary"  data-dismiss="modal" (click)="executeCampaignFunction()">Yes</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
