@@ -26,7 +26,7 @@ class EventUser {
 
     //TODO Use custom validators here
 
-    @Size(min = 10, max = 10, message = "{eventUser.mobile.invalidSize}")
+    @Size(min = 10, max =15 , message = "{eventUser.mobile.invalidSize}")
     @Pattern(regexp = "[0-9]*", message = "{eventUser.mobile.invalidDigits}")
     var mobile: String? = null
 

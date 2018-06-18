@@ -6,6 +6,7 @@ import com.und.web.model.EmailTemplate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @CrossOrigin
 @RestController
@@ -35,7 +36,7 @@ class EmailTemplateController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/save-template"])
-    fun saveEmailTemplate(@RequestBody emailTemplate: EmailTemplate): Long {
+    fun saveEmailTemplate(@Valid @RequestBody emailTemplate: EmailTemplate): Long {
 
         return emailTemplateService.saveEmailTemplate(emailTemplate)
     }

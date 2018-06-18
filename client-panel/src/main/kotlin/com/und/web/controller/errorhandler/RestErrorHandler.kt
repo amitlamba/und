@@ -132,6 +132,15 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
     }
 
+    @ExceptionHandler(EventUserListBySegmentNotFoundException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    fun eventUser(ex: EventUserListBySegmentNotFoundException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("401 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.segmentUserListNotFound", null, request.locale), ex.localizedMessage)
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
+    }
+
     @ExceptionHandler(EventNotFoundException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody

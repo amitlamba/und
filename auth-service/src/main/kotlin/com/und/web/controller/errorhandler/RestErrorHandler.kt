@@ -1,10 +1,7 @@
 package com.und.web.controller.errorhandler
 
 import com.und.common.utils.loggerFor
-import com.und.web.controller.exception.ReCaptchaInvalidException
-import com.und.web.controller.exception.ReCaptchaUnavailableException
-import com.und.web.controller.exception.UndBusinessValidationException
-import com.und.web.controller.exception.UserAlreadyRegistered
+import com.und.web.controller.exception.*
 import io.jsonwebtoken.MalformedJwtException
 import io.jsonwebtoken.SignatureException
 import io.jsonwebtoken.UnsupportedJwtException
@@ -103,6 +100,15 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
+    @ExceptionHandler(EmailAlreadyRegisteredException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    fun emailAlreadyRegisteredError(ex: EmailAlreadyRegisteredException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("400 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.emailRegisteredError", null, request.locale), ex.localizedMessage)
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
+    }
+
     @ExceptionHandler(AccessDeniedException::class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ResponseBody
@@ -157,5 +163,30 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
     }
 
+    @ExceptionHandler(InvalidContactUsMessageException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    fun eventUser(ex: InvalidContactUsMessageException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("401 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("contactUs.message.invalid", null, request.locale), ex.localizedMessage)
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
+    }
 
+    @ExceptionHandler(InvalidContactUsCompanyNameException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    fun eventUser(ex: InvalidContactUsCompanyNameException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("401 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("contactUs.companyName.invalid", null, request.locale), ex.localizedMessage)
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(InvalidContactUsException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    fun eventUser(ex: InvalidContactUsException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("401 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("contactUs.invalid", null, request.locale), ex.localizedMessage)
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
+    }
 }

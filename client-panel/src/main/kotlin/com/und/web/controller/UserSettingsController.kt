@@ -45,7 +45,7 @@ class UserSettingsController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/email-service-provider/save"])
-    fun saveEmailServiceProvider(@RequestBody serviceProviderCredentials: ServiceProviderCredentials): Long? {
+    fun saveEmailServiceProvider(@Valid @RequestBody serviceProviderCredentials: ServiceProviderCredentials): Long? {
         val clientID = AuthenticationUtils.clientID
         val userID = AuthenticationUtils.principal.id
         serviceProviderCredentials.appuserID = userID
@@ -70,7 +70,7 @@ class UserSettingsController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/sms-service-provider/save"])
-    fun saveSmsServiceProvider(@RequestBody serviceProviderCredentials: ServiceProviderCredentials): Long? {
+    fun saveSmsServiceProvider(@Valid @RequestBody serviceProviderCredentials: ServiceProviderCredentials): Long? {
         val clientID = AuthenticationUtils.clientID
         val userID = AuthenticationUtils.principal.id
         serviceProviderCredentials.appuserID = userID

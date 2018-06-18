@@ -177,6 +177,34 @@ class CampaignService {
         }
         return webCampaign
     }
+    fun buildWebCampaignForList(campaign: Campaign): WebCampaign {
+        val webCampaign = WebCampaign()
+        with(webCampaign) {
+            id = campaign.id
+            name = campaign.name
+
+            campaignType = campaign.campaignType
+            segmentationID = campaign.segmentationID
+            dateCreated = campaign.dateCreated
+            dateModified = campaign.dateModified
+            status = campaign.status
+
+
+
+            schedule = objectMapper.readValue(campaign.schedule, Schedule::class.java)
+        }
+
+/*        if (campaign.emailCampaign != null) {
+            val emailcampaign = campaign.emailCampaign
+            webCampaign.templateID = emailcampaign?.templateId
+            webCampaign.campaignType = CampaignType.EMAIL
+        } else if (campaign.smsCampaign != null) {
+            val smsCampaign = campaign.smsCampaign
+            webCampaign.templateID = smsCampaign?.templateId
+            webCampaign.campaignType = CampaignType.SMS
+        }*/
+        return webCampaign
+    }
 
     fun pause(campaignId: Long): Long? {
         return handleSchedule(campaignId, JobDescriptor.Action.PAUSE)

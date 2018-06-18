@@ -12,6 +12,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @RestController("segment")
 @RequestMapping("/segment")
@@ -38,7 +39,7 @@ class SegmentController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/save"])
-    fun save(@RequestBody segment: Segment): ResponseEntity<Segment> {
+    fun save(@Valid @RequestBody segment: Segment): ResponseEntity<Segment> {
         //FIXME Validate for unique name of segment for a client
         val persistedSegment = segmentService.createSegment(segment)
         return ResponseEntity(persistedSegment, HttpStatus.CREATED)

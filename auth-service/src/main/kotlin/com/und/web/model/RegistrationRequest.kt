@@ -23,7 +23,7 @@ class RegistrationRequest {
     lateinit var name: String
 
     @NotNull
-    @Size(min = 4, max = 40, message = "Country should contain 4 to 20 characters")
+    @Size(min = 4, max = 60, message = "Country should contain 4 to 60 characters")
     var country: String? = null
 
     @NotNull

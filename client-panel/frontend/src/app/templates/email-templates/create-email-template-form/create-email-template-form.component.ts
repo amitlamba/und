@@ -116,10 +116,10 @@ export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
   }
 
   setUpUnsubscribeButtonText() {
-    if(this.emailTemplate.emailTemplateBody.indexOf('##UND_UNSUBSCRIBE_LINK##') < 0) {
-      this.unsubscribeButtonText = "Add Unsubscribe";
-    } else {
+    if(this.emailTemplate && this.emailTemplate.emailTemplateBody && this.emailTemplate.emailTemplateBody.indexOf('##UND_UNSUBSCRIBE_LINK##') >= 0) {
       this.unsubscribeButtonText = "Remove Unsubscribe";
+    } else {
+      this.unsubscribeButtonText = "Add Unsubscribe";
     }
   }
 }
