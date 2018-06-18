@@ -89,6 +89,7 @@ import {ReportsService} from "./_services/reports.service";
 import {RegisterService} from "./_services/register.service";
 import {UserProfileComponent} from './user-profile/user-profile.component';
 import {TooltipModule} from "ngx-bootstrap";
+import {CampaignsInfoComponent} from './campaigns-info/campaigns-info.component';
 import {Select2Module} from "ng2-select2";
 
 
@@ -170,7 +171,8 @@ import {Select2Module} from "ng2-select2";
     TimerangeComponent,
     ConversionEventsGraphComponent,
     EventsGraphComponent,
-    UserProfileComponent
+    UserProfileComponent,
+    CampaignsInfoComponent
   ],
   providers: [
     AuthGuard,
@@ -196,6 +198,7 @@ import {Select2Module} from "ng2-select2";
     GlobalFilterComponent,
     CreateEmailTemplateFormComponent
   ],
+  exports: [TooltipModule],
   bootstrap: [AppComponent]
 })
 

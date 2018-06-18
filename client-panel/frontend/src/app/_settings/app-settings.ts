@@ -12,6 +12,7 @@ export class AppSettings {
   public static API_ENDPOINT_CLIENT_CLIENT_EMAIL_TEMPLATES = AppSettings.API_ENDPOINT_CLIENT_CLIENT_EMAIL + "/templates";
   public static API_ENDPOINT_CLIENT_CLIENT_EMAIL_SAVE_TEMPLATES = AppSettings.API_ENDPOINT_CLIENT_CLIENT_EMAIL + "/save-template";
   public static API_ENDPOINT_CLIENT_CLIENT_EMAIL_USER_EVENT_ATTRIBUTES = AppSettings.API_ENDPOINT_CLIENT_CLIENT_EMAIL + "/user-event-attributes";
+  public static API_ENDPOINT_CLIENT_CLIENT_GET_EMAIL_TEMPLATE_BY_ID = AppSettings.API_ENDPOINT_CLIENT_CLIENT_EMAIL + "/template";
 
   public static API_ENDPOINT_CLIENT_CLIENT_SMS = AppSettings.API_ENDPOINT_CLIENT_CLIENT + "/sms";
   public static API_ENDPOINT_CLIENT_CLIENT_SMS_DEFAULT_TEMPLATES = AppSettings.API_ENDPOINT_CLIENT_CLIENT_SMS + "/default-templates";
@@ -45,6 +46,21 @@ export class AppSettings {
   public static API_ENDPOINT_CLIENT_SEGMENT_COMMONPROPERTIES = AppSettings.API_ENDPOINT_CLIENT_SEGMENT + "/commonproperties";
   public static API_ENDPOINT_CLIENT_SEGMENT_LIST = AppSettings.API_ENDPOINT_CLIENT_SEGMENT + "/list";
   public static API_ENDPOINT_CLIENT_SEGMENT_SAVE = AppSettings.API_ENDPOINT_CLIENT_SEGMENT + "/save";
+  public static API_ENDPOINT_CLIENT_GET_SEGMENT_BY_ID = AppSettings.API_ENDPOINT_CLIENT_SEGMENT + "/segment";
+
+
+  public static API_ENDPOINT_CLIENT_FIND_USER_BY = AppSettings.API_ENDPOINT_CLIENT + "/user";
+  public static API_ENDPOINT_CLIENT_FIND_USER_BY_GOOGLE_ID = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/google';
+  public static API_ENDPOINT_CLIENT_FIND_USER_BY_UND_ID = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/id';
+  public static API_ENDPOINT_CLIENT_FIND_USER_BY_FACEBOOK_ID = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/fb';
+  public static API_ENDPOINT_CLIENT_FIND_USER_BY_CLIENT_USER_ID = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/sys';
+  public static API_ENDPOINT_CLIENT_FIND_USER_BY_EMAIL_ID = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/email';
+  public static API_ENDPOINT_CLIENT_FIND_USER_BY_MOBILE_NUMBER = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/mobile';
+
+  public static API_ENDPOINT_CLIENT_EVENT = AppSettings.API_ENDPOINT_CLIENT + "/user";
+  public static API_ENDPOINT_CLIENT_EVENTS_LIST_BY_USER_ID = AppSettings.API_ENDPOINT_CLIENT_EVENT + "/event-list";
+  public static API_ENDPOINT_CLIENT_EVENT_DETAILS_BY_EVENT_ID = AppSettings.API_ENDPOINT_CLIENT + "/event-details";
+
 
   public static API_ENDPOINT_CLIENT_CAMPAIGN = AppSettings.API_ENDPOINT_CLIENT + "/campaign";
   public static API_ENDPOINT_CLIENT_CAMPAIGN_SAVE = AppSettings.API_ENDPOINT_CLIENT_CAMPAIGN + "/save";
@@ -53,7 +69,6 @@ export class AppSettings {
   public static API_ENDPOINT_CLIENT_CAMPAIGN_RESUME = AppSettings.API_ENDPOINT_CLIENT_CAMPAIGN + "/resume";
   public static API_ENDPOINT_CLIENT_CAMPAIGN_STOP = AppSettings.API_ENDPOINT_CLIENT_CAMPAIGN + "/stop";
   public static API_ENDPOINT_CLIENT_CAMPAIGN_DELETE = AppSettings.API_ENDPOINT_CLIENT_CAMPAIGN + "/delete";
-
 
 
   public static API_ENDPOINT_CLIENT_LOCATION = AppSettings.API_ENDPOINT_CLIENT + "/location";
@@ -65,7 +80,9 @@ export class AppSettings {
 
 
   // public static API_ENDPOINT_AUTH = AppSettings.API_ENDPOINT + "/auth";
-  public static API_ENDPOINT_AUTH = "http://nestros.com:9595"
+  public static API_ENDPOINT_AUTH = "http://nestros.com:9595";
+  // public static API_ENDPOINT_AUTH = AppSettings.API_ENDPOINT + "/auth";
+  // public static API_ENDPOINT_AUTH = "http://nestros.com:9595"
 
   public static API_ENDPOINT_AUTH_AUTH = AppSettings.API_ENDPOINT_AUTH + "/auth";
   public static API_ENDPOINT_AUTH_AUTH_VALIDATE = AppSettings.API_ENDPOINT_AUTH_AUTH + "/validate";

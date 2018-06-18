@@ -1,4 +1,4 @@
-<div class="form-inline ml-3 mt-1 mb-2">
+ <div class="row d-flex flex-row ml-3 mt-1 mb-0">
   <div class="form-group">
     <select class="form-control"
             (change)="filterFirstDropdown($event.target.value)" style="width:145px;margin-right: -8px;">
@@ -7,20 +7,20 @@
       <option *ngFor="let prop of defaultProperties" [value]="prop.name">{{prop.name}}</option>
     </select>
   </div>
-  <div class="form-group col-3 my-0 pr-0" *ngIf="selectedProperty && selectedProperty.dataType=='string'">
+  <div class="form-group col-6 my-0 pr-0" *ngIf="selectedProperty && selectedProperty.dataType=='string'">
     <app-string-comparator [(operator)]="localPropertyFilter.operator"
                            [(values)]="localPropertyFilter.values"></app-string-comparator>
   </div>
-  <div class="form-group col-3 my-0 pr-0" *ngIf="selectedProperty && selectedProperty.dataType=='number'">
+  <div class="form-group col-6 my-0 pr-0" *ngIf="selectedProperty && selectedProperty.dataType=='number'">
     <app-number-comparator [(operator)]="localPropertyFilter.operator"
                            [(values)]="localPropertyFilter.values"></app-number-comparator>
   </div>
-  <div class="form-group col-3 my-0 pr-0" *ngIf="selectedProperty && selectedProperty.dataType=='date'">
+  <div class="form-group col-6 mb-0  ml-3 pr-0 date-comparator" *ngIf="selectedProperty && selectedProperty.dataType=='date'">
     <app-date-comparator [(operator)]="localPropertyFilter.operator" [(values)]="localPropertyFilter.values"
                          [(valueUnit)]="localPropertyFilter.valueUnit" class="row d-flex flex-row"
                          style="width: 500px;"></app-date-comparator>
   </div>
-  <div *ngIf="selectedProperty && selectedProperty.dataType=='timerange'" class="ml-3">
+  <div class="form-group col-md-8 col-sm-6 my-0 pr-0" *ngIf="selectedProperty && selectedProperty.dataType=='timerange'">
     <app-timerange [options]="selectedProperty.options"
                    (values)="timeRangeValueChanged($event)"></app-timerange>
   </div>

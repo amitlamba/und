@@ -5,7 +5,7 @@
       <div class="form-group">
         <label for="websiteUrl">Website's URL</label>
         <div class="input-group">
-          <select class="input-group-addon protocols rounded p-2" name="protocol" [(ngModel)]="protocol">
+          <select class="input-group-addon protocols rounded-left p-2" name="protocol" [(ngModel)]="protocol">
             <span class="caret"></span>
             <option *ngFor="let pr of protocolsArray" [ngValue]="pr">{{pr}}</option>
           </select>

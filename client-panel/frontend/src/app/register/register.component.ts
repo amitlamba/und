@@ -11,10 +11,14 @@ import {_RECAPTCHA_KEY} from "../_settings/app-settings";
   styleUrls: ['./register.component.scss']
 })
 export class RegisterComponent implements OnInit {
+
   // Angular2 ReCaptcha Component used from https://github.com/xmaestro/angular2-recaptcha
   @ViewChild('ReCaptchaComponent') captcha: ReCaptchaComponent;
+  recaptchaToken: string = null;
+  preferredCountries = ['in', 'us', 'ru', 'gb'];
+  phoneNumberLength: number;
+
   _site_key = _RECAPTCHA_KEY;
-  recaptchaToken: string = null
 
   constructor(private authenticationService: AuthenticationService, private router: Router) {
   }
@@ -32,6 +36,7 @@ export class RegisterComponent implements OnInit {
 
   onSubmit(form: FormData) {
     this.loading = true;
+    console.log(this.model);
     if (this.form.valid) {
       console.log(this.form);
       console.log(this.model);
@@ -49,7 +54,10 @@ export class RegisterComponent implements OnInit {
 
   }
 
-
+  phoneNumberLengthCheck($event) {
+    console.log($event.length);
+    this.phoneNumberLength = $event.length
+  }
   ngOnInit() {
     this.captcha.reset();
   }
@@ -58,5 +66,8 @@ export class RegisterComponent implements OnInit {
     console.log("event daata \n" + $event);
     this.recaptchaToken = this.captcha.getResponse().toString();
     console.log("Token Data \n" + this.recaptchaToken);
+  }
+  saveCountryName($event){
+    this.model.country = $event.substring(0,$event.indexOf('(')-1); //using indexOf so as to remove the special characters
   }
 }

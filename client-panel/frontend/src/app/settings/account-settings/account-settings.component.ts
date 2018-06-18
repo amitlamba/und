@@ -1,6 +1,8 @@
 import {Component, ElementRef, OnInit, ViewChild} from '@angular/core';
 import {AccountSettings, UnSubscribeLink} from "../../_models/client";
 import {SettingsService} from "../../_services/settings.service";
+import {MessageService} from "../../_services/message.service";
+import {HttpErrorResponse} from "@angular/common/http";
 
 
 @Component({
@@ -22,7 +24,8 @@ export class AccountSettingsComponent implements OnInit {
   // ng2-timezone-picker is used from https://samuelnygaard.github.io/ng2-timezone-selector/docs/
   placeholderString = 'Select timezone';
 
-  constructor(private settingsService: SettingsService) {
+  constructor(private settingsService: SettingsService,
+              private messageService: MessageService) {
   }
 
   ngOnInit() {
@@ -81,7 +84,11 @@ export class AccountSettingsComponent implements OnInit {
     this.settingsService.saveAccountSettings(this.accountSettings)
       .subscribe(
         (response) => {
+          this.messageService.addSuccessMessage('Website Url Added Succesfully');
           this.accountSettings.urls = [];
+        },
+        (error:HttpErrorResponse)=>{
+          this.messageService.addDangerMessage('Error in Adding Website Url,Please try again')
         }
       );
   }
@@ -95,7 +102,11 @@ export class AccountSettingsComponent implements OnInit {
     this.settingsService.saveUnSubscribeLink(this.unSubscribeLink)
       .subscribe(
         (response) => {
+          this.messageService.addSuccessMessage('Unsubscribe Link Added Successfully.');
           console.log(response);
+        },
+        (error:HttpErrorResponse)=>{
+          this.messageService.addDangerMessage('Error in adding Unsubscribe URL, Please try again.')
         }
       )
   }

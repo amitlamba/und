@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 
-import {EventUser, User} from "../_models/user";
+import {User} from "../_models/user";
 import {UserService} from "../_services/user.service";
 
 @Component({
@@ -10,7 +10,7 @@ import {UserService} from "../_services/user.service";
 
 export class HomeComponent implements OnInit {
   title: string = "Dashboard";
-  users: EventUser[] = [];
+  // users: EventUser[] = [];
 
   constructor(private userService: UserService) {
   }
@@ -18,10 +18,10 @@ export class HomeComponent implements OnInit {
   ngOnInit() {
 
     // get users from secure api end point
-    this.userService.getUsers()
-      .subscribe(users => {
-        this.users = users;
-      });
+    // this.userService.getUsers()
+    //   .subscribe(users => {
+    //     this.users = users;
+    //   });
 
     // Sample Graph Using ChartJS
 

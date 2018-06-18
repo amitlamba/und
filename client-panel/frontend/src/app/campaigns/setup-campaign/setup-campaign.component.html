@@ -65,10 +65,9 @@
           <button class="btn btn-primary ml-3 px-4"
                   (click)="continueToSchedule()"
                   type="button"
-          >
+                  [disabled]='f.invalid || templateID.value=="selectTemplate" || segmentID.value=="selectSegment"'>
             Continue
           </button>
-          <!--[disabled]='f.invalid || templateID.value=="selectTemplate" || segmentID.value=="selectSegment"'-->
         </form>
       </div>
     </div>

@@ -8,12 +8,12 @@
   </div>
 
   <!-- Modal -->
-  <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"
+  <div #emailTemplateModal class="modal fade" id="emailTemplateModal" tabindex="-1" role="dialog" aria-labelledby="emailTemplateModalTitle"
        aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLongTitle">Create Email Template</h5>
+          <h5 class="modal-title" id="emailTemplateModalTitle">Create Email Template</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="onCancel()">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -49,8 +49,10 @@
         <td>{{et.emailTemplateBody}}</td>
         <td><button class="btn btn-sm btn-outline-secondary"
                     data-toggle="modal"
-                    data-target="#exampleModalLong"
-                    (click)="onEdit(et)"><i class="fas fa-pencil-alt icon-light"></i></button> <button class="btn btn-sm btn-outline-secondary"><i class="fas fa-trash icon-light"></i></button></td>
+                    tooltip="Edit Campaign"
+                    data-target="#emailTemplateModal"
+                    (click)="onEdit(et)"><i class="fas fa-pencil-alt icon-light"></i></button>
+        </td>
       </tr>
       </tbody>
     </table>

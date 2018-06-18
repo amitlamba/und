@@ -1,4 +1,4 @@
-<div class="event-widget" #eventWidget>
+<div class="event-widget my-3" #eventWidget>
   <div class="row d-flex flex-row ml-2">
     <div class="form-group m-2 mr-4">
       <select class="form-control" (change)="eventNameChanged($event.target.value)">
@@ -23,7 +23,7 @@
   <ng-template #container></ng-template>
 
   <div class="ml-3 mb-3" *ngIf="eventSelected">
-    <button type="button" class="btn btn-link" (click)="addPropertyFilter()">
+    <button type="button" class="btn btn-link pt-0" (click)="addPropertyFilter()">
       <i class="fa fa-plus " aria-hidden="true"></i>
       Filter
     </button>
@@ -32,7 +32,7 @@
   <div class="ml-3" *ngIf="!hideWhere && eventSelected">
     <p class="mb-1">where</p>
   </div>
-  <div class="form-inline" *ngIf="!hideWhere && eventSelected">
+  <div class="form-inline mb-4 mt-2" *ngIf="!hideWhere && eventSelected">
     <div class="form-group pr-0 ml-3">
       <select class="form-control" (change)="countDropdown($event.target.value)"
               [(ngModel)]="didEvent.whereFilter.whereFilterName">

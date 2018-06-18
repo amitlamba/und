@@ -1,6 +1,6 @@
-import { Component, Output, Input, OnInit, EventEmitter } from '@angular/core';
-import { CountryCode } from './resource/country-code';
-import { Country } from './model/country.model';
+import {Component, Output, Input, OnInit, EventEmitter} from '@angular/core';
+import {CountryCode} from './resource/country-code';
+import {Country} from './model/country.model';
 import * as _ from 'google-libphonenumber';
 
 @Component({
@@ -13,14 +13,16 @@ export class NgxIntlTelInputComponent implements OnInit {
   @Input() value = '';
   @Input() preferredCountries: Array<string> = [];
   @Output() valueChange: EventEmitter<string> = new EventEmitter<string>();
+  @Output() checkPhoneNumberLength: EventEmitter<string> = new EventEmitter<string>();
+  @Output() getSelectedCountryName: EventEmitter<string> = new EventEmitter<string>();
 
+  dialCodePlaceholder: string;
   phone_number = '';
   allCountries: Array<Country> = [];
   preferredCountriesInDropDown: Array<Country> = [];
   selectedCountry: Country = new Country();
-  constructor(
-      private countryCodeData: CountryCode
-  ) {
+
+  constructor(private countryCodeData: CountryCode) {
     this.fetchCountryData();
   }
 
@@ -35,17 +37,22 @@ export class NgxIntlTelInputComponent implements OnInit {
     }
     if (this.preferredCountriesInDropDown.length) {
       this.selectedCountry = this.preferredCountriesInDropDown[0];
+      this.dialCodePlaceholder = this.selectedCountry.dialCode;
+      this.getSelectedCountryName.emit(this.selectedCountry.name);
     } else {
       this.selectedCountry = this.allCountries[0];
     }
   }
 
   public onPhoneNumberChange(): void {
+    this.checkPhoneNumberLength.emit(this.phone_number);
     this.value = this.selectedCountry.dialCode + this.phone_number;
     this.valueChange.emit(this.value);
   }
 
   public onCountrySelect(country: Country, el): void {
+    this.getSelectedCountryName.emit(country.name);;
+    this.dialCodePlaceholder = country.dialCode;
     this.selectedCountry = country;
     if (this.phone_number.length > 0) {
       this.value = this.selectedCountry.dialCode + this.phone_number;

@@ -3,11 +3,17 @@ import {Observable} from "rxjs/Observable";
 import {HttpClient} from "@angular/common/http";
 import {AppSettings} from "../_settings/app-settings";
 import {Injectable} from "@angular/core";
+import {BehaviorSubject} from "rxjs/BehaviorSubject";
+import {EmailTemplate} from "../_models/email";
 
 @Injectable()
 export class CampaignService {
 
-  campaigns:Campaign[]=[];
+  campaigns: Campaign[] = [];
+  campaignObjectForInfo = new BehaviorSubject<Campaign>(new Campaign());
+  campaignObjectForInfoObservable = this.campaignObjectForInfo.asObservable();
+
+
   constructor(private httpClient: HttpClient) {
   }
 

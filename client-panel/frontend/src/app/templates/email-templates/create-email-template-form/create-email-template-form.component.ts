@@ -17,6 +17,7 @@ import {SendersInfo} from "../../../_models/client";
 export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
   emailTemplate: EmailTemplate;
   createNewTemplate: boolean = false;
+  emailTemplateModalReference;                  //value From email-template.component.ts
   unsubscribeButtonText = "Add Unsubscribe";
 
   sendersInfoList: SendersInfo[] = [];
@@ -57,6 +58,7 @@ export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
 
   onSave(form: FormData) {
     // console.log(JSON.stringify(this.emailTemplate));
+    console.log(this.emailTemplate.emailTemplateBody);
     if (this.form.valid) {
       if (this.emailTemplate.id) {
         this.templatesService.saveEmailTemplate(this.emailTemplate)
@@ -106,6 +108,10 @@ export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
   }
 
   redirectToSendersInfoPage() {
+    this.emailTemplateModalReference.nativeElement.className='modal hide';
+    $('body').removeClass('modal-open');
+    $('body').addClass('pr-0');
+    $('.modal-backdrop').remove();
     this.router.navigate(['settings/email-list']);
   }
 

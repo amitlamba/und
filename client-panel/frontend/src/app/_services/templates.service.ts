@@ -19,6 +19,8 @@ export class TemplatesService {
   smsTemplateForEdit = new BehaviorSubject<SmsTemplate>(new SmsTemplate());
   castSmsTemplateForEdit = this.smsTemplateForEdit.asObservable();
 
+  // closeModalDialogBox:boolean = false;
+
   constructor(private httpClient: HttpClient) {
   }
 
@@ -60,6 +62,10 @@ export class TemplatesService {
 
   getEmailTemplates(): Observable<EmailTemplate[]> {
     return this.httpClient.get<EmailTemplate[]>(AppSettings.API_ENDPOINT_CLIENT_CLIENT_EMAIL_TEMPLATES);
+  }
+
+  getEmailTemplateById(id: number): Observable<EmailTemplate> {
+    return this.httpClient.get<EmailTemplate>(AppSettings.API_ENDPOINT_CLIENT_CLIENT_GET_EMAIL_TEMPLATE_BY_ID +"/" +id);
   }
 
   saveEmailTemplate(emailTemplate: EmailTemplate): Observable<any> {
