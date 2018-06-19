@@ -24,12 +24,10 @@
               [value]="sendersInfo.address">{{sendersInfo.address}}
       </option>
     </select>
-    <button class="btn btn-link pl-1"
-            type="button"
-            data-toggle="modal"
-            data-target="#exampleModalLong"
+    <button class="btn btn-link"
             (click)="redirectToSendersInfoPage()"
-           >Add Email
+            data-toggle="modal"
+            data-target="#exampleModalLong">Add Email
     </button>
   </div>
   <div class="form-group col-sm-12">
@@ -77,13 +75,14 @@
             class="btn btn-primary my-3"
             (click)="addUnsubscribeLink($event)">{{unsubscribeButtonText}}
     </button>
+    <!--<div class="text-right"><i class="fa fa-user" aria-hidden="true"></i></div>-->
   </div>
   <div class="text-right col-sm-12">
     <button type="submit"
             class="btn btn-primary"
             data-toggle="modal"
             data-target="#exampleModalLong"
-            [disabled]="!emailTemplateForm.valid || emailTemplate.emailTemplateBody=='' || emailTemplate.emailTemplateBody==undefined">Save
+            [disabled]="!emailTemplateForm.valid">Save
     </button>
   </div>
 </form>
