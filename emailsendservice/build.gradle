@@ -24,7 +24,7 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-data-rest')
     compile('org.springframework.boot:spring-boot-starter-mail')
     compile("org.springframework.boot:spring-boot-starter-freemarker")
-
+    compile('org.springframework.boot:spring-boot-starter-security')
 
     compile('org.postgresql:postgresql')
     compile group: 'org.jsoup', name: 'jsoup', version: '1.11.3'
