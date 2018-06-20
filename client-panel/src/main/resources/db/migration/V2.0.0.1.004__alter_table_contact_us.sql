@@ -1,1 +1,1 @@
-DROP INDEX public.contact_us_email_uindex;
+DROP INDEX contact_us_email_uindex;

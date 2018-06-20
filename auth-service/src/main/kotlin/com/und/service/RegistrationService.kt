@@ -3,6 +3,8 @@ package com.und.service
 import com.und.common.utils.*
 import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.model.jpa.ClientVerification
+import com.und.model.jpa.security.Authority
+import com.und.model.jpa.security.AuthorityName
 import com.und.web.controller.errorhandler.ValidationError
 import com.und.web.model.RegistrationRequest
 import com.und.model.utils.Email
@@ -11,6 +13,8 @@ import com.und.model.jpa.security.User
 import com.und.service.security.AuthorityService
 import com.und.service.security.ClientService
 import com.und.security.utils.AuthenticationUtils
+import com.und.web.controller.RegisterController
+import com.und.web.controller.exception.UserAlreadyRegistered
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -47,13 +51,14 @@ class RegistrationService {
      * validation should be part of transaction different from commit as it will
      * acquire lock on all table, even after this check non unique may exist, if database constraint is not followed.
      */
-    fun validate(registrationRequest: RegistrationRequest): ValidationError {
+    fun validate(registrationRequest: RegistrationRequest) {
         val client = clientService.findByEmail(registrationRequest.email)
         val error = ValidationError()
         if (client != null) {
-            error.addFieldError("email", "This email id is already registered")
+            val message = "email ${registrationRequest.email} is already registered"
+            logger.error(message)
+            throw  UserAlreadyRegistered(message)
         }
-        return error
     }
 
     fun register(registrationRequest: RegistrationRequest): Client {
@@ -76,6 +81,7 @@ class RegistrationService {
 
     private fun buildUser(registrationRequest: RegistrationRequest, userType: Int): User {
         val user = User()
+        val roleUser:Authority = authorityService.findByName(AuthorityName.ROLE_USER) as Authority
         with(user) {
             email = registrationRequest.email
             password = passwordEncoder.encode(registrationRequest.password)
@@ -88,7 +94,7 @@ class RegistrationService {
             this.userType = userType
             username = usernameFromEmailAndType(email, this.userType)
             val authority = authorityService.authorityByType(this.userType)
-            if (authority != null) authorities = arrayListOf(authority)
+            if (authority != null) authorities = arrayListOf(authority, roleUser)
             clientSecret = randomString(128)
         }
         return user
@@ -183,27 +189,8 @@ class RegistrationService {
 
 
     fun sendVerificationEmail(client: Client) {
-        fun buildMesageBody(client: Client): String {
-            val url = "http://localhost:8080/register/verifyemail/${client.email}/${client.clientVerification.emailCode}"
-            return """
-                    Dear ${client.name},
-                        Welcome your login id is admin_${client.email}
-                        To be able to use it you first need to verify email by clicking on below link
-                        ${url}
-                    Thanks
-                    Team UND
-               """.trimIndent()
-        }
 
-        val message = Email(
-                clientID = 1,
-                emailSubject = "Welcome To UND !!!",
-                fromEmailAddress = InternetAddress("admin@userndot.com", "UserNDot Admin"),
-                toEmailAddresses = arrayOf(InternetAddress(client.email, client.name)),
-                emailBody = buildMesageBody(client)
-
-        )
-        emailService.sendEmail(message)
+        emailService.sendVerificationEmail(client)
         logger.debug("email sent succesfully")
 
     }

@@ -14,15 +14,9 @@ import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 
 @Service
-class MessageJobService {
-
-    @Autowired
-    lateinit var jobService: JobService
+class MessageJobService(private val jobService: JobService, private val eventStream: EventStream) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
-
-    @Autowired
-    lateinit var eventStream: EventStream
 
     fun executeJob(pair: Pair<String, String>): String {
 
@@ -30,7 +24,7 @@ class MessageJobService {
         try {
             //eventStream.campaignTriggerEvent()
             //below null pointer has been added because it doesnt get initiated before execuite job gets called, may be constructor should have been used here
-            eventStream?.let { stream ->
+            eventStream.let { stream ->
                 stream.campaignTriggerEvent().send(MessageBuilder.withPayload(pair).build())
             }
 

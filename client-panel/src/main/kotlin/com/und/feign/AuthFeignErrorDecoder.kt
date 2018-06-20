@@ -29,11 +29,11 @@ class AuthFeignErrorDecoder : ErrorDecoder {
             throw RuntimeException("Failed to process response body.", e)
         }
 
-        if (response.status() >= 400 && response.status() <= 499) {
+        if (response.status() in 400..499) {
             throw HttpClientErrorException(statusCode, statusText, responseHeaders, responseBody, null)
         }
 
-        return if (response.status() >= 500 && response.status() <= 599) {
+        return if (response.status() in 500..599) {
             HttpServerErrorException(statusCode, statusText, responseHeaders, responseBody, null)
         } else delegate.decode(methodKey, response)
     }

@@ -4,7 +4,7 @@ spring:
       uri: http://nestros.com:8888
       enabled: true
       name: client-panel
-      #profile: shiv
+      profile: shiv
   application:
     name: client-panel
   mvc:

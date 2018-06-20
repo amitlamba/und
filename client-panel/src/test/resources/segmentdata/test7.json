@@ -1,0 +1,36 @@
+{
+  "id": null,
+  "name": "Test Segment 4",
+  "type": "Behaviour",
+  "conversionEvent": null,
+  "didEvents": {
+    "description": null,
+    "joinCondition": {
+      "anyOfCount": null,
+      "conditionType": "AllOf"
+    },
+    "events": [
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "On",
+          "values": [
+            "2018-06-09"
+          ],
+          "valueUnit": "NONE"
+        },
+        "propertyFilters": []
+      }
+    ]
+  },
+  "didNotEvents": {
+    "description": null,
+    "joinCondition": {
+      "anyOfCount": null,
+      "conditionType": "AnyOf"
+    },
+    "events": []
+  },
+  "globalFilters": [],
+  "geographyFilters": []
+}

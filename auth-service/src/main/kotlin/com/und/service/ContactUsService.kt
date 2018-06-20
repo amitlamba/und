@@ -39,7 +39,7 @@ class ContactUsService {
             val contactUs = buildContactUs(webContactUs)
             val persistedContactUs = contactUsRepository.save(contactUs)
             webContactUs.id = persistedContactUs.id
-            sendContactUsEmail(contactUs)
+            emailService.sendContactUsEmail(contactUs)
         }
     }
 
@@ -57,29 +57,5 @@ class ContactUsService {
     }
 
 
-    fun sendContactUsEmail(contactInfo: ContactUs) {
-        fun buildMesageBody(): String {
-            return """
-                    Dear ${contactInfo.name},
-                        Thanks for contacting us
-                        we will connect with you soon!
-
-                    Thanks
-                    Team UND
-               """.trimIndent()
-        }
-
-        val message = Email(
-                clientID = 1,
-                emailSubject = "Your Request Accepted",
-                fromEmailAddress = InternetAddress("admin@userndot.com", "UserNDot Admin"),
-                toEmailAddresses = arrayOf(InternetAddress(contactInfo.email, contactInfo.name)),
-                emailBody = buildMesageBody()
-
-        )
-        emailService.sendEmail(message)
-        logger.debug("email sent successfully")
-
-    }
 
 }

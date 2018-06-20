@@ -25,7 +25,6 @@ class SegmentParserTest {
     var testDataBase = "segmentdata"
 
 
-
     @Before
     fun setup() {
         mapper = ObjectMapper()
@@ -42,7 +41,7 @@ class SegmentParserTest {
 
         val testData = readFileText("$testDataBase/test1.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val parsedResponse = SegmentParser().segmentQueries(segment)
+        SegmentParser().segmentQueries(segment)
         MatcherAssert.assertThat(2, Is(2))
     }
 
@@ -52,7 +51,7 @@ class SegmentParserTest {
 
         val testData = readFileText("$testDataBase/test2.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val parsedResponse = SegmentParser().segmentQueries(segment)
+        SegmentParser().segmentQueries(segment)
         MatcherAssert.assertThat(2, Is(2))
     }
 
@@ -61,7 +60,7 @@ class SegmentParserTest {
 
         val testData = readFileText("$testDataBase/test3.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val parsedResponse = SegmentParser().segmentQueries(segment)
+        SegmentParser().segmentQueries(segment)
 
 
         MatcherAssert.assertThat(2, Is(2))
@@ -72,7 +71,7 @@ class SegmentParserTest {
 
         val testData = readFileText("$testDataBase/test4.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val parsedResponse = SegmentParser().segmentQueries(segment)
+        SegmentParser().segmentQueries(segment)
         MatcherAssert.assertThat(2, Is(2))
     }
 
@@ -81,7 +80,7 @@ class SegmentParserTest {
 
         val testData = readFileText("$testDataBase/test5.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val parsedResponse = SegmentParser().segmentQueries(segment)
+        SegmentParser().segmentQueries(segment)
         MatcherAssert.assertThat(2, Is(2))
     }
 
@@ -90,7 +89,7 @@ class SegmentParserTest {
 
         val testData = readFileText("$testDataBase/test6.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val parsedResponse = SegmentParser().segmentQueries(segment)
+        SegmentParser().segmentQueries(segment)
         MatcherAssert.assertThat(2, Is(2))
 
     }
@@ -100,7 +99,7 @@ class SegmentParserTest {
 
         val testData = readFileText("$testDataBase/JsonTestData12.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val parsedResponse = SegmentParser().segmentQueries(segment)
+        SegmentParser().segmentQueries(segment)
         MatcherAssert.assertThat(2, Is(2))
 
     }
@@ -109,14 +108,14 @@ class SegmentParserTest {
     fun testSegmentParser7() {
         var count = 0
         val dir = ResourceUtils.getFile("classpath:$testDataBase")
-        val files = dir.list { dir, name -> true }
+        val files = dir.list { _, _ -> true }
         files.forEach {
             val testData = readFileText("$testDataBase/$it")
             val segment = mapper.readValue(testData, Segment::class.java)
             println("****$it**${count++}******")
             println("************")
 
-            val parsedResponse = SegmentParser().segmentQueries(segment)
+            SegmentParser().segmentQueries(segment)
             println("************")
             println("************")
 

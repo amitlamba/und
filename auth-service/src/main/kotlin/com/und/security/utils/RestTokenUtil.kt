@@ -70,7 +70,7 @@ class RestTokenUtil {
 
 
     /**
-     * use this method when you need to validate that token is validas well as exists in database
+     * use this method when you need to validate that token is valid as well as exists in database
      */
     fun validateTokenForKeyType(token: String, keyType: KEYTYPE): Pair<UndUserDetails?, UserCache> {
         val (user, jwtDetails) = validateToken(token)
@@ -119,15 +119,19 @@ class RestTokenUtil {
      * tries to get jwt object from cache, and updates requested key type if it exists else makes a new entry
      */
     fun generateJwtByUser(user: UndUserDetails, keyType: KEYTYPE): UserCache {
-        val cachedJwt = if (user.id != null) getJwtIfExists(user.id) else UserCache()
-        val jwtGenerator = if(user.userType == AuthenticationUtils.USER_TYPE_EVENT) {
+        val cachedJwt = user.id?.let{uid-> getJwtIfExists(uid)}?:UserCache()
+        val jwt = if(user.userType == AuthenticationUtils.USER_TYPE_EVENT ) {
             val expirationDate = Date(Long.MAX_VALUE )
-            JWTGenerator(expirationDate, cachedJwt, user)
-        } else {
-            val expirationDate = Date(dateUtils.now().time + expiration*1000 )
-            JWTGenerator(expirationDate, cachedJwt, user)
+            JWTGenerator(expirationDate, cachedJwt, user).generateJwtByUserDetails(keyType)
+        } else if(user.userType == AuthenticationUtils.USER_TYPE_SYSTEM) {
+
+            val expirationDate = Date(Long.MAX_VALUE )
+            JWTGenerator(expirationDate, cachedJwt, user).generateJwtForSystemUser(KEYTYPE.LOGIN)
         }
-        val jwt = jwtGenerator.generateJwtByUserDetails(keyType)
+        else {
+            val expirationDate = Date(dateUtils.now().time + expiration*1000 )
+            JWTGenerator(expirationDate, cachedJwt, user).generateJwtByUserDetails(keyType)
+        }
         jwtKeyService.save(jwt)
         return jwt
 
