@@ -19,3 +19,7 @@ spring:
       probability: 1
   kafka:
     bootstrap-servers: ${KAFKA_IP}:${KAFKA_PORT}
+
+encrypt:
+  key: UserNDot@18
+  fail-on-error: false
