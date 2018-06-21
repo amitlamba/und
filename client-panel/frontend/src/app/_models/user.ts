@@ -39,7 +39,7 @@ export class EventUser {
   additionalInfo: any;         //Please review this property again with the backend
   address: string;
   city: string;
-  clientId: string;
+  clientId: number;
   clientUserId: string;
   communication: Communication;
   country: string;
@@ -74,7 +74,13 @@ export class Event {
   longitude: string;
   agentString: string;
   userIdentified: boolean;
+  attributes:any;
   // lineitem,attributes,startDate,EndDate to be added.
+}
+
+export class EventSelected {
+  event: Event;
+  selected: boolean;
 }
 
 export class Identity {

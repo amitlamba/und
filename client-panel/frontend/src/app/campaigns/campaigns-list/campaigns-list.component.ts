@@ -106,7 +106,7 @@ export class CampaignsListComponent implements OnInit {
       }
 
       case "delete": {
-        console.log('inside resume');
+        console.log('inside delete');
         this.campaignService.deleteCampaign(this.campaignId)
           .subscribe(
             (campaignId) => {
