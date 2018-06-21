@@ -6,6 +6,7 @@ import com.und.model.jpa.security.UndUserDetails
 import com.und.model.redis.security.UserCache
 import com.und.repository.jpa.security.UserRepository
 import com.und.repository.redis.UserCacheRepository
+import com.und.security.utils.AuthenticationUtils
 import com.und.security.utils.KEYTYPE
 import com.und.security.utils.KeyResolver
 import com.und.security.utils.RestTokenUtil
@@ -22,6 +23,7 @@ import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.junit.MockitoJUnitRunner
 import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.test.util.ReflectionTestUtils
 
 /**
@@ -85,6 +87,23 @@ class RestTokenUtilTest {
 
     @Test
     @Throws(Exception::class)
+    fun testGenerateToken() {
+        `when`(dateUtilsMock.now())
+                .thenReturn(DateUtil.yesterday())
+                .thenReturn(DateUtil.now())
+
+
+
+        val (token, password) = createAdminToken()
+
+        println(token)
+        println(password)
+        assertThat(token).isNotNull()
+
+    }
+
+    @Test
+    @Throws(Exception::class)
     fun getUsernameFromToken() {
         `when`(dateUtilsMock.now()).thenReturn(DateUtil.now())
         val (token, uc) = createToken()
@@ -134,10 +153,38 @@ class RestTokenUtilTest {
         device.isNormal = true
         `when`(restTokenUtil.getJwtIfExists(user.id!!))
                 .thenReturn(jwtKey)
-
         val jwtKeys = restTokenUtil.generateJwtByUser(user, KEYTYPE.LOGIN)
+
         return Pair(jwtKeys.loginKey ?: "", jwtKeys)
     }
+
+
+    private fun createAdminToken(): Pair<String, String> {
+        val user = UndUserDetails(
+                id = 1L,
+                username = "systemund",
+                secret = TextCodec.BASE64.encode(secret),
+                key = "6Agq1z240W5igRjLToZb8gUdNknXJR16pnGazh8N28wkC3KSpyueJxc2e3wYYsUnpopuqwWf1oN7KM7NgCY9b19zsB0nAZm1iXpKD3dLN0zdTcejwDxcCZoPx0N7vNXq",
+                password = "V#rY%m*7lexP@5^!Xfg",
+                clientId = 1,
+                authorities = arrayListOf(SimpleGrantedAuthority(AuthorityName.ROLE_ADMIN.name), SimpleGrantedAuthority(AuthorityName.ROLE_EVENT.name),
+                        SimpleGrantedAuthority(AuthorityName.ROLE_USER.name),
+                        SimpleGrantedAuthority(AuthorityName.ROLE_SYSTEM.name )
+                ),
+                email = "admin@und.com",
+                userType = AuthenticationUtils.USER_TYPE_SYSTEM
+
+
+        )
+
+
+        val jwtKeys = restTokenUtil.generateJwtByUser(user, KEYTYPE.LOGIN)
+        val crypter = BCryptPasswordEncoder()
+        val encryptedPassword = crypter.encode(user.password)
+        return Pair(jwtKeys.loginKey!!, encryptedPassword)
+    }
+
+
 
     companion object {
 

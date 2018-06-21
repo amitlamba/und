@@ -54,7 +54,7 @@ class EmailService {
         var emailToSend = emailHelperService.updateSubjectAndBody(email)
         emailToSend.emailBody = emailHelperService.trackAllURLs(emailToSend.emailBody!!, emailToSend.clientID, mongoEmailId)
         sendEmailWithoutTracking(emailToSend)
-        emailHelperService.updateEmailStatus(mongoEmailId!!, SENT, email.clientID)
+        emailHelperService.updateEmailStatus(mongoEmailId, SENT, email.clientID)
     }
 
     fun sendEmailWithoutTracking(email: Email) {

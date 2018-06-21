@@ -5,6 +5,7 @@ import com.und.web.controller.exception.ReCaptchaInvalidException
 import com.und.web.controller.exception.ReCaptchaUnavailableException
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
 import org.springframework.web.client.RestClientException
@@ -28,6 +29,9 @@ class CaptchaService : ICaptchaService {
     @Autowired
     private lateinit var restTemplate: RestOperations
 
+    @Value("\${system.captcha.enabled}")
+    private var captchaEnabled: Boolean = true
+
     override val reCaptchaSite: String?
         get() = captchaSettings.site
 
@@ -42,31 +46,32 @@ class CaptchaService : ICaptchaService {
 
     override fun processResponse(response: String) {
         LOGGER.debug("Attempting to validate response {}", response)
-
-        if (reCaptchaAttemptService.isBlocked(clientIP)) {
-            throw ReCaptchaInvalidException("Client exceeded maximum number of failed attempts")
-        }
-
-        if (!responseSanityCheck(response)) {
-            throw ReCaptchaInvalidException("Response contains invalid characters")
-        }
-
-        val verifyUri = URI.create(String.format("https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s&remoteip=%s", reCaptchaSecret, response, clientIP))
-        try {
-            val googleResponse = restTemplate.getForObject(verifyUri, GoogleResponse::class.java)
-            LOGGER.debug("Google's response: {} ", googleResponse.toString())
-
-            if (!googleResponse.isSuccess) {
-                if (googleResponse.hasClientError()) {
-                    reCaptchaAttemptService.reCaptchaFailed(clientIP)
-                }
-                throw ReCaptchaInvalidException("reCaptcha was not successfully validated")
+        if (captchaEnabled) {
+            if (reCaptchaAttemptService.isBlocked(clientIP)) {
+                throw ReCaptchaInvalidException("Client exceeded maximum number of failed attempts")
             }
-        } catch (rce: RestClientException) {
-            throw ReCaptchaUnavailableException("Registration unavailable at this time.  Please try again later.", rce)
-        }
 
-        reCaptchaAttemptService.reCaptchaSucceeded(clientIP)
+            if (!responseSanityCheck(response)) {
+                throw ReCaptchaInvalidException("Response contains invalid characters")
+            }
+
+            val verifyUri = URI.create(String.format("https://www.google.com/recaptcha/api/siteverify?secret=%s&response=%s&remoteip=%s", reCaptchaSecret, response, clientIP))
+            try {
+                val googleResponse = restTemplate.getForObject(verifyUri, GoogleResponse::class.java)
+                LOGGER.debug("Google's response: {} ", googleResponse.toString())
+
+                if (!googleResponse.isSuccess) {
+                    if (googleResponse.hasClientError()) {
+                        reCaptchaAttemptService.reCaptchaFailed(clientIP)
+                    }
+                    throw ReCaptchaInvalidException("reCaptcha was not successfully validated")
+                }
+            } catch (rce: RestClientException) {
+                throw ReCaptchaUnavailableException("Registration unavailable at this time.  Please try again later.", rce)
+            }
+
+            reCaptchaAttemptService.reCaptchaSucceeded(clientIP)
+        }
     }
 
     private fun responseSanityCheck(response: String): Boolean {

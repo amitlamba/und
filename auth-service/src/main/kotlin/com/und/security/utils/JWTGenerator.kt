@@ -28,6 +28,21 @@ class JWTGenerator(private val expirationDate: Date,
         return cachedJwt
     }
 
+    fun generateJwtForSystemUser(keyType: KEYTYPE): UserCache {
+        cachedJwt.userId = "${user.id}"
+        when (keyType) {
+            KEYTYPE.LOGIN -> cachedJwt.loginKey = user.key
+            KEYTYPE.PASSWORD_RESET -> cachedJwt.pswrdRstKey = generateToken(user)
+            KEYTYPE.REGISTRATION -> cachedJwt.emailRgstnKey = generateToken(user)
+        }
+        cachedJwt.secret = user.secret
+        cachedJwt.username = user.username
+        cachedJwt.password = user.password!!
+        cachedJwt.email = user.email ?: "Notfound"
+        cachedJwt.clientId = "1"
+        return cachedJwt
+    }
+
 
     private fun generateToken(userDetails: UndUserDetails): String {
 

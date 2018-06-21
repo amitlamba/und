@@ -7,10 +7,13 @@ ext {
 
 dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-stream-kafka')
-    compile('org.springframework.boot:spring-boot-starter-data-mongodb')
+    compile('org.springframework.boot:spring-boot-starter-data-mongodb:2.0.2.RELEASE')
+
+    compile group: 'org.mongodb', name: 'mongodb-driver', version: '3.7.1'
     compile('org.springframework.boot:spring-boot-starter-mail')
     compile("org.springframework.boot:spring-boot-starter-mobile:2.0.0.M5")
     compile("org.springframework.boot:spring-boot-starter-data-rest")
+    compile('org.springframework.boot:spring-boot-starter-security')
     compile("eu.bitwalker:UserAgentUtils:${bitWalkerUagentVersion}")
     compile("io.springfox:springfox-swagger2:$swaggerVersion")
     compile("io.springfox:springfox-swagger-ui:$swaggerVersion")

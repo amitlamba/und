@@ -3,7 +3,6 @@ package com.und.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.model.jpa.Segment
 import com.und.model.mongo.eventapi.EventUser
-import com.und.web.model.EventUser as EventUserWeb
 import com.und.repository.jpa.SegmentRepository
 import com.und.repository.mongo.EventRepository
 import com.und.repository.mongo.EventUserRepository
@@ -13,7 +12,7 @@ import com.und.web.model.ConditionType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.stereotype.Service
-import java.util.stream.Collectors
+import com.und.web.model.EventUser as EventUserWeb
 import com.und.web.model.Segment as WebSegment
 
 @Service
@@ -74,14 +73,14 @@ class SegmentServiceImpl : SegmentService {
     }
 
     override fun segmentUsers(segment: WebSegment, clientId: Long): List<EventUserWeb> {
-        val segmentJpa=buildSegment(segment)
+        val segmentJpa = buildSegment(segment)
         val eventUsers = getSegmentUsersList(segmentJpa, clientId)
         return buildEventUserList(eventUsers)
     }
 
     private fun getSegmentUsersList(segment: Segment, clientId: Long): List<EventUser> {
-        buildWebSegment(segment)
-        val queries = SegmentParserCriteria().segmentQueries(buildWebSegment(segment))
+        val websegment = buildWebSegment(segment)
+        val queries = SegmentParserCriteria().segmentQueries(websegment)
         val userDidList = retrieveUsers(queries.didq.first, queries.didq.second, clientId)
         val userDidNotList = retrieveUsers(queries.didntq.first, queries.didntq.second, clientId)
 
@@ -133,7 +132,7 @@ class SegmentServiceImpl : SegmentService {
 
     private fun buildEventUserList(eventUserList: List<EventUser>): List<EventUserWeb> {
         var eventUserListWeb: List<EventUserWeb> = emptyList()
-        val eventUserService=EventUserService()
+        val eventUserService = EventUserService()
         for (eventUser in eventUserList) {
             val listElement = eventUserService.buildEventUser(eventUser)
             eventUserListWeb += listElement

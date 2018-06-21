@@ -3,6 +3,7 @@ package com.und.web.controller
 import com.und.model.mongo.CommonMetadata
 import com.und.model.mongo.EventMetadata
 import com.und.model.mongo.eventapi.EventUser
+import com.und.security.utils.AuthenticationUtils
 import com.und.service.EventMetadataService
 import com.und.service.SegmentService
 import com.und.web.controller.exception.SegmentNotFoundException
@@ -60,9 +61,9 @@ class SegmentController {
     }
 
     @GetMapping(value = ["/users/{segmentId}"])
-    @PreAuthorize("hasRole('ROLE_UND_SERVICE')")
+    //@PreAuthorize("hasRole('ROLE_SYSTEM')")
     fun segmentUsers(@PathVariable("segmentId") segmentId: Long): List<EventUser> {
-        val clientId = 2L
+        val clientId = AuthenticationUtils.clientID?:-1
         val asegmentUsers = segmentService.segmentUsers(segmentId, clientId)
         return asegmentUsers
     }

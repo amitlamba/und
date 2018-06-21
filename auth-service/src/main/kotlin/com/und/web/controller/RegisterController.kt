@@ -1,22 +1,18 @@
 package com.und.web.controller
 
 import com.und.common.utils.loggerFor
-import com.und.web.controller.exception.UndBusinessValidationException
-import com.und.model.utils.Email
 import com.und.security.utils.KEYTYPE
 import com.und.security.utils.RestTokenUtil
 import com.und.service.EmailService
 import com.und.service.RegistrationService
 import com.und.service.security.UserService
 import com.und.service.security.captcha.CaptchaService
-import com.und.web.controller.exception.UserAlreadyRegistered
 import com.und.web.model.*
 import com.und.web.model.ResponseStatus
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
-import javax.mail.internet.InternetAddress
 import javax.servlet.http.HttpServletRequest
 import javax.validation.Valid
 
@@ -55,11 +51,8 @@ class RegisterController {
 
         val response = request.getParameter("recaptchaToken")
         captchaService.processResponse(response)
-        val errors = registrationService.validate(registrationRequest)
-        if (errors.getFieldErrors().isNotEmpty()) {
-            logger.error("business validation failure while registering ${registrationRequest.email} , with errors ${errors.getFieldErrors()}")
-            throw  UserAlreadyRegistered("${errors.getFieldErrors()}")
-        }
+        registrationService.validate(registrationRequest)
+
         val client = registrationService.register(registrationRequest)
         registrationService.sendVerificationEmail(client)
     }
@@ -81,29 +74,20 @@ class RegisterController {
         val response = request.getParameter("recaptchaToken")
         captchaService.processResponse(response)
         val code = userService.generateJwtForForgotPassword(email)
-        emailService.sendEmail(Email(
-                clientID = 1,
-                fromEmailAddress = InternetAddress("admin@userndot.com", "UserNDot Admin"),
-                toEmailAddresses = arrayOf(InternetAddress(email)),
-                emailBody = """
-                    Hi, $//userName
-                    please click http://localhost:8080/register/resetpassword/$email/${code.pswrdRstKey} to reset password
-                """.trimIndent(),
-                emailSubject = "forgot password"
-
-        ))
         return if (code.pswrdRstKey.isNullOrBlank()) {
             ResponseEntity.status(HttpStatus.NOT_FOUND).body(Response(
                     message = "Invalid Email Id",
                     status = ResponseStatus.FAIL
             ))
         } else {
+            emailService.sendForgotPasswordEmail(code, email)
             ResponseEntity.ok().body(Response(
-                    message = "Invalid Link",
+                    message = "",
                     status = ResponseStatus.SUCCESS
             ))
         }
     }
+
 
     @GetMapping(value = ["/resetpassword/{code}"])
     fun resetPasswordForm(@PathVariable code: String): ResponseEntity<Response> {
