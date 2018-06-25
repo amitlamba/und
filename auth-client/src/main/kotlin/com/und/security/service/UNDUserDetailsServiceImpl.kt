@@ -17,7 +17,7 @@ class UNDUserDetailsServiceImpl : UserDetailsService {
     @Autowired
     private lateinit var authenticationService: AuthenticationServiceClient
 
-    @Value("\${system.user.token}")
+    @Value("\${und.system.user.token}")
     private lateinit var systemToken:String
 
     @Throws(UsernameNotFoundException::class)

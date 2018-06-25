@@ -13,8 +13,7 @@ import org.springframework.stereotype.Repository
 @Repository
 interface UserRepository : JpaRepository<User, Long> {
 
-    @Modifying(clearAutomatically = true)
-    @Query("Select User u WHERE u.client = :clientId and u.id = :id and u.userTpe=:userType")
-    fun findSystemUser(@Param("clientId") clientId: Long =1, @Param("id") id: Long=1,  @Param("userType") userType: Int=4):User
+    @Query("Select u from User u WHERE u.client = :clientId and u.id = :id and u.userType = :userType")
+    fun findSystemUser(@Param("clientId") clientId: Long =1L, @Param("id") id: Long=1L,  @Param("userType") userType: Int=4):User
 
 }
