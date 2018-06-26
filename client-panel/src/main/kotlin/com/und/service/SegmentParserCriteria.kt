@@ -63,11 +63,7 @@ class SegmentParserCriteria {
 
         val gFilters = segment.globalFilters
         val matches = filterGlobalQ(gFilters)
-        println("pair matches started")
-        if (matches != null) {
-            println(Aggregation.newAggregation(matches.first).toString())
-            println(Aggregation.newAggregation(matches.second).toString())
-        }
+
 
 
 

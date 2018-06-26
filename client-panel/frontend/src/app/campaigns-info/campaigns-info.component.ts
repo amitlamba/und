@@ -22,17 +22,6 @@ export class CampaignsInfoComponent implements OnInit {
   emailTemplateObjectPresent: boolean = false;
   segmentObjectPresent: boolean = false;
 
-  // private _campaignInfoObject:Campaign;
-  // get campaignInfoObject(){
-  //   return this._campaignInfoObject;
-  // }
-  //
-  // @Input() set campaignInfoObject(campaignInfoObject:Campaign){
-  //     console.log("Prev.value"+this._campaignInfoObject);
-  //     console.log("New Value"+campaignInfoObject);
-  //     this._campaignInfoObject=campaignInfoObject;
-  // }
-
   constructor(private segmentsService: SegmentService,
               private templatesService: TemplatesService,
               private campaignService: CampaignService) {

@@ -1,6 +1,6 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, Pipe, PipeTransform, ViewChild} from '@angular/core';
 import {SegmentService} from "../_services/segment.service";
-import {Event, EventUser} from "../_models/user";
+import {Event, EventSelected, EventUser} from "../_models/user";
 import {Router} from "@angular/router";
 import {HttpErrorResponse} from "@angular/common/http";
 
@@ -13,8 +13,8 @@ export class UserProfileComponent implements OnInit {
   userProfile: string;
   eventUser: EventUser = new EventUser();
   eventList: Event[] = [];
-  showEventsList:boolean = false;
-  @ViewChild('radioButton') radioButton;
+  eventsSelectedList: EventSelected[] = [];
+  showEventsList: boolean = false;
 
   constructor(private segmentService: SegmentService,
               private router: Router) {
@@ -27,9 +27,15 @@ export class UserProfileComponent implements OnInit {
     else {
       this.eventUser = this.segmentService.eventUser;
       this.segmentService.getEventsListByUserId(this.eventUser.undId).subscribe(
-        (response:Event[]) => {
+        (response: Event[]) => {
           console.log(response);
           this.eventList = response;
+          this.eventsSelectedList = this.eventList.map((v, i, a) => {
+            let es = new EventSelected();
+            es.event = v;
+            es.selected = true;
+            return es;
+          });
           this.showEventsList = true;
         }, (error: HttpErrorResponse) => {
           console.log(error);
@@ -53,5 +59,23 @@ export class UserProfileComponent implements OnInit {
       }
     }
     return true;
+  }
+
+  showEventDetails(val) {
+    this.eventsSelectedList.forEach((v, i, a) => {
+      if (val == v.event.name) {
+        a[i].selected = !v.selected
+      }
+    });
+  }
+}
+@Pipe({name: 'keys'})
+export class KeysPipe implements PipeTransform {
+  transform(value, args:string[]) : any {
+    let keys = [];
+    for (let key in value) {
+      keys.push({key: key, value: value[key]});
+    }
+    return keys;
   }
 }

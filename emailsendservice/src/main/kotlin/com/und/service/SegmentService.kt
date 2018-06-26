@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.model.jpa.Segment
 import com.und.model.mongo.EventUser
 import com.und.repository.jpa.SegmentRepository
+import com.und.repository.jpa.security.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import com.und.model.utils.Segment as WebSegment
@@ -16,6 +17,9 @@ class SegmentService {
 
     @Autowired
     private lateinit var segmentRepository: SegmentRepository
+
+    @Autowired
+    private lateinit var userRepository: UserRepository
 
     @Autowired
     private lateinit var segmentUserServiceClient: SegmentUserServiceClient
@@ -39,10 +43,10 @@ class SegmentService {
 
     fun getUserData(webSegment: WebSegment): List<EventUser> {
         //TODO: Write the definition to get data from Mongo here
-
+        val token = userRepository.findSystemUser().key
         val segmentId = webSegment.id
-        return if (segmentId != null) {
-            segmentUserServiceClient.users(segmentId)
+        return if (segmentId != null && token != null) {
+            segmentUserServiceClient.users(segmentId, token)
         } else emptyList()
     }
 

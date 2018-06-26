@@ -20,7 +20,10 @@ class MessageJob : Job {
         val clientId = context.jobDetail.jobDataMap["clientId"] as String
         val campaignId = context.jobDetail.jobDataMap["campaignId"] as String
         val campaignName = context.jobDetail.jobDataMap["campaignName"] as String
-
+        val nextFireTime = context.nextFireTime
+        if(nextFireTime == null) {
+            //FIXME send message for complete of campaign status
+        }
         logger.info("Job ** ${context.jobDetail.key.name} ** fired @ ${context.fireTime} for client $clientId with campaign $campaignName : $campaignId")
         Pair(campaignId, clientId)
         jobService.executeJob(Pair(campaignId, clientId))

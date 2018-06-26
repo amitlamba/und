@@ -87,7 +87,7 @@ import {EventsGraphComponent} from './events-graph/events-graph.component';
 import {ChartsModule} from "ng2-charts";
 import {ReportsService} from "./_services/reports.service";
 import {RegisterService} from "./_services/register.service";
-import {UserProfileComponent} from './user-profile/user-profile.component';
+import {KeysPipe, UserProfileComponent} from './user-profile/user-profile.component';
 import {TooltipModule} from "ngx-bootstrap";
 import {CampaignsInfoComponent} from './campaigns-info/campaigns-info.component';
 import {Select2Module} from "ng2-select2";
@@ -172,7 +172,8 @@ import {Select2Module} from "ng2-select2";
     ConversionEventsGraphComponent,
     EventsGraphComponent,
     UserProfileComponent,
-    CampaignsInfoComponent
+    CampaignsInfoComponent,
+    KeysPipe
   ],
   providers: [
     AuthGuard,

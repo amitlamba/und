@@ -28,7 +28,8 @@
                    type="text"
                    class="form-control"
                    [placeholder]="inputPlaceholder"
-                   [(ngModel)]="userIdentity">
+                   [(ngModel)]="userIdentity"
+                   (keyup.enter)="findUserByIdentity()">
           </div>
           <div class="alert alert-info" *ngIf="invalidID">
             Invalid {{ inputPlaceholder }}

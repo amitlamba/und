@@ -8,18 +8,27 @@
       </div>
       <div class="row mx-4 py-3 my-2">
         <div class="col-md-4 col-sm-6 py-2 border-right">
-          <p><i class="fas fa-phone  mr-3 ml-1  fa-rotate-90 user-info-icon"></i>
+          <p>
+            <span class="d-inline-block" tooltip="Contact Number"><i
+              class="fas fa-phone  mr-3 ml-1  fa-rotate-90 user-info-icon"></i></span>
             <span>{{ eventUser.mobile }}</span>
           </p>
           <p>
-            <i class="far fa-envelope-open  mr-3 ml-1 user-info-icon"></i>
+            <span tooltip="Email">
+              <i class="far fa-envelope-open  mr-3 ml-1 user-info-icon"></i>
+            </span>
             <span>{{ eventUser.email }}</span>
           </p>
         </div>
         <div class="col-md-4 col-sm-6 py-2 border-right">
-          <p><i class="fas fa-map-marker-alt  mr-3 ml-1 user-info-icon"></i> Gurugram ,Haryana, India</p>
           <p>
-            <i class="far fa-compass  mr-3 ml-1 user-info-icon"></i>
+              <span tooltip="Location">
+              <i class="fas fa-map-marker-alt  mr-3 ml-1 user-info-icon"></i>
+             </span>
+            Gurugram ,Haryana, India
+          </p>
+          <p>
+            <span tooltip="Latitude and Longitude"><i class="far fa-compass  mr-3 ml-1 user-info-icon"></i></span>
             <span class="d-inline-block">Lat - 17.284012</span>
             <span class="d-block longitude">Lon - 56.007907</span>
           </p>
@@ -27,11 +36,11 @@
         <div class="col-md-4 col-sm-6 py-2">
           <p>
             <img src="../../assets/img/favicon-256.png" alt="UsernDot ID icon"
-                 class="icon-size d-inline-block mr-3">
+                 class="icon-size d-inline-block mr-3" tooltip="UserNDot ID">
             <span>{{eventUser.undId}}</span></p>
           <p>
             <span class="rounded font-weight-bold d-inline-block client-id p-1 mr-3"
-                  style="background: #c6cfd7">ID</span>
+                  style="background: #c6cfd7" tooltip="User ID">ID</span>
             <span> - 54680048900005</span></p>
         </div>
       </div>
@@ -143,42 +152,50 @@
           <div class="row my-5">
             <div class="col-md-3">
               <form novalidate #f="ngForm">
-                <div class="events-list w-100 py-3 rounded-top" style="background: #d4d4e3">
+                <div class="events-list w-100 py-3 rounded-top" style="background: #e9e9f0">
                   <p class="mb-0 px-4"> Events List</p>
                 </div>
                 <div class="table-responsive-sm">
                   <table class="table table-bordered  w-100">
-                    <tbody ngModelGroup="eventsList" #eventsList="ngModelGroup">
-                    <tr *ngFor="let event of eventList">
+                    <tbody>
+                    <tr *ngFor="let eventSelected of eventsSelectedList">
                       <td class="text-center">
-                        <input type="checkbox" name="{{event.name}}" ngModel>
+                        <input type="checkbox" [checked]="eventSelected.selected" name="{{eventSelected.event.name}}"
+                               (change)="showEventDetails(eventSelected.event.name)">
                       </td>
-                      <td>{{event.name}}<span class="badge ml-4 event-count">9</span></td>
+                      <td>{{eventSelected.event.name}}</td>
+                      <!--<td>{{eventSelected.event.name}}<span class="badge ml-4 event-count">9</span></td>-->
                     </tr>
                     </tbody>
                   </table>
                 </div>
-                <p>{{f.value |json }}</p>
               </form>
             </div>
             <div class="col-md-7">
-              <div class="events-list w-100 py-3 rounded-top" style="background: #d4d4e3">
+              <div class="events-list w-100 py-3 rounded-top" style="background: #e9e9f0">
                 <p class="mb-0 px-4"> Event User Details</p>
               </div>
               <div class="card">
                 <div class="card-body">
-                  <div *ngIf="eventsList.Charged">
-                    <p>laksh</p>
+                  <div class="px-4" *ngFor="let filteredEvent of eventsSelectedList">
+                    <!--<span class="font-weight-bold">{{ event.creationTime|date:'HH:mm:ss' }}</span>-->
+                    <div *ngIf="filteredEvent.selected">
+                      <p class="font-weight-bold mb-0">{{filteredEvent.event.name}}</p>
+                      <p class="text-muted">
+                        <span class="pr-1" tooltip="Date and time">
+                          {{ filteredEvent.event.creationTime|date:'medium' }}
+                          <span class="pl-2">|</span>
+                        </span>
+                        <span *ngIf="!isEmptyObject(filteredEvent.event.attributes)">
+                          <span *ngFor="let key of filteredEvent.event.attributes | keys" tooltip="{{key.key}}">
+                            <span class="pr-1">{{key.value}}
+                              <span class="pl-2">|</span>
+                            </span>
+                          </span>
+                        </span>
+                      </p>
+                    </div>
                   </div>
-                  <h5 class="card-title">Special title treatment</h5>
-                  <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
-                  <a href="#" class="btn btn-primary">Go somewhere</a>
-                  <!--<h5 class="card-title">Special title treatment</h5>-->
-                  <!--<p class="card-text">With supporting text below as a natural lead-in to additional content.</p>-->
-                  <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
-                  <!--<h5 class="card-title">Special title treatment</h5>-->
-                  <!--<p class="card-text">With supporting text below as a natural lead-in to additional content.</p>-->
-                  <!--<a href="#" class="btn btn-primary">Go somewhere</a>-->
                 </div>
               </div>
             </div>
