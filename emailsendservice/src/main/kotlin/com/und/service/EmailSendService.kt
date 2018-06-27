@@ -47,7 +47,7 @@ class EmailSendService {
                         .withSubject(Content()
                                 .withCharset("UTF-8").withData(email.emailSubject)))
 
-                source = email.fromEmailAddress.address
+                source = email.fromEmailAddress?.address
 
             }
             client.sendEmail(request)

@@ -49,7 +49,7 @@ class EmailService {
                 clientID = 1,
                 toEmailAddresses = arrayOf(InternetAddress(email)),
                 emailTemplateId = EmailService.forgotPasswordTemplate,
-                emailTemplateName = "",
+                emailTemplateName = "forgotpassword",
                 data = dataMap
 
         )
@@ -64,7 +64,7 @@ class EmailService {
                 clientID = 1,
                 toEmailAddresses = arrayOf(InternetAddress(contactInfo.email)),
                 emailTemplateId = EmailService.contactusTemplate,
-                emailTemplateName = "",
+                emailTemplateName = "contactus",
                 data = dataMap
 
         )
@@ -81,7 +81,7 @@ class EmailService {
                 clientID = 1,
                 toEmailAddresses = arrayOf(InternetAddress(client.email)),
                 emailTemplateId = EmailService.verificationTemplate,
-                emailTemplateName = "",
+                emailTemplateName = "verificationemail",
                 data = dataMap
 
         )

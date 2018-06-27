@@ -132,9 +132,10 @@ class UserSettingsController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/unsubscribe-link/get"])
-    fun getUnsubscribeLink(): UnSubscribeLink {
+    fun getUnsubscribeLink(): UnSubscribeLink? {
         val clientID = AuthenticationUtils.clientID
-        return userSettingsService.getUnSubscribeLink(clientID)
+        val linkOptional = userSettingsService.getUnSubscribeLink(clientID)
+        return if(linkOptional.isPresent) linkOptional.get() else null
     }
 
 }
