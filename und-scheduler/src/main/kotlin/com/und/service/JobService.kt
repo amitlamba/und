@@ -42,9 +42,9 @@ interface JobService {
      * Searches for a Job identified by the given `JobKey`
      *
      * @param jobDescriptor
-     * @return the jobDescriptor if found or an empty Optional
+     * @return the list of jobDescriptor if found or an empty list
      */
-    fun findJob(jobDescriptor: JobDescriptor): Optional<JobDescriptor>
+    fun findJob(jobDescriptor: JobDescriptor):  List<JobDescriptor>
 
 
     /**
@@ -80,6 +80,7 @@ interface JobService {
      */
     fun pauseJob(group: String, name: String):JobActionStatus
 
+
     /**
      * Resumes the Job identified by the given `JobKey`
      *
@@ -89,4 +90,29 @@ interface JobService {
      * the name of the dynamically scheduled job
      */
     fun resumeJob(group: String, name: String):JobActionStatus
+
+    /**
+     * Resumes the Jobs identified by the given `group`
+     *
+     * @param group
+     * the group a job belongs to
+
+     */
+    fun resumeJobs(group: String):JobActionStatus
+
+    /**
+     * Deletes the Jobs identified by the given `group`
+     *
+     * @param group
+     * the group a job belongs to
+     */
+    fun deleteJobs(group: String): JobActionStatus
+
+    /**
+     * Pauses the Jobs identified by the given `group`
+     *
+     * @param group
+     * the group a job belongs to
+     */
+    fun pauseJobs(group: String):JobActionStatus
 }

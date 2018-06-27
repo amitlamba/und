@@ -4,19 +4,20 @@ import com.und.model.JobDescriptor
 object JobUtil {
 
     fun getJobName(job: JobDescriptor): String {
-        return " ${job.campaignId} - ${job.campaignName}"
+        return getJobName(job.campaignId, job.campaignName, job.fireIndex)
+
     }
 
     fun getGroupName(job: JobDescriptor): String {
-        return " ${job.clientId}"
+        return getGroupName(job.clientId, job.campaignId)
     }
 
-    fun getJobName(campaignId:String,campaignName:String): String {
-        return " ${campaignId} - ${campaignName}"
+    fun getJobName(campaignId:String,campaignName:String, fireIndex:String): String {
+        return "$campaignId-$campaignName-$fireIndex"
     }
 
-    fun getGroupName(clientId:String): String {
-        return " ${clientId}"
+    fun getGroupName(clientId:String, campaignId:String): String {
+        return "$clientId-$campaignId"
     }
 
 

@@ -28,8 +28,9 @@ class TriggerDescriptor {
     var countTimes: Int = 0
     //@JsonSerialize(using = LocalDateTimeSerializer::class)
     var fireTime: LocalDateTime? = null
-    var fireTimes: List<LocalDate>? = null
+    var fireTimes: List<LocalDateTime>? = null
     var cron: String? = null
+
 
 
     private fun buildName(jobDescriptor: JobDescriptor): String {
@@ -84,6 +85,7 @@ class TriggerDescriptor {
                         .usingJobData("startDate", startDate?.toEpochDay()?.toString())
                         .usingJobData("endDate", endDate?.toEpochDay()?.toString())
                         .usingJobData("countTimes", countTimes.toString())
+
 
             }
             !isEmpty(fireTimes) -> {

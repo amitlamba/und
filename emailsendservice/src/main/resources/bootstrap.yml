@@ -4,7 +4,6 @@ spring:
       uri: http://nestros.com:8888
       enabled: true
       name: emailsendservice
-      #profile: shiv
   application:
     name: emailsendservice
   zipkin:

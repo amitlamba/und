@@ -45,8 +45,8 @@ insert into template(id, client_id, appuser_id, template, name) VALUES
 
 /* set sequences after adding default data to appropriate place say 1000*/
 
-alter sequence  authority_id_seq INCREMENT 1000;
-alter sequence  client_id_seq INCREMENT 1000;
-alter sequence  appuser_id_seq INCREMENT 1000;
-alter sequence  email_template_id_seq INCREMENT 1000;
-alter sequence  template_id_seq INCREMENT 1000;
+alter sequence  authority_id_seq START 1000 INCREMENT 1;
+alter sequence  client_id_seq START 1000 INCREMENT 1;
+alter sequence  appuser_id_seq START 1000 INCREMENT 1;
+alter sequence  email_template_id_seq START 1000 INCREMENT 1;
+alter sequence  template_id_seq START 1000 INCREMENT 1;

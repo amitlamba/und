@@ -4,19 +4,26 @@ import com.und.config.EventStream
 import com.und.model.JobAction
 import com.und.model.JobActionStatus
 import com.und.model.JobDescriptor
+import com.und.model.TriggerDescriptor
 import com.und.service.JobService
 import com.und.util.JobUtil
+import org.quartz.Scheduler
+import org.quartz.impl.matchers.GroupMatcher
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class MessageJobService(private val jobService: JobService, private val eventStream: EventStream) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+
+    @Autowired
+    protected lateinit var scheduler: Scheduler
 
     fun executeJob(pair: Pair<String, String>): String {
 
@@ -43,20 +50,29 @@ class MessageJobService(private val jobService: JobService, private val eventStr
         val action = jobDescriptor.action
         return when (action) {
             JobDescriptor.Action.CREATE -> {
-                performAction(jobDescriptor, jobService::createJob)
+                val trigger = jobDescriptor.triggerDescriptors.first()
+                val fireTime = trigger.fireTime
+                val cron = trigger.cron
+                val fireTimes = trigger.fireTimes
+                if (cron === null && fireTime == null && fireTimes != null && fireTimes.isNotEmpty()) {
+                    multipleDateTrigger(fireTimes, jobDescriptor)
+
+                } else {
+                    performAction(jobDescriptor, jobService::createJob)
+                }
             }
             JobDescriptor.Action.PAUSE -> {
-                performAction(jobDescriptor, jobService::pauseJob)
+                performActionGroup(jobDescriptor, jobService::pauseJobs)
             }
             JobDescriptor.Action.RESUME -> {
-                performAction(jobDescriptor, jobService::resumeJob)
+                performActionGroup(jobDescriptor, jobService::resumeJobs)
             }
             JobDescriptor.Action.DELETE -> {
-                performAction(jobDescriptor, jobService::deleteJob)
+                performActionGroup(jobDescriptor, jobService::deleteJobs)
             }
 
             JobDescriptor.Action.STOP -> {
-                performAction(jobDescriptor, jobService::deleteJob)
+                performActionGroup(jobDescriptor, jobService::deleteJobs)
             }
             JobDescriptor.Action.NOTHING -> {
                 val status = jobActionStatus(jobDescriptor, action)
@@ -69,15 +85,38 @@ class MessageJobService(private val jobService: JobService, private val eventStr
 
     }
 
-    private fun performAction(jobDescriptor: JobDescriptor, perform: (JobDescriptor) -> JobActionStatus): JobActionStatus {
-        val job = jobService.findJob(jobDescriptor)
+    private fun multipleDateTrigger(fireTimes: List<LocalDateTime>, jobDescriptor: JobDescriptor): JobActionStatus {
+        val trigger: TriggerDescriptor = jobDescriptor.triggerDescriptors.first()
+        val actions = mutableListOf<JobActionStatus>()
+        for (i in 0 until fireTimes.size) {
+            trigger.fireTime = fireTimes[i]
+            jobDescriptor.fireIndex = i.toString()
+            val action = performAction(jobDescriptor, jobService::createJob)
+            actions.add(action)
+        }
         val status = jobActionStatus(jobDescriptor, jobDescriptor.action)
-        if (job.isPresent) {
+        for (action in actions) {
+            if (action.status != JobActionStatus.Status.OK) {
+                status.status = action.status
+                status.message = action.message
+                break
+            }
+        }
+
+        return status
+    }
+
+    private fun performAction(jobDescriptor: JobDescriptor, perform: (JobDescriptor) -> JobActionStatus): JobActionStatus {
+        val group: String = JobUtil.getGroupName(jobDescriptor)
+        val name: String = JobUtil.getJobName(jobDescriptor)
+        val jobs = jobService.findJob(group, name)
+        val status = jobActionStatus(jobDescriptor, jobDescriptor.action)
+        if (jobs.isPresent) {
             status.status = JobActionStatus.Status.DUPLICATE
             status.message = "Cant Perform ${jobDescriptor.action.name}  on schedule as it already exists."
         } else {
             try {
-                  val actionStatus = perform(jobDescriptor)
+                val actionStatus = perform(jobDescriptor)
                 status.status = actionStatus.status
                 status.message = actionStatus.message
             } catch (e: Exception) {
@@ -90,13 +129,14 @@ class MessageJobService(private val jobService: JobService, private val eventStr
     }
 
 
-    private fun performAction(jobDescriptor: JobDescriptor, perform: (String, String) -> JobActionStatus): JobActionStatus {
-        val job = jobService.findJob(jobDescriptor)
+    private fun performActionGroup(jobDescriptor: JobDescriptor, perform: (String) -> JobActionStatus): JobActionStatus {
+        val jobs = jobService.findJob(jobDescriptor)
         val status = jobActionStatus(jobDescriptor, jobDescriptor.action)
-        if (job.isPresent) {
-            val group: String = JobUtil.getGroupName(jobDescriptor.clientId)
-            val name: String = JobUtil.getJobName(jobDescriptor.campaignId, jobDescriptor.campaignName)
-            val actionStatus = perform(group, name)
+
+        if (jobs.isNotEmpty()) {
+
+            val group: String = JobUtil.getGroupName(jobDescriptor)
+            val actionStatus = perform(group)
             status.status = actionStatus.status
             status.message = actionStatus.message
         } else {
