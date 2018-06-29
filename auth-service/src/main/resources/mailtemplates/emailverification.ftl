@@ -4,8 +4,7 @@
     <title>Verification Email</title>
 </head>
 <body>
-<div style="width:400px;margin:0 auto;padding:30px;"
-">
+<div style="width:400px;margin:0 auto;padding:30px;">
 <a href="https://userndot.com" style="text-decoration: none;">
     <h2 style="text-align: center;">UserNDot</h2>
 </a>
