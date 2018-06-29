@@ -82,7 +82,7 @@
             class="btn btn-primary"
             data-toggle="modal"
             data-target="#exampleModalLong"
-            [disabled]="!emailTemplateForm.valid">Save
+            [disabled]="!emailTemplateForm.valid || emailTemplate.emailTemplateBody=='' || emailTemplate.emailTemplateBody==undefined">Save
     </button>
   </div>
 </form>

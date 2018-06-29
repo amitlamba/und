@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {Chart} from 'chart.js'
-import {ReportsService} from "../_services/reports.service";
+import {ReportsService} from "../../_services/reports.service";
 
 
 @Component({
@@ -21,7 +21,7 @@ export class EventsGraphComponent implements OnInit {
 
   ngOnInit() {
     this.eventsChartData = this.reportsService.eventsChartData;
-    this.eventsChartLabels = this.reportsService.lineChartLabels;
+    // this.eventsChartLabels = this.reportsService.lineChartLabels;
     this.eventsChartOptions = this.reportsService.lineChartOptions.options;
     this.eventsChartColors = this.reportsService.lineChartColors;
     this.eventsChartLegend = this.reportsService.lineChartLegend;

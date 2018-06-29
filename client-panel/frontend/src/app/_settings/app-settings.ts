@@ -1,9 +1,9 @@
 export class AppSettings {
-  public static API_ENDPOINT = "http://nestros.com:8080";
+  public static API_ENDPOINT = "http://nestros.com:8090";
 
 
   // public static API_ENDPOINT_CLIENT = AppSettings.API_ENDPOINT + "/client";
-  public static API_ENDPOINT_CLIENT = "http://nestros.com:9191";
+  public static API_ENDPOINT_CLIENT = "http://nestros.com:9201";
   // public static API_ENDPOINT_CLIENT = "http://localhost:9191";
 
   public static API_ENDPOINT_CLIENT_CLIENT = AppSettings.API_ENDPOINT_CLIENT + "/client";
@@ -80,7 +80,7 @@ export class AppSettings {
 
 
   // public static API_ENDPOINT_AUTH = AppSettings.API_ENDPOINT + "/auth";
-  public static API_ENDPOINT_AUTH = "http://nestros.com:9595";
+  public static API_ENDPOINT_AUTH = "http://nestros.com:9605";
   // public static API_ENDPOINT_AUTH = AppSettings.API_ENDPOINT + "/auth";
   // public static API_ENDPOINT_AUTH = "http://nestros.com:9595"
 

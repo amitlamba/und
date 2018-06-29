@@ -106,6 +106,10 @@ export class CreateEmailTemplateFormComponent implements OnInit, OnChanges {
   }
 
   redirectToSendersInfoPage() {
+    // this.emailTemplateModalReference.nativeElement.className='modal hide';
+    $('body').removeClass('modal-open');
+    $('body').addClass('pr-0');
+    $('.modal-backdrop').remove();
     this.router.navigate(['settings/email-list']);
   }
 
