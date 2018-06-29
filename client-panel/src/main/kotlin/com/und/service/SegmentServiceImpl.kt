@@ -79,13 +79,25 @@ class SegmentServiceImpl : SegmentService {
     }
 
     private fun getSegmentUsersList(segment: Segment, clientId: Long): List<EventUser> {
+        val allResult =  mutableListOf<Set<String>>()
         val websegment = buildWebSegment(segment)
         val queries = SegmentParserCriteria().segmentQueries(websegment)
-        val userDidList = retrieveUsers(queries.didq.first, queries.didq.second, clientId)
-        val userDidNotList = retrieveUsers(queries.didntq.first, queries.didntq.second, clientId)
+
+        val (didQueries, joincondition) = queries.didq
+        if(didQueries.isNotEmpty()) {
+            val userDidList = retrieveUsers(didQueries, joincondition, clientId)
+            allResult.add(userDidList.toSet())
+        }
+
+        val (didNotQueries, joinconditionfornot) = queries.didntq
+        if(didNotQueries.isNotEmpty()) {
+            val userDidNotList = retrieveUsers(didNotQueries, joinconditionfornot, clientId)
+            allResult.add(userDidNotList.toSet())
+        }
 
 
-        val userList = userDidList.intersect(userDidNotList)
+
+        val userList = allResult.reduce{f, s ->  f.intersect(s)}
         return userList.asSequence().map {
             eventUserRepository.findUserById(it, clientId)
 
@@ -94,16 +106,19 @@ class SegmentServiceImpl : SegmentService {
     }
 
     private fun retrieveUsers(queries: List<Aggregation>, conditionType: ConditionType, clientId: Long): MutableSet<String> {
-        val userDidList = mutableSetOf<String>()
-        queries.forEach {
-            val idList = eventRepository.usersFromEvent(it, clientId)
-            when (conditionType) {
-                ConditionType.AnyOf -> userDidList.addAll(idList)
-                ConditionType.AllOf -> userDidList.intersect(idList)
-            }
+        val userDidList = mutableListOf<Set<String>>()
+        queries.forEach { aggregation ->
+            val idList = eventRepository.usersFromEvent(aggregation, clientId)
+            userDidList.add(idList.toSet())
 
         }
-        return userDidList
+        val result =  when (conditionType) {
+            ConditionType.AnyOf -> userDidList.reduce{f, s ->  f.union(s)}
+            ConditionType.AllOf -> userDidList.reduce{f, s ->  f.intersect(s)}
+        }
+        val mutableResult = mutableSetOf<String>()
+        mutableResult.addAll(result)
+        return mutableResult
     }
 
     private fun buildSegment(websegment: WebSegment): Segment {

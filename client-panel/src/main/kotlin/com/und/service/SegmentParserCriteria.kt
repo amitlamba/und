@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.aggregation.GroupOperation
 import org.springframework.data.mongodb.core.aggregation.MatchOperation
 import org.springframework.data.mongodb.core.query.Criteria
 import java.time.LocalDateTime
+import java.util.*
 
 /*
 1. parse events, didn't do and do
@@ -25,7 +26,7 @@ import java.time.LocalDateTime
 class SegmentParserCriteria {
 
     companion object {
-        val logger:Logger = loggerFor(SegmentParserCriteria::class.java)
+        val logger: Logger = loggerFor(SegmentParserCriteria::class.java)
     }
 
     private val dateUtils = DateUtils()
@@ -75,12 +76,11 @@ class SegmentParserCriteria {
 
     fun parseEvents(events: List<Event>, did: Boolean): List<Aggregation> {
 
-        return events.map {
-            val whereCond = if (did) it.whereFilter?.let { whereFilterParse(it) } else null
+        return events.map { event ->
             val matches = mutableListOf<Criteria>()
-            matches.addAll(parsePropertyFilters(it))
-            matches.add(Criteria.where(Field.eventName.fName).`is`(it.name))
-            matches.add(parseDateFilter(it.dateFilter))
+            matches.addAll(parsePropertyFilters(event))
+            matches.add(Criteria.where(Field.eventName.fName).`is`(event.name))
+            matches.add(parseDateFilter(event.dateFilter))
             var fields = Aggregation.fields(Field.userId.name, Field.creationTime.name, Field.clientId.name)
             matches.forEach { criteria ->
                 val name = criteria.key
@@ -99,9 +99,13 @@ class SegmentParserCriteria {
 
             val matchOps = Aggregation.match(Criteria().andOperator(*matches.toTypedArray()))
 
-            if (whereCond != null) {
-                val group = whereCond.first
-                val matchOnGroup = whereCond.second
+            val whereCond =  if (did) {
+                 event.whereFilter?.let { whereFilter -> whereFilterParse(whereFilter) }?:Optional.empty()
+            } else Optional.empty()
+
+            if (whereCond.isPresent) {
+                val group = whereCond.get().first
+                val matchOnGroup = whereCond.get().second
                 Aggregation.newAggregation(project, matchOps, group, matchOnGroup)
             } else {
                 val group = Aggregation.group(Aggregation.fields().and(Field.userId.name, Field.userId.name))
@@ -174,10 +178,10 @@ class SegmentParserCriteria {
     private fun parseDateFilter(dateFilters: DateFilter): Criteria = match(dateFilters.values, dateFilters.operator.name, Field.creationTime.name, DataType.date, dateFilters.valueUnit)
 
 
-    private fun whereFilterParse(whereFilter: WhereFilter): Pair<GroupOperation, MatchOperation> {
+    private fun whereFilterParse(whereFilter: WhereFilter): Optional<Pair<GroupOperation, MatchOperation>> {
         val values = whereFilter.values
-        return if (values != null) {
-             when (whereFilter.whereFilterName) {
+        return if ((values != null && values.isNotEmpty()) && !whereFilter.propertyName.isNullOrBlank()) {
+            val filter: Pair<GroupOperation, MatchOperation> = when (whereFilter.whereFilterName) {
                 WhereFilterName.Count -> {
 
                     val group = Aggregation.group(Aggregation.fields().and(Field.userId.name, Field.userId.name)).count().`as`(Field.count.name)
@@ -193,7 +197,8 @@ class SegmentParserCriteria {
                 }
                 else -> throw Exception("invalid aggregate expression can only be count or sum  but is ${whereFilter.whereFilterName}")
             }
-        } else throw Exception("no value for groupin criteria")
+            Optional.of(filter)
+        } else Optional.empty()
 
 
     }
@@ -204,7 +209,7 @@ class SegmentParserCriteria {
         return when (type) {
             DataType.string -> matchString(values, StringOperator.valueOf(operator), fieldName)
             DataType.number -> matchNumber(values, NumberOperator.valueOf(operator), fieldName)
-            DataType.date ->  matchDate(values, DateOperator.valueOf(operator), unit, fieldName)
+            DataType.date -> matchDate(values, DateOperator.valueOf(operator), unit, fieldName)
             DataType.range -> Criteria()
             DataType.boolean -> Criteria()
 

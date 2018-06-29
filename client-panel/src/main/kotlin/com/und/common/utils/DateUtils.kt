@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component
 import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.util.Date
 
@@ -20,7 +22,7 @@ class DateUtils : Serializable {
 
     fun parseToDate(date: String): Any {
         return if (regexDateTime.matches(date)) {
-            parseDateTime(date)
+            convertDateTimeToDate(parseDateTime(date))
         } else if (regexDate.matches(date)) {
             parseDate(date)
         } else {
@@ -37,6 +39,11 @@ class DateUtils : Serializable {
         return LocalDate.parse(date)
     }
 
+    fun convertDateTimeToDate(ld:LocalDateTime):Date {
+        val  zdtTime = ld.atZone(ZoneId.systemDefault());
+        return  Date.from(zdtTime.toInstant())
+
+    }
     val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
     val dateFormatter: DateTimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE
     private val regexDateTime = "[0-9][0-9][0-9][0-9][-][0-9][0-9][-][0-9][0-9][T][0-9][0-9][:][0-9][0-9][:][0-9][0-9][.][0-9]*[Z]".toRegex()
