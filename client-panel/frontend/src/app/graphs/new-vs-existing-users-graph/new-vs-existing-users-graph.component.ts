@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import {Chart} from 'chart.js'
-import {ReportsService} from "../_services/reports.service";
+import {ReportsService} from "../../_services/reports.service";
 
 @Component({
   selector: 'app-new-vs-existing-users-graph',
@@ -22,7 +22,7 @@ export class NewVsExistingUsersGraphComponent implements OnInit {
 
   ngOnInit() {
     this.newUsersChartData = this.reportsService.newUsersChartData;
-    this.newUsersChartLabels = this.reportsService.lineChartLabels;
+    // this.newUsersChartLabels = this.reportsService.lineChartLabels;
     this.newUsersChartOptions = this.reportsService.lineChartOptions.options;
     this.newUsersChartColors = this.reportsService.lineChartColors;
     this.newUsersChartLegend = this.reportsService.lineChartLegend;
@@ -70,6 +70,46 @@ export class NewVsExistingUsersGraphComponent implements OnInit {
       this.newUsersChartData = _lineChartData;
     }
   }
+  private datasets = [
+    {
+      label: "# of Votes",
+      data: [12, 19, 3, 5, 2, 3]
+    }
+  ];
 
+  private labels = ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'];
+
+  private options = {
+    scales: {
+      yAxes: [{
+        ticks: {
+          beginAtZero: true
+        }
+      }]
+    }
+  };
+
+  changeLabels(): void {
+    if (this.labels[0] == 'Red')
+      this.labels = ['Blue', 'Yellow', 'Green', 'Purple', 'Orange', 'Red'];
+    else
+      this.labels = ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'];
+  }
+  changeData(): void {
+    if (this.datasets[0].data[0] == 12)
+      this.datasets = [
+        {
+          label: "# of Votes",
+          data: [19, 3, 5, 2, 3, 12]
+        }
+      ]
+    else
+      this.datasets = [
+        {
+          label: "# of Votes",
+          data: [12, 19, 3, 5, 2, 3]
+        }
+      ]
+  }
 
 }

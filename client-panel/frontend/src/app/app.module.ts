@@ -79,11 +79,11 @@ import {AboutUsComponent} from './about-us/about-us.component';
 import {TermsOfServiceComponent} from './terms-of-service/terms-of-service.component';
 import {NgxIntlTelInputModule} from "./ngx-intl-tel-input/src";
 import {ContactUsComponent} from "./contact-us/contact-us.component";
-import {NewVsExistingUsersGraphComponent} from './new-vs-existing-users-graph/new-vs-existing-users-graph.component';
+import { NewVsExistingUsersGraphComponent} from "./graphs/new-vs-existing-users-graph/new-vs-existing-users-graph.component";
 import {ReCaptchaModule} from "angular2-recaptcha";
 import {TimerangeComponent} from './segment-category/timerange/timerange.component';
-import {ConversionEventsGraphComponent} from './conversion-events-graph/conversion-events-graph.component';
-import {EventsGraphComponent} from './events-graph/events-graph.component';
+import {ConversionEventsGraphComponent} from "./graphs/conversion-events-graph/conversion-events-graph.component";
+import {EventsGraphComponent} from "./graphs/events-graph/events-graph.component";
 import {ChartsModule} from "ng2-charts";
 import {ReportsService} from "./_services/reports.service";
 import {RegisterService} from "./_services/register.service";
@@ -91,6 +91,7 @@ import {KeysPipe, UserProfileComponent} from './user-profile/user-profile.compon
 import {TooltipModule} from "ngx-bootstrap";
 import {CampaignsInfoComponent} from './campaigns-info/campaigns-info.component';
 import {Select2Module} from "ng2-select2";
+import { BaseGraphComponent } from './graphs/base-graph/base-graph.component';
 
 
 @NgModule({
@@ -173,7 +174,8 @@ import {Select2Module} from "ng2-select2";
     EventsGraphComponent,
     UserProfileComponent,
     CampaignsInfoComponent,
-    KeysPipe
+    KeysPipe,
+    BaseGraphComponent
   ],
   providers: [
     AuthGuard,
@@ -197,7 +199,8 @@ import {Select2Module} from "ng2-select2";
     FilterComponent,
     GeographyFilterComponent,
     GlobalFilterComponent,
-    CreateEmailTemplateFormComponent
+    CreateEmailTemplateFormComponent,
+    BaseGraphComponent
   ],
   exports: [TooltipModule],
   bootstrap: [AppComponent]
