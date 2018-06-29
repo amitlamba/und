@@ -59,6 +59,7 @@ class EmailService {
 
     fun sendContactUsEmail(contactInfo: ContactUs) {
         val dataMap = mutableMapOf<String, Any>(
+                "name" to "${contactInfo.name}"
         )
 
         val email = Email(
@@ -75,7 +76,7 @@ class EmailService {
     fun sendVerificationEmail(client: Client) {
         val dataMap = mutableMapOf<String, Any>(
                 "name" to "${client.firstname} ${client.lastname}",
-                "emailVerificationLink" to ""
+                "emailVerificationLink" to "${authUrl}/register/verifyemail/${client.email}/${client.clientVerification.emailCode}"
         )
 
         val email = Email(
