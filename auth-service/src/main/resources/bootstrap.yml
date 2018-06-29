@@ -1,7 +1,4 @@
 spring:
-  profiles:
-    active:
-      shiv
   cloud:
     config:
       uri: http://nestros.com:8888

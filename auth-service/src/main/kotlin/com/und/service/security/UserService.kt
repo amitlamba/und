@@ -47,7 +47,7 @@ class UserService {
         //FIXME usernameFromEmailAndType method need fix and not required here
         val username = usernameFromEmailAndType(adminUser.username, AuthenticationUtils.USER_TYPE_EVENT)
         val jwt = retrieveJwtLogin(username, KEYTYPE.LOGIN)
-        return jwt?:updateJwtOfEventUser(adminUser)
+        return if(jwt?.loginKey != null) jwt else updateJwtOfEventUser(adminUser)
 
     }
 

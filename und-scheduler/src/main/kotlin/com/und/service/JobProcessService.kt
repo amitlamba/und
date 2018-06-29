@@ -30,7 +30,7 @@ class JobProcessService : AbstractJobService() {
         val triggersForJob = descriptor.buildTriggers()
         JobProcessService.logger.info("About to save job with key - ${jobDetail.key}")
         try {
-            scheduler.addCalendarIfRequired(descriptor)
+            //scheduler.addCalendarIfRequired(descriptor)
             scheduler.scheduleJob(jobDetail, triggersForJob, false)
             logger.info("Job with key - ${jobDetail.key} saved successfully")
         } catch (e: SchedulerException) {
@@ -70,7 +70,7 @@ class JobProcessService : AbstractJobService() {
     }
 
 
-    private fun Scheduler.addCalendarIfRequired(descriptor: JobDescriptor) {
+/*    private fun Scheduler.addCalendarIfRequired(descriptor: JobDescriptor) {
         val fireTimes = descriptor.triggerDescriptors.map { it.fireTimes }
         if (fireTimes.isNotEmpty()) {
             val muiltipFireTimes = fireTimes.first()?.isNotEmpty()
@@ -80,7 +80,7 @@ class JobProcessService : AbstractJobService() {
                 this.addCalendar(descriptor.calendarName(), cal, false, true)
             }
         }
-    }
+    }*/
 
 
 

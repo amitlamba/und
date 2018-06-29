@@ -15,18 +15,20 @@ class JobDescriptor {
     @NotBlank
     lateinit var clientId: String
     @NotBlank
-    lateinit var campaignId : String
+    lateinit var campaignId: String
 
     @NotBlank
     lateinit var campaignName: String
 
+    var fireIndex: String = "0"
+
     @JsonProperty("triggers")
     var triggerDescriptors: List<TriggerDescriptor> = listOf()
 
-    var action:Action = Action.NOTHING
+    var action: Action = Action.NOTHING
 
     enum class Action {
-        PAUSE,CREATE,RESUME,DELETE,STOP,NOTHING,
+        PAUSE, CREATE, RESUME, DELETE, STOP, NOTHING,
     }
 
     /**
@@ -37,10 +39,10 @@ class JobDescriptor {
     @JsonIgnore
     fun buildTriggers(): Set<Trigger> {
         val triggers = LinkedHashSet<Trigger>()
-        triggerDescriptors.forEach{
+        triggerDescriptors.forEach {
             triggers.add(it.buildTrigger(this))
         }
-       return triggers
+        return triggers
     }
 
     /**
@@ -53,7 +55,8 @@ class JobDescriptor {
                 .withIdentity(JobUtil.getJobName(this), JobUtil.getGroupName(this))
                 .usingJobData("clientId", clientId)
                 .usingJobData("campaignId", campaignId)
-                .usingJobData("campaignName",campaignName)
+                .usingJobData("campaignName", campaignName)
+                .usingJobData("fireIndex", fireIndex)
                 .build()
     }
 
@@ -72,13 +75,14 @@ class JobDescriptor {
         fun buildDescriptor(jobDetail: JobDetail, triggersOfJob: List<Trigger>): JobDescriptor {
             val triggerDescriptors = arrayListOf<TriggerDescriptor>()
 
-            triggersOfJob.forEach{triggerDescriptors.add(TriggerDescriptor.buildDescriptor(it))}
+            triggersOfJob.forEach { triggerDescriptors.add(TriggerDescriptor.buildDescriptor(it)) }
 
             val jobDescriptor = JobDescriptor()
             with(jobDescriptor) {
                 clientId = jobDetail.jobDataMap["clientId"] as String
                 campaignId = jobDetail.jobDataMap["campaignId"] as String
                 campaignName = jobDetail.jobDataMap["campaignName"] as String
+                fireIndex = jobDetail.jobDataMap["fireIndex"] as String
                 this.triggerDescriptors = triggerDescriptors
 
             }

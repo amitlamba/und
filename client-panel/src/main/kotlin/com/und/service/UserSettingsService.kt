@@ -121,12 +121,15 @@ class UserSettingsService {
 
     fun saveAccountSettings(accountSettings: AccountSettings, clientID: Long?, userID: Long?) {
         //FIXME: Validate Timezone and Email Addresses
-        val clientSettings = ClientSettings()
-        clientSettings.id = accountSettings.id
-        clientSettings.clientID = clientID
-        clientSettings.authorizedUrls = objectMapper.writeValueAsString(accountSettings.urls)
-        clientSettings.timezone = accountSettings.timezone
-        clientSettingsRepository.save(clientSettings)
+        if(clientID != null) {
+            val clientSettings = ClientSettings()
+            val clientSettingspersisted = clientSettingsRepository.findByClientID(clientID)
+            clientSettings.id = accountSettings.id?:clientSettingspersisted?.id
+            clientSettings.clientID = clientID
+            clientSettings.authorizedUrls = objectMapper.writeValueAsString(accountSettings.urls)
+            clientSettings.timezone = accountSettings.timezone
+            clientSettingsRepository.save(clientSettings)
+        }
     }
 
     fun getAccountSettings(clientID: Long): Optional<AccountSettings> {
@@ -201,16 +204,17 @@ class UserSettingsService {
 
     }
 
-    fun getUnSubscribeLink(clientID: Long?): UnSubscribeLink {
+    fun getUnSubscribeLink(clientID: Long?): Optional<UnSubscribeLink> {
 
         val clientSettings = clientSettingsRepository.findByClientID(clientID!!)
         val linkUrl = clientSettings?.unSubscribeLink
-
-        return linkUrl?.let { link ->
+        val unSubscribeLink  = linkUrl?.let { link ->
             val unSubscribeLink = UnSubscribeLink()
             unSubscribeLink.unSubscribeLink = link
-            return unSubscribeLink
-        } ?: UnSubscribeLink()
+            unSubscribeLink
+        }
+        return if(unSubscribeLink == null) Optional.empty() else Optional.of(unSubscribeLink)
+
 
     }
 

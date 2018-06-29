@@ -45,4 +45,5 @@ class StandardInfo {
     var country: String? = null
     var City: String? = null
     var Address: String? = null
+    var countryCode: String? = null
 }

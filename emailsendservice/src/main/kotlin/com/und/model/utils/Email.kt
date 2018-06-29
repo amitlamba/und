@@ -7,7 +7,7 @@ import javax.mail.internet.InternetAddress
 
 data class Email(
         var clientID: Long,
-        var fromEmailAddress: InternetAddress,
+        var fromEmailAddress: InternetAddress? = null,
         var toEmailAddresses: Array<InternetAddress>,
         var ccEmailAddresses: Array<InternetAddress>? = null,
         var bccEmailAddresses: Array<InternetAddress>? = null,
@@ -43,7 +43,7 @@ data class Email(
 
     override fun hashCode(): Int {
         var result = clientID.hashCode()
-        result = 31 * result + fromEmailAddress.hashCode()
+        result = 31 * result + (fromEmailAddress?.hashCode()?:0)
         result = 31 * result + Arrays.hashCode(toEmailAddresses)
         result = 31 * result + (ccEmailAddresses?.let { Arrays.hashCode(it) } ?: 0)
         result = 31 * result + (bccEmailAddresses?.let { Arrays.hashCode(it) } ?: 0)

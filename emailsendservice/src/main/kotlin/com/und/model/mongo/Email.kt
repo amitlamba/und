@@ -10,12 +10,12 @@ import javax.mail.internet.InternetAddress
 @Document(collection = "#{tenantProvider.getTenant()}_email")
 data class Email(
         var clientID: Long,
-        var fromEmailAddress: InternetAddress,
+        var fromEmailAddress: InternetAddress? = null,
         var toEmailAddresses: Array<InternetAddress>,
         var ccEmailAddresses: Array<InternetAddress>? = null,
         var bccEmailAddresses: Array<InternetAddress>? = null,
         var replyToEmailAddresses: Array<InternetAddress>? = null,
-        var emailSubject: String,
+        var emailSubject: String? = null,
         @Transient
         var emailBody: String,
         var emailTemplateId: Long? = null,

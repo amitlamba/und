@@ -20,6 +20,7 @@ export class SegmentService {
   editSegment: Segment;
   countries: Country[];
   eventUser: EventUser = new EventUser();
+  cachedRegisteredEvents: RegisteredEvent[] = null;
 
   constructor(private httpClient: HttpClient) {
     // this.editSegment = this.initSegment(new Segment());

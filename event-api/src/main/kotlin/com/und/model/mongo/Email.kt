@@ -41,3 +41,4 @@ enum class EmailStatus(val order: Int) {
     READ(3),
     CTA_PERFORMED(4);
 }
+

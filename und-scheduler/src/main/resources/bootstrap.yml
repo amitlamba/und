@@ -1,7 +1,4 @@
 spring:
-  profiles:
-    active:
-      #dev
   cloud:
     config:
       uri: http://nestros.com:8888

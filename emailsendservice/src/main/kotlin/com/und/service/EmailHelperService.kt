@@ -54,15 +54,14 @@ class EmailHelperService {
         return msg
     }
 
-    fun saveMailInMongo(email: Email, emailStatus: EmailStatus): String? {
-        val mongoEmail: com.und.model.mongo.Email = com.und.model.mongo.Email(
+    fun saveMailInMongo(email: Email, emailStatus: EmailStatus): String? { val mongoEmail: com.und.model.mongo.Email = com.und.model.mongo.Email(
                 email.clientID,
                 email.fromEmailAddress,
                 email.toEmailAddresses,
                 email.ccEmailAddresses,
                 email.bccEmailAddresses,
                 email.replyToEmailAddresses,
-                email.emailSubject!!,
+                email.emailSubject,
                 email.emailBody!!,
                 email.emailTemplateId,
                 email.eventUser?.id,

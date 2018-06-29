@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import java.lang.Exception
@@ -185,6 +186,16 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
     fun eventUser(ex: SegmentNotFoundException, request: WebRequest): ResponseEntity<Any> {
         logger.error("400 Status Code", ex)
         val bodyOfResponse = GenericResponse(messageSource.getMessage("message.nosegmentwithid", null, request.locale), ex.localizedMessage)
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
+    }
+
+
+    @ExceptionHandler(HttpClientErrorException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseBody
+    fun clientError(ex: HttpClientErrorException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("400 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.clientError", null, request.locale), ex.localizedMessage)
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
     }
 

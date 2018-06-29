@@ -9,6 +9,8 @@ import org.quartz.JobKey
 import org.quartz.JobKey.jobKey
 import org.quartz.Scheduler
 import org.quartz.SchedulerException
+import org.quartz.impl.matchers.GroupMatcher
+import org.quartz.impl.matchers.StringMatcher
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.transaction.annotation.Transactional
@@ -39,17 +41,22 @@ abstract class AbstractJobService : JobService {
      */
     @Transactional(readOnly = true)
     override fun findJob(group: String, name: String): Optional<JobDescriptor> {
+        val jobKey = jobKey(name, group)
+        return findJob(jobKey)
+    }
+
+    private fun findJob(jobKey :JobKey): Optional<JobDescriptor> {
         try {
-            val jobDetail = scheduler.getJobDetail(jobKey(name, group))
+            val jobDetail = scheduler.getJobDetail(jobKey)
             if (Objects.nonNull(jobDetail))
                 return Optional.of(
                         JobDescriptor.buildDescriptor(jobDetail,
-                                scheduler.getTriggersOfJob(jobKey(name, group))))
+                                scheduler.getTriggersOfJob(jobKey)))
         } catch (e: SchedulerException) {
-            logger.error("Could not find job with key - $group.$name due to error - ${e.localizedMessage}")
+            logger.error("Could not find job with key - ${jobKey.group}.${jobKey.name} due to error - ${e.localizedMessage}")
         }
 
-        logger.warn("Could not find job with key - $group.$name")
+        logger.warn("Could not find job with key - ${jobKey.group}.${jobKey.name}")
         return Optional.empty()
     }
 
@@ -57,12 +64,24 @@ abstract class AbstractJobService : JobService {
      * {@inheritDoc}
      */
     @Transactional(readOnly = true)
-    override fun findJob(jobDescriptor: JobDescriptor): Optional<JobDescriptor> {
-        val name = JobUtil.getJobName(jobDescriptor)
-        val group = JobUtil.getGroupName(jobDescriptor)
-        return findJob(group, name)
+    override fun findJob(jobDescriptor: JobDescriptor): List<JobDescriptor> {
+        val descriptors = mutableListOf<JobDescriptor>()
+         val groupName = JobUtil.getGroupName(jobDescriptor)
+        val jobKeys = scheduler.getJobKeys(GroupMatcher.groupEquals(groupName))
+        if(jobKeys!= null) {
+            for (jobKey in jobKeys) {
+
+                val job = findJob(jobKey)
+                if(job.isPresent) {
+                    descriptors.add(job.get())
+                }
+            }
+        }
+        return descriptors
 
     }
+
+
 
     /**
      * {@inheritDoc}
@@ -99,6 +118,56 @@ abstract class AbstractJobService : JobService {
         return status
 
     }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    override fun deleteJobs(group: String): JobActionStatus {
+        val keys = scheduler.getJobKeys(GroupMatcher.groupEquals(group))
+
+        val status = JobActionStatus()
+        try {
+            //val atcher = GroupMatcher.groupEquals(group)
+            scheduler.deleteJobs(keys.toList())
+            status.status = JobActionStatus.Status.OK
+            logger.info("delete for jobs with group - $group")
+        } catch (e: SchedulerException) {
+            logger.error("Could not execute delete jobs with key - $group due to error - ${e.localizedMessage}")
+            status.status = JobActionStatus.Status.ERROR
+
+        }
+        return status
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    override fun pauseJobs(group: String): JobActionStatus = takeActionOnGroup(group, "pause", scheduler::pauseJobs)
+
+    /**
+     * {@inheritDoc}
+     */
+    override fun resumeJobs(group: String): JobActionStatus = takeActionOnGroup(group, "resume", scheduler::resumeJobs)
+
+    private fun takeActionOnGroup(group: String, actionName: String, action: (GroupMatcher<JobKey>) -> Unit): JobActionStatus {
+        val status = JobActionStatus()
+        try {
+            //val atcher = GroupMatcher.groupEquals(group)
+            action(GroupMatcher.groupEquals(group))
+            status.status = JobActionStatus.Status.OK
+            logger.info("$actionName  for jobs with group - $group")
+        } catch (e: SchedulerException) {
+            logger.error("Could not execute $actionName jobs with key - $group due to error - ${e.localizedMessage}")
+            status.status = JobActionStatus.Status.ERROR
+
+        }
+        return status
+
+    }
+
+
 
 
 }
