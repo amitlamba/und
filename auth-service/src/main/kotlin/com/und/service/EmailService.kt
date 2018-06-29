@@ -2,14 +2,12 @@ package com.und.service
 
 import com.und.common.utils.loggerFor
 import com.und.config.EventStream
-import com.und.model.jpa.ClientVerification
 import com.und.model.jpa.ContactUs
-import com.und.model.utils.Email
 import com.und.model.jpa.security.Client
-import com.und.model.jpa.security.EmailMessage
-import com.und.model.jpa.security.User
 import com.und.model.redis.security.UserCache
+import com.und.model.utils.Email
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import javax.mail.internet.InternetAddress
@@ -24,6 +22,9 @@ class EmailService {
         const val contactusTemplate = 2L
         const val verificationTemplate = 3L
     }
+
+    @Value("\${und.auth-url}")
+    lateinit var authUrl: String
 
     @Autowired
     private lateinit var eventStream: EventStream
@@ -41,8 +42,8 @@ class EmailService {
 
     fun sendForgotPasswordEmail(code: UserCache, email: String) {
         val dataMap = mutableMapOf<String, Any>(
-                "code" to code,
-                "resetpasswordUrl" to "resetpasswordUrl"
+                "name" to "${code.firstname} ${code.lastname}",
+                "resetPasswordLink" to "${authUrl}/register/resetpassword/${code.pswrdRstKey}"
         )
 
         val email = Email(
@@ -73,8 +74,8 @@ class EmailService {
 
     fun sendVerificationEmail(client: Client) {
         val dataMap = mutableMapOf<String, Any>(
-                "client" to client,
-                "verificationUrl" to ""
+                "name" to "${client.firstname} ${client.lastname}",
+                "emailVerificationLink" to ""
         )
 
         val email = Email(

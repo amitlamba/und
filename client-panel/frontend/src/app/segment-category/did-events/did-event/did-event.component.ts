@@ -24,6 +24,7 @@ import {SegmentService} from "../../../_services/segment.service";
 import {FilterComponent} from "./filter/filter.component";
 import {DidEventsComponent} from "../did-events.component";
 import * as moment from "moment";
+import {MessageService} from "../../../_services/message.service";
 
 @Component({
   selector: 'app-did-event',
@@ -84,17 +85,38 @@ export class DidEventComponent implements OnInit {
   }
 
   constructor(private daterangepickerOptions: DaterangepickerConfig, private segmentService: SegmentService,
-              private componentFactoryResolver: ComponentFactoryResolver) {
+              private componentFactoryResolver: ComponentFactoryResolver, private messageService: MessageService) {
     this.daterangepickerOptions.settings = {
       locale: {format: 'YYYY-MM-DD'},
       alwaysShowCalendars: false
     };
     this.singleDate = Date.now();
-    this.registeredEvents = this.segmentService.sampleEvents;
-    // console.log(this.registeredEvents);
-    this.defaultProperties = this.segmentService.defaultEventProperties;
-    this.eventProperties = this.registeredEvents[0].properties;
+    this.segmentService.getEvents().subscribe(
+      (response) => {
+        this.segmentService.cachedRegisteredEvents = response;
+        this.registeredEvents = this.segmentService.cachedRegisteredEvents;
+        if(this.registeredEvents == null || this.registeredEvents.length==0) {
+          this.messageService.addDangerMessage("No Events Metadata available. Showing Dummy data.");
+          this.registeredEvents = this.segmentService.sampleEvents;
+        }
+        this.defaultProperties = this.segmentService.defaultEventProperties;
+        this.eventProperties = this.registeredEvents[0].properties;
+        this.eventNameChanged(0);
+      }
+    );
   }
+
+  // private getCachedRegisteredEvents(): RegisteredEvent[] {
+  //   if(!this.segmentService.cachedRegisteredEvents) {
+  //     this.segmentService.getEvents().subscribe(
+  //       (response) => {
+  //         this.segmentService.cachedRegisteredEvents = response;
+  //         this.registeredEvents = this.segmentService.cachedRegisteredEvents;
+  //       }
+  //     );
+  //   }
+  //   return this.segmentService.cachedRegisteredEvents;
+  // }
 
   eventNameChanged(val:any) {
     this.eventProperties = this.registeredEvents[val].properties;
@@ -150,7 +172,6 @@ export class DidEventComponent implements OnInit {
 
 
   ngOnInit() {
-    this.eventNameChanged(0);
   }
 
 
