@@ -5,34 +5,34 @@ export class ReportsService {
 
   reportsDataFormat = [
     {
-      "date":"2018-06-26",
-      "eventName":"Added To Cart",
-      "count":5
+      "date": "2018-06-26",
+      "eventName": "Added To Cart",
+      "count": 5
     },
     {
-      "date":"2018-06-27",
-      "eventName":"Coupon applied",
-      "count":4
+      "date": "2018-06-27",
+      "eventName": "Coupon applied",
+      "count": 4
     },
     {
-      "date":"2018-06-28",
-      "eventName":"Item Purchased",
-      "count":5
+      "date": "2018-06-28",
+      "eventName": "Item Purchased",
+      "count": 5
     },
     {
-      "date":"2018-06-29",
-      "eventName":"Product Viewed",
-      "count":14
+      "date": "2018-06-29",
+      "eventName": "Product Viewed",
+      "count": 14
     },
     {
-      "date":"2018-06-30",
-      "eventName":"Removed From Cart",
-      "count":3
+      "date": "2018-06-30",
+      "eventName": "Removed From Cart",
+      "count": 3
     },
     {
-      "date":"2018-07-1",
-      "eventName":"Added To Cart",
-      "count":8
+      "date": "2018-07-1",
+      "eventName": "Added To Cart",
+      "count": 8
     }
 
   ];
