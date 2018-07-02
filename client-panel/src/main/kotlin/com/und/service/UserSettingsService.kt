@@ -124,11 +124,15 @@ class UserSettingsService {
         if(clientID != null) {
             val clientSettings = ClientSettings()
             val clientSettingspersisted = clientSettingsRepository.findByClientID(clientID)
-            clientSettings.id = accountSettings.id?:clientSettingspersisted?.id
+            clientSettings.id = clientSettingspersisted?.id
             clientSettings.clientID = clientID
             clientSettings.authorizedUrls = objectMapper.writeValueAsString(accountSettings.urls)
             clientSettings.timezone = accountSettings.timezone
-            clientSettingsRepository.save(clientSettings)
+            if(clientSettingspersisted == null) {
+                clientSettingsRepository.save(clientSettings)
+            } else {
+                clientSettingsRepository.updateAccountSettings(clientSettings.authorizedUrls, clientSettings.timezone, clientID)
+            }
         }
     }
 

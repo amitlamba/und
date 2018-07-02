@@ -17,4 +17,8 @@ interface ClientSettingsRepository : JpaRepository<ClientSettings, Int> {
     fun saveSenderEmailAddresses(senderEmailAddresses: String, clientId: Long)
 
     fun findByClientID(clientId: Long): ClientSettings?
+
+    @Modifying
+    @Query(value = "Update client_settings set authorized_urls = :authorizedUrls, timezone = :timezone where client_id = :clientId", nativeQuery = true)
+    fun updateAccountSettings(authorizedUrls: String?, timezone: String, clientId: Long)
 }
