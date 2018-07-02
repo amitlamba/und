@@ -4,7 +4,7 @@ spring:
       uri: http://nestros.com:8888
       enabled: true
       name: client-panel
-      profile: shiv
+#      profile: shiv
   application:
     name: client-panel
   mvc:
@@ -21,5 +21,5 @@ spring:
     bootstrap-servers: ${KAFKA_IP}:${KAFKA_PORT}
 
 encrypt:
-  key: UserNDot@18
-  fail-on-error: false
+  key: ${ENCRYPT_KEY}
+#  fail-on-error: false
