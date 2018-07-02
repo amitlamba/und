@@ -119,6 +119,7 @@ class UserSettingsService {
         return wspCreds
     }
 
+    @Transactional
     fun saveAccountSettings(accountSettings: AccountSettings, clientID: Long?, userID: Long?) {
         //FIXME: Validate Timezone and Email Addresses
         if(clientID != null) {
