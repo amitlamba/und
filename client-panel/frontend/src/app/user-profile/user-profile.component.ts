@@ -14,7 +14,6 @@ export class UserProfileComponent implements OnInit {
   eventUser: EventUser = new EventUser();
   eventList: Event[] = [];
   eventsSelectedList: EventSelected[] = [];
-  showEventsList: boolean = false;
 
   constructor(private segmentService: SegmentService,
               private router: Router) {
@@ -36,7 +35,6 @@ export class UserProfileComponent implements OnInit {
             es.selected = true;
             return es;
           });
-          this.showEventsList = true;
         }, (error: HttpErrorResponse) => {
           console.log(error);
         }
