@@ -13,13 +13,13 @@ import {HttpErrorResponse} from "@angular/common/http";
 export class AccountSettingsComponent implements OnInit {
   showCodeBlock: boolean = false;
   accountSettings: AccountSettings = new AccountSettings();
-  unSubscribeLink: UnSubscribeLink = new UnSubscribeLink();
+  UnSubscribeLink: UnSubscribeLink = new UnSubscribeLink();
   protocol: string = 'https://';
   websiteURL: string;
-  unsubscribeLink: string;
   protocolsArray: string[] = ['http://', 'https://'];
   codeSnippet: string;
   tokenValue: string;
+  unSubscribeLink: string='';
 
   // ng2-timezone-picker is used from https://samuelnygaard.github.io/ng2-timezone-selector/docs/
   placeholderString = 'Select timezone';
@@ -31,17 +31,16 @@ export class AccountSettingsComponent implements OnInit {
   ngOnInit() {
     this.accountSettings.timezone = "Asia/Kolkata";
     this.accountSettings.urls = [];
+    console.log(this.UnSubscribeLink);
     this.settingsService.getAccountSettings()
       .subscribe(
         (accountSettings) => {
-          this.accountSettings.id = accountSettings.id;
-
-          if (typeof accountSettings.urls[0] !== "undefined") {
-
-            if (accountSettings.urls[0].substring(0, accountSettings.urls[0].indexOf("/") + 2 == 'https://')) {
+          console.log(accountSettings);
+          if (accountSettings && accountSettings !== 'null' && typeof accountSettings.urls[0] !== "undefined") {
+            this.accountSettings.id = accountSettings.id;
+            if (accountSettings.urls[0].substring(0, accountSettings.urls[0].indexOf("/") + 2) == 'https://') {
               this.protocol = accountSettings.urls[0].substring(0, accountSettings.urls[0].indexOf("/") + 2);
             }
-
             else {
               this.protocol = accountSettings.urls[0].substring(0, accountSettings.urls[0].indexOf("/") + 2)
             }
@@ -70,9 +69,10 @@ export class AccountSettingsComponent implements OnInit {
     );
     this.settingsService.getUnSubscribeLink()
       .subscribe(
-        (unSubscribeLink) => {
-          console.log(unSubscribeLink);
-          this.unSubscribeLink = unSubscribeLink;
+        (unSubscribeLink:UnSubscribeLink) => {
+          if (unSubscribeLink && unSubscribeLink.unSubscribeLink !== 'null') {
+            this.unSubscribeLink = unSubscribeLink.unSubscribeLink;
+          }
         }
       )
   }
@@ -87,7 +87,7 @@ export class AccountSettingsComponent implements OnInit {
           this.messageService.addSuccessMessage('Website Url Added Succesfully');
           this.accountSettings.urls = [];
         },
-        (error:HttpErrorResponse)=>{
+        (error: HttpErrorResponse) => {
           this.messageService.addDangerMessage('Error in Adding Website Url,Please try again')
         }
       );
@@ -98,14 +98,15 @@ export class AccountSettingsComponent implements OnInit {
   }
 
   addUnSubscribeLink() {
-    console.log(this.unSubscribeLink);
-    this.settingsService.saveUnSubscribeLink(this.unSubscribeLink)
+    this.UnSubscribeLink.unSubscribeLink=this.unSubscribeLink;
+    console.log(this.UnSubscribeLink);
+    this.settingsService.saveUnSubscribeLink(this.UnSubscribeLink)
       .subscribe(
         (response) => {
           this.messageService.addSuccessMessage('Unsubscribe Link Added Successfully.');
           console.log(response);
         },
-        (error:HttpErrorResponse)=>{
+        (error: HttpErrorResponse) => {
           this.messageService.addDangerMessage('Error in adding Unsubscribe URL, Please try again.')
         }
       )

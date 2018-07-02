@@ -49,17 +49,18 @@ export class AppSettings {
   public static API_ENDPOINT_CLIENT_GET_SEGMENT_BY_ID = AppSettings.API_ENDPOINT_CLIENT_SEGMENT + "/segment";
 
 
-  public static API_ENDPOINT_CLIENT_FIND_USER_BY = AppSettings.API_ENDPOINT_CLIENT + "/user";
-  public static API_ENDPOINT_CLIENT_FIND_USER_BY_GOOGLE_ID = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/google';
-  public static API_ENDPOINT_CLIENT_FIND_USER_BY_UND_ID = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/id';
-  public static API_ENDPOINT_CLIENT_FIND_USER_BY_FACEBOOK_ID = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/fb';
-  public static API_ENDPOINT_CLIENT_FIND_USER_BY_CLIENT_USER_ID = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/sys';
-  public static API_ENDPOINT_CLIENT_FIND_USER_BY_EMAIL_ID = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/email';
-  public static API_ENDPOINT_CLIENT_FIND_USER_BY_MOBILE_NUMBER = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/mobile';
+  public static API_ENDPOINT_CLIENT_USER = AppSettings.API_ENDPOINT_CLIENT + "/user";
+  public static API_ENDPOINT_CLIENT_USER_GOOGLE_ID = AppSettings.API_ENDPOINT_CLIENT_USER + '/google';
+  public static API_ENDPOINT_CLIENT_USER_ID = AppSettings.API_ENDPOINT_CLIENT_USER + '/id';
+  public static API_ENDPOINT_CLIENT_USER_FACEBOOK_ID = AppSettings.API_ENDPOINT_CLIENT_USER + '/fb';
+  public static API_ENDPOINT_CLIENT_USER_SYS_ID = AppSettings.API_ENDPOINT_CLIENT_USER + '/sys';
+  public static API_ENDPOINT_CLIENT_USER_EMAIL_ID = AppSettings.API_ENDPOINT_CLIENT_USER + '/email';
+  public static API_ENDPOINT_CLIENT_USER_MOBILE_NUMBER = AppSettings.API_ENDPOINT_CLIENT_USER + '/mobile';
+  public static API_ENDPOINT_CLIENT_USER_USER_LIST_SEGMENT = AppSettings.API_ENDPOINT_CLIENT_USER + '/user-list/segment';
 
-  public static API_ENDPOINT_CLIENT_EVENT = AppSettings.API_ENDPOINT_CLIENT + "/user";
-  public static API_ENDPOINT_CLIENT_EVENTS_LIST_BY_USER_ID = AppSettings.API_ENDPOINT_CLIENT_EVENT + "/event-list";
-  public static API_ENDPOINT_CLIENT_EVENT_DETAILS_BY_EVENT_ID = AppSettings.API_ENDPOINT_CLIENT + "/event-details";
+  // public static API_ENDPOINT_CLIENT_EVENT = AppSettings.API_ENDPOINT_CLIENT + "/user";
+  // public static API_ENDPOINT_CLIENT_EVENTS_LIST_BY_USER_ID = AppSettings.API_ENDPOINT_CLIENT_EVENT + "/event-list";
+  // public static API_ENDPOINT_CLIENT_EVENT_DETAILS_BY_EVENT_ID = AppSettings.API_ENDPOINT_CLIENT + "/event-details";
 
 
   public static API_ENDPOINT_CLIENT_CAMPAIGN = AppSettings.API_ENDPOINT_CLIENT + "/campaign";

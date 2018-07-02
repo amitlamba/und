@@ -218,35 +218,35 @@ export class SegmentService {
   }
 
   findUserByGoogleID(googleID: string): Observable<any> {
-    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY_GOOGLE_ID + "/" + googleID);
+    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_USER_GOOGLE_ID + "/" + googleID);
   }
 
   findUserByFacebookID(facebookID: string): Observable<any> {
-    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY_FACEBOOK_ID + "/" + facebookID);
+    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_USER_FACEBOOK_ID + "/" + facebookID);
   }
 
   findUserByUndID(UndId: string): Observable<any> {
-    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY_UND_ID + "/" + UndId);
+    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_USER_ID + "/" + UndId);
   }
 
   findUserByEmailID(emailID: string): Observable<any> {
-    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY_EMAIL_ID + "/" + emailID);
+    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_USER_EMAIL_ID + "/" + emailID);
   }
 
   findUserByMobileNo(mobileNo: string): Observable<any> {
-    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY_MOBILE_NUMBER + "/" + mobileNo);
+    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_USER_MOBILE_NUMBER + "/" + mobileNo);
   }
 
   findUserByClientUserID(userID: string): Observable<any> {
-    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY_CLIENT_USER_ID + "/" + userID);
+    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_USER_SYS_ID + "/" + userID);
   }
 
   getEventsListByUserId(userId: string): Observable<any> {
-    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_EVENTS_LIST_BY_USER_ID + "/" + userId);
+    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_USER_ID + "/" + userId);
   }
 
-  getEventDetailsByEventId(eventId: string): Observable<any> {
-    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_EVENTS_LIST_BY_USER_ID + "/" + eventId);
+  getEventUsersBySegment(segment: Segment): Observable<EventUser[]> {
+    return this.httpClient.post<EventUser[]>(AppSettings.API_ENDPOINT_CLIENT_USER_USER_LIST_SEGMENT, segment);
   }
 
   globalFiltersMetadata = {
