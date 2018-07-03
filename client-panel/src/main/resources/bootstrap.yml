@@ -1,10 +1,10 @@
 spring:
   cloud:
     config:
-      uri: http://nestros.com:8888
+      uri: http://nestros.com:8898
       enabled: true
       name: client-panel
-#      profile: shiv
+      profile: staging
   application:
     name: client-panel
   mvc:
