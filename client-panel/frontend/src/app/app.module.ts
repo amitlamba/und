@@ -92,6 +92,7 @@ import {TooltipModule} from "ngx-bootstrap";
 import {CampaignsInfoComponent} from './campaigns-info/campaigns-info.component';
 import {Select2Module} from "ng2-select2";
 import { BaseGraphComponent } from './graphs/base-graph/base-graph.component';
+import { EventUserListComponent } from './segment-category/event-user-list/event-user-list.component';
 
 
 @NgModule({
@@ -175,7 +176,8 @@ import { BaseGraphComponent } from './graphs/base-graph/base-graph.component';
     UserProfileComponent,
     CampaignsInfoComponent,
     KeysPipe,
-    BaseGraphComponent
+    BaseGraphComponent,
+    EventUserListComponent
   ],
   providers: [
     AuthGuard,
