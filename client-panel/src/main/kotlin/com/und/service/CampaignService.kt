@@ -11,6 +11,7 @@ import com.und.model.TriggerDescriptor
 import com.und.model.jpa.*
 import com.und.repository.jpa.CampaignAuditLogRepository
 import com.und.repository.jpa.CampaignRepository
+import com.und.repository.jpa.ClientSettingsRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.model.ValidationError
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,6 +19,7 @@ import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.ZoneId
 import com.und.web.model.Campaign as WebCampaign
 
 
@@ -33,6 +35,8 @@ class CampaignService {
 
     @Autowired
     private lateinit var campaignRepository: CampaignRepository
+    @Autowired
+    private lateinit var clientSettingsRepository: ClientSettingsRepository
 
     @Autowired
     private lateinit var campaignAuditRepository: CampaignAuditLogRepository
@@ -100,16 +104,30 @@ class CampaignService {
         }
 
         val jobDescriptor = JobDescriptor()
+        setTimeZone(jobDescriptor)
         jobDescriptor.campaignName = campaign.name
         jobDescriptor.clientId = AuthenticationUtils.clientID.toString()
         jobDescriptor.campaignId = campaign.id.toString()
         jobDescriptor.action = action
+
+
 
         val triggerDescriptors = arrayListOf<TriggerDescriptor>()
 
         triggerDescriptors.add(buildTriggerDescriptor())
         jobDescriptor.triggerDescriptors = triggerDescriptors
         return jobDescriptor
+    }
+
+    private fun setTimeZone(jobDescriptor: JobDescriptor) {
+        val clientId = AuthenticationUtils.clientID
+        if (clientId != null) {
+            val clientSettings = clientSettingsRepository.findByClientID(clientId)
+            val timezone = clientSettings?.timezone
+            if (timezone != null) {
+                jobDescriptor.timeZoneId = ZoneId.of(timezone)
+            }
+        }
     }
 
     fun buildCampaign(webCampaign: WebCampaign): Campaign {
