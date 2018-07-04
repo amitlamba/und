@@ -14,7 +14,7 @@ class EventUser {
     @Email(message = "{eventUser.email.invalid}")
     var email: String? = null
 
-    var clientUserId: String? = null //this is id of the user client has provided
+    var uid: String? = null //this is id of the user client has provided
 
     var undId: String? = null
 

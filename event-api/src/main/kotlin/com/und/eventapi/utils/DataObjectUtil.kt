@@ -90,7 +90,7 @@ fun com.und.model.mongo.eventapi.EventUser.copyNonNull(eventUser: EventUser): co
     copyEventUser.creationTime = creationTime
 
     copyEventUser.identity = Identity()
-    copyEventUser.identity.clientUserId = unchanged(eventUser.clientUserId, identity.clientUserId)
+    copyEventUser.identity.uid = unchanged(eventUser.uid, identity.uid)
     copyEventUser.identity.fbId = unchanged(eventUser.fbId, identity.fbId)
     copyEventUser.identity.googleId = unchanged(eventUser.googleId, identity.googleId)
     copyEventUser.identity.mobile = unchanged(eventUser.mobile, identity.mobile)
