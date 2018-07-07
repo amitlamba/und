@@ -1,6 +1,7 @@
 package com.und.model
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import java.time.ZoneId
 import javax.validation.constraints.NotBlank
 
 class JobDescriptor {
@@ -18,6 +19,8 @@ class JobDescriptor {
 
 
     var action:Action = Action.NOTHING
+
+    var timeZoneId: ZoneId = ZoneId.of("UTC")
 
     enum class Action {
         PAUSE,CREATE,RESUME,DELETE,STOP,NOTHING,

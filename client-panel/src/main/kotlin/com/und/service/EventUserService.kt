@@ -1,5 +1,6 @@
 package com.und.service
 
+import com.und.common.utils.DateUtils
 import com.und.repository.mongo.EventRepository
 import com.und.repository.mongo.EventUserRepository
 import com.und.security.utils.AuthenticationUtils
@@ -111,7 +112,7 @@ class EventUserService {
         eventUser.additionalInfo = eventUserMongo.additionalInfo
         eventUser.clientUserId = eventUserMongo.identity.clientUserId
         eventUser.dob = eventUserMongo.standardInfo.dob
-        eventUser.creationDate = eventUserMongo.creationTime
+        eventUser.creationDate = DateUtils().convertDateToDateTime(eventUserMongo.creationTime)
         eventUser.email = eventUserMongo.identity.email
         eventUser.fbId = eventUserMongo.identity.fbId
         eventUser.googleId = eventUserMongo.identity.googleId
@@ -135,7 +136,7 @@ class EventUserService {
         event.ipAddress = eventMongo.geoDetails.ip
         event.agentString = eventMongo.agentString
         event.clientId = eventMongo.clientId
-        event.creationTime = eventMongo.creationTime
+        event.creationTime = DateUtils().convertDateToDateTime(eventMongo.creationTime)
         event.userIdentified = eventMongo.userIdentified
         return event
     }

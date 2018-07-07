@@ -54,7 +54,9 @@ class RestTokenUtil {
                     authorities = claims.roles.map { role -> SimpleGrantedAuthority(role) },
                     secret = jwtDetails.secret,
                     username = jwtDetails.username,
-                    password = jwtDetails.password
+                    password = jwtDetails.password,
+                    timeZoneId = jwtDetails.timeZoneId
+
             )
         }
 

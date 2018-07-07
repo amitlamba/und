@@ -6,13 +6,16 @@ import com.und.model.mongo.eventapi.SystemDetails
 import com.und.web.model.eventapi.Event
 import com.und.web.model.eventapi.EventUser
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.*
 import com.und.model.mongo.eventapi.Event as MongoEvent
 
 fun Event.copyToMongo(): MongoEvent {
     val event = this
     val mongoEvent = MongoEvent(clientId = event.clientId, name = event.name)
-
+    mongoEvent.timeZoneId = ZoneId.of(event.timeZone)
+    mongoEvent.clientTime = ClientTimeNow(LocalDateTime.now(mongoEvent.timeZoneId))
     //copying system info
     val agentString = event.agentString
     if (agentString != null) {

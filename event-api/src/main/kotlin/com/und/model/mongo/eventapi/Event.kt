@@ -1,11 +1,14 @@
 package com.und.model.mongo.eventapi
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.und.common.utils.DateUtils
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.util.HashMap
+import java.time.ZonedDateTime
+import java.util.*
 
 @Document(collection = "#{tenantProvider.getTenant()}_event")
 class Event(
@@ -15,8 +18,8 @@ class Event(
         var lineItem: MutableList<LineItem> = mutableListOf(),
         var attributes: HashMap<String, Any> = hashMapOf(),
         var system: System = System(),
-        var agentString:String? = null,
-        var creationTime: LocalDateTime = LocalDateTime.now()
+        var agentString: String? = null,
+        var creationTime: Date = DateUtils.nowInUTC()
 ) {
     var geoDetails = GeoDetails()
     var deviceId: String = ""
@@ -25,6 +28,27 @@ class Event(
     var sessionId: String = ""
 
     var geogrophy: Geogrophy? = null
+
+    var firstTime = false
+
+    var timeZoneId = ZoneId.of("UTC")
+
+    var clientTime = ClientTimeNow(LocalDateTime.now(timeZoneId))
+}
+
+class ClientTimeNow(val time: LocalDateTime) {
+
+
+
+    var hour: Int = time.hour
+    var minute: Int = time.minute
+    var second: Int = time.second
+    var month: Int = time.monthValue
+    var dayOfMonth: Int = time.dayOfMonth
+    var dayOfWeek: Int = time.dayOfWeek.value
+    var year: Int = time.year
+
+
 }
 
 data class Coordinate(val latitude: Float, val longitude: Float)

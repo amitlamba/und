@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.net.URLEncoder
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.regex.Pattern
 import javax.mail.Message
 import javax.mail.Session
@@ -87,7 +88,7 @@ class EmailHelperService {
         val mongoEmail: com.und.model.mongo.Email = emailSentRepository.findById(mongoEmailId).get()
         if (mongoEmail.emailStatus.order < emailStatus.order) {
             mongoEmail.emailStatus = EmailStatus.READ
-            mongoEmail.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(), emailStatus, clickTrackEventId))
+            mongoEmail.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), emailStatus, clickTrackEventId))
             emailSentRepository.save(mongoEmail)
         }
     }

@@ -17,17 +17,17 @@ class UNDUserDetailsServiceImpl : UserDetailsService {
     @Autowired
     private lateinit var authenticationService: AuthenticationServiceClient
 
-    @Value("\${und.system.user.token}")
-    private lateinit var systemToken:String
+/*    @Value("\${und.system.user.token}")
+    private lateinit var systemToken:String*/
 
     @Throws(UsernameNotFoundException::class)
     override fun loadUserByUsername(username: String): UserDetails {
-        val response = authenticationService.userByName(username, systemToken)
+/*        val response = authenticationService.userByName(username)
         return if (response.status == ResponseStatus.SUCCESS) {
             response.data.value as UserDetails
-        } else {
+        } else {*/
             throw UsernameNotFoundException("No user found with username $username.")
-        }
+        //}
     }
 
 

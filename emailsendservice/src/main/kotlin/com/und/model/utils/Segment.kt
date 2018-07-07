@@ -1,6 +1,7 @@
 package com.und.model.utils
 
 import java.time.LocalDateTime
+import java.time.ZoneId
 
 
 class Segment {
@@ -9,7 +10,7 @@ class Segment {
 
     var name: String = ""
     var type: String = ""
-    var creationDate: LocalDateTime = LocalDateTime.now()
+    var creationDate: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
     var conversionEvent: String? = null
     var didEvents: DidEvents? = null
     var didNotEvents: DidEvents? = null

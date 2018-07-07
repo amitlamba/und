@@ -1,6 +1,8 @@
 package com.und.model.mongo
 
+import com.und.common.utils.DateUtils
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.*
 
@@ -10,7 +12,7 @@ class EventUser {
     var identity: Identity = Identity()
     var standardInfo: StandardInfo = StandardInfo()
     val additionalInfo: HashMap<String, Any> = hashMapOf()
-    var creationTime: Long = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
+    var creationTime: Date = DateUtils.nowInUTC()
 }
 
 

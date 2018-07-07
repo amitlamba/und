@@ -3,6 +3,7 @@ package com.und.model
 import com.und.util.JobUtil
 import org.quartz.CronExpression.isValidExpression
 import org.quartz.CronScheduleBuilder.cronSchedule
+import org.quartz.DateBuilder
 import org.quartz.JobDataMap
 import org.quartz.SimpleScheduleBuilder.simpleSchedule
 import org.quartz.Trigger
@@ -12,10 +13,9 @@ import org.quartz.impl.calendar.BaseCalendar
 import org.quartz.spi.OperableTrigger
 import org.springframework.util.StringUtils.isEmpty
 import java.sql.Date
-import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.*
 import java.time.ZoneId.systemDefault
-import java.time.ZoneOffset
+import java.time.temporal.Temporal
 import java.util.*
 
 
@@ -50,7 +50,13 @@ class TriggerDescriptor {
     fun buildTrigger(jobDescriptor: JobDescriptor): Trigger {
         name = buildName(jobDescriptor)
         group = buildGroupName(jobDescriptor)
+        val timeZone = jobDescriptor.timeZoneId
+        val startDayTime = startDate?.atStartOfDay(timeZone)
+        val endDateTime = endDate?.let{
 
+            val endTime = LocalTime.of(23,59, 59)
+            LocalDateTime.of(endDate, endTime)?.atZone(timeZone)
+        }
         val triggerBuilder = when {
 
 
@@ -63,25 +69,26 @@ class TriggerDescriptor {
                         .withIdentity(name, group)
                         .withSchedule(cronSchedule(cron)
                                 .withMisfireHandlingInstructionFireAndProceed()
-                                .inTimeZone(TimeZone.getTimeZone(systemDefault())))
+                                .inTimeZone(TimeZone.getTimeZone(timeZone)))
                         .usingJobData("cron", cron)
+                        .usingJobData("timezone", (TimeZone.getTimeZone(timeZone)).id)
                         .usingJobData("startDate", startDate?.toEpochDay()?.toString())
                         .usingJobData("endDate", endDate?.toEpochDay()?.toString())
                         .usingJobData("countTimes", countTimes.toString())
 
             }
             !isEmpty(fireTime) -> {
-                val jobDataMap = JobDataMap()
-                jobDataMap["fireTime"] = fireTime
-                if (startDate != null) jobDataMap["startDate"] = startDate
-                if (endDate != null) jobDataMap["endDate"] = endDate
-                if (countTimes > 0) jobDataMap["countTimes"] = countTimes.toString()
+
+                val firetimeatzone = fireTime?.atZone(timeZone)
                 newTrigger()
                         .withIdentity(name, group)
                         .withSchedule(simpleSchedule()
-                                .withMisfireHandlingInstructionNextWithExistingCount())
-                        .startAt(Date.from(fireTime?.atZone(systemDefault())?.toInstant()))
-                        .usingJobData("fireTime", fireTime?.toEpochSecond(ZoneOffset.UTC)?.toString())
+                                .withMisfireHandlingInstructionNextWithExistingCount()
+
+                        )
+                        .startAt(Date.from(firetimeatzone?.toInstant()))
+                        .usingJobData("fireTime", firetimeatzone?.toEpochSecond()?.toString())
+                        .usingJobData("timezone", (TimeZone.getTimeZone(timeZone)).id)
                         .usingJobData("startDate", startDate?.toEpochDay()?.toString())
                         .usingJobData("endDate", endDate?.toEpochDay()?.toString())
                         .usingJobData("countTimes", countTimes.toString())
@@ -110,15 +117,23 @@ class TriggerDescriptor {
 
         }
         if (startDate != null) {
-            triggerBuilder.startAt(java.sql.Date.valueOf(startDate))
+            val startDate:LocalDate = startDate!!
+            val db = DateBuilder.newDateInTimezone(TimeZone.getTimeZone(timeZone))
+            db.inYear(startDate.year).inMonthOnDay(startDate.monthValue, startDate.dayOfMonth).atHourMinuteAndSecond(0,0,0)
+            triggerBuilder.startAt(db.build())
         }
         if (endDate != null) {
+
+            val endDate:LocalDate = endDate!!
+            val db = DateBuilder.newDateInTimezone(TimeZone.getTimeZone(timeZone))
+            db.inYear(endDate.year).inMonthOnDay(endDate.monthValue, endDate.dayOfMonth).atHourMinuteAndSecond(23,59,59)
+            triggerBuilder.startAt(db.build())
             triggerBuilder.endAt(java.sql.Date.valueOf(endDate))
         }
         if (endDate == null && countTimes > 0) {
             val trigger = triggerBuilder.build()
             val endDate = TriggerUtils.computeEndTimeToAllowParticularNumberOfFirings(trigger as OperableTrigger,
-                    BaseCalendar(Calendar.getInstance().timeZone), countTimes)
+                    BaseCalendar(TimeZone.getTimeZone(timeZone)), countTimes)
             triggerBuilder.endAt(endDate)
         }
 
@@ -139,6 +154,8 @@ class TriggerDescriptor {
             with(triggerDescriptor) {
                 name = trigger.key.name
                 group = trigger.key.group
+                val timeZoneId =  trigger.jobDataMap["timezone"] as String
+                val tz = TimeZone.getTimeZone(timeZoneId)
                 val fireTimeString = trigger.jobDataMap["fireTime"] as String?
                 if (!fireTimeString.isNullOrBlank()) {
                     fireTime = fireTimeString?.let { LocalDateTime.ofEpochSecond(fireTimeString.toLong(), 0, ZoneOffset.UTC) }

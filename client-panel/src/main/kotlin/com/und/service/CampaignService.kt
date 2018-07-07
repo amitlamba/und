@@ -11,6 +11,7 @@ import com.und.model.TriggerDescriptor
 import com.und.model.jpa.*
 import com.und.repository.jpa.CampaignAuditLogRepository
 import com.und.repository.jpa.CampaignRepository
+import com.und.repository.jpa.ClientSettingsRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.model.ValidationError
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,6 +19,8 @@ import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.ZoneId
+import java.util.*
 import com.und.web.model.Campaign as WebCampaign
 
 
@@ -33,6 +36,9 @@ class CampaignService {
 
     @Autowired
     private lateinit var campaignRepository: CampaignRepository
+
+    @Autowired
+    private lateinit var userSettingsService: UserSettingsService
 
     @Autowired
     private lateinit var campaignAuditRepository: CampaignAuditLogRepository
@@ -100,10 +106,13 @@ class CampaignService {
         }
 
         val jobDescriptor = JobDescriptor()
+        jobDescriptor.timeZoneId = userSettingsService.getTimeZone()
         jobDescriptor.campaignName = campaign.name
         jobDescriptor.clientId = AuthenticationUtils.clientID.toString()
         jobDescriptor.campaignId = campaign.id.toString()
         jobDescriptor.action = action
+
+
 
         val triggerDescriptors = arrayListOf<TriggerDescriptor>()
 
@@ -111,6 +120,10 @@ class CampaignService {
         jobDescriptor.triggerDescriptors = triggerDescriptors
         return jobDescriptor
     }
+
+
+
+
 
     fun buildCampaign(webCampaign: WebCampaign): Campaign {
         val campaign = Campaign()
