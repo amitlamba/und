@@ -8,10 +8,12 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.TextNode
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.User
 import java.io.IOException
+import java.time.ZoneId
 
 
 /**
@@ -43,7 +45,9 @@ class UndUserDetails(
         val secret: String,
 
         @get:JsonIgnore
-        val key: String? = null
+        val key: String? = null,
+
+        var timeZoneId: String = ZoneId.of("UTC").id
 ) : User(username, password, authorities) {
 
     override fun getUsername(): String {
@@ -98,14 +102,15 @@ class UndUserDeserilaizer : JsonDeserializer<UndUserDetails>() {
         val userDetailsNode = jsonParser.codec.readTree<TreeNode>(jsonParser)
         //val nameList = jsonParser.readValueAs(List::class.java)
         val id = userDetailsNode.get("id").toString().toLong()
-        val username = userDetailsNode.get("username").toString()
+        val username =  (userDetailsNode.get("username") as TextNode).asText()
         //val name = userDetailsNode.get("name").toString()
-        val firstname = userDetailsNode.get("firstname").toString()
-        val lastname = userDetailsNode.get("lastname").toString()
+        val firstname =  (userDetailsNode.get("firstname") as TextNode).asText()
+        val lastname = (userDetailsNode.get("lastname") as TextNode).asText()
         val email = userDetailsNode.get("email").toString()
         val clientId = userDetailsNode.get("clientId").toString().toLong()
         val enable = userDetailsNode.get("enabled").numberType()
         val authoritiesNode = userDetailsNode.get("authorities")
+        val timezone = (userDetailsNode.get("timeZoneId") as TextNode).asText()
 
         val authorities = if (authoritiesNode != null && authoritiesNode is ArrayNode) {
             authoritiesNode.map { t ->
@@ -123,7 +128,8 @@ class UndUserDeserilaizer : JsonDeserializer<UndUserDetails>() {
                 key = "key",
                 password = "password",
                 clientId = clientId,
-                authorities = authorities
+                authorities = authorities,
+                timeZoneId = timezone
         )
     }
 }

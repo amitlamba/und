@@ -3,6 +3,7 @@ package com.und.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.model.jpa.Segment
 import com.und.model.mongo.eventapi.EventUser
+import com.und.repository.jpa.ClientSettingsRepository
 import com.und.repository.jpa.SegmentRepository
 import com.und.repository.mongo.EventRepository
 import com.und.repository.mongo.EventUserRepository
@@ -28,6 +29,8 @@ class SegmentServiceImpl : SegmentService {
     @Autowired
     lateinit var eventUserRepository: EventUserRepository
 
+    @Autowired
+    private lateinit var userSettingsService: UserSettingsService
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
@@ -79,9 +82,11 @@ class SegmentServiceImpl : SegmentService {
     }
 
     private fun getSegmentUsersList(segment: Segment, clientId: Long): List<EventUser> {
+
+        val tz = userSettingsService.getTimeZone()
         val allResult =  mutableListOf<Set<String>>()
         val websegment = buildWebSegment(segment)
-        val queries = SegmentParserCriteria().segmentQueries(websegment)
+        val queries = SegmentParserCriteria().segmentQueries(websegment, tz)
 
         val (didQueries, joincondition) = queries.didq
         if(didQueries.isNotEmpty()) {

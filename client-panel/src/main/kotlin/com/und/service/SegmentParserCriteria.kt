@@ -9,7 +9,9 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.GroupOperation
 import org.springframework.data.mongodb.core.aggregation.MatchOperation
 import org.springframework.data.mongodb.core.query.Criteria
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 
 /*
@@ -43,27 +45,28 @@ class SegmentParserCriteria {
         month,
         year,
         count,
-        sumof
+        sumof,
+        firstTime
 
     }
 
-    fun segmentQueries(segment: Segment): SegmentQuery {
+    fun segmentQueries(segment: Segment, tz: ZoneId): SegmentQuery {
 
         //did
         val did = segment.didEvents
         val didq =
-                did?.let { Pair(parseEvents(it.events, true), it.joinCondition.conditionType) }
+                did?.let { Pair(parseEvents(it.events, tz, true), it.joinCondition.conditionType) }
                         ?: Pair(emptyList(), ConditionType.AllOf)
 
 
         //and not
         val didnot = segment.didNotEvents
-        val didnotq = didnot?.let { Pair(parseEvents(it.events, false), ConditionType.AnyOf) }
+        val didnotq = didnot?.let { Pair(parseEvents(it.events, tz, false), ConditionType.AnyOf) }
                 ?: Pair(emptyList(), ConditionType.AnyOf)
 
 
         val gFilters = segment.globalFilters
-        val matches = filterGlobalQ(gFilters)
+        val matches = filterGlobalQ(gFilters, tz)
 
 
 
@@ -74,13 +77,14 @@ class SegmentParserCriteria {
     }
 
 
-    fun parseEvents(events: List<Event>, did: Boolean): List<Aggregation> {
+    fun parseEvents(events: List<Event>, tz: ZoneId, did: Boolean): List<Aggregation> {
 
         return events.map { event ->
             val matches = mutableListOf<Criteria>()
-            matches.addAll(parsePropertyFilters(event))
+            matches.addAll(parsePropertyFilters(event,  tz))
             matches.add(Criteria.where(Field.eventName.fName).`is`(event.name))
-            matches.add(parseDateFilter(event.dateFilter))
+            matches.add(Criteria.where("userId").exists(true))
+            matches.add(parseDateFilter(event.dateFilter, tz))
             var fields = Aggregation.fields(Field.userId.name, Field.creationTime.name, Field.clientId.name)
             matches.forEach { criteria ->
                 val name = criteria.key
@@ -89,18 +93,18 @@ class SegmentParserCriteria {
                 }
             }
             val project = Aggregation.project(fields)
-                    .and(Field.creationTime.name).extractMonth().`as`(Field.month.name)
-                    .and(Field.creationTime.name).extractDayOfMonth().`as`(Field.monthday.name)
-                    .and(Field.creationTime.name).extractDayOfWeek().`as`(Field.weekday.name)
-                    .and(Field.creationTime.name).extractHour().`as`(Field.hour.name)
-                    .and(Field.creationTime.name).extractMinute().`as`(Field.minute.name)
-                    .and(Field.creationTime.name).extractYear().`as`(Field.year.name)
+                    .and("clientTime.month").`as`(Field.month.name)
+                    .and("clientTime.dayOfMonth").`as`(Field.monthday.name)
+                    .and("clientTime.dayOfWeek").`as`(Field.weekday.name)
+                    .and("clientTime.hour").`as`(Field.hour.name)
+                    .and("clientTime.minute").`as`(Field.minute.name)
+                    .and("clientTime.year").`as`(Field.year.name)
 
 
             val matchOps = Aggregation.match(Criteria().andOperator(*matches.toTypedArray()))
 
-            val whereCond =  if (did) {
-                 event.whereFilter?.let { whereFilter -> whereFilterParse(whereFilter) }?:Optional.empty()
+            val whereCond = if (did) {
+                event.whereFilter?.let { whereFilter -> whereFilterParse(whereFilter, tz) } ?: Optional.empty()
             } else Optional.empty()
 
             if (whereCond.isPresent) {
@@ -117,10 +121,10 @@ class SegmentParserCriteria {
 
     }
 
-    private fun parsePropertyFilters(event: Event): List<Criteria> = event.propertyFilters.groupBy { it.name }.map { eventPropertyQuery(it.value) }
+    private fun parsePropertyFilters(event: Event,  tz: ZoneId): List<Criteria> = event.propertyFilters.groupBy { it.name }.map { eventPropertyQuery(it.value, tz) }
 
 
-    private fun eventPropertyQuery(eventProperties: List<PropertyFilter>): Criteria {
+    private fun eventPropertyQuery(eventProperties: List<PropertyFilter>,  tz: ZoneId): Criteria {
         fun parseProperty(propertyFilter: PropertyFilter): Criteria {
             return when (propertyFilter.filterType) {
                 PropertyFilterType.genericproperty -> {
@@ -135,9 +139,7 @@ class SegmentParserCriteria {
                             )
                         }
                         genericProperty.FirstTime.desc -> {
-                            //FIXME how to do this?
-                            "{count of event == 1}"
-                            Criteria()
+                            Criteria.where(Field.firstTime.name).`is`(true)
                         }
                         genericProperty.DayOfWeek.desc -> {
                             Criteria.where(Field.weekday.name).`in`(values)
@@ -158,7 +160,7 @@ class SegmentParserCriteria {
                 }
                 PropertyFilterType.eventproperty -> {
 
-                    match(propertyFilter.values, propertyFilter.operator, "attributes.${propertyFilter.name}", propertyFilter.type, propertyFilter.valueUnit)
+                    match(propertyFilter.values, propertyFilter.operator, "attributes.${propertyFilter.name}", propertyFilter.type, propertyFilter.valueUnit, tz)
                 }
                 else -> {
                     throw Exception("type of filter can be eventptoperty, genericproperty or UTM but is null")
@@ -175,10 +177,10 @@ class SegmentParserCriteria {
 
     }
 
-    private fun parseDateFilter(dateFilters: DateFilter): Criteria = match(dateFilters.values, dateFilters.operator.name, Field.creationTime.name, DataType.date, dateFilters.valueUnit)
+    private fun parseDateFilter(dateFilters: DateFilter, tz: ZoneId): Criteria = match(dateFilters.values, dateFilters.operator.name, Field.creationTime.name, DataType.date, dateFilters.valueUnit, tz)
 
 
-    private fun whereFilterParse(whereFilter: WhereFilter): Optional<Pair<GroupOperation, MatchOperation>> {
+    private fun whereFilterParse(whereFilter: WhereFilter,  tz: ZoneId): Optional<Pair<GroupOperation, MatchOperation>> {
         val values = whereFilter.values
         return if ((values != null && values.isNotEmpty()) && !whereFilter.propertyName.isNullOrBlank()) {
             val filter: Pair<GroupOperation, MatchOperation> = when (whereFilter.whereFilterName) {
@@ -204,12 +206,12 @@ class SegmentParserCriteria {
     }
 
 
-    private fun match(values: List<String>, operator: String, fieldName: String, type: DataType, unit: Unit): Criteria {
+    private fun match(values: List<String>, operator: String, fieldName: String, type: DataType, unit: Unit, tz: ZoneId): Criteria {
         logger.debug("type : $type, operator: $operator and fieldname : $fieldName")
         return when (type) {
             DataType.string -> matchString(values, StringOperator.valueOf(operator), fieldName)
             DataType.number -> matchNumber(values, NumberOperator.valueOf(operator), fieldName)
-            DataType.date -> matchDate(values, DateOperator.valueOf(operator), unit, fieldName)
+            DataType.date -> matchDate(values, DateOperator.valueOf(operator), unit, fieldName, tz)
             DataType.range -> Criteria()
             DataType.boolean -> Criteria()
 
@@ -276,53 +278,74 @@ class SegmentParserCriteria {
 
     }
 
-    private fun matchDate(values: List<String>, operator: DateOperator, unit: Unit, fieldName: String): Criteria {
+    private fun matchDate(values: List<String>, operator: DateOperator, unit: Unit, fieldName: String, tz: ZoneId): Criteria {
 
         return when (operator) {
-
+            //absolute comparison starts
             DateOperator.Before -> {
-                val date = dateUtils.parseToDate(values.first())
-                Criteria.where(fieldName).lt(date)
+
+                val start = dateUtils.getStartOfDay(values.first(), tz)
+                Criteria.where(fieldName).lte(start)
             }
             DateOperator.After -> {
-                val date = dateUtils.parseToDate(values.first())
-                Criteria.where(fieldName).gt(date)
+                val end = dateUtils.getMidnight(values.first(), tz)
+                Criteria.where(fieldName).gte(end)
             }
             DateOperator.On -> {
-                val date = dateUtils.parseToDate(values.first())
-                Criteria.where(fieldName).`is`(date)
+                val start = dateUtils.getStartOfDay(values.first(), tz)
+                val end = dateUtils.getMidnight(values.first(), tz)
+                Criteria.where(fieldName).lte(end).gte(start)
             }
             DateOperator.Between -> {
-
-                val startDate = dateUtils.parseToDate(values.first())
-                val endDate = dateUtils.parseToDate(values.last())
-                Criteria.where(fieldName).lte(startDate).gte(endDate)
+                val startDate = dateUtils.getStartOfDay(values.first(), tz)
+                val endDate = dateUtils.getMidnight(values.last(), tz)
+                Criteria.where(fieldName).gte(startDate).lte(endDate)
             }
+            //absolute comparison ends
+            //relative comparison starts
             DateOperator.InThePast -> {
 
-                val startDate = minus(LocalDateTime.now(), unit, values.first().toLong())
-                val endDate = minus(LocalDateTime.now(), unit, values.last().toLong())
+                val startLocalDateTime = minus(LocalDateTime.now(tz), unit, values.first().toLong())
+                val startTzDateTime = Date.from(startLocalDateTime.atZone(tz).toInstant())
+                val endTzDateTime = Date.from(LocalDateTime.now(tz).atZone(tz).toInstant())
 
-                Criteria.where(fieldName).lte(startDate).gte(endDate)
+                Criteria.where(fieldName).gte(startTzDateTime).lte(endTzDateTime)
 
             }
             DateOperator.WasExactly -> {
-                val date = LocalDateTime.now().minusDays(values.first().toLong())
-                Criteria.where(fieldName).`is`(date)
+                val startLocalDate = LocalDate.now(tz).minusDays(values.first().toLong())
+                val startLocalDateTime = startLocalDate.atStartOfDay()
+                val endLocalDateTime = startLocalDate.plusDays(1).atStartOfDay()
+                val startTzDateTime = Date.from(startLocalDateTime.atZone(tz).toInstant())
+                val endTzDateTime = Date.from(endLocalDateTime.atZone(tz).toInstant())
+                Criteria.where(fieldName).lte(endTzDateTime).gte(startTzDateTime)
             }
             DateOperator.Today -> {
-                Criteria.where(fieldName).`is`(LocalDateTime.now())
+                val startLocalDate = LocalDate.now(tz)
+                val startLocalDateTime = startLocalDate.atStartOfDay()
+                val endLocalDateTime = startLocalDate.plusDays(1).atStartOfDay()
+                val startTzDateTime = Date.from(startLocalDateTime.atZone(tz).toInstant())
+                val endTzDateTime = Date.from(endLocalDateTime.atZone(tz).toInstant())
+                Criteria.where(fieldName).lte(endTzDateTime).gte(startTzDateTime)
             }
             DateOperator.InTheFuture -> {
 
-                val startDate = plus(LocalDateTime.now(), unit, values.first().toLong())
-                val endDate = plus(LocalDateTime.now(), unit, values.last().toLong())
+                val endLocalDateTime = plus(LocalDateTime.now(tz), unit, values.first().toLong())
+                val endTzDateTime = Date.from(endLocalDateTime.atZone(tz).toInstant())
+                val startTzDateTime = Date.from(LocalDateTime.now(tz).atZone(tz).toInstant())
 
-                Criteria.where(fieldName).lte(startDate).gte(endDate)
+                Criteria.where(fieldName).gte(startTzDateTime).lte(endTzDateTime)
+
             }
             DateOperator.WillBeExactly -> {
-                val date = LocalDateTime.now().plusDays(values.first().toLong())
-                Criteria.where(fieldName).`is`(date)
+                //1 is aadded to make day go to moprning of next day 00:00 hours for lte comparision
+                val endLocalDate = LocalDate.now(tz).plusDays(values.first().toLong())
+                val endLocalDateTime = endLocalDate.plusDays(1).atStartOfDay()
+                val startLocalDateTime = LocalDate.now(tz).atStartOfDay()
+                val startTzDateTime = Date.from(startLocalDateTime.atZone(tz).toInstant())
+                val endTzDateTime = Date.from(endLocalDateTime.atZone(tz).toInstant())
+                Criteria.where(fieldName).lte(endTzDateTime).gte(startTzDateTime)
+
             }
             DateOperator.Exists -> {
                 Criteria.where(fieldName).exists(true)
@@ -336,8 +359,11 @@ class SegmentParserCriteria {
 
     }
 
-    private fun plus(date: LocalDateTime, unit: Unit, value: Long): LocalDateTime {
+    private fun minus(date: LocalDateTime, unit: Unit, value: Long): LocalDateTime {
+
         return when (unit) {
+            Unit.mins -> date.minusMinutes(value)
+            Unit.hours -> date.minusHours(value)
             Unit.days -> date.minusDays(value)
             Unit.week -> date.minusWeeks(value)
             Unit.month -> date.minusMonths(value)
@@ -346,8 +372,10 @@ class SegmentParserCriteria {
         }
     }
 
-    private fun minus(date: LocalDateTime, unit: Unit, value: Long): LocalDateTime {
+    private fun plus(date: LocalDateTime, unit: Unit, value: Long): LocalDateTime {
         return when (unit) {
+            Unit.mins -> date.plusMinutes(value)
+            Unit.hours -> date.plusHours(value)
             Unit.days -> date.plusDays(value)
             Unit.week -> date.plusWeeks(value)
             Unit.month -> date.plusMonths(value)
@@ -356,14 +384,14 @@ class SegmentParserCriteria {
         }
     }
 
-    private fun filterGlobalQ(globalFilters: List<GlobalFilter>): Pair<MatchOperation, MatchOperation>? {
+    private fun filterGlobalQ(globalFilters: List<GlobalFilter>, tz: ZoneId): Pair<MatchOperation, MatchOperation>? {
         fun parseGlobalFilter(filter: GlobalFilter): Criteria {
             val fieldName = filter.name
             val type = filter.type
             val unit = filter.valueUnit
             val values = filter.values
             val operator = filter.operator
-            return match(values, operator, fieldName, type, unit)
+            return match(values, operator, fieldName, type, unit, tz)
         }
 
         fun parse(filters: Map<String, List<GlobalFilter>>): Criteria {

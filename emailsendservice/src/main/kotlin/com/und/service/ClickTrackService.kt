@@ -7,6 +7,7 @@ import com.und.repository.mongo.ClickTrackEventRepository
 import com.und.repository.mongo.EmailSentRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.time.ZoneId
 
 @Service
 class ClickTrackService {
@@ -20,7 +21,7 @@ class ClickTrackService {
             var email = emailSentRepository.findById(clickTrackEvent.emailUid).get()
             when (email.emailStatus) {
                 EmailStatus.SENT, EmailStatus.READ -> {
-                    email.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(), EmailStatus.CTA_PERFORMED, clickTrackEventId))
+                    email.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), EmailStatus.CTA_PERFORMED, clickTrackEventId))
                     email.emailStatus = EmailStatus.CTA_PERFORMED
                     emailSentRepository.save(email)
                 }

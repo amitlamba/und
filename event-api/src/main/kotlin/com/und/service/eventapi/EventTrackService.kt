@@ -12,6 +12,7 @@ import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.time.ZoneId
 
 @Service
 class EventTrackService {
@@ -44,7 +45,7 @@ class EventTrackService {
         val mongoEventId = eventService.saveEvent(event)
         email?.let {
             it.emailStatus = EmailStatus.CTA_PERFORMED
-            it.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(), EmailStatus.CTA_PERFORMED, mongoEventId))
+            it.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), EmailStatus.CTA_PERFORMED, mongoEventId))
             emailSentRepository.save(it)
         }
 

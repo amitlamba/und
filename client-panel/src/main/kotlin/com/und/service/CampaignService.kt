@@ -20,6 +20,7 @@ import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.ZoneId
+import java.util.*
 import com.und.web.model.Campaign as WebCampaign
 
 
@@ -35,8 +36,9 @@ class CampaignService {
 
     @Autowired
     private lateinit var campaignRepository: CampaignRepository
+
     @Autowired
-    private lateinit var clientSettingsRepository: ClientSettingsRepository
+    private lateinit var userSettingsService: UserSettingsService
 
     @Autowired
     private lateinit var campaignAuditRepository: CampaignAuditLogRepository
@@ -104,7 +106,7 @@ class CampaignService {
         }
 
         val jobDescriptor = JobDescriptor()
-        setTimeZone(jobDescriptor)
+        jobDescriptor.timeZoneId = userSettingsService.getTimeZone()
         jobDescriptor.campaignName = campaign.name
         jobDescriptor.clientId = AuthenticationUtils.clientID.toString()
         jobDescriptor.campaignId = campaign.id.toString()
@@ -119,16 +121,9 @@ class CampaignService {
         return jobDescriptor
     }
 
-    private fun setTimeZone(jobDescriptor: JobDescriptor) {
-        val clientId = AuthenticationUtils.clientID
-        if (clientId != null) {
-            val clientSettings = clientSettingsRepository.findByClientID(clientId)
-            val timezone = clientSettings?.timezone
-            if (timezone != null) {
-                jobDescriptor.timeZoneId = ZoneId.of(timezone)
-            }
-        }
-    }
+
+
+
 
     fun buildCampaign(webCampaign: WebCampaign): Campaign {
         val campaign = Campaign()

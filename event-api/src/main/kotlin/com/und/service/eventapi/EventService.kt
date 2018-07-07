@@ -8,6 +8,7 @@ import com.und.model.mongo.eventapi.EventMetadata
 import com.und.repository.mongo.EventMetadataRepository
 import com.und.repository.mongo.EventRepository
 import com.und.repository.mongo.EventUserRepository
+import com.und.security.utils.AuthenticationUtils
 import com.und.security.utils.TenantProvider
 import com.und.web.model.eventapi.Event
 import com.und.web.model.eventapi.Identity
@@ -53,6 +54,7 @@ class EventService {
         val clientId = event.clientId
         tenantProvider.setTenat(clientId.toString())
         val mongoEvent = event.copyToMongo()
+        mongoEvent.clientTime.hour
         val eventMetadata = buildMetadata(mongoEvent)
         eventMetadataRepository.save(eventMetadata)
         //FIXME add to metadata
@@ -79,9 +81,9 @@ class EventService {
 
     fun buildEvent(fromEvent: Event, request: HttpServletRequest): Event {
         with(fromEvent) {
-
             clientId = tenantProvider.tenant.toInt()
             ipAddress = request.ipAddr()
+            timeZone = AuthenticationUtils.principal.timeZoneId
             agentString = request.getHeader("User-Agent")
         }
         return fromEvent
