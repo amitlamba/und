@@ -1,6 +1,8 @@
 package com.und.service
 
 import com.und.repository.mongo.EventRepository
+import com.und.repository.mongo.EventUserCustomRepository
+import com.und.repository.mongo.EventUserRepo
 import com.und.repository.mongo.EventUserRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.model.event.Event
@@ -8,6 +10,7 @@ import com.und.model.mongo.eventapi.EventUser as EventUserMongo
 import com.und.model.mongo.eventapi.Event as EventMongo
 import com.und.web.model.EventUser
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 
 
@@ -19,6 +22,13 @@ class EventUserService {
 
     @Autowired
     private lateinit var eventRepository: EventRepository
+
+    @Autowired
+    private lateinit var eventUserCustomRepository: EventUserRepo
+
+    fun getTotalEventUserToday():Long{
+        return eventUserCustomRepository.totalEventUserToday()
+    }
 
     fun findEventUserById(id: String): EventUser? {
         val clientId = getClientId()

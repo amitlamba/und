@@ -2,6 +2,7 @@ package com.und.repository.mongo
 
 import com.und.model.mongo.eventapi.EventUser
 import com.und.model.mongo.eventapi.Event
+import org.springframework.stereotype.Repository
 import java.util.*
 
 interface EventUserCustomRepository {
@@ -13,5 +14,6 @@ interface EventUserCustomRepository {
     fun findUserByEmail(id: String, clientId: Long): Optional<EventUser>
     fun findUserByMobile(id: String, clientId: Long): Optional<EventUser>
     fun testUserProfile(id: String, clientId: Long, eventUser: EventUser)
+
 
 }
