@@ -297,14 +297,8 @@ class SegmentParserCriteria {
                 Criteria.where(fieldName).lte(end).gte(start)
             }
             DateOperator.Between -> {
-<<<<<<< HEAD
-
-                val startDate = dateUtils.parseToDate(values.first())
-                val endDate = dateUtils.parseToDate(values.last())
-=======
-                val startDate = dateUtils.getStartOfDay(values.first(), tz)
-                val endDate = dateUtils.getMidnight(values.last(), tz)
->>>>>>> ae16fc37c44067246559ebe0da13929c93ce970c
+                var startDate = dateUtils.getStartOfDay(values.first(), tz)
+                var endDate = dateUtils.getMidnight(values.last(), tz)
                 Criteria.where(fieldName).gte(startDate).lte(endDate)
             }
             //absolute comparison ends

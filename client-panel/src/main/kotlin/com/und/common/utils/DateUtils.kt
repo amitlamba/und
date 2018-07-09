@@ -98,14 +98,14 @@ class DateUtils : Serializable {
     }
 }
 
-fun main(args: Array<String>) {
-    val lt = LocalTime.of(10,12,13)
-    val tz = ZoneId.of("UTC")
-    val tz2 = ZoneId.of("America/Araguaina")
-    val testDate = "2018-07-07"
-    val morningtWithoutTz = LocalDateTime.now(tz2)
-    val morningwithTz = morningtWithoutTz.atZone(tz)
-    val dateInTz = Date.from(morningtWithoutTz.atZone(tz).toInstant())
-    //val dateInTz2 = Date.from(morningwithTz.atZone(tz).toInstant())
-    println(dateInTz)
-}
+//fun main(args: Array<String>) {
+//    val lt = LocalTime.of(10,12,13)
+//    val tz = ZoneId.of("UTC")
+//    val tz2 = ZoneId.of("America/Araguaina")
+//    val testDate = "2018-07-07"
+//    val morningtWithoutTz = LocalDateTime.now(tz2)
+//    val morningwithTz = morningtWithoutTz.atZone(tz)
+//    val dateInTz = Date.from(morningtWithoutTz.atZone(tz).toInstant())
+//    //val dateInTz2 = Date.from(morningwithTz.atZone(tz).toInstant())
+//    println(dateInTz)
+//}
