@@ -19,14 +19,14 @@ class EventUserTest {
             country = "Zimbabwe"
         }
         with(eventUserDb.identity) {
-            clientUserId = "100"
+            uid = "100"
             fbId = "boringboooker"
             googleId = "mugabe@zimbabwe.com"
             email = "mugabe@zimbabwe.com"
         }
 
         val eventUserNew = EventUser()
-        eventUserNew.clientUserId = "200"
+        eventUserNew.uid = "200"
         with(eventUserNew) {
             firstName = "namaste"
             lastName = null
@@ -46,7 +46,7 @@ class EventUserTest {
         //Assert.assertThat(copiedUser.standardInfo.countryCode , IsEqual.equalTo("Zim"))
 
 
-        Assert.assertThat(copiedUser.identity.clientUserId , IsEqual.equalTo("200"))
+        Assert.assertThat(copiedUser.identity.uid , IsEqual.equalTo("200"))
         Assert.assertThat(copiedUser.identity.fbId , IsEqual.equalTo("coolBooker"))
         Assert.assertThat(copiedUser.identity.googleId , IsEqual.equalTo("mugabe@zimbabwe.com"))
         Assert.assertThat(copiedUser.identity.email , IsEqual.equalTo("newmugambe@zimbabwe.com"))

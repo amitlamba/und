@@ -20,7 +20,9 @@ import com.fasterxml.jackson.module.kotlin.*
 import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.model.jpa.ClientSettingsEmail
 import com.und.repository.jpa.ClientSettingsEmailRepository
+import com.und.security.utils.AuthenticationUtils
 import com.und.web.model.ValidationError
+import java.time.ZoneId
 
 @Service
 class UserSettingsService {
@@ -228,6 +230,16 @@ class UserSettingsService {
         return emailAddresses?.let {
             it.map { address -> EmailAddress(address.email ?: "", address.address ?: "") }
         } ?: emptyList()
+
+    }
+
+
+    fun getTimeZone(): ZoneId {
+        val clientId = AuthenticationUtils.clientID
+        val tz =  clientId?.let {
+            clientSettingsRepository.findByClientID(clientId)?.timezone
+        }?:TimeZone.getDefault().id
+        return ZoneId.of(tz)
 
     }
 

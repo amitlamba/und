@@ -18,6 +18,7 @@ import org.mockito.MockitoAnnotations
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 import javax.mail.internet.InternetAddress
 import org.hamcrest.CoreMatchers.`is` as Is
@@ -73,8 +74,8 @@ class TemplateContentCreationServiceTest {
         val name = "SampleDB"
         val template = Template()
         template.template =  "Hello, \${ user.standardInfo.firstname} \${ user.standardInfo.lastname}"
-        template.dateCreated = LocalDateTime.now()
-        template.dateModified = LocalDateTime.now()
+        template.dateCreated = LocalDateTime.now(ZoneId.of("UTC"))
+        template.dateModified = LocalDateTime.now(ZoneId.of("UTC"))
         whenever(templateRepository.findByName("${name}")).thenReturn(Optional.of(template))
 
         val converted = templateContentCreationService.getContentFromTemplate("$name", getModelMap())
@@ -88,8 +89,8 @@ class TemplateContentCreationServiceTest {
         val name = "SampleCache"
         val template = Template()
         template.template =  "Hello, \${ user.standardInfo.firstname} \${ user.standardInfo.lastname}"
-        template.dateCreated = LocalDateTime.now()
-        template.dateModified = LocalDateTime.now()
+        template.dateCreated = LocalDateTime.now(ZoneId.of("UTC"))
+        template.dateModified = LocalDateTime.now(ZoneId.of("UTC"))
         whenever(templateRepositoryCache.findByName("${name}")).thenReturn(Optional.of(template))
 
 

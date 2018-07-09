@@ -1,9 +1,9 @@
 export class AppSettings {
-  public static API_ENDPOINT = "http://nestros.com:8090";
+  public static API_ENDPOINT = "http://userndot.com:8080";
 
 
   // public static API_ENDPOINT_CLIENT = AppSettings.API_ENDPOINT + "/client";
-  public static API_ENDPOINT_CLIENT = "http://nestros.com:9201";
+  public static API_ENDPOINT_CLIENT = "http://userndot.com:9191";
   // public static API_ENDPOINT_CLIENT = "http://localhost:9191";
 
   public static API_ENDPOINT_CLIENT_CLIENT = AppSettings.API_ENDPOINT_CLIENT + "/client";
@@ -20,9 +20,9 @@ export class AppSettings {
   public static API_ENDPOINT_CLIENT_CLIENT_SMS_SAVE_TEMPLATES = AppSettings.API_ENDPOINT_CLIENT_CLIENT_SMS + "/save-template";
   public static API_ENDPOINT_CLIENT_CLIENT_SMS_USER_EVENT_ATTRIBUTES = AppSettings.API_ENDPOINT_CLIENT_CLIENT_SMS + "/user-event-attributes";
 
-  public static API_ENDPOINT_CLIENT_CLIENT_USERS = AppSettings.API_ENDPOINT_CLIENT_CLIENT + "/users"
-  public static API_ENDPOINT_CLIENT_CLIENT_USERS_GETLIST = AppSettings.API_ENDPOINT_CLIENT_CLIENT_USERS + "/get-list"
-  public static API_ENDPOINT_CLIENT_CLIENT_USERS_GETUSEREVENTS = AppSettings.API_ENDPOINT_CLIENT_CLIENT_USERS + "/get-user-events"
+  public static API_ENDPOINT_CLIENT_CLIENT_USERS = AppSettings.API_ENDPOINT_CLIENT_CLIENT + "/users";
+  public static API_ENDPOINT_CLIENT_CLIENT_USERS_GETLIST = AppSettings.API_ENDPOINT_CLIENT_CLIENT_USERS + "/get-list";
+  public static API_ENDPOINT_CLIENT_CLIENT_USERS_GETUSEREVENTS = AppSettings.API_ENDPOINT_CLIENT_CLIENT_USERS + "/get-user-events";
 
   public static API_ENDPOINT_CLIENT_SETTING = AppSettings.API_ENDPOINT_CLIENT + "/setting";
   public static API_ENDPOINT_CLIENT_SETTING_ALL_SERVICE_PROVIDERS = AppSettings.API_ENDPOINT_CLIENT_SETTING + "/service-providers";
@@ -57,9 +57,7 @@ export class AppSettings {
   public static API_ENDPOINT_CLIENT_USER_EMAIL_ID = AppSettings.API_ENDPOINT_CLIENT_USER + '/email';
   public static API_ENDPOINT_CLIENT_USER_MOBILE_NUMBER = AppSettings.API_ENDPOINT_CLIENT_USER + '/mobile';
   public static API_ENDPOINT_CLIENT_USER_USER_LIST_SEGMENT = AppSettings.API_ENDPOINT_CLIENT_USER + '/user-list/segment';
-
-  // public static API_ENDPOINT_CLIENT_EVENT = AppSettings.API_ENDPOINT_CLIENT + "/user";
-  // public static API_ENDPOINT_CLIENT_EVENTS_LIST_BY_USER_ID = AppSettings.API_ENDPOINT_CLIENT_EVENT + "/event-list";
+  public static API_ENDPOINT_CLIENT_EVENTS_LIST = AppSettings.API_ENDPOINT_CLIENT_USER + "/event-list";
   // public static API_ENDPOINT_CLIENT_EVENT_DETAILS_BY_EVENT_ID = AppSettings.API_ENDPOINT_CLIENT + "/event-details";
 
 
@@ -81,9 +79,9 @@ export class AppSettings {
 
 
   // public static API_ENDPOINT_AUTH = AppSettings.API_ENDPOINT + "/auth";
-  public static API_ENDPOINT_AUTH = "http://nestros.com:9605";
+  public static API_ENDPOINT_AUTH = "http://userndot.com:9595";
   // public static API_ENDPOINT_AUTH = AppSettings.API_ENDPOINT + "/auth";
-  // public static API_ENDPOINT_AUTH = "http://nestros.com:9595"
+  // public static API_ENDPOINT_AUTH = "http://userndot.com:9595"
 
   public static API_ENDPOINT_AUTH_AUTH = AppSettings.API_ENDPOINT_AUTH + "/auth";
   public static API_ENDPOINT_AUTH_AUTH_VALIDATE = AppSettings.API_ENDPOINT_AUTH_AUTH + "/validate";

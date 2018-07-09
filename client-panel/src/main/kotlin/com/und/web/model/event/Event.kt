@@ -2,6 +2,7 @@ package com.und.web.model.event
 
 import com.und.model.mongo.eventapi.LineItem
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
@@ -10,7 +11,7 @@ open class Event {
 
     lateinit var name: String
     var clientId: Int = -1
-    var creationTime: LocalDateTime = LocalDateTime.now()
+    var creationTime: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
     var ipAddress: String? = null
     var city: String? = null
     var state: String? = null

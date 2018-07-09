@@ -1,11 +1,9 @@
 package com.und.model.mongo
 
+import com.und.common.utils.DateUtils
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneOffset
-import java.util.HashMap
+import java.util.*
 
 @Document(collection = "#{tenantProvider.getTenant()}_eventUser")
 class EventUser {
@@ -15,7 +13,7 @@ class EventUser {
         var identity: Identity = Identity()
         var standardInfo: StandardInfo = StandardInfo()
         val additionalInfo: HashMap<String, Any> = hashMapOf()
-        var creationTime: Long = LocalDateTime.now().toInstant(ZoneOffset.UTC).toEpochMilli()
+        var creationTime: Date = DateUtils.nowInUTC()
         var communication: Communication? = null
 }
 

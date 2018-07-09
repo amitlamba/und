@@ -1,6 +1,7 @@
 package com.und.web.model.eventapi
 
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.*
 import javax.validation.constraints.Email
@@ -14,7 +15,7 @@ class EventUser {
     @Email(message = "{eventUser.email.invalid}")
     var email: String? = null
 
-    var clientUserId: String? = null //this is id of the user client has provided
+    var uid: String? = null //this is id of the user client has provided
 
     var undId: String? = null
 
@@ -62,7 +63,7 @@ class EventUser {
     var additionalInfo: HashMap<String, Any> = hashMapOf()
 
     //FIXME creation date can't keep changing
-    var creationDate: LocalDateTime = LocalDateTime.now()
+    var creationDate: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
 
 
 }

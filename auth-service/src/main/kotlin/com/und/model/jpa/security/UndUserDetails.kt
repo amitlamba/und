@@ -2,6 +2,7 @@ package com.und.model.jpa.security
 
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.userdetails.User
+import java.time.ZoneId
 
 /**
  * Created by shiv on 21/07/17.
@@ -30,7 +31,9 @@ class UndUserDetails(
 
         val key: String? = null,
 
-        val userType: Int? = null
+        val userType: Int? = null,
+
+        var timeZoneId: String = ZoneId.of("UTC").id
 ) : User(username, password, authorities) {
 
     override fun getUsername(): String {

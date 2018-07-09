@@ -1,6 +1,7 @@
 package com.und.web.model
 
 import java.time.LocalDateTime
+import java.time.ZoneId
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
@@ -17,7 +18,7 @@ class Segment {
 
     @NotNull
     var type: String = ""
-    var creationDate: LocalDateTime = LocalDateTime.now()
+    var creationDate: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
     var conversionEvent: String? = null
     var didEvents: DidEvents? = null
     var didNotEvents: DidEvents? = null
@@ -134,6 +135,8 @@ enum class StringOperator {
 }
 
 enum class Unit {
+    mins,
+    hours,
     days,
     week,
     month,

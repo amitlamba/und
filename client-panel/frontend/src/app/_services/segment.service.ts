@@ -13,6 +13,8 @@ import {AppSettings} from "../_settings/app-settings";
 import {tap} from "rxjs/operators";
 import {Observable} from "rxjs/Observable";
 import {EventUser} from "../_models/user";
+import {BehaviorSubject} from "rxjs/BehaviorSubject";
+import {Campaign} from "../_models/campaign";
 
 @Injectable()
 export class SegmentService {
@@ -21,6 +23,7 @@ export class SegmentService {
   countries: Country[];
   eventUser: EventUser = new EventUser();
   cachedRegisteredEvents: RegisteredEvent[] = null;
+  eventUserList: EventUser[] = [];
 
   constructor(private httpClient: HttpClient) {
     // this.editSegment = this.initSegment(new Segment());
@@ -242,7 +245,7 @@ export class SegmentService {
   }
 
   getEventsListByUserId(userId: string): Observable<any> {
-    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_USER_ID + "/" + userId);
+    return this.httpClient.get<any>(AppSettings.API_ENDPOINT_CLIENT_EVENTS_LIST + "/" + userId);
   }
 
   getEventUsersBySegment(segment: Segment): Observable<EventUser[]> {

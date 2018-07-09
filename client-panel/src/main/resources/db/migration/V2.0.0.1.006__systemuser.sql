@@ -1,0 +1,9 @@
+alter sequence  authority_id_seq RESTART WITH 1000 INCREMENT 1;
+alter sequence  client_id_seq RESTART WITH 1000 INCREMENT 1;
+alter sequence  appuser_id_seq RESTART WITH 1000 INCREMENT 1;
+alter sequence  email_template_id_seq RESTART WITH 1000 INCREMENT 1;
+alter sequence  template_id_seq RESTART WITH 1000 INCREMENT 1;
+alter sequence  campaign_id_seq RESTART WITH 1000 INCREMENT 1;
+alter sequence  client_settings_id_seq RESTART WITH 1000 INCREMENT 1;
+alter sequence  segment_id_seq RESTART WITH 1000 INCREMENT 1;
+alter sequence  service_provider_credentials_id_seq RESTART WITH 1000 INCREMENT 1;
