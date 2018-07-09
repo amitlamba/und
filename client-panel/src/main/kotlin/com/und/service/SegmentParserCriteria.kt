@@ -296,7 +296,7 @@ class SegmentParserCriteria {
 
                 val startDate = dateUtils.parseToDate(values.first())
                 val endDate = dateUtils.parseToDate(values.last())
-                Criteria.where(fieldName).lte(startDate).gte(endDate)
+                Criteria.where(fieldName).gte(startDate).lte(endDate)
             }
             DateOperator.InThePast -> {
 

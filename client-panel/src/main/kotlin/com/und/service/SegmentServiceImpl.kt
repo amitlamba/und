@@ -131,6 +131,9 @@ class SegmentServiceImpl : SegmentService {
             appuserID = AuthenticationUtils.principal.id
             //FIXME create a separate class for json conversion
             data = objectMapper.writeValueAsString(websegment)
+
+
+            //check here
         }
         return segment
     }
