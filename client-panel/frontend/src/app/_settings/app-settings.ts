@@ -20,9 +20,9 @@ export class AppSettings {
   public static API_ENDPOINT_CLIENT_CLIENT_SMS_SAVE_TEMPLATES = AppSettings.API_ENDPOINT_CLIENT_CLIENT_SMS + "/save-template";
   public static API_ENDPOINT_CLIENT_CLIENT_SMS_USER_EVENT_ATTRIBUTES = AppSettings.API_ENDPOINT_CLIENT_CLIENT_SMS + "/user-event-attributes";
 
-  public static API_ENDPOINT_CLIENT_CLIENT_USERS = AppSettings.API_ENDPOINT_CLIENT_CLIENT + "/users"
-  public static API_ENDPOINT_CLIENT_CLIENT_USERS_GETLIST = AppSettings.API_ENDPOINT_CLIENT_CLIENT_USERS + "/get-list"
-  public static API_ENDPOINT_CLIENT_CLIENT_USERS_GETUSEREVENTS = AppSettings.API_ENDPOINT_CLIENT_CLIENT_USERS + "/get-user-events"
+  public static API_ENDPOINT_CLIENT_CLIENT_USERS = AppSettings.API_ENDPOINT_CLIENT_CLIENT + "/users";
+  public static API_ENDPOINT_CLIENT_CLIENT_USERS_GETLIST = AppSettings.API_ENDPOINT_CLIENT_CLIENT_USERS + "/get-list";
+  public static API_ENDPOINT_CLIENT_CLIENT_USERS_GETUSEREVENTS = AppSettings.API_ENDPOINT_CLIENT_CLIENT_USERS + "/get-user-events";
 
   public static API_ENDPOINT_CLIENT_SETTING = AppSettings.API_ENDPOINT_CLIENT + "/setting";
   public static API_ENDPOINT_CLIENT_SETTING_ALL_SERVICE_PROVIDERS = AppSettings.API_ENDPOINT_CLIENT_SETTING + "/service-providers";
@@ -49,17 +49,16 @@ export class AppSettings {
   public static API_ENDPOINT_CLIENT_GET_SEGMENT_BY_ID = AppSettings.API_ENDPOINT_CLIENT_SEGMENT + "/segment";
 
 
-  public static API_ENDPOINT_CLIENT_FIND_USER_BY = AppSettings.API_ENDPOINT_CLIENT + "/user";
-  public static API_ENDPOINT_CLIENT_FIND_USER_BY_GOOGLE_ID = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/google';
-  public static API_ENDPOINT_CLIENT_FIND_USER_BY_UND_ID = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/id';
-  public static API_ENDPOINT_CLIENT_FIND_USER_BY_FACEBOOK_ID = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/fb';
-  public static API_ENDPOINT_CLIENT_FIND_USER_BY_CLIENT_USER_ID = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/sys';
-  public static API_ENDPOINT_CLIENT_FIND_USER_BY_EMAIL_ID = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/email';
-  public static API_ENDPOINT_CLIENT_FIND_USER_BY_MOBILE_NUMBER = AppSettings.API_ENDPOINT_CLIENT_FIND_USER_BY + '/mobile';
-
-  public static API_ENDPOINT_CLIENT_EVENT = AppSettings.API_ENDPOINT_CLIENT + "/user";
-  public static API_ENDPOINT_CLIENT_EVENTS_LIST_BY_USER_ID = AppSettings.API_ENDPOINT_CLIENT_EVENT + "/event-list";
-  public static API_ENDPOINT_CLIENT_EVENT_DETAILS_BY_EVENT_ID = AppSettings.API_ENDPOINT_CLIENT + "/event-details";
+  public static API_ENDPOINT_CLIENT_USER = AppSettings.API_ENDPOINT_CLIENT + "/user";
+  public static API_ENDPOINT_CLIENT_USER_GOOGLE_ID = AppSettings.API_ENDPOINT_CLIENT_USER + '/google';
+  public static API_ENDPOINT_CLIENT_USER_ID = AppSettings.API_ENDPOINT_CLIENT_USER + '/id';
+  public static API_ENDPOINT_CLIENT_USER_FACEBOOK_ID = AppSettings.API_ENDPOINT_CLIENT_USER + '/fb';
+  public static API_ENDPOINT_CLIENT_USER_SYS_ID = AppSettings.API_ENDPOINT_CLIENT_USER + '/sys';
+  public static API_ENDPOINT_CLIENT_USER_EMAIL_ID = AppSettings.API_ENDPOINT_CLIENT_USER + '/email';
+  public static API_ENDPOINT_CLIENT_USER_MOBILE_NUMBER = AppSettings.API_ENDPOINT_CLIENT_USER + '/mobile';
+  public static API_ENDPOINT_CLIENT_USER_USER_LIST_SEGMENT = AppSettings.API_ENDPOINT_CLIENT_USER + '/user-list/segment';
+  public static API_ENDPOINT_CLIENT_EVENTS_LIST = AppSettings.API_ENDPOINT_CLIENT_USER + "/event-list";
+  // public static API_ENDPOINT_CLIENT_EVENT_DETAILS_BY_EVENT_ID = AppSettings.API_ENDPOINT_CLIENT + "/event-details";
 
 
   public static API_ENDPOINT_CLIENT_CAMPAIGN = AppSettings.API_ENDPOINT_CLIENT + "/campaign";
@@ -82,7 +81,7 @@ export class AppSettings {
   public static API_ENDPOINT_AUTH = AppSettings.API_ENDPOINT + "/auth";
   // public static API_ENDPOINT_AUTH = "http://nestros.com:9595";
   // public static API_ENDPOINT_AUTH = AppSettings.API_ENDPOINT + "/auth";
-  // public static API_ENDPOINT_AUTH = "http://nestros.com:9595"
+  // public static API_ENDPOINT_AUTH = "http://userndot.com:9595"
 
   public static API_ENDPOINT_AUTH_AUTH = AppSettings.API_ENDPOINT_AUTH + "/auth";
   public static API_ENDPOINT_AUTH_AUTH_VALIDATE = AppSettings.API_ENDPOINT_AUTH_AUTH + "/validate";

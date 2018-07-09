@@ -19,6 +19,7 @@ import java.io.IOException
 import java.net.URLDecoder
 import java.net.URLEncoder
 import java.time.LocalDateTime
+import java.time.ZoneId
 import javax.imageio.ImageIO
 
 @Service
@@ -52,7 +53,7 @@ class EmailService {
             if (mongoEmail.emailStatus.order < EmailStatus.READ.order) {
                 mongoEmail.emailStatus = EmailStatus.READ
             }
-            mongoEmail.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(), EmailStatus.READ, null))
+            mongoEmail.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), EmailStatus.READ, null))
             emailSentRepository.save(mongoEmail)
         }
     }

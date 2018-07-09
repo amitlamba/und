@@ -1,9 +1,11 @@
 package com.und.model.mongo.eventapi
 
+import com.und.common.utils.DateUtils
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.TypeAlias
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 
 @TypeAlias("event")
@@ -16,7 +18,7 @@ class Event(
         var attributes: HashMap<String, Any> = hashMapOf(),
         var system: System = System(),
         var agentString: String? = null,
-        var creationTime: LocalDateTime = LocalDateTime.now()
+        var creationTime: Date = DateUtils.nowInUTC()
 ) {
     var geoDetails = GeoDetails()
     var deviceId: String = ""

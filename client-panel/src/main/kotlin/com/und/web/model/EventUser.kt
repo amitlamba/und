@@ -2,6 +2,7 @@ package com.und.web.model
 
 import com.und.model.mongo.eventapi.Communication
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 import javax.validation.constraints.Email
 import javax.validation.constraints.Pattern
@@ -60,7 +61,7 @@ class EventUser {
     var additionalInfo: HashMap<String, Any> = hashMapOf()
 
     //FIXME creation date can't keep changing
-    var creationDate: LocalDateTime = LocalDateTime.now()
+    var creationDate: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
 
     var communication: Communication = Communication()
 

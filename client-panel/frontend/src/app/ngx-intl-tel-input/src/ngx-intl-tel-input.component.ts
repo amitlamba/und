@@ -51,7 +51,7 @@ export class NgxIntlTelInputComponent implements OnInit {
   }
 
   public onCountrySelect(country: Country, el): void {
-    this.getSelectedCountryName.emit(country.name);;
+    this.getSelectedCountryName.emit(country.name);
     this.dialCodePlaceholder = country.dialCode;
     this.selectedCountry = country;
     if (this.phone_number.length > 0) {

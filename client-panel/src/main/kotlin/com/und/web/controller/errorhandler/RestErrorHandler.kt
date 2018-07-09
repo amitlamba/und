@@ -14,7 +14,6 @@ import org.springframework.context.MessageSource
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.validation.BindException
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -25,7 +24,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
-import java.lang.Exception
 import java.util.*
 
 
@@ -60,6 +58,15 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
 
     }
 
+
+//    @ExceptionHandler(InputUserDateFormatException::class)
+//    fun handleInputUserDateFormatException(ex: InputUserDateFormatException):ResponseEntity<ReportError>{
+//        logger.error(HttpStatus.BAD_REQUEST,ex)
+//        var error=ReportError()
+//        error.message =ex.message
+//        error.status=HttpStatus.BAD_REQUEST.value()
+//        return ResponseEntity<ReportError>(error,HttpStatus.BAD_REQUEST)
+//    }
 
     //@ExceptionHandler(MethodArgumentNotValidException::class)
     //@ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -198,7 +205,6 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
         val bodyOfResponse = GenericResponse(messageSource.getMessage("message.clientError", null, request.locale), ex.localizedMessage)
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
     }
-
 
 
 

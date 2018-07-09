@@ -1,9 +1,11 @@
 package com.und.web.model.eventapi
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.und.eventapi.validation.*
 import com.und.model.mongo.eventapi.LineItem
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.*
 import javax.validation.constraints.Pattern
@@ -21,7 +23,7 @@ open class Event {
 
     var clientId: Int = -1
     var identity: Identity = Identity()
-    var creationTime: LocalDateTime = LocalDateTime.now()
+    var creationTime: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
 
     @Pattern(regexp="(([0-9]|[1][0-9]{1,2}|2[0-4][0-9]|25[0-5])[.]){3}([0-9]|[1][0-9]{1,2}|2[0-4][0-9]|25[0-5])",message="{event.ip.invalid}")
     var ipAddress: String? = null
@@ -48,6 +50,9 @@ open class Event {
     var userIdentified: Boolean = false
     var lineItem: MutableList<LineItem> = mutableListOf()
     var attributes: HashMap<String, Any> = hashMapOf()
+
+    //@get:JsonIgnore
+    var timeZone:String? = null
 
 }
 

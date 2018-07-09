@@ -3,6 +3,7 @@ package com.und.model.redis.security
 import com.und.model.jpa.security.Authority
 import org.springframework.data.annotation.Id
 import org.springframework.data.redis.core.RedisHash
+import java.time.ZoneId
 
 @RedisHash("user")
 class UserCache {
@@ -40,6 +41,8 @@ class UserCache {
     var pswrdRstKey: String? = null
 
     var emailRgstnKey: String? = null
+
+    var timeZoneId:String = ZoneId.of("UTC").id
 
 
 }

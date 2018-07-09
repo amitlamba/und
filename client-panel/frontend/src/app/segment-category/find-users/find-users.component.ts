@@ -18,7 +18,8 @@ export class FindUsersComponent implements OnInit {
   userIdentity: string;
   loadingIcon: boolean = false;
   showErrorMessage: boolean = false;
-  errorMessage: string='';
+  errorMessage: string = '';
+  eventUserList: EventUser[] = [];
 
   constructor(private segmentService: SegmentService,
               private router: Router) {
@@ -144,5 +145,11 @@ export class FindUsersComponent implements OnInit {
   changeInputPlaceholder(placeholderValue: string) {
     this.inputPlaceholder = placeholderValue;
     this.userIdentity = '';
+  }
+
+  receiveEventUserList($event) {
+    this.segmentService.eventUserList = $event;
+    this.eventUserList = this.segmentService.eventUserList;
+    console.log($event);
   }
 }
