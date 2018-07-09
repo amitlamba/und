@@ -28,8 +28,8 @@ export class StringComparatorComponent implements OnInit, OnChanges {
   stringComparatorMetadata: any;
   @Input() stringComparatorOperators: string[];
   private singleFieldRequiredComparators: string[] = ["Equals","NotEquals","Contains","DoesNotContain"];
-  private selectOptionsRequired: string[] = ["Equals","NotEquals"];
-  private select2OptionsRequired: string[] = ["Contains","DoesNotContain"];
+  selectOptionsRequired: string[] = ["Equals","NotEquals"];
+  select2OptionsRequired: string[] = ["Contains","DoesNotContain"];
   private doubleFieldRequiredComparators: string[] = [];
   private noFieldRequiredComparators: string[] = ["Exists","DoesNotExist"];
   fieldRequired: boolean = false;

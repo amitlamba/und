@@ -23,7 +23,7 @@ export class SimpleTinyComponent implements OnInit, AfterViewInit, OnDestroy {
   @Output() onEditorKeyup = new EventEmitter<any>();
   @ViewChild(MentionDirective) mention: MentionDirective;
   items = UserParams.params;
-
+  htmlContent = '';
   editor;
 
   ngAfterViewInit() {
