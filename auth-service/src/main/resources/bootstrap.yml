@@ -1,11 +1,11 @@
 spring:
   cloud:
     config:
-      uri: http://nestros.com:8888
+      uri: http://${CONFIG_IP}:${CONFIG_PORT}
       enabled: true
       name: auth-service
   application:
     name: auth-service
-  mvc:
-    view:
-      prefix:
+
+encrypt:
+  key: ${ENCRYPT_KEY}

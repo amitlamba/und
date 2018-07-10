@@ -1,24 +1,12 @@
 spring:
   cloud:
     config:
-      uri: http://nestros.com:8898
+      uri: ${CONFIG_IP}:${CONFIG_PORT}
       enabled: true
       name: client-panel
       profile: staging
   application:
     name: client-panel
-  mvc:
-    view:
-      prefix:
-  zipkin:
-    base-url: http://springbootzipkin:7777
-    sender:
-      type: kafka
-  sleuth:
-    sampler:
-      probability: 1
-  kafka:
-    bootstrap-servers: ${KAFKA_IP}:${KAFKA_PORT}
 
 encrypt:
   key: ${ENCRYPT_KEY}
