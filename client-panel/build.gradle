@@ -1,5 +1,4 @@
 
-apply plugin: "com.moowork.node"
 
 jar {
     group = 'com.und'
@@ -7,27 +6,6 @@ jar {
     version = '0.2.0'
 }
 
-node {
-    version = "7.5.0"
-    download = true
-    nodeModulesDir = file("frontend")
-}
-
-task buildClientDev(type: NpmTask, dependsOn: 'npmInstall') {
-    group = 'build'
-    description = 'Compile client side folder for development'
-    args = ['run', 'buildDev']
-}
-task buildClient(type: NpmTask, dependsOn: 'npmInstall') {
-    group = 'build'
-    description = "Compile client side folder for production"
-    args = ['run', 'build']
-}
-task buildClientWatch(type: NpmTask, dependsOn: 'npmInstall') {
-    group = 'application'
-    description = "Build and watches the client side assets for rebuilding"
-    args = ['run', 'buildWatch']
-}
 
 dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-stream-kafka')
@@ -58,7 +36,6 @@ dependencies {
 
 }
 
-jar.dependsOn(buildClient)
 
 
 
