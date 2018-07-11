@@ -1,10 +1,10 @@
 spring:
   cloud:
     config:
-      uri: ${CONFIG_IP}:${CONFIG_PORT}
+      uri: http://${CONFIG_IP}:${CONFIG_PORT}
       enabled: true
       name: client-panel
-      profile: staging
+#      profile: prod
   application:
     name: client-panel
 
