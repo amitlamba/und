@@ -59,14 +59,14 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
     }
 
 
-//    @ExceptionHandler(InputUserDateFormatException::class)
-//    fun handleInputUserDateFormatException(ex: InputUserDateFormatException):ResponseEntity<ReportError>{
-//        logger.error(HttpStatus.BAD_REQUEST,ex)
-//        var error=ReportError()
-//        error.message =ex.message
-//        error.status=HttpStatus.BAD_REQUEST.value()
-//        return ResponseEntity<ReportError>(error,HttpStatus.BAD_REQUEST)
-//    }
+/*    @ExceptionHandler(InputUserDateFormatException::class)
+    fun handleInputUserDateFormatException(ex: InputUserDateFormatException):ResponseEntity<ReportError>{
+        logger.error(HttpStatus.BAD_REQUEST,ex)
+        var error=ReportError()
+        error.message =ex.message
+        error.status=HttpStatus.BAD_REQUEST.value()
+        return ResponseEntity<ReportError>(error,HttpStatus.BAD_REQUEST)
+    }*/
 
     //@ExceptionHandler(MethodArgumentNotValidException::class)
     //@ResponseStatus(HttpStatus.BAD_REQUEST)

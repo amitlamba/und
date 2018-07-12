@@ -100,7 +100,11 @@ class SegmentServiceImpl : SegmentService {
             allResult.add(userDidNotList.toSet())
         }
 
-
+        val userQuery = queries.userQuery
+        if(userQuery != null) {
+            val userProfiles = eventUserRepository.usersFromUserProfile(userQuery, clientId)
+            allResult.add(userProfiles.toSet())
+        }
 
         val userList = allResult.reduce{f, s ->  f.intersect(s)}
         return userList.asSequence().map {

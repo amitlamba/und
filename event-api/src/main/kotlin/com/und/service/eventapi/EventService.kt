@@ -83,7 +83,7 @@ class EventService {
         with(fromEvent) {
             clientId = tenantProvider.tenant.toInt()
             ipAddress = request.ipAddr()
-           // timeZone = AuthenticationUtils.principal.timeZoneId
+            timeZone = AuthenticationUtils.principal.timeZoneId
             agentString = request.getHeader("User-Agent")
         }
         return fromEvent

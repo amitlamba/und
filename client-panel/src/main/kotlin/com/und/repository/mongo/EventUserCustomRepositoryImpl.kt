@@ -2,9 +2,11 @@ package com.und.repository.mongo
 
 import com.und.model.mongo.eventapi.Event
 import com.und.model.mongo.eventapi.EventUser
+import org.bson.Document
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Update
 import java.util.*
@@ -76,6 +78,18 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
         } else {
             Optional.of(eventUser)
         }
+    }
+
+
+    override fun usersFromUserProfile(query: Aggregation, clientId: Long): List<String>  {
+
+        val output = mongoTemplate.aggregate(query, "${clientId}_eventUser", Document::class.java)
+
+        output.mappedResults.forEach { action-> println(action.toJson()) }
+        return output?.let { aggResult ->
+            aggResult.mapNotNull { dbo -> dbo["_id"] as String }
+        } ?: emptyList()
+
     }
 
     private fun updateEventUser(q: Query, update: Update, clientId: Long) {
