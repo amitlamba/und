@@ -4,7 +4,6 @@ spring:
       uri: http://${CONFIG_IP}:${CONFIG_PORT}
       enabled: true
       name: client-panel
-#      profile: prod
   application:
     name: client-panel
 
