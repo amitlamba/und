@@ -16,6 +16,7 @@ import org.mockito.MockitoAnnotations
 import org.springframework.test.util.ReflectionTestUtils
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.*
 import javax.mail.internet.InternetAddress
 
@@ -73,8 +74,8 @@ class EmailHelperServiceTest {
     fun testTemplateLoadDB() {
         val template = Template()
         template.template = "Hello world"
-        template.dateCreated = LocalDateTime.now()
-        template.dateModified = LocalDateTime.now()
+        template.dateCreated = LocalDateTime.now(ZoneId.of("UTC"))
+        template.dateModified = LocalDateTime.now(ZoneId.of("UTC"))
         whenever(templateRepository.findByName(any())).thenReturn(Optional.of(template))
 
         val to = "shiv@userndot.com"

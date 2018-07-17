@@ -9,6 +9,7 @@ import com.und.web.controller.exception.EmailAlreadyRegisteredException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.time.ZoneId
 import javax.mail.internet.InternetAddress
 import com.und.web.model.ContactUs as WebContactUs
 
@@ -27,8 +28,8 @@ class ContactUsService {
     private lateinit var emailService: EmailService
 
     fun save(webContactUs: WebContactUs) {
-        val startDate = LocalDateTime.now().minusHours(24)
-        val endDate = LocalDateTime.now()
+        val startDate = LocalDateTime.now(ZoneId.of("UTC")).minusHours(24)
+        val endDate = LocalDateTime.now(ZoneId.of("UTC"))
         val contactUsEmail = contactUsRepository
                 .findByEmailBetweenDates(webContactUs.email, startDate, endDate)
         if (contactUsEmail.isPresent && contactUsEmail.get().size >= 2) {

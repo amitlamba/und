@@ -1,6 +1,7 @@
 package com.und.web.model
 
 import java.time.LocalDateTime
+import java.time.ZoneId
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
@@ -17,7 +18,7 @@ class Segment {
 
     @NotNull
     var type: String = ""
-    var creationDate: LocalDateTime = LocalDateTime.now()
+    var creationDate: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
     var conversionEvent: String? = null
     var didEvents: DidEvents? = null
     var didNotEvents: DidEvents? = null
@@ -134,6 +135,8 @@ enum class StringOperator {
 }
 
 enum class Unit {
+    mins,
+    hours,
     days,
     week,
     month,
@@ -159,25 +162,17 @@ enum class GlobalFilterType(val type: String) {
 }
 
 class Geography {
-    var country: Country = Country()
-    var state: State = State()
-    var city: City = City()
+    var country: Country? = null
+    var state: State? = null
+    var city: City? = null
 }
 
-class Country {
-    var id: Long = 0
-    var name: String = ""
-}
+class Country(val id:Int, val name:String)
 
-class State {
-    var id: Long = 0
-    var name: String = ""
-}
+class State(val id:Int, val name:String)
 
-class City {
-    var id: Long = 0
-    var name: String = ""
-}
+class City (val id:Int, val name:String)
+
 
 class RegisteredEvent {
     var name: String = ""

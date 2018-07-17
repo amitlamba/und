@@ -73,8 +73,12 @@ class EventUserService {
 
         val identity = eventUser.identity
         fun copyChangedValues(userId: String): MongoEventUser {
-
-            val existingEventUser = eventUserRepository.findById(userId)
+            val uid = eventUser.uid
+            val existingEventUser = if(uid != null) {
+                 eventUserRepository.findByIdOrIdentityUid(userId, uid)
+            } else {
+                eventUserRepository.findById(userId)
+            }
             val existingUser = if (existingEventUser.isPresent) existingEventUser.get() else MongoEventUser()
             return existingUser.copyNonNull(eventUser)
         }

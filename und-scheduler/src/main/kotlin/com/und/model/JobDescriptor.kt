@@ -7,6 +7,7 @@ import com.und.util.JobUtil
 import org.quartz.JobBuilder
 import org.quartz.JobDetail
 import org.quartz.Trigger
+import java.time.ZoneId
 import java.util.*
 import javax.validation.constraints.NotBlank
 
@@ -26,6 +27,8 @@ class JobDescriptor {
     var triggerDescriptors: List<TriggerDescriptor> = listOf()
 
     var action: Action = Action.NOTHING
+
+    var timeZoneId:ZoneId = ZoneId.of("UTC")
 
     enum class Action {
         PAUSE, CREATE, RESUME, DELETE, STOP, NOTHING,

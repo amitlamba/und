@@ -59,14 +59,14 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
     }
 
 
-    @ExceptionHandler(InputUserDateFormatException::class)
+/*    @ExceptionHandler(InputUserDateFormatException::class)
     fun handleInputUserDateFormatException(ex: InputUserDateFormatException):ResponseEntity<ReportError>{
         logger.error(HttpStatus.BAD_REQUEST,ex)
         var error=ReportError()
         error.message =ex.message
         error.status=HttpStatus.BAD_REQUEST.value()
         return ResponseEntity<ReportError>(error,HttpStatus.BAD_REQUEST)
-    }
+    }*/
 
     //@ExceptionHandler(MethodArgumentNotValidException::class)
     //@ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -87,13 +87,13 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
     }
 
 
-//    @ExceptionHandler(Exception::class)
-//    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-//    fun handleInternal(ex: RuntimeException, request: WebRequest): ResponseEntity<Any> {
-//        logger.error("500 Status Code", ex.fillInStackTrace())
-//        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.error", null, request.locale), "InternalError")
-//        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR)
-//    }
+    @ExceptionHandler(Exception::class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    fun handleInternal(ex: RuntimeException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("500 Status Code", ex.fillInStackTrace())
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.error", null, request.locale), "InternalError")
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR)
+    }
 
     @ExceptionHandler(UndBusinessValidationException::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

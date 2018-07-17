@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.util.ResourceUtils
 import java.time.LocalDateTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import org.hamcrest.CoreMatchers.`is` as Is
 
@@ -59,7 +60,7 @@ class SegmentParserCriteriaTest {
 
         val testData = readFileText("$testDataBase/test1.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val q =  segmentParser.segmentQueries(segment)
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
         println(q.didq.first)
         println(q.didq.second)
         MatcherAssert.assertThat(2, Is(2))
@@ -71,7 +72,7 @@ class SegmentParserCriteriaTest {
 
         val testData = readFileText("$testDataBase/test2.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val q =  segmentParser.segmentQueries(segment)
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
         println(q.didq.first)
         println(q.didq.second)
         MatcherAssert.assertThat(2, Is(2))
@@ -84,7 +85,7 @@ class SegmentParserCriteriaTest {
         val segment = mapper.readValue(testData, Segment::class.java)
 
 
-        val q =  segmentParser.segmentQueries(segment)
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
         println(q.didq.first)
         println(q.didq.second)
         //val users = segmentServiceImpl.segmentUsers(37,2)
@@ -96,7 +97,7 @@ class SegmentParserCriteriaTest {
 
         val testData = readFileText("$testDataBase/test4.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val q =  segmentParser.segmentQueries(segment)
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
         println(q.didq.first)
         println(q.didq.second)
         MatcherAssert.assertThat(2, Is(2))
@@ -107,7 +108,7 @@ class SegmentParserCriteriaTest {
 
         val testData = readFileText("$testDataBase/test5.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val q =  segmentParser.segmentQueries(segment)
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
         println(q.didq.first)
         println(q.didq.second)
 
@@ -120,7 +121,7 @@ class SegmentParserCriteriaTest {
 
         val testData = readFileText("$testDataBase/test6.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val q =  segmentParser.segmentQueries(segment)
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
         println(q.didq.first)
         println(q.didq.second)
         MatcherAssert.assertThat(2, Is(2))
@@ -132,7 +133,7 @@ class SegmentParserCriteriaTest {
 
         val testData = readFileText("$testDataBase/test7.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val q =  segmentParser.segmentQueries(segment)
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
         println(q.didq.first)
         println(q.didq.second)
         MatcherAssert.assertThat(2, Is(2))
@@ -144,7 +145,7 @@ class SegmentParserCriteriaTest {
 
         val testData = readFileText("$testDataBase/JsonTestData12.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-         segmentParser.segmentQueries(segment)
+         segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
         MatcherAssert.assertThat(2, Is(2))
 
     }
@@ -160,7 +161,7 @@ class SegmentParserCriteriaTest {
             println("****$it**${count++}******")
             println("************")
 
-             segmentParser.segmentQueries(segment)
+             segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
             println("************")
             println("************")
 

@@ -1,6 +1,5 @@
 
 
-
 jar {
     group = 'com.und'
     baseName = 'client-panel'
@@ -12,14 +11,14 @@ dependencies {
     compile('org.springframework.cloud:spring-cloud-starter-stream-kafka')
     compile('org.springframework.cloud:spring-cloud-stream-binder-kafka')
     compile('org.springframework.boot:spring-boot-starter-data-jpa')
-    compile('org.springframework.boot:spring-boot-starter-data-mongodb:2.0.2.RELEASE')
+    compile('org.springframework.boot:spring-boot-starter-data-mongodb')
 
     compile('org.springframework.boot:spring-boot-starter-data-rest')
     compile("org.springframework.boot:spring-boot-starter-mobile:1.5.9.RELEASE")
     compile('org.flywaydb:flyway-core:5.0.7')
     compile('org.springframework.boot:spring-boot-starter-mail')
     compile('org.springframework.boot:spring-boot-starter-security')
-    compile('org.springframework.security:spring-security-rsa')
+    compile group: 'org.springframework.security', name: 'spring-security-rsa', version: '1.0.5.RELEASE'
 
     compile ("com.und:auth-client:0.4.0-SNAPSHOT")
 
@@ -36,7 +35,6 @@ dependencies {
 
 
 }
-
 
 
 

@@ -26,7 +26,8 @@ class UndUserDetailsDeSerializationTest {
       "firstname": "",
       "lastname": "",
       "email": null,
-      "name": "shiv6@und.com"
+      "name": "shiv6@und.com",
+      "timeZoneId":"UTC"
     }
     """.trimIndent()
 
