@@ -3,6 +3,7 @@ package com.und.web.model
 import com.und.model.EditorSelected
 import com.und.model.MessageType
 import java.io.Serializable
+import java.time.LocalDateTime
 import javax.validation.constraints.Email
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
