@@ -1,7 +1,5 @@
-package com.und.web.model
+package com.und.model.utils
 
-import com.und.model.EditorSelected
-import com.und.model.MessageType
 import java.io.Serializable
 import javax.validation.constraints.Email
 import javax.validation.constraints.NotNull
@@ -38,7 +36,10 @@ class EmailTemplate : Serializable{
 
     @NotNull
     var editorSelected: EditorSelected? = null
+}
 
-    var dateCreated: LocalDateTime? = null
+enum class EditorSelected {
+    tinymceEditor,
+    textareaEditor,
 }
 

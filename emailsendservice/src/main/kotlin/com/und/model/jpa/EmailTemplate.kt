@@ -60,7 +60,7 @@ class EmailTemplate {
     var tags: String? = null
 
     @field:CreationTimestamp
-    @Column(name = "date_created")
+    @Column(name = "date_created", updatable = false)
     lateinit var dateCreated: LocalDateTime
 
     @field:UpdateTimestamp

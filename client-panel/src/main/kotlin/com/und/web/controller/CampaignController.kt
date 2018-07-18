@@ -49,6 +49,19 @@ class CampaignController {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(value = ["/update"])
+    fun updateCampaign(@Valid @RequestBody campaign: Campaign): ResponseEntity<Campaign> {
+        logger.info("campaign update request inititated ${campaign.name}")
+        val clientId = AuthenticationUtils.clientID
+        if (clientId != null) {
+            val persistedCampaign = campaignService.save(campaign)
+            return ResponseEntity(persistedCampaign, HttpStatus.CREATED)
+        }
+        logger.info("campaign saved with name ${campaign.name}")
+        return ResponseEntity(campaign, HttpStatus.EXPECTATION_FAILED)
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PatchMapping(value = ["/pause/{campaignId}"])
     fun pauseCampaign(@PathVariable campaignId: Long): ResponseEntity<*> {
         return takeAction(campaignId, campaignService::pause)

@@ -5,10 +5,13 @@ import com.und.common.utils.loggerFor
 import com.und.web.model.*
 import com.und.web.model.Unit
 import org.slf4j.Logger
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.GroupOperation
 import org.springframework.data.mongodb.core.aggregation.MatchOperation
 import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.stereotype.Component
+import java.io.Serializable
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -25,6 +28,8 @@ import java.util.*
 8. combine results of both
 9. cache and store parsed query
  */
+
+@Component
 class SegmentParserCriteria {
 
     companion object {
@@ -50,6 +55,7 @@ class SegmentParserCriteria {
 
     }
 
+
     fun segmentQueries(segment: Segment, tz: ZoneId): SegmentQuery {
 
 
@@ -59,6 +65,7 @@ class SegmentParserCriteria {
         val (eventPropertyMatch, userPropertyMatch) = filterGlobalQ(gFilters, tz)
 
         val userQuery = if (userPropertyMatch != null) parseUsers(userPropertyMatch) else null
+
 
         //did
         val did = segment.didEvents
@@ -71,12 +78,6 @@ class SegmentParserCriteria {
         val didnot = segment.didNotEvents
         val didnotq = didnot?.let { Pair(parseEvents(it.events, tz, false, null, null), ConditionType.AnyOf) }
                 ?: Pair(emptyList(), ConditionType.AnyOf)
-
-
-
-
-
-
 
 
         return SegmentQuery(didq, didnotq, userQuery)
@@ -195,20 +196,23 @@ class SegmentParserCriteria {
 
     private fun whereFilterParse(whereFilter: WhereFilter, tz: ZoneId): Optional<Pair<GroupOperation, MatchOperation>> {
         val values = whereFilter.values
-        return if ((values != null && values.isNotEmpty()) && !whereFilter.propertyName.isNullOrBlank()) {
-            val filter: Pair<GroupOperation, MatchOperation> = when (whereFilter.whereFilterName) {
-                WhereFilterName.Count -> {
+        return if ((values != null && values.isNotEmpty())) {
+            val filter = when  {
+                whereFilter.whereFilterName == WhereFilterName.Count -> {
 
                     val group = Aggregation.group(Aggregation.fields().and(Field.userId.name, Field.userId.name)).count().`as`(Field.count.name)
                     val match = matchNumber(values.map { it.toString() }, whereFilter.operator, Field.count.name)
                     Pair(group, Aggregation.match(match))
                 }
-                WhereFilterName.SumOfValuesOf -> {
-
+                whereFilter.whereFilterName == WhereFilterName.SumOfValuesOf && !whereFilter.propertyName.isNullOrBlank() -> {
                     val group = Aggregation.group(Aggregation.fields().and(Field.userId.name, Field.userId.name)).sum(whereFilter.propertyName).`as`(Field.sumof.name)
                     val match = matchNumber(values.map { it.toString() }, whereFilter.operator, Field.sumof.name)
-
                     Pair(group, Aggregation.match(match))
+
+                }
+                whereFilter.whereFilterName == WhereFilterName.SumOfValuesOf && whereFilter.propertyName.isNullOrBlank() -> {
+                    throw Exception("invalid aggregate expression  ${whereFilter.whereFilterName} should have property specified")
+
                 }
                 else -> throw Exception("invalid aggregate expression can only be count or sum  but is ${whereFilter.whereFilterName}")
             }
@@ -429,7 +433,7 @@ class SegmentParserCriteria {
                     val filter = gFilterList.groupBy { it.name }
                     val criteria = parse(filter)
                     when (gFilterType) {
-                        GlobalFilterType.AppFields -> eventPropertyMatchCriteria.add(criteria)
+                        //GlobalFilterType.AppFields -> eventPropertyMatchCriteria.add(criteria)
                         GlobalFilterType.Technographics -> eventPropertyMatchCriteria.add(criteria)
 
                         GlobalFilterType.Demographics -> userPropertyMatchCriteria.add(criteria)
@@ -471,6 +475,6 @@ class SegmentParserCriteria {
 }
 
 
-class SegmentQuery(val didq: Pair<List<Aggregation>, ConditionType>, val didntq: Pair<List<Aggregation>, ConditionType>, val userQuery: Aggregation?)
+class SegmentQuery(val didq: Pair<List<Aggregation>, ConditionType>, val didntq: Pair<List<Aggregation>, ConditionType>, val userQuery: Aggregation?) : Serializable
 
 

@@ -3,7 +3,6 @@ package com.und.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.model.jpa.Segment
 import com.und.model.mongo.eventapi.EventUser
-import com.und.repository.jpa.ClientSettingsRepository
 import com.und.repository.jpa.SegmentRepository
 import com.und.repository.mongo.EventRepository
 import com.und.repository.mongo.EventUserRepository
@@ -36,6 +35,11 @@ class SegmentServiceImpl : SegmentService {
     private lateinit var objectMapper: ObjectMapper
 
 
+    @Autowired
+    private lateinit var segmentParserCriteria: SegmentParserCriteria
+
+
+    //@CacheEvict("segmentlist", key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_segment_'" )
     override fun createSegment(websegment: WebSegment): WebSegment {
         val segment = buildSegment(websegment)
         segmentRepository.save(segment)
@@ -44,6 +48,7 @@ class SegmentServiceImpl : SegmentService {
 
     }
 
+    //@Cacheable(cacheNames = ["segmentlist"], key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_segment_'" )
     override fun allSegment(): List<WebSegment> {
         val clientID = AuthenticationUtils.clientID
         val websegments = mutableListOf<WebSegment>()
@@ -55,6 +60,7 @@ class SegmentServiceImpl : SegmentService {
         return websegments
     }
 
+    //@Cacheable(cacheNames = ["segment"], key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_segment_'+#id" )
     override fun segmentById(id: Long): WebSegment {
         val clientID = AuthenticationUtils.clientID
         if (clientID != null) {
@@ -84,29 +90,31 @@ class SegmentServiceImpl : SegmentService {
     private fun getSegmentUsersList(segment: Segment, clientId: Long): List<EventUser> {
 
         val tz = userSettingsService.getTimeZone()
-        val allResult =  mutableListOf<Set<String>>()
+        val allResult = mutableListOf<Set<String>>()
         val websegment = buildWebSegment(segment)
-        val queries = SegmentParserCriteria().segmentQueries(websegment, tz)
+        val queries = segmentParserCriteria.segmentQueries(websegment, tz)
 
         val (didQueries, joincondition) = queries.didq
-        if(didQueries.isNotEmpty()) {
+        if (didQueries.isNotEmpty()) {
             val userDidList = retrieveUsers(didQueries, joincondition, clientId)
             allResult.add(userDidList.toSet())
         }
 
         val (didNotQueries, joinconditionfornot) = queries.didntq
-        if(didNotQueries.isNotEmpty()) {
-            val userDidNotList = retrieveUsers(didNotQueries, joinconditionfornot, clientId)
+        if (didNotQueries.isNotEmpty()) {
+            val userDidNotDid = retrieveUsers(didNotQueries, joinconditionfornot, clientId)
+
+            val userDidNotList = eventUserRepository.findUsersNotIn(userDidNotDid.toSet(), clientId)
             allResult.add(userDidNotList.toSet())
         }
 
         val userQuery = queries.userQuery
-        if(userQuery != null) {
+        if (userQuery != null) {
             val userProfiles = eventUserRepository.usersFromUserProfile(userQuery, clientId)
             allResult.add(userProfiles.toSet())
         }
 
-        val userList = allResult.reduce{f, s ->  f.intersect(s)}
+        val userList = allResult.reduce { f, s -> f.intersect(s) }
         return userList.asSequence().map {
             eventUserRepository.findUserById(it, clientId)
 
@@ -121,9 +129,9 @@ class SegmentServiceImpl : SegmentService {
             userDidList.add(idList.toSet())
 
         }
-        val result =  when (conditionType) {
-            ConditionType.AnyOf -> userDidList.reduce{f, s ->  f.union(s)}
-            ConditionType.AllOf -> userDidList.reduce{f, s ->  f.intersect(s)}
+        val result = when (conditionType) {
+            ConditionType.AnyOf -> userDidList.reduce { f, s -> f.union(s) }
+            ConditionType.AllOf -> userDidList.reduce { f, s -> f.intersect(s) }
         }
         val mutableResult = mutableSetOf<String>()
         mutableResult.addAll(result)
