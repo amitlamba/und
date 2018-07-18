@@ -90,6 +90,7 @@ class EmailTemplateService {
         webTemplate.parentID = emailTemplate.parentID
         webTemplate.tags = emailTemplate.tags
         webTemplate.editorSelected = emailTemplate.editorSelected
+        webTemplate.dateCreated = emailTemplate.dateCreated
         return webTemplate
 
     }
