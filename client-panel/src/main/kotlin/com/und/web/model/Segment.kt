@@ -1,5 +1,6 @@
 package com.und.web.model
 
+import java.io.Serializable
 import java.time.LocalDateTime
 import java.time.ZoneId
 import javax.validation.constraints.NotNull
@@ -7,7 +8,7 @@ import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
 
 
-class Segment {
+class Segment : Serializable {
 
     var id: Long? = null
 
@@ -26,35 +27,36 @@ class Segment {
     var geographyFilters: List<Geography> = listOf()
 }
 
-class DidEvents {
+class DidEvents : Serializable {
     var description: String? = null
     var joinCondition: JoinCondition = JoinCondition()
     var events: List<Event> = listOf()
 }
 
-class JoinCondition {
+class JoinCondition : Serializable {
     var anyOfCount: Long? = null
     var conditionType: ConditionType = ConditionType.AllOf // AnyOf
 }
 
-enum class ConditionType {
+enum class ConditionType : Serializable {
     AllOf,
     AnyOf
 }
 
-class Event {
+class Event : Serializable {
     var name: String = ""
     var dateFilter: DateFilter = DateFilter()
     var propertyFilters: List<PropertyFilter> = listOf()
     var whereFilter: WhereFilter? = null
 }
 
-class DateFilter {
+class DateFilter : Serializable {
     var operator: DateOperator = DateOperator.After
     var values: List<String> = listOf()
     var valueUnit: Unit = Unit.NONE
 }
-class PropertyFilter {
+
+class PropertyFilter : Serializable {
     var name: String = ""
     var type: DataType = DataType.string
     private var _filterType: PropertyFilterType? = null
@@ -79,26 +81,26 @@ class PropertyFilter {
 }
 
 
-enum class PropertyFilterType {
+enum class PropertyFilterType : Serializable {
     eventproperty,
     genericproperty,
     UTM
 }
 
 
-class WhereFilter {
+class WhereFilter : Serializable {
     var whereFilterName: WhereFilterName? = null
     var propertyName: String = ""
     var operator: NumberOperator = NumberOperator.NONE
     var values: List<Long>? = null
 }
 
-enum class WhereFilterName {
+enum class WhereFilterName : Serializable {
     Count,
     SumOfValuesOf
 }
 
-enum class DateOperator {
+enum class DateOperator : Serializable {
     Before,
     After,
     On,
@@ -113,7 +115,7 @@ enum class DateOperator {
     NONE
 }
 
-enum class NumberOperator {
+enum class NumberOperator : Serializable {
     Equals,
     Between,
     GreaterThan,
@@ -124,7 +126,7 @@ enum class NumberOperator {
     NONE
 }
 
-enum class StringOperator {
+enum class StringOperator : Serializable {
     Equals,
     NotEquals,
     Contains,
@@ -134,7 +136,7 @@ enum class StringOperator {
     NONE
 }
 
-enum class Unit {
+enum class Unit : Serializable {
     mins,
     hours,
     days,
@@ -144,7 +146,7 @@ enum class Unit {
     NONE
 }
 
-class GlobalFilter {
+class GlobalFilter : Serializable {
     var globalFilterType: GlobalFilterType = GlobalFilterType.AppFields
     var name: String = ""
     var type: DataType = DataType.string
@@ -153,7 +155,7 @@ class GlobalFilter {
     var valueUnit: Unit = Unit.NONE
 }
 
-enum class GlobalFilterType(val type: String) {
+enum class GlobalFilterType(val type: String) : Serializable {
     UserProperties("UserProperties"),
     Demographics("Demographics"),
     Technographics("Technographics"),
@@ -161,39 +163,39 @@ enum class GlobalFilterType(val type: String) {
     AppFields("appFields")
 }
 
-class Geography {
+class Geography : Serializable {
     var country: Country? = null
     var state: State? = null
     var city: City? = null
 }
 
-class Country(val id:Int, val name:String)
+class Country(val id: Int, val name: String) : Serializable
 
-class State(val id:Int, val name:String)
+class State(val id: Int, val name: String) : Serializable
 
-class City (val id:Int, val name:String)
+class City(val id: Int, val name: String) : Serializable
 
 
-class RegisteredEvent {
+class RegisteredEvent : Serializable {
     var name: String = ""
     var properties: List<RegisteredEventProperties> = listOf()
 }
 
-class RegisteredEventProperties {
+class RegisteredEventProperties : Serializable {
     var name: String = ""
     var dataType: DataType = DataType.string
     var regex: String = ""
     var options: Array<Any> = arrayOf()
 }
 
-class GlobalFilterItem {
+class GlobalFilterItem : Serializable {
     var value: String = ""
     var displayName: String = ""
     var type: String = ""
 }
 
 
-enum class DataType {
+enum class DataType : Serializable {
     string,
     number,
     date,
@@ -201,7 +203,7 @@ enum class DataType {
     boolean
 }
 
-enum class genericProperty(val desc: String) {
+enum class genericProperty(val desc: String) : Serializable {
     TimeOfDay("Time of day"),
     FirstTime("First Time"),
     DayOfWeek("Day of week"),
@@ -209,7 +211,7 @@ enum class genericProperty(val desc: String) {
 
 }
 
-enum class utmProperty(val desc: String) {
+enum class utmProperty(val desc: String) : Serializable {
     UTMSource("UTM Source"),
     UTMVisited("UTM Visited"),
 

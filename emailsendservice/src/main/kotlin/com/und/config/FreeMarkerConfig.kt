@@ -20,7 +20,7 @@ class FreeMarkerConfigure {
     @Bean
     fun freeMarkerConfigurationBean(): FreeMarkerConfigurationFactoryBean {
         val freeMarkerConfigurationFactoryBean = FreeMarkerConfigurationFactoryBean()
-        freeMarkerConfigurationFactoryBean.setPostTemplateLoaders(cacheTemplateLoader(), dataBaseTemplateLoader())
+        freeMarkerConfigurationFactoryBean.setPostTemplateLoaders(dataBaseTemplateLoader())
         return freeMarkerConfigurationFactoryBean
     }
 

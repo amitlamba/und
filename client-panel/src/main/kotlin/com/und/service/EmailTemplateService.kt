@@ -1,17 +1,17 @@
 package com.und.service
 
-import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.model.jpa.EmailTemplate
 import com.und.model.jpa.Template
-import com.und.web.model.EmailTemplate as WebEmailTemplate
 import com.und.repository.jpa.EmailTemplateRepository
-import com.und.repository.jpa.TemplateRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.EmailTemplateDuplicateNameException
 import com.und.web.controller.exception.EmailTemplateNotFoundException
-import com.und.web.model.ValidationError
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.CacheEvict
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import com.und.web.model.EmailTemplate as WebEmailTemplate
 
 @Service
 class EmailTemplateService {
@@ -34,7 +34,8 @@ class EmailTemplateService {
 
     }
 
-    private fun getEmailTemplate(emailTemplateId: Long): List<WebEmailTemplate> {
+    @Cacheable(cacheNames = ["emailtemplate"],key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_template_'+#emailTemplateId" )
+    fun getEmailTemplate(emailTemplateId: Long): List<WebEmailTemplate> {
         val clientId = AuthenticationUtils.clientID
         return clientId?.let {
             val emailTemplateOtion = emailTemplateRepository.findByIdAndClientID(emailTemplateId, clientId)
@@ -42,12 +43,15 @@ class EmailTemplateService {
         } ?: emptyList()
     }
 
-    private fun getClientEmailTemplates(): List<WebEmailTemplate> {
+    @Cacheable(cacheNames = ["emailtemplate"],key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_template_list'" )
+    fun getClientEmailTemplates(): List<WebEmailTemplate> {
         val clientId = AuthenticationUtils.clientID
         return clientId?.let { emailTemplateRepository.findByClientID(clientId).map { buildWebEmailTemplate(it) } }
                 ?: emptyList()
     }
 
+    @CachePut(cacheNames = ["emailtemplate"], key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_template_'+#webEmailTemplate.id" )
+    //@CacheEvict(cacheNames = ["emailtemplate"],key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_template_list'" )
     fun saveEmailTemplate(webEmailTemplate: WebEmailTemplate): Long {
         val clientId = AuthenticationUtils.clientID
         if (clientId != null) {
@@ -64,16 +68,12 @@ class EmailTemplateService {
     }
 
     fun getEmailTemplateById(id: Long): WebEmailTemplate {
-        val clientId = AuthenticationUtils.clientID
-        if (clientId != null) {
-            val emailTemplate = emailTemplateRepository.findByIdAndClientID(id, clientId)
-            if(emailTemplate.isPresent){
-                return buildWebEmailTemplate(emailTemplate.get())
+           val emailTemplate = getEmailTemplate(id)
+            if(emailTemplate.isNotEmpty()){
+                return emailTemplate.first()
             }
             else throw EmailTemplateNotFoundException("Email Template with id $id not found")
         }
-        else throw org.springframework.security.access.AccessDeniedException("User is not logged in")
-    }
 
     fun getUserEventAttributes() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
