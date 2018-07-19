@@ -30,9 +30,7 @@ dependencies {
 
 
     compile(
-            "io.jsonwebtoken:jjwt:$jjwtVersion",
-            "org.springframework.boot:spring-boot-starter-data-redis",
-            "redis.clients:jedis:$jedisVersion",
+            "io.jsonwebtoken:jjwt:$jjwtVersion"
 
 
     )

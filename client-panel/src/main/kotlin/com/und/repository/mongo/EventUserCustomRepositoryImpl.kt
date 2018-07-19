@@ -1,5 +1,6 @@
 package com.und.repository.mongo
 
+import com.mongodb.operation.AggregateOperation
 import com.und.model.mongo.eventapi.Event
 import com.und.model.mongo.eventapi.EventUser
 import org.bson.Document
@@ -90,7 +91,6 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
 
         val output = mongoTemplate.aggregate(query, "${clientId}_eventUser", Document::class.java)
 
-        output.mappedResults.forEach { action-> println(action.toJson()) }
         return output?.let { aggResult ->
             aggResult.mapNotNull { dbo -> dbo["_id"] as String }
         } ?: emptyList()
@@ -99,5 +99,19 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
 
     private fun updateEventUser(q: Query, update: Update, clientId: Long) {
         mongoTemplate.updateFirst(q, update, "${clientId}_eventUser")
+    }
+
+
+    override fun findUsersNotIn(ids: Set<String>, clientId: Long): List<String> {
+
+        val project = Aggregation.project("_id")
+        val match = Aggregation.match(Criteria.where("_id").nin(ids))
+        val group = Aggregation.group("_id")
+        val q = Aggregation.newAggregation(project,match,group)
+        val output = mongoTemplate.aggregate(q, "${clientId}_eventUser", Document::class.java)
+
+        return output?.let { aggResult ->
+            aggResult.mapNotNull { dbo -> dbo["_id"].toString()  }
+        } ?: emptyList()
     }
 }

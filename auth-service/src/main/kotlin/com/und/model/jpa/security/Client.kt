@@ -53,7 +53,7 @@ class Client {
     @Column(name = "country")
     var country: String? = null
 
-    @Column(name = "date_created")
+    @Column(name = "date_created", updatable = false)
     @Temporal(TemporalType.TIMESTAMP)
     lateinit var dateCreated: Date
 

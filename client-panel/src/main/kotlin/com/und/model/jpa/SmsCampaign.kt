@@ -35,7 +35,7 @@ class SmsCampaign {
     var templateId: Long? = null
 
     @field:CreationTimestamp
-    @Column(name = "date_created")
+    @Column(name = "date_created", updatable = false)
     lateinit var dateCreated: LocalDateTime
 
     @field:UpdateTimestamp
