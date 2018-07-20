@@ -6,8 +6,8 @@ import java.util.*
 data class Sms(
     var clientID: Long,
     var fromSmsAddress: String?,
-    var toSmsAddresses: Array<String>,
-    var smsBody: String,
+    var toSmsAddresses: String?,
+    var smsBody: String?,
     var smsTemplateId: Long?,
     var smsTemplateName: String?,
     var data: MutableMap<String, Any> = mutableMapOf(),
@@ -27,7 +27,7 @@ data class Sms(
         if(!smsBody.equals(other.smsBody)) return false
         if(smsTemplateId!=other.smsTemplateId)return false
         if(smsTemplateName!=other.smsTemplateName) return false
-        if(!Arrays.equals(toSmsAddresses,other.toSmsAddresses))return false
+        if(toSmsAddresses==other.toSmsAddresses)return false
         if (eventUser!=other.eventUser) return false
         if (data != other.data) return false
 

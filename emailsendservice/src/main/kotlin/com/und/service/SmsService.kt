@@ -70,7 +70,7 @@ class SmsService {
                     Files.createFile(path)
                     var bufferedWriter=Files.newBufferedWriter(path)
                     bufferedWriter.write(sms.fromSmsAddress)
-                    sms.toSmsAddresses.forEach { bufferedWriter.write(it) }
+                    bufferedWriter.write(sms.toSmsAddresses)
                     bufferedWriter.write(sms.clientID.toString())
                     bufferedWriter.write(smsSNSConfig.awsAccessKeyId)
                     bufferedWriter.write(smsSNSConfig.region.getName())

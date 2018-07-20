@@ -48,7 +48,7 @@ class SmsHelperService {
             val clientId = smsToSend.clientID
 
             /*
-            what this code do i think we don't need it
+            what this code do is it needed in sms
              */
 
 //            if(id!=null) {

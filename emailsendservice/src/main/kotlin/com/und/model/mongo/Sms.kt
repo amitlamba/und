@@ -8,9 +8,9 @@ import javax.persistence.Id
 data class Sms(
         var clientID: Long,
         var fromSmsAddress: String? = null,
-        var toSmsAddresses: Array<String>,
+        var toSmsAddresses: String?,
         @Transient
-        var smsBody:String,
+        var smsBody:String?,
         var smsTemplateId: Long? = null,
         var userID: String? = null,
         var campaignID: Long? = null,

@@ -37,7 +37,7 @@ class CampaignService {
                 //TODO: How to skip transactional Messages
 
                 //check mode of communication is email
-                if(user.communication?.email?.value=="email"){
+                if(campaign?.campaignType=="email"){
 
                     if(user.communication?.email?.dnd == true)
                         return@forEach //Local lambda return
@@ -45,9 +45,9 @@ class CampaignService {
                     toKafka(email)
                 }
                 //check mode of communication is sms
-                if(user.communication?.mobile?.value=="mobile"){
+                if(campaign?.campaignType=="mobile"){
 
-                    if(user.communication?.email?.dnd == true)
+                    if(user.communication?.mobile?.dnd == true)
                         return@forEach //Local lambda return
                     val sms: Sms = sms(clientId, campaign, user)
                     toKafka(sms)
@@ -66,7 +66,7 @@ class CampaignService {
                 clientId,
                 campaign?.fromSMSUser,
                 user.identity.mobile,
-                smsBody = null,
+                smsBody =null,
                 smsTemplateId = campaign?.smsTemplateId,
                 smsTemplateName=null
         )
