@@ -11,6 +11,8 @@ interface EventStream {
     @Output("emailEventSend")
     fun emailEventSend(): MessageChannel
 
+    @Output(value="smsEventSend")
+    fun smsEventSend():MessageChannel
 
     @Input("clientEmailReceive")
     fun clientEmailSend(): SubscribableChannel

@@ -4,6 +4,7 @@ import com.und.config.EventStream
 import com.und.model.jpa.Campaign
 import com.und.model.mongo.EventUser
 import com.und.model.utils.Email
+import com.und.model.utils.Sms
 import com.und.repository.jpa.CampaignRepository
 import com.und.utils.loggerFor
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,10 +35,23 @@ class CampaignService {
             try {
                 //TODO: filter out unsubscribed and blacklisted users
                 //TODO: How to skip transactional Messages
-                if(user.communication?.email?.dnd == true)
-                    return@forEach //Local lambda return
-                val email: Email = email(clientId, campaign, user)
-                toKafka(email)
+
+                //check mode of communication is email
+                if(user.communication?.email?.value=="email"){
+
+                    if(user.communication?.email?.dnd == true)
+                        return@forEach //Local lambda return
+                    val email: Email = email(clientId, campaign, user)
+                    toKafka(email)
+                }
+                //check mode of communication is sms
+                if(user.communication?.mobile?.value=="mobile"){
+
+                    if(user.communication?.email?.dnd == true)
+                        return@forEach //Local lambda return
+                    val sms: Sms = sms(clientId, campaign, user)
+                    toKafka(sms)
+                }
             } catch (ex: Exception) {
                 logger.error(ex.message)
 
@@ -46,6 +60,18 @@ class CampaignService {
             }
         }
     }
+
+    private fun sms(clientId: Long, campaign: Campaign?, user: EventUser):Sms{
+        return Sms(
+                clientId,
+                campaign?.fromSMSUser,
+                user.identity.mobile,
+                smsBody = null,
+                smsTemplateId = campaign?.smsTemplateId,
+                smsTemplateName=null
+        )
+    }
+
 
     private fun email(clientId: Long, campaign: Campaign?, user: EventUser): Email {
         return Email(
@@ -69,6 +95,10 @@ class CampaignService {
 
     fun toKafka(email: Email): Boolean =
             eventStream.emailEventSend().send(MessageBuilder.withPayload(email).build())
+
+
+    fun toKafka(sms: Sms): Boolean =
+            eventStream.smsEventSend().send(MessageBuilder.withPayload(sms).build())
 
 
 }

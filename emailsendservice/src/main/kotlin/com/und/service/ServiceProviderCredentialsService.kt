@@ -167,4 +167,9 @@ class ServiceProviderCredentialsService {
         val serviceProviderCred = this.findActiveEmailServiceProvider(email.clientID)
         return this.buildWebServiceProviderCredentials(serviceProviderCred)
     }
+
+    fun getServiceProviderCredentials(sms:Sms): com.und.model.utils.ServiceProviderCredentials {
+        val serviceProviderCred = this.findActiveSMSServiceProvider(sms.clientID)
+        return this.buildWebServiceProviderCredentials(serviceProviderCred)
+    }
 }

@@ -1,6 +1,7 @@
 package com.und.service
 
 import com.und.model.utils.Email
+import com.und.model.utils.Sms
 import com.und.utils.loggerFor
 import freemarker.template.Configuration
 import freemarker.template.Template
@@ -31,7 +32,9 @@ class TemplateContentCreationService {
         BODY("body"), SUBJECT("subject")
     }
 
-
+    enum class SmsContent(val desc: String){
+        BODY(desc = "body")
+    }
     fun getEmailSubject(email: Email, model: MutableMap<String, Any>): String {
         return getContentFromTemplate(email, EmailContent.SUBJECT, model)
     }
@@ -50,6 +53,12 @@ class TemplateContentCreationService {
 
     private fun getContentFromTemplate(email: Email, contentType: EmailContent, model: MutableMap<String, Any>): String {
         val name = "${email.clientID}:${email.emailTemplateName}:${contentType.desc}:${email.emailTemplateId}"
+        val template = freeMarkerConfiguration.getTemplate(name)
+        return FreeMarkerTemplateUtils.processTemplateIntoString(template, model)
+    }
+
+    private fun getContentFromTemplate(sms: Sms, contentType: SmsContent, model: MutableMap<String, Any>): String {
+        val name = "${sms.clientID}:${sms.smsTemplateName}:${contentType.desc}:${sms.smsTemplateId}"
         val template = freeMarkerConfiguration.getTemplate(name)
         return FreeMarkerTemplateUtils.processTemplateIntoString(template, model)
     }
@@ -92,5 +101,9 @@ class TemplateContentCreationService {
             replacedContent = replacedContent.replace(c, "$trackingURL?c=$clientId&e=$mongoEmailId&u=" + URLEncoder.encode(c, "UTF-8"))
         }
         return replacedContent
+    }
+
+    fun getSmsBody(sms: Sms, model: MutableMap<String, Any>):String{
+        return getContentFromTemplate(sms,SmsContent.BODY,model)
     }
 }
