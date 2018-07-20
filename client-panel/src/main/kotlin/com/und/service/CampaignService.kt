@@ -3,7 +3,6 @@ package com.und.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.common.utils.loggerFor
 import com.und.config.EventStream
-import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.model.CampaignStatus
 import com.und.model.JobActionStatus
 import com.und.model.JobDescriptor
@@ -11,16 +10,15 @@ import com.und.model.TriggerDescriptor
 import com.und.model.jpa.*
 import com.und.repository.jpa.CampaignAuditLogRepository
 import com.und.repository.jpa.CampaignRepository
-import com.und.repository.jpa.ClientSettingsRepository
 import com.und.security.utils.AuthenticationUtils
+import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.web.model.ValidationError
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.ZoneId
-import java.util.*
+import java.time.LocalDateTime
 import com.und.web.model.Campaign as WebCampaign
 
 
@@ -93,8 +91,11 @@ class CampaignService {
 
                     }
                     oneTime != null -> {
-
-                        fireTime = oneTime.campaignDateTime?.toLocalDateTime()
+                        fireTime = if (oneTime.nowOrLater == Now.Now) {
+                            LocalDateTime.now().plusMinutes(1L)
+                        } else {
+                            oneTime.campaignDateTime?.toLocalDateTime()
+                        }
                     }
                     multipleDates != null -> {
                         fireTimes = multipleDates.campaignDateTimeList.map { it.toLocalDateTime() }
@@ -113,7 +114,6 @@ class CampaignService {
         jobDescriptor.action = action
 
 
-
         val triggerDescriptors = arrayListOf<TriggerDescriptor>()
 
         triggerDescriptors.add(buildTriggerDescriptor())
@@ -122,11 +122,9 @@ class CampaignService {
     }
 
 
-
-
-
     fun buildCampaign(webCampaign: WebCampaign): Campaign {
         val campaign = Campaign()
+
         with(campaign) {
             this.id = webCampaign.id
             this.clientID = AuthenticationUtils.clientID
@@ -135,6 +133,12 @@ class CampaignService {
             campaignType = webCampaign.campaignType
             segmentationID = webCampaign.segmentationID
 
+            webCampaign.schedule?.oneTime?.let { whenTo ->
+                if (whenTo.nowOrLater == Now.Now) {
+                    whenTo.campaignDateTime = null
+                }
+
+            }
 
             schedule = objectMapper.writeValueAsString(webCampaign.schedule)
         }
@@ -190,6 +194,7 @@ class CampaignService {
         }
         return webCampaign
     }
+
     fun buildWebCampaignForList(campaign: Campaign): WebCampaign {
         val webCampaign = WebCampaign()
         with(webCampaign) {

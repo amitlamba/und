@@ -1,9 +1,11 @@
 package com.und.repository.mongo
 
+import com.mongodb.DBObject
 import com.mongodb.operation.AggregateOperation
 import com.und.model.mongo.eventapi.Event
 import com.und.model.mongo.eventapi.EventUser
 import org.bson.Document
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -18,7 +20,7 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
     lateinit var mongoTemplate: MongoTemplate
 
     override fun findUserById(id: String, clientId: Long): Optional<EventUser> {
-        val q = Query(Criteria.where("_id").`is`(id))
+        val q = Query(Criteria.where("_id").`is`(ObjectId(id)))
         return queryEventUser(q, clientId)
     }
 
@@ -100,7 +102,7 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
     override fun findUsersNotIn(ids: Set<String>, clientId: Long): List<String> {
 
         val project = Aggregation.project("_id")
-        val match = Aggregation.match(Criteria.where("_id").nin(ids))
+        val match = Aggregation.match(Criteria.where("_id").nin(ids.map { id->  ObjectId(id) }))
         val group = Aggregation.group("_id")
         val q = Aggregation.newAggregation(project,match,group)
         val output = mongoTemplate.aggregate(q, "${clientId}_eventUser", Document::class.java)
