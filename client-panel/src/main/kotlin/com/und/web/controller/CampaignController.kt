@@ -2,6 +2,7 @@ package com.und.web.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.common.utils.loggerFor
+import com.und.model.jpa.Schedule
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.CampaignService
 import com.und.web.model.Campaign
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import java.util.*
 import javax.validation.Valid
 
 @CrossOrigin
@@ -34,6 +36,28 @@ class CampaignController {
         return campaignService.getCampaigns()
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = ["error/{campaignId}"])
+    fun scheduleError( @PathVariable("campaignId") campaignId: Long): ResponseEntity<String> {
+
+        logger.info("campaign schedule error fetching for campaignId $campaignId")
+        val clientId = AuthenticationUtils.clientID
+        val message = clientId?.let {
+
+             campaignService.getScheduleError(campaignId, clientId)
+
+        }
+        logger.info("campaign schedule error message for campaignId : $campaignId is ${message?.isPresent}")
+
+        return if(message != null && message.isPresent) {
+             ResponseEntity(message.get(), HttpStatus.OK)
+        }else {
+             ResponseEntity(String(), HttpStatus.EXPECTATION_FAILED)
+        }
+
+
+    }
+
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/save"])
@@ -46,6 +70,20 @@ class CampaignController {
         }
         logger.info("campaign saved with name ${campaign.name}")
         return ResponseEntity(campaign, HttpStatus.EXPECTATION_FAILED)
+    }
+
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(value = ["/updateschedule/{campaignId}"])
+    fun updateschedule(@Valid @RequestBody schedule: Schedule, @PathVariable("campaignId") campaignId: Long): ResponseEntity<HttpStatus> {
+        logger.info("schedule update request initiated for $campaignId")
+        val clientId = AuthenticationUtils.clientID
+        if (clientId != null) {
+            campaignService.updateSchedule(campaignId,clientId, schedule)
+            return ResponseEntity(HttpStatus.ACCEPTED)
+        }
+        logger.info("campaign schedule for id $campaignId not accepted ")
+        return ResponseEntity(HttpStatus.NOT_ACCEPTABLE)
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

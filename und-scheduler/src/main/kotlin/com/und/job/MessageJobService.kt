@@ -47,7 +47,7 @@ class MessageJobService(private val jobService: JobService, private val eventStr
     @StreamListener("scheduleJobReceive")
     @SendTo("scheduleJobAckSend")
     fun save(jobDescriptor: JobDescriptor): JobActionStatus {
-        val action = jobDescriptor.action
+       val action = jobDescriptor.action
         return when (action) {
             JobDescriptor.Action.CREATE -> {
                 val trigger = jobDescriptor.triggerDescriptors.first()
@@ -74,7 +74,7 @@ class MessageJobService(private val jobService: JobService, private val eventStr
             JobDescriptor.Action.STOP -> {
                 performActionGroup(jobDescriptor, jobService::deleteJobs)
             }
-            JobDescriptor.Action.NOTHING -> {
+            JobDescriptor.Action.COMPLETED ,  JobDescriptor.Action.NOTHING-> {
                 val status = jobActionStatus(jobDescriptor, action)
                 status.status = JobActionStatus.Status.NOTFOUND
                 status.message = "No action with this name can be performed"
