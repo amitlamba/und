@@ -57,12 +57,6 @@ class TemplateContentCreationService {
         return FreeMarkerTemplateUtils.processTemplateIntoString(template, model)
     }
 
-    private fun getContentFromTemplate(sms: Sms, contentType: SmsContent, model: MutableMap<String, Any>): String {
-        val name = "${sms.clientID}:${sms.smsTemplateName}:${contentType.desc}:${sms.smsTemplateId}"
-        val template = freeMarkerConfiguration.getTemplate(name)
-        return FreeMarkerTemplateUtils.processTemplateIntoString(template, model)
-    }
-
     private fun getContentFromTemplate(name: String, templateContent: String, model: Map<String, Any>): String {
         val content = StringBuilder()
         try {
@@ -103,7 +97,4 @@ class TemplateContentCreationService {
         return replacedContent
     }
 
-    fun getSmsBody(sms: Sms, model: MutableMap<String, Any>):String{
-        return getContentFromTemplate(sms,SmsContent.BODY,model)
-    }
 }

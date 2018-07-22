@@ -6,12 +6,14 @@ import javax.persistence.Id
 
 @Document(collection = "#{tenantProvider.getTenant()}_sms")
 data class Sms(
+        //here we are not saving all details why add extra properties
         var clientID: Long,
         var fromSmsAddress: String? = null,
         var toSmsAddresses: String?,
         @Transient
         var smsBody:String?,
         var smsTemplateId: Long? = null,
+
         var userID: String? = null,
         var campaignID: Long? = null,
         @Id

@@ -83,6 +83,7 @@ class ServiceProviderCredentialsService {
         AWS_SES_SMTP("AWS - Simple Email Service (SMTP)"),
         AWS_SNS("AWS - Simple Notification Service"),
         GOOGLE_FCM("Google - FCM"),
+        Twillio("Twillio"),
 
 
     }
@@ -168,8 +169,8 @@ class ServiceProviderCredentialsService {
         return this.buildWebServiceProviderCredentials(serviceProviderCred)
     }
 
-    fun getServiceProviderCredentials(sms:Sms): com.und.model.utils.ServiceProviderCredentials {
-        val serviceProviderCred = this.findActiveSMSServiceProvider(sms.clientID)
+    fun getServiceProviderCredentials(clientId: Long): com.und.model.utils.ServiceProviderCredentials {
+        val serviceProviderCred = this.findActiveSMSServiceProvider(clientId)
         return this.buildWebServiceProviderCredentials(serviceProviderCred)
     }
 }

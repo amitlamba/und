@@ -29,6 +29,7 @@ class CampaignService {
     private lateinit var eventStream: EventStream
 
     fun executeCampaign(campaignId: Long, clientId: Long) {
+        //metod should be getCampaignByCampaignIdAndClientId
         val campaign = campaignRepository.getCampaignByCampaignId(campaignId, clientId)
         val usersData = getUsersData(campaign?.segmentId ?: 0, clientId)
         usersData.forEach { user ->
@@ -37,7 +38,7 @@ class CampaignService {
                 //TODO: How to skip transactional Messages
 
                 //check mode of communication is email
-                if(campaign?.campaignType=="email"){
+                if(campaign?.campaignType=="EMAIL"){
 
                     if(user.communication?.email?.dnd == true)
                         return@forEach //Local lambda return
@@ -45,7 +46,7 @@ class CampaignService {
                     toKafka(email)
                 }
                 //check mode of communication is sms
-                if(campaign?.campaignType=="mobile"){
+                if(campaign?.campaignType=="SMS"){
 
                     if(user.communication?.mobile?.dnd == true)
                         return@forEach //Local lambda return
@@ -67,8 +68,10 @@ class CampaignService {
                 campaign?.fromSMSUser,
                 user.identity.mobile,
                 smsBody =null,
-                smsTemplateId = campaign?.smsTemplateId,
-                smsTemplateName=null
+                smsTemplateId = campaign?.smsTemplateId?:0L,
+                //assign name also
+                smsTemplateName=null,
+                eventUser = user
         )
     }
 

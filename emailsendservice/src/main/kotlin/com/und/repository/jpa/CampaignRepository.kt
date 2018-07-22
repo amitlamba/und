@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface CampaignRepository : JpaRepository<Campaign, Long> {
-
+    //here we select st.name as sms_template_name
     @Query("""select
                       c.id,
                       c.segmentation_id,
