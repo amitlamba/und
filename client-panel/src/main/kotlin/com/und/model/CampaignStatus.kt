@@ -5,6 +5,9 @@ enum class CampaignStatus {
     RESUMED,
     CREATED,
     ERROR,
+    SCHEDULE_PENDING,
+    SCHEDULE_ERROR,
     DELETED,
-    STOPPED
+    STOPPED,
+    COMPLETED
 }

@@ -11,6 +11,7 @@ import com.und.model.jpa.*
 import com.und.repository.jpa.CampaignAuditLogRepository
 import com.und.repository.jpa.CampaignRepository
 import com.und.security.utils.AuthenticationUtils
+import com.und.web.controller.exception.ScheduleUpdateException
 import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.web.model.ValidationError
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,6 +20,7 @@ import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
+import java.util.*
 import com.und.web.model.Campaign as WebCampaign
 
 
@@ -70,18 +72,44 @@ class CampaignService {
         webCampaign.id = persistedCampaign.id
         logger.info("sending request to scheduler ${campaign.name}")
         val jobDescriptor = buildJobDescriptor(webCampaign, JobDescriptor.Action.CREATE)
-        sendToKafka(jobDescriptor)
+        val sendToKafka = sendToKafka(jobDescriptor)
         return persistedCampaign
+    }
+
+    @Transactional
+    fun updateSchedule(campaignId: Long, clientId: Long, schedule: Schedule) {
+        val cn = campaignRepository.findByIdAndClientID(campaignId, clientId)
+                .orElseGet {
+                    throw ScheduleUpdateException("Can't update schedule as campaign doesn't exist with id $campaignId and client : $clientId")
+                }.apply {
+
+                    if (status !in setOf(CampaignStatus.ERROR, CampaignStatus.SCHEDULE_PENDING, CampaignStatus.SCHEDULE_ERROR)) {
+                        throw ScheduleUpdateException("Can't update schedule for campaign $campaignId and client : $clientId id \n as only those campaign with  schedule status as error can be updated")
+
+                    }
+                }
+
+        cn.apply {
+            val webCampaign = buildWebCampaign(this)
+            webCampaign.schedule = schedule
+            val jobDescriptor = buildJobDescriptor(webCampaign, JobDescriptor.Action.CREATE)
+            logger.info("sending request to schedule, update schedule  for campaignId $campaignId and name $name for client $clientId")
+            sendToKafka(jobDescriptor)
+        }
+        val scheduleJson = objectMapper.writeValueAsString(schedule)
+        campaignRepository.updateSchedule(campaignId, clientId, scheduleJson)
+
+
     }
 
     private fun buildJobDescriptor(campaign: WebCampaign, action: JobDescriptor.Action): JobDescriptor {
 
-        fun buildTriggerDescriptor(): TriggerDescriptor {
+        fun buildTriggerDescriptor(schedule: Schedule): TriggerDescriptor {
             val triggerDescriptor = TriggerDescriptor()
             with(triggerDescriptor) {
-                val recurring = campaign.schedule?.recurring
-                val oneTime = campaign.schedule?.oneTime
-                val multipleDates = campaign.schedule?.multipleDates
+                val recurring = schedule.recurring
+                val oneTime = schedule.oneTime
+                val multipleDates = schedule.multipleDates
                 when {
                     recurring != null -> {
                         cron = recurring.cronExpression
@@ -116,7 +144,7 @@ class CampaignService {
 
         val triggerDescriptors = arrayListOf<TriggerDescriptor>()
 
-        triggerDescriptors.add(buildTriggerDescriptor())
+        campaign.schedule?.let { triggerDescriptors.add(buildTriggerDescriptor(it)) }
         jobDescriptor.triggerDescriptors = triggerDescriptors
         return jobDescriptor
     }
@@ -296,9 +324,17 @@ class CampaignService {
         val campignName = action.campaignName
         val actionPerformed = action.action
         when {
+            status == JobActionStatus.Status.COMPLETED -> {
+                campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.COMPLETED.name)
+                logger.info(" Campaign Schedule created $campaignId")
+            }
             status == JobActionStatus.Status.OK -> {
                 campaignRepository.updateScheduleStatus(campaignId, clientId, actionToCampaignStatus(actionPerformed).name)
                 logger.info(" Campaign Schedule created $campaignId")
+            }
+            status == JobActionStatus.Status.DUPLICATE -> {
+                //campaignRepository.updateScheduleStatus(campaignId, clientId, actionToCampaignStatus(actionPerformed).name)
+                logger.error(" Campaign Schedule is duplicate for  $campaignId")
             }
             actionPerformed == JobDescriptor.Action.CREATE -> {
                 campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.ERROR.name)
@@ -328,7 +364,15 @@ class CampaignService {
             JobDescriptor.Action.CREATE -> CampaignStatus.CREATED
             JobDescriptor.Action.STOP -> CampaignStatus.STOPPED
             JobDescriptor.Action.NOTHING -> CampaignStatus.ERROR
+            JobDescriptor.Action.COMPLETED -> CampaignStatus.COMPLETED
         }
     }
+
+    fun getScheduleError(campaignId: Long, clientId: Long): Optional<String> {
+        val auditLog = campaignAuditRepository.findTopBycampaignIdAndClientIDOrderByIdDesc(campaignId, clientId)
+        return auditLog.map { if (it.status !in setOf(JobActionStatus.Status.OK, JobActionStatus.Status.DUPLICATE)) it.message else "" }
+
+    }
+
 
 }

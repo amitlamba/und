@@ -9,7 +9,8 @@ class JobActionStatus {
         DUPLICATE,
         NOTFOUND,
         ERROR,
-        OK
+        OK,
+        COMPLETED
     }
 }
 

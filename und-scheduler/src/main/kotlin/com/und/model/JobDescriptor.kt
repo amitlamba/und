@@ -31,7 +31,7 @@ class JobDescriptor {
     var timeZoneId:ZoneId = ZoneId.of("UTC")
 
     enum class Action {
-        PAUSE, CREATE, RESUME, DELETE, STOP, NOTHING,
+        PAUSE, CREATE, RESUME, DELETE, STOP, NOTHING, COMPLETED,
     }
 
     /**

@@ -115,4 +115,11 @@ interface JobService {
      * the group a job belongs to
      */
     fun pauseJobs(group: String):JobActionStatus
+
+
+    /**
+     * find next occurrences of the job in a group
+     * the group name
+     */
+    fun jobGroupNextDate(groupName:String):List<Date>
 }
