@@ -3,23 +3,20 @@ package com.und.web.controller
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.EventUserService
 import com.und.service.SegmentService
-import com.und.web.controller.exception.*
-import com.und.web.model.event.Event
+import com.und.web.controller.exception.EventUserListBySegmentNotFoundException
 import com.und.web.model.EventUser
 import com.und.web.model.Response
-import com.und.web.model.ResponseStatus
 import com.und.web.model.Segment
+import com.und.web.model.event.Event
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
-import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
-import javax.validation.Valid
 
 
 @CrossOrigin
-@Controller
+@RestController
 @RequestMapping("/user")
 class EventUserController {
 
@@ -30,88 +27,47 @@ class EventUserController {
     private lateinit var segmentService: SegmentService
 
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/google/{id}"])
-    @ResponseBody
     fun findEventUserByGoogleId(@PathVariable id: String): ResponseEntity<EventUser> {
-
         val eventUser = eventUserService.findEventUserByGoogleId(id)
-        return if (eventUser == null) {
-            throw EventUserListNotFoundException("user with google id $id not found")
-        } else {
-            ResponseEntity(eventUser, HttpStatus.OK)
-        }
-
-
+        return ResponseEntity(eventUser, HttpStatus.OK)
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/id/{id}"])
-    @ResponseBody
     fun findEventUserById(@PathVariable id: String): ResponseEntity<EventUser> {
-
         val eventUser = eventUserService.findEventUserById(id)
-        return if (eventUser == null) {
-            throw EventUserNotFoundException("user with id $id not found")
-        } else {
-            ResponseEntity(eventUser, HttpStatus.OK)
-        }
-
-
+        return ResponseEntity(eventUser, HttpStatus.OK)
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/mobile/{id}"])
-    @ResponseBody
     fun findEventUserByMobile(@PathVariable id: String): ResponseEntity<EventUser> {
-
         val eventUser = eventUserService.findEventUserByMobile(id)
-        return if (eventUser == null) {
-            throw EventUserNotFoundException("user with mobile $id not found")
-        } else {
-            ResponseEntity(eventUser, HttpStatus.OK)
-        }
-
-
+        return ResponseEntity(eventUser, HttpStatus.OK)
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/fb/{id}"])
-    @ResponseBody
     fun findEventUserByFB(@PathVariable id: String): ResponseEntity<EventUser> {
-
         val eventUser = eventUserService.findEventUserByFB(id)
-        return if (eventUser == null) {
-            throw EventUserNotFoundException("user with facebook id $id not found")
-        } else {
-            ResponseEntity(eventUser, HttpStatus.OK)
-        }
-
-
+        return ResponseEntity(eventUser, HttpStatus.OK)
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/sys/{id}"])
     @ResponseBody
     fun findEventUserBySysId(@PathVariable id: String): ResponseEntity<EventUser> {
-
         val eventUser = eventUserService.findEventUserBySysId(id)
-        return if (eventUser == null) {
-            throw EventUserNotFoundException("user with sys id $id not found")
-        } else {
-            ResponseEntity(eventUser, HttpStatus.OK)
-        }
-
-
+        return ResponseEntity(eventUser, HttpStatus.OK)
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/email/{id}"])
-    @ResponseBody
     fun findEventUserByEmail(@PathVariable id: String): ResponseEntity<EventUser> {
-
         val eventUser = eventUserService.findEventUserByEmail(id)
-        return if (eventUser == null) {
-            throw EventUserNotFoundException("user with email id $id not found")
-        } else {
-            ResponseEntity(eventUser, HttpStatus.OK)
-        }
-
-
+        return ResponseEntity(eventUser, HttpStatus.OK)
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -126,43 +82,34 @@ class EventUserController {
         }
     }
 
-    @GetMapping(value = ["/testuser/{id}"])
-    @ResponseBody
-    fun testUserProfile(@PathVariable id: String): ResponseEntity<Response> {
-        val isTestUser = eventUserService.testUserProfile(id)
-        return if (isTestUser == null) {
-            throw EventUserNotFoundException("user with id $id not found")
-        } else {
-            ResponseEntity.ok().body(Response(
-                    status = ResponseStatus.SUCCESS,
-                    message = "User profile updated successfully"
-            ))
-        }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PatchMapping(value = ["/setTestProfile/{id}"])
+    fun setTestProfile(@PathVariable id: String): ResponseEntity<Response> {
+        eventUserService.setTestProfile(id)
+        return ResponseEntity(HttpStatus.OK)
+
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PatchMapping(value = ["/unsetTestProfile/{id}"])
+    fun unsetTestProfile(@PathVariable id: String): ResponseEntity<Response> {
+        eventUserService.unsetTestProfile(id)
+        return ResponseEntity(HttpStatus.OK)
 
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/event-details/{id}"])
-    @ResponseBody
     fun getEventDetailsById(@PathVariable id: String): ResponseEntity<Event> {
-
         val eventDetails = eventUserService.findEventDetailsById(id)
-        return if (eventDetails == null) {
-            throw EventNotFoundException("Event with id $id not found")
-        } else {
-            ResponseEntity(eventDetails, HttpStatus.OK)
-        }
+        return ResponseEntity(eventDetails, HttpStatus.OK)
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/event-list/{id}"])
-    @ResponseBody
     fun getEventsListByUserId(@PathVariable id: String): ResponseEntity<List<Event>> {
-
         val eventList = eventUserService.findEventsListById(id)
-        return if (eventList==null) {
-            throw EventsListNotFoundException("Events with id $id not found")
-        } else {
-            ResponseEntity(eventList, HttpStatus.OK)
-        }
+        return ResponseEntity(eventList, HttpStatus.OK)
     }
 
 
