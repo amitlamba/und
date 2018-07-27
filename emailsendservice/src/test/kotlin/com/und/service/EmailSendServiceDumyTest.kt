@@ -5,21 +5,13 @@ import org.junit.Test
 
 import org.junit.Assert.*
 
-class SmsHelperServiceTest {
+class EmailSendServiceDumyTest {
 
     @Before
     fun setUp() {
     }
 
     @Test
-    fun updateBody() {
-    }
-
-    @Test
-    fun saveSmsInMongo() {
-    }
-
-    @Test
-    fun updateSmsStatus() {
+    fun sendEmailBySMTP() {
     }
 }
