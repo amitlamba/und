@@ -46,13 +46,6 @@ class SmsService {
 
     }
 
-    fun ServiceProviderCredentials.sendSms(sms:Sms){
-        when(this.serviceProvider){
-            ServiceProviderCredentialsService.ServiceProvider.Twillio.desc->TwilioSmsSendService().sendSms(this,sms)
-            ServiceProviderCredentialsService.ServiceProvider.AWS_SNS.desc->AWS_SNSSmsService().sendSms(this,sms)
-        }
-    }
-
     @Cacheable
     private fun serviceProviderCredentials(sms: Sms): ServiceProviderCredentials {
         synchronized(sms.clientID) {
@@ -63,5 +56,14 @@ class SmsService {
             }
         }
         return wspCredsMap[sms.clientID]!!
+    }
+}
+
+fun ServiceProviderCredentials.sendSms(sms:Sms){
+    when(this.serviceProvider){
+        ServiceProviderCredentialsService.ServiceProvider.Twillio.desc->
+            TwilioSmsSendService().sendSms(this,sms)
+        ServiceProviderCredentialsService.ServiceProvider.AWS_SNS.desc->
+            AWS_SNSSmsService().sendSms(this,sms)
     }
 }

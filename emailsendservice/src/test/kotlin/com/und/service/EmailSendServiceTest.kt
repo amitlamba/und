@@ -1,5 +1,6 @@
 package com.und.service
 
+import com.und.model.utils.EmailSMTPConfig
 import org.junit.Before
 import org.junit.Test
 import org.mockito.InjectMocks
@@ -46,5 +47,7 @@ class EmailSendServiceTest {
             """
         assert(content2 == finalContent2)
     }
+
+
 
 }

@@ -16,7 +16,7 @@ import org.springframework.data.redis.repository.configuration.EnableRedisReposi
 @SpringBootApplication
 @EnableMongoRepositories(basePackages = ["com.und.repository.mongo"])
 @EnableJpaRepositories(basePackages = ["com.und.repository.jpa"])
-@EnableRedisRepositories(basePackages = ["com.und.repository.redis"])
+//@EnableRedisRepositories(basePackages = ["com.und.repository.redis"])
 @EnableAutoConfiguration
 @ComponentScan(basePackages = ["com.und"])
 @RefreshScope

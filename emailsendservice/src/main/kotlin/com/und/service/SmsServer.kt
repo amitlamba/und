@@ -14,12 +14,12 @@ class TwilioSmsSendService:SmsServer{
     }
     override fun sendSms(serviceProviderCredentials: ServiceProviderCredentials, sms: Sms): Boolean {
         //write sms send code
-        looger.info(serviceProviderCredentials.serviceProviderType)
-        looger.info(serviceProviderCredentials.serviceProvider)
-        looger.info(serviceProviderCredentials.credentialsMap.toString())
-        looger.info(sms.fromSmsAddress)
-        looger.info(sms.toSmsAddresses)
-        looger.info(sms.smsBody)
+        looger.info("Service provider type  ${serviceProviderCredentials.serviceProviderType}")
+        looger.info("Service provider  ${serviceProviderCredentials.serviceProvider}")
+        looger.info("Credential  ${serviceProviderCredentials.credentialsMap.toString()}")
+        looger.info("From  ${sms.fromSmsAddress}")
+        looger.info("To  ${sms.toSmsAddresses}")
+        looger.info("Body  ${sms.smsBody}")
         return true
     }
 
@@ -30,12 +30,12 @@ class AWS_SNSSmsService:SmsServer{
     }
     override fun sendSms(serviceProviderCredentials: ServiceProviderCredentials, sms: Sms): Boolean {
         //write sms send code
-        looger.info(serviceProviderCredentials.serviceProviderType)
-        looger.info(serviceProviderCredentials.serviceProvider)
-        looger.info(serviceProviderCredentials.credentialsMap.toString())
-        looger.info(sms.fromSmsAddress)
-        looger.info(sms.toSmsAddresses)
-        looger.info(sms.smsBody)
+        looger.info("Service provider type  ${serviceProviderCredentials.serviceProviderType}")
+        looger.info("Service provider  ${serviceProviderCredentials.serviceProvider}")
+        looger.info("Credential  ${serviceProviderCredentials.credentialsMap.toString()}")
+        looger.info("From  ${sms.fromSmsAddress}")
+        looger.info("To  ${sms.toSmsAddresses}")
+        looger.info("Body  ${sms.smsBody}")
         return true
     }
 

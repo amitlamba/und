@@ -84,6 +84,7 @@ class EmailService {
                 toEmailAddresses = arrayOf(InternetAddress(client.email)),
                 emailTemplateId = EmailService.verificationTemplate,
                 emailTemplateName = "verificationemail",
+
                 data = dataMap
 
         )
