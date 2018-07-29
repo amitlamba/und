@@ -60,12 +60,20 @@ class SegmentController {
         return ResponseEntity(segment, HttpStatus.OK)
     }
 
-    @GetMapping(value = ["/users/{segmentId}"])
-    //@PreAuthorize("hasRole('ROLE_SYSTEM')")
+    @GetMapping(value = ["/segmentusers/{segmentId}"])
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     fun segmentUsers(@PathVariable("segmentId") segmentId: Long): List<EventUser> {
         val clientId = AuthenticationUtils.clientID?:-1
-        val asegmentUsers = segmentService.segmentUsers(segmentId, clientId)
-        return asegmentUsers
+        val segmentUsers = segmentService.segmentUsers(segmentId, clientId)
+        return segmentUsers
+    }
+
+    @GetMapping(value = ["/users/{segmentId}/{clientId}"])
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
+    fun segmentUsers(@PathVariable("segmentId") segmentId: Long,  @PathVariable("clientId") clientId:Long): List<EventUser> {
+
+        val segmentUsers = segmentService.segmentUsers(segmentId, clientId)
+        return segmentUsers
     }
 
 
