@@ -21,7 +21,7 @@ class CampaignListener {
         campaignService.executeCampaign(campaignMap["campaignMap"]!!, campaignMap["clientId"]!!)
     }*/
 
-   //@StreamListener("campaignTriggerReceive")
+   @StreamListener("campaignTriggerReceive")
     fun executeCampaign(campaignData: Pair<Long, Long>) {
        try {
            val (campaignId, clientId) = campaignData

@@ -59,9 +59,9 @@ class EmailSendService {
 
     fun sendEmailBySMTP(emailSMTPConfig: EmailSMTPConfig, email: Email) {
 
-        val session = emailHelperService.session(email.clientID, emailSMTPConfig)
+       val session = emailHelperService.session(email.clientID, emailSMTPConfig)
 
-        val transport = emailHelperService.transport(email.clientID)
+       val transport = emailHelperService.transport(email.clientID)
 
 
         // Send the message.
@@ -69,6 +69,7 @@ class EmailSendService {
             logger.debug("Sending...")
             val mongoEmailId = emailHelperService.saveMailInMongo(email, NOT_SENT)
             val msg = emailHelperService.createMimeMessage(session, email)
+            logger.info("email sent to   ${email.toEmailAddresses} from  ${email.fromEmailAddress}} with msg ${email.emailBody}")
             transport.sendMessage(msg, msg.allRecipients)
         } catch (ex: Exception) {
             logger.error("The email was not sent.")

@@ -9,6 +9,7 @@ import com.und.web.model.Campaign
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.util.*
@@ -38,22 +39,17 @@ class CampaignController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["error/{campaignId}"])
-    fun scheduleError( @PathVariable("campaignId") campaignId: Long): ResponseEntity<String> {
+    fun scheduleError(@PathVariable("campaignId") campaignId: Long): ResponseEntity<String> {
 
         logger.info("campaign schedule error fetching for campaignId $campaignId")
-        val clientId = AuthenticationUtils.clientID
-        val message = clientId?.let {
+        val clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
 
-             campaignService.getScheduleError(campaignId, clientId)
+        val message = campaignService.getScheduleError(campaignId, clientId)
 
-        }
-        logger.info("campaign schedule error message for campaignId : $campaignId is ${message?.isPresent}")
+        logger.info("campaign schedule error message for campaignId : $campaignId is ${message.isPresent}")
 
-        return if(message != null && message.isPresent) {
-             ResponseEntity(message.get(), HttpStatus.OK)
-        }else {
-             ResponseEntity(String(), HttpStatus.EXPECTATION_FAILED)
-        }
+        return message.map { ResponseEntity(message.get(), HttpStatus.OK) }
+                .orElse(ResponseEntity(String(), HttpStatus.EXPECTATION_FAILED))
 
 
     }
@@ -79,7 +75,7 @@ class CampaignController {
         logger.info("schedule update request initiated for $campaignId")
         val clientId = AuthenticationUtils.clientID
         if (clientId != null) {
-            campaignService.updateSchedule(campaignId,clientId, schedule)
+            campaignService.updateSchedule(campaignId, clientId, schedule)
             return ResponseEntity(HttpStatus.ACCEPTED)
         }
         logger.info("campaign schedule for id $campaignId not accepted ")

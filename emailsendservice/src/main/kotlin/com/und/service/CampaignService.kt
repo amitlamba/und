@@ -64,7 +64,7 @@ class CampaignService {
 
     fun getUsersData(segmentId: Long, clientId: Long): List<EventUser> {
         val segment = segmentService.getWebSegment(segmentId, clientId)
-        return segmentService.getUserData(segment)
+        return segmentService.getUserData(segment, clientId)
     }
 
     fun toKafka(email: Email): Boolean =

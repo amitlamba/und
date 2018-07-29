@@ -43,7 +43,7 @@ class DatabaseTemplateLoader : TemplateLoader {
         return if(!name.isNullOrBlank()) {
             val nameParts = name.trim().split(":")
             val size = nameParts.size
-            if(size !=3 || size !=4) return null
+            if(size !=3 && size !=4) return null
             val clientId = nameParts[0].toLong()
             val templatename = nameParts[1]
             val bodyOrSubject = nameParts[2]
@@ -51,7 +51,7 @@ class DatabaseTemplateLoader : TemplateLoader {
 
             val template = retrievetemplate(clientId, templateId, "$clientId:$templatename:$bodyOrSubject")
             template?.let {
-                if (bodyOrSubject.contains("body")) {
+                if (bodyOrSubject.contains("body") && clientId != 1L) {
                     return addPixelTrackingPlaceholder(template.emailTemplateBody)
                 }
                 else template.emailTemplateSubject
@@ -65,7 +65,8 @@ class DatabaseTemplateLoader : TemplateLoader {
 
         return clientId.let {
             val emailTemplateOtion = emailTemplateRepository.findByIdAndClientID(templateId, clientId)
-            if (emailTemplateOtion.isPresent) buildWebEmailTemplate(emailTemplateOtion.get()) else null
+            emailTemplateOtion.map {template-> buildWebEmailTemplate(template) }.orElse(null)
+
         }
 
     }

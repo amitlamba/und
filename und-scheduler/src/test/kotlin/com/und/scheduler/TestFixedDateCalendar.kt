@@ -54,4 +54,13 @@ class TestFixedDateCalendar {
             println("Hello bhai hello brother")
         }
     }
+
+    @Test
+    fun testInvalidCron() {
+        val cron = ""
+        CronExpression.validateExpression(cron)
+
+    }
+
+
 }
