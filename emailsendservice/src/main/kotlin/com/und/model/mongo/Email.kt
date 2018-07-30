@@ -17,7 +17,7 @@ data class Email(
         var replyToEmailAddresses: Array<InternetAddress>? = null,
         var emailSubject: String? = null,
         @Transient
-        var emailBody: String,
+        var emailBody: String="",
         var emailTemplateId: Long? = null,
         var userID: String? = null,
         var campaignID: Long? = null,
@@ -27,6 +27,7 @@ data class Email(
         var emailServiceProvider: String? = null,
         var emailStatus: EmailStatus,
         var statusUpdates: MutableList<EmailStatusUpdate> = mutableListOf()
+//FIXME add creation date
 )
 
 data class EmailStatusUpdate (

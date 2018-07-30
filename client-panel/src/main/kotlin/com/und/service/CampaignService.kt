@@ -370,7 +370,7 @@ class CampaignService {
 
     fun getScheduleError(campaignId: Long, clientId: Long): Optional<String> {
         val auditLog = campaignAuditRepository.findTopBycampaignIdAndClientIDOrderByIdDesc(campaignId, clientId)
-        return auditLog.map { if (it.status !in setOf(JobActionStatus.Status.OK, JobActionStatus.Status.DUPLICATE)) it.message else "" }
+        return auditLog.filter {  it.status !in setOf(JobActionStatus.Status.OK, JobActionStatus.Status.DUPLICATE) && it.message.isNotEmpty()}.map {it.message}
 
     }
 

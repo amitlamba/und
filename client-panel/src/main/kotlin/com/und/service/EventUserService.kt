@@ -54,7 +54,7 @@ class EventUserService {
         val clientId = getClientId()
         val user = find(id, clientId)
         return user.map { buildEventUser(it) }
-                .orElseThrow({ EventUserListNotFoundException("user with provided id $id not found") })
+                .orElseThrow{ EventUserListNotFoundException("user with provided id $id not found") }
     }
 
     fun unsetTestProfile(id: String) {
@@ -78,7 +78,7 @@ class EventUserService {
         val clientId = getClientId()
         val event = eventRepository.findEventById(id, clientId)
         return event.map{buildEvent(it)}
-                .orElseThrow({EventNotFoundException("Event with id $id not found")})
+                .orElseThrow{EventNotFoundException("Event with id $id not found")}
 
     }
 
@@ -87,7 +87,7 @@ class EventUserService {
         val eventsListMongo = eventRepository.findEventsListById(id, clientId)
 
         return if (eventsListMongo.isNotEmpty()) {
-            buildEventList(eventsListMongo)
+            eventsListMongo.map { event->buildEvent(event) }
         } else throw EventsListNotFoundException("Events with id $id not found")
     }
 
@@ -139,12 +139,5 @@ class EventUserService {
         return event
     }
 
-    private fun buildEventList(eventListMongo: List<EventMongo>): List<Event> {
-        var eventList: List<Event> = emptyList()
-        for (event in eventListMongo) {
-            val listElement = buildEvent(event)
-            eventList += listElement
-        }
-        return eventList
-    }
+
 }
