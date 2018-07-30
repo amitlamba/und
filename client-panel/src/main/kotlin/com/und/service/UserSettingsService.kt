@@ -21,8 +21,12 @@ import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.model.jpa.ClientSettingsEmail
 import com.und.repository.jpa.ClientSettingsEmailRepository
 import com.und.security.utils.AuthenticationUtils
+import com.und.web.controller.exception.WrongCredentialException
 import com.und.web.model.ValidationError
 import java.time.ZoneId
+import javax.mail.AuthenticationFailedException
+import javax.mail.MessagingException
+import javax.mail.Session
 
 @Service
 class UserSettingsService {
@@ -240,6 +244,34 @@ class UserSettingsService {
             clientSettingsRepository.findByClientID(clientId)?.timezone
         }?:TimeZone.getDefault().id
         return ZoneId.of(tz)
+
+    }
+
+    fun testConnection(serviceProviderCredential: com.und.web.model.ServiceProviderCredentials):Boolean{
+
+        var port=Integer.parseInt(serviceProviderCredential.credentialsMap.get("port"))
+        var host=serviceProviderCredential.credentialsMap.get("url")
+        var username=serviceProviderCredential.credentialsMap.get("username")
+        var password=serviceProviderCredential.credentialsMap.get("password")
+
+        var props=Properties()
+        props["mail.smtp.host"]=host
+        props["mail.smtp.port"]=port
+        props["mail.smtp.starttls.enable"] = "true"
+        props["mail.smtp.auth"] = "true"
+        try {
+            val session = Session.getDefaultInstance(props)
+            val transport = session.getTransport("smtp")
+            transport.connect(username, password)
+            transport.close()
+            return true
+        } catch (e: AuthenticationFailedException) {
+            throw WrongCredentialException("authentication failed")
+            return false
+        } catch (e: MessagingException) {
+            throw WrongCredentialException(" Not valid credential")
+            return false
+        }
 
     }
 

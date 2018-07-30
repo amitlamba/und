@@ -4,11 +4,15 @@ spring:
 #      uri: http://${CONFIG_IP}:${CONFIG_PORT}
       uri: http://nestros.com:8898
       enabled: true
+      profile: staging
       name: client-panel
       profile: staging
   application:
     name: client-panel
 
 encrypt:
+
+
+
   key: ${ENCRYPT_KEY}
 #  fail-on-error: false

@@ -54,6 +54,7 @@ class ServiceProviderCredentialsService {
     }
 
     fun findActiveEmailServiceProvider(clientID: Long): ServiceProviderCredentials {
+
         val serviceCredOption = serviceProviderCredentialsRepository.findTop1ByClientIDAndServiceProviderTypeAndStatus(
                 clientID, ServiceProviderType.EMAIL_SERVICE_PROVIDER.desc, Status.ACTIVE)
         return if (serviceCredOption.isPresent)

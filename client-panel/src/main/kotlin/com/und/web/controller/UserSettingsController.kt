@@ -22,6 +22,7 @@ class UserSettingsController {
     @Autowired
     private lateinit var userSettingsService: UserSettingsService
 
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/service-providers"])
     fun getServiceProviders(): List<ServiceProviderCredentials> {
@@ -51,7 +52,11 @@ class UserSettingsController {
         serviceProviderCredentials.appuserID = userID
         serviceProviderCredentials.clientID = clientID
         serviceProviderCredentials.serviceProviderType = "Email Service Provider"
+        //check credential are correct or not
+        var success=userSettingsService.testConnection(serviceProviderCredentials)
+        if(success)
         return userSettingsService.saveEmailServiceProvider(serviceProviderCredentials)
+        return 0L
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
