@@ -103,7 +103,10 @@ class EmailServiceProviderConnectionFactory {
         props["mail.smtp.port"] = port
         props["mail.smtp.starttls.enable"] = "true"
         props["mail.smtp.auth"] = "true"
+        props["mail.smtp.socketFactory.class"]="javax.net.ssl.SSLSocketFactory"
+        props["mail.smtp.socketFactory.port"]=port
 
+        //props["mail.smtp.quitwait"]=false
         // Create a Session object to represent a mail session with the specified properties.
         return Session.getDefaultInstance(props)
     }
