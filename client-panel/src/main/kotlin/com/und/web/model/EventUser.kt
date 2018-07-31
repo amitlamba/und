@@ -65,7 +65,7 @@ class EventUser {
 
     var communication: Communication = Communication()
 
-    var markTestUserProfile: Boolean = false
+    var testUser: Boolean = false
 
 }
 
