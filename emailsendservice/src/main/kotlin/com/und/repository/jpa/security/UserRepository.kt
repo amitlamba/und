@@ -14,6 +14,6 @@ import org.springframework.stereotype.Repository
 interface UserRepository : JpaRepository<User, Long> {
 
     @Query("Select u from User u WHERE u.client = :clientId and u.id = :id and u.userType = :userType")
-    fun findSystemUser(@Param("clientId") clientId: Long =1L, @Param("id") id: Long=1L,  @Param("userType") userType: Int=4):User
+    fun findSystemUser(@Param("clientId") clientId: Long =1L, @Param("id") id: Long=1L,  @Param("userType") userType: String="3"):User
 
 }

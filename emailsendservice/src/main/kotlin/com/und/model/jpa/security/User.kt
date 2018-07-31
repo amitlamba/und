@@ -19,7 +19,7 @@ class User {
     var client: Long? = null
 
     @Column(name = "user_type", updatable = false, insertable = false)
-    var userType: Int? = null
+    var userType: String? = null
 
     @Column(name = "KEY", length = 255, updatable = false, insertable = false)
     var key: String? = null

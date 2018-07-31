@@ -86,6 +86,14 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
         return handleExceptionInternal(ex, bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST, request)
     }
 
+    @ExceptionHandler(ScheduleUpdateException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleScheduleUpdateException(ex: ScheduleUpdateException, request: WebRequest): ResponseEntity<Any> {
+        logger.error("400 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.invalidScheduleupdateRequest", null, request.locale), ex.localizedMessage)
+        return handleExceptionInternal(ex, bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST, request)
+    }
+
 
     @ExceptionHandler(Exception::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)

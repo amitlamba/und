@@ -1,16 +1,14 @@
 package com.und.repository.mongo
 
-import com.mongodb.DBObject
-import com.mongodb.operation.AggregateOperation
-import com.und.model.mongo.eventapi.Event
 import com.und.model.mongo.eventapi.EventUser
 import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
+import org.springframework.data.mongodb.core.aggregation.AggregationResults
 import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
 import java.text.SimpleDateFormat
@@ -58,62 +56,38 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
 
     }
 
-
-
-    override fun testUserProfile(id: String, clientId: Long, eventUser: EventUser) {
-
-        val isTestUser:Boolean=eventUser.testUser
-        val q = Query(Criteria.where("_id").`is`(id))
-        if(!isTestUser){
-            val update = Update()
-            update.set("testUser", "true")
-            updateEventUser(q,update,clientId)
-        }
-        else{
-            val update = Update()
-            update.set("testUser", "false")
-            updateEventUser(q,update,clientId)
-        }
+    override fun testUserProfile(id: String, clientId: Long, isTestUser: Boolean) {
+        val q = Query(Criteria.where("_id").`is`(ObjectId(id)))
+        val update = Update()
+        update.set("testUser", isTestUser)
+        updateEventUser(q, update, clientId)
 
     }
-
-
 
     private fun queryEventUser(q: Query, clientId: Long): Optional<EventUser> {
         val eventUser = mongoTemplate.findOne(q, EventUser::class.java, "${clientId}_eventUser")
-        return if (eventUser == null) {
-            Optional.empty()
-        } else {
-            Optional.of(eventUser)
-        }
+        return Optional.ofNullable(eventUser)
     }
 
-
-    override fun usersFromUserProfile(query: Aggregation, clientId: Long): List<String>  {
-
+    override fun usersFromUserProfile(query: Aggregation, clientId: Long): List<String> {
         val output = mongoTemplate.aggregate(query, "${clientId}_eventUser", Document::class.java)
-
-        return output?.let { aggResult ->
-            aggResult.mapNotNull { dbo -> dbo["_id"] as String }
-        } ?: emptyList()
-
+        return extractids(output)
     }
 
     private fun updateEventUser(q: Query, update: Update, clientId: Long) {
         mongoTemplate.updateFirst(q, update, "${clientId}_eventUser")
     }
 
-
     override fun findUsersNotIn(ids: Set<String>, clientId: Long): List<String> {
 
         val project = Aggregation.project("_id")
-        val match = Aggregation.match(Criteria.where("_id").nin(ids.map { id->  ObjectId(id) }))
+        val match = Aggregation.match(Criteria.where("_id").nin(ids.map { id -> ObjectId(id) }))
         val group = Aggregation.group("_id")
-        val q = Aggregation.newAggregation(project,match,group)
+        val q = Aggregation.newAggregation(project, match, group)
         val output = mongoTemplate.aggregate(q, "${clientId}_eventUser", Document::class.java)
-
-        return output?.let { aggResult ->
-            aggResult.mapNotNull { dbo -> dbo["_id"].toString()  }
-        } ?: emptyList()
+        return extractids(output)
     }
+
+    private fun extractids(output: AggregationResults<Document>): List<String> = output.map { it["_id"].toString() }
+
 }

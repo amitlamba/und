@@ -9,6 +9,7 @@ import org.quartz.JobKey
 import org.quartz.JobKey.jobKey
 import org.quartz.Scheduler
 import org.quartz.SchedulerException
+import org.quartz.TriggerKey
 import org.quartz.impl.matchers.GroupMatcher
 import org.quartz.impl.matchers.StringMatcher
 import org.slf4j.Logger
@@ -45,7 +46,7 @@ abstract class AbstractJobService : JobService {
         return findJob(jobKey)
     }
 
-    private fun findJob(jobKey :JobKey): Optional<JobDescriptor> {
+    private fun findJob(jobKey: JobKey): Optional<JobDescriptor> {
         try {
             val jobDetail = scheduler.getJobDetail(jobKey)
             if (Objects.nonNull(jobDetail))
@@ -66,42 +67,46 @@ abstract class AbstractJobService : JobService {
     @Transactional(readOnly = true)
     override fun findJob(jobDescriptor: JobDescriptor): List<JobDescriptor> {
         val descriptors = mutableListOf<JobDescriptor>()
-         val groupName = JobUtil.getGroupName(jobDescriptor)
+        val groupName = JobUtil.getGroupName(jobDescriptor)
         val jobKeys = scheduler.getJobKeys(GroupMatcher.groupEquals(groupName))
-        if(jobKeys!= null) {
-            for (jobKey in jobKeys) {
+        val jobs = jobKeys.asSequence()
+                .mapNotNull { key -> findJob(key) }
+                .filter { job -> job.isPresent }
+                .map { job -> job.get() }.toList()
+        descriptors.addAll(jobs)
 
-                val job = findJob(jobKey)
-                if(job.isPresent) {
-                    descriptors.add(job.get())
-                }
-            }
-        }
         return descriptors
 
     }
 
+    override  fun jobGroupNextDate(groupName:String):List<Date>{
+        val jobKeys = scheduler.getJobKeys(GroupMatcher.groupEquals(groupName)).sortedBy { key->key.name.split("-").last().toLong() }
+
+        return jobKeys.filterNotNull()
+                .flatMap { key ->  scheduler.getTriggersOfJob(key).filterNotNull() }.takeWhile { trigger->trigger.nextFireTime != null}.map{it.nextFireTime}.sortedByDescending { it }
+
+    }
 
 
     /**
      * {@inheritDoc}
      */
-    abstract override fun updateJob(group: String, name: String, descriptor: JobDescriptor):JobActionStatus
+    abstract override fun updateJob(group: String, name: String, descriptor: JobDescriptor): JobActionStatus
 
     /**
      * {@inheritDoc}
      */
-    override fun deleteJob(group: String, name: String):JobActionStatus = takeAction(group, name, "delete", { jobKey -> scheduler.deleteJob(jobKey) })
+    override fun deleteJob(group: String, name: String): JobActionStatus = takeAction(group, name, "delete", { jobKey -> scheduler.deleteJob(jobKey) })
 
     /**
      * {@inheritDoc}
      */
-    override fun pauseJob(group: String, name: String):JobActionStatus = takeAction(group, name, "pause", scheduler::pauseJob)
+    override fun pauseJob(group: String, name: String): JobActionStatus = takeAction(group, name, "pause", scheduler::pauseJob)
 
     /**
      * {@inheritDoc}
      */
-    override fun resumeJob(group: String, name: String):JobActionStatus = takeAction(group, name, "resume", scheduler::resumeJob)
+    override fun resumeJob(group: String, name: String): JobActionStatus = takeAction(group, name, "resume", scheduler::resumeJob)
 
 
     private fun takeAction(group: String, name: String, actionName: String, action: (JobKey) -> Unit): JobActionStatus {
@@ -166,8 +171,6 @@ abstract class AbstractJobService : JobService {
         return status
 
     }
-
-
 
 
 }

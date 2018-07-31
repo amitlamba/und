@@ -6,13 +6,18 @@ import com.und.repository.mongo.EventUserCustomRepository
 import com.und.repository.mongo.EventUserRepo
 import com.und.repository.mongo.EventUserRepository
 import com.und.security.utils.AuthenticationUtils
-import com.und.web.model.event.Event
-import com.und.model.mongo.eventapi.EventUser as EventUserMongo
-import com.und.model.mongo.eventapi.Event as EventMongo
+import com.und.web.controller.exception.EventNotFoundException
+import com.und.web.controller.exception.EventUserListNotFoundException
+import com.und.web.controller.exception.EventUserNotFoundException
+import com.und.web.controller.exception.EventsListNotFoundException
 import com.und.web.model.EventUser
+import com.und.web.model.event.Event
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
+import java.util.*
+import com.und.model.mongo.eventapi.Event as EventMongo
+import com.und.model.mongo.eventapi.EventUser as EventUserMongo
 
 
 @Service
@@ -31,76 +36,69 @@ class EventUserService {
         return eventUserCustomRepository.totalEventUserToday()
     }
 
-    fun findEventUserById(id: String): EventUser? {
+    fun findEventUserById(id: String): EventUser {
+        return findUser(id, eventUserRepository::findUserById)
+    }
+
+    fun findEventUserByEmail(id: String): EventUser {
+        return findUser(id, eventUserRepository::findUserByEmail)
+    }
+
+    fun findEventUserBySysId(id: String): EventUser {
+        return findUser(id, eventUserRepository::findUserBySysId)
+    }
+
+    fun findEventUserByFB(id: String): EventUser {
+        return findUser(id, eventUserRepository::findUserByFbId)
+    }
+
+    fun findEventUserByMobile(id: String): EventUser {
+        return findUser(id, eventUserRepository::findUserByMobile)
+    }
+
+    fun findEventUserByGoogleId(id: String): EventUser {
+        return findUser(id, eventUserRepository::findUserByGoogleId)
+    }
+
+    private fun findUser(id: String, find: (id: String, clientId: Long) -> Optional<com.und.model.mongo.eventapi.EventUser>): EventUser {
+        val clientId = getClientId()
+        val user = find(id, clientId)
+        return user.map { buildEventUser(it) }
+                .orElseThrow{ EventUserListNotFoundException("user with provided id $id not found") }
+    }
+
+    fun unsetTestProfile(id: String) {
+        setProfileAsTest(id, false)
+    }
+
+    fun setTestProfile(id: String) {
+        setProfileAsTest(id, true)
+    }
+
+    fun setProfileAsTest(id: String, isTest: Boolean) {
         val clientId = getClientId()
         val user = eventUserRepository.findUserById(id, clientId)
         return if (user.isPresent) {
-            buildEventUser(user.get())
-        } else null
+            eventUserRepository.testUserProfile(id, clientId, isTest)
+        } else throw EventUserNotFoundException("user with id $id not found")
     }
 
-    fun findEventUserByEmail(id: String): EventUser? {
-        val clientId = getClientId()
-        val user = eventUserRepository.findUserByEmail(id, clientId)
-        return if (user.isPresent) {
-            buildEventUser(user.get())
-        } else null
-    }
 
-    fun findEventUserBySysId(id: String): EventUser? {
-        val clientId = getClientId()
-        val user = eventUserRepository.findUserBySysId(id, clientId)
-        return if (user.isPresent) {
-            buildEventUser(user.get())
-        } else null
-    }
-
-    fun findEventUserByFB(id: String): EventUser? {
-        val clientId = getClientId()
-        val user = eventUserRepository.findUserByFbId(id, clientId)
-        return if (user.isPresent) {
-            buildEventUser(user.get())
-        } else null
-    }
-
-    fun findEventUserByMobile(id: String): EventUser? {
-        val clientId = getClientId()
-        val user = eventUserRepository.findUserByMobile(id, clientId)
-        return if (user.isPresent) {
-            buildEventUser(user.get())
-        } else null
-    }
-
-    fun findEventUserByGoogleId(id: String): EventUser? {
-        val clientId = getClientId()
-        val user = eventUserRepository.findUserByGoogleId(id, clientId)
-        return if (user.isPresent) {
-            buildEventUser(user.get())
-        } else null
-    }
-
-    fun testUserProfile(id: String): Unit? {
-        val clientId = getClientId()
-        val user = eventUserRepository.findUserById(id, clientId)
-        return if (user.isPresent) {
-            eventUserRepository.testUserProfile(id, clientId, user.get())
-        } else null
-    }
-
-    fun findEventDetailsById(id: String): Event? {
+    fun findEventDetailsById(id: String): Event {
         val clientId = getClientId()
         val event = eventRepository.findEventById(id, clientId)
-        return if (event.isPresent) {
-            buildEvent(event.get())
-        } else null
+        return event.map{buildEvent(it)}
+                .orElseThrow{EventNotFoundException("Event with id $id not found")}
+
     }
 
-    fun findEventsListById(id: String):List<Event>?{
+    fun findEventsListById(id: String): List<Event> {
         val clientId = getClientId()
-        val eventsListMongo=eventRepository.findEventsListById(id,clientId)
-        return if(eventsListMongo.isNotEmpty()) {
-            buildEventList(eventsListMongo)
-        }else null
+        val eventsListMongo = eventRepository.findEventsListById(id, clientId)
+
+        return if (eventsListMongo.isNotEmpty()) {
+            eventsListMongo.map { event->buildEvent(event) }
+        } else throw EventsListNotFoundException("Events with id $id not found")
     }
 
     private fun getClientId(): Long {
@@ -151,12 +149,5 @@ class EventUserService {
         return event
     }
 
-    private fun buildEventList(eventListMongo:List<EventMongo>):List<Event>{
-        var eventList:List<Event> = emptyList()
-        for(event in eventListMongo){
-            val listElement=buildEvent(event)
-            eventList+=listElement
-        }
-    return eventList
-    }
+
 }

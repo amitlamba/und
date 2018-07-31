@@ -18,6 +18,7 @@ import java.time.ZoneId
 import java.util.regex.Pattern
 import javax.mail.Message
 import javax.mail.Session
+import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
 
 @Service
@@ -43,6 +44,9 @@ class EmailHelperService {
 
     fun createMimeMessage(session: Session, email: Email): MimeMessage {
         val emailSMTPConfig = emailServiceProviderConnectionFactory.getEmailServiceProvider(email.clientID)
+        if(email.clientID == 1L) {
+            email.fromEmailAddress = InternetAddress(emailSMTPConfig.SMTP_USERNAME)
+        }
         val msg = MimeMessage(session)
         msg.setFrom(email.fromEmailAddress)
         msg.setRecipients(Message.RecipientType.TO, email.toEmailAddresses)
@@ -63,7 +67,7 @@ class EmailHelperService {
                 email.bccEmailAddresses,
                 email.replyToEmailAddresses,
                 email.emailSubject,
-                email.emailBody!!,
+                email.emailBody?:"",
                 email.emailTemplateId,
                 email.eventUser?.id,
                 emailStatus = emailStatus

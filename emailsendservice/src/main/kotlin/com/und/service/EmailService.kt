@@ -45,14 +45,15 @@ class EmailService {
     }
 
     fun sendEmail(email: Email) {
-        val emailToSend = emailHelperService.updateSubjectAndBody(email)
-        val mongoEmailId = emailHelperService.saveMailInMongo(emailToSend, NOT_SENT)
         //FIXME: cache the findByClientID clientSettings
-        val clientSettings = clientSettingsRepository.findByClientID(emailToSend.clientID)
+        val clientSettings = clientSettingsRepository.findByClientID(email.clientID)
+        val mongoEmailId = emailHelperService.saveMailInMongo(email, NOT_SENT)
         if (StringUtils.isNotBlank(clientSettings?.unSubscribeLink))
-            emailToSend.data["unsubscribeLink"] = emailHelperService.getUnsubscribeLink(clientSettings?.unSubscribeLink!!, emailToSend.clientID.toInt(), mongoEmailId!!)
-        emailToSend.data["pixelTrackingPlaceholder"] = """<div><img src="""" + emailHelperService.getImageUrl(emailToSend.clientID.toInt(), mongoEmailId!!) + """">"""
-        emailToSend.emailBody = emailHelperService.trackAllURLs(emailToSend.emailBody!!, emailToSend.clientID, mongoEmailId)
+            email.data["unsubscribeLink"] = emailHelperService.getUnsubscribeLink(clientSettings?.unSubscribeLink!!, email.clientID.toInt(), mongoEmailId!!)
+        email.data["pixelTrackingPlaceholder"] = """<div><img src="""" + emailHelperService.getImageUrl(email.clientID.toInt(), mongoEmailId!!) + """">"""
+
+        val emailToSend = emailHelperService.updateSubjectAndBody(email)
+        email.emailBody = emailHelperService.trackAllURLs(emailToSend.emailBody!!, email.clientID, mongoEmailId)
         sendEmailWithoutTracking(emailToSend)
         emailHelperService.updateEmailStatus(mongoEmailId, SENT, emailToSend.clientID)
     }

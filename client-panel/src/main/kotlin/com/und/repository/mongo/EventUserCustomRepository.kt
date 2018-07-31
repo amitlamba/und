@@ -13,7 +13,7 @@ interface EventUserCustomRepository {
     fun findUserBySysId(id: String, clientId: Long): Optional<EventUser>
     fun findUserByEmail(id: String, clientId: Long): Optional<EventUser>
     fun findUserByMobile(id: String, clientId: Long): Optional<EventUser>
-    fun testUserProfile(id: String, clientId: Long, eventUser: EventUser)
+    fun testUserProfile(id: String, clientId: Long, isTestUser: Boolean)
 
     fun findUsersNotIn(ids: Set<String>, clientId: Long): List<String>
 
