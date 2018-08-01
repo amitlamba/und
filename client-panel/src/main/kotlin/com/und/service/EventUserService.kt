@@ -128,6 +128,7 @@ class EventUserService {
         eventUser.undId = eventUserMongo.id
         eventUser.countryCode = eventUserMongo.standardInfo.countryCode
         eventUser.communication = eventUserMongo.communication
+        eventUser.testUser = eventUserMongo.testUser
         return eventUser
     }
 
