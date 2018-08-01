@@ -2,10 +2,13 @@ package com.und.web.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.common.utils.loggerFor
+import com.und.model.jpa.CampaignType
 import com.und.model.jpa.Schedule
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.CampaignService
+import com.und.service.EmailTemplateService
 import com.und.web.model.Campaign
+import com.und.web.model.EmailTemplate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -27,6 +30,9 @@ class CampaignController {
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    private lateinit var emailTempleteService: EmailTemplateService
 
     @Autowired
     lateinit var campaignService: CampaignService
@@ -61,8 +67,25 @@ class CampaignController {
         logger.info("campaign save request inititated ${campaign.name}")
         val clientId = AuthenticationUtils.clientID
         if (clientId != null) {
-            val persistedCampaign = campaignService.save(campaign)
-            return ResponseEntity(persistedCampaign, HttpStatus.CREATED)
+
+            var campaignType=campaign.campaignType
+
+                var tempelate= listOf<EmailTemplate>()
+
+                if (campaignType.equals(CampaignType.EMAIL)){
+                    println(campaign.templateID)
+                    tempelate=emailTempleteService.getEmailTemplate(campaign.templateID!!)
+                }
+                if(campaignType.equals(CampaignType.SMS)){
+
+                }
+                if(campaignType.equals(CampaignType.MOBILE_PUSH_NOTIFICATION)){
+
+                }
+            if(tempelate.isNotEmpty()) {
+                        val persistedCampaign = campaignService.save(campaign)
+                        return ResponseEntity(persistedCampaign, HttpStatus.CREATED)
+                    }
         }
         logger.info("campaign saved with name ${campaign.name}")
         return ResponseEntity(campaign, HttpStatus.EXPECTATION_FAILED)

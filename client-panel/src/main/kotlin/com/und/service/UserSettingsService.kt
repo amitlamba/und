@@ -62,7 +62,7 @@ class UserSettingsService {
     @Autowired
     private lateinit var clientRepository: ClientRepository
 
-    @Value("\${und.url.client}")
+    //@Value("\${und.url.client}")
     lateinit var clientUrl: String
 
     private var emptyArrayJson: String = "[]"
@@ -257,7 +257,9 @@ class UserSettingsService {
     }
 
     fun getSenderEmailAddresses(clientID: Long): List<EmailAddress> {
-        val emailAddresses = clientSettingsEmailRepository.findByClientIdAndDeleted(clientID, false)
+        //wrong query
+        //val emailAddresses = clientSettingsEmailRepository.findByClientIdAndDeleted(clientID, false)
+        var emailAddresses=clientSettingsEmailRepository.findByClientIdAndVerified(clientID,true)
         return emailAddresses?.let {
             it.map { address -> EmailAddress(address.email ?: "", address.address ?: "") }
         } ?: emptyList()
@@ -321,12 +323,12 @@ class UserSettingsService {
         var timeStamp = System.currentTimeMillis() / 1000
         var verificationCode = encrypt("$timeStamp||${emailAddress.address}||$clientID")
         var emailVerificationLink = "emailVerificationLink" to "${clientUrl}/setting/verifyemail/"+URLEncoder.encode(verificationCode,"UTF-8")
-        var name = emailAddress.address
-        var emailSubject = "Verify from emil Address"
+        var name = emailAddress.personal
+        var emailSubject = "Verify from email Address"
         var emailBody="Hi ${name} \n Please verify your email by clicking on below link\n $emailVerificationLink"
-        data.put("name",name)
-        data.put("verificationLink",emailVerificationLink)
-        var email = Email(clientID, fromEmailAddress, arrayOf(toEmailAddress), emailBody = emailBody,emailSubject = emailSubject, data = data,emailTemplateId = templateId,emailTemplateName = templateName)
+//        data.put("name",name)
+//        data.put("verificationLink",emailVerificationLink)
+        var email = Email(clientID, fromEmailAddress, arrayOf(toEmailAddress), emailBody = emailBody,emailSubject = emailSubject,emailTemplateId = templateId,emailTemplateName = templateName)
 
         toKafka(email)
     }
@@ -342,8 +344,9 @@ class UserSettingsService {
         //check verification link is clik before 24 hour
         var currentTimeStamp=System.currentTimeMillis()/1000
         val expired = currentTimeStamp < timestamp + expiration
-        if(expired){
+        if(!expired){
             //error expired regenerate verifiction link
+            //here we give an option in ui to resend verification link
         }else{
             //update setting
             emailSetting.verified=true

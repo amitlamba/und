@@ -13,6 +13,6 @@ interface ClientRepository: JpaRepository<Client, Long> {
     @Query("Select count(c) from Client c where c.dateCreated=now()")
     fun getNewClient():Long
 
-    fun findById(clientId: Id):Client
+    fun findById(id: Id):Client
 
 }
