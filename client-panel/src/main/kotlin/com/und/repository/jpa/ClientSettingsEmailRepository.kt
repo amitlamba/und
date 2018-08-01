@@ -12,4 +12,6 @@ interface ClientSettingsEmailRepository : JpaRepository<ClientSettingsEmail, Int
     fun findByEmailAndClientIdAndDeleted(email: String, clientId: Long, deleted: Boolean): ClientSettingsEmail?
 
     fun existsByEmailAndClientIdAndDeleted(email: String, clientId: Long, deleted: Boolean): Boolean
+
+    fun findByEmailAndClientId(mail:String,clientId: Long):ClientSettingsEmail
 }

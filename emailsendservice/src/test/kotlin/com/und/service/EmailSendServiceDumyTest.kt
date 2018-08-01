@@ -30,7 +30,7 @@ class EmailSendServiceDumyTest {
 
     var email = Email(3L,
             InternetAddress("userndot19@gmail.com"),
-            arrayOf(InternetAddress("jogendra.shekhawat@userndot.com")),
+            arrayOf(InternetAddress("userndot19@gmail.com")),
             null,
             null,
             null,
@@ -94,7 +94,7 @@ class EmailSendServiceDumyTest {
         props.put("mail.transport.protocol","smtp");
         props.put("mail.smtp.port",465);
         props.put("mail.smtp.auth",true);
-        props.put("mail.smtp.starttls.required",true);
+        //props.put("mail.smtp.starttls.required",true);
         props.put("mail.smtp.starttls.enable",true);
         props.put("mail.smtp.socketFactory.class","javax.net.ssl.SSLSocketFactory");
         props.put("mail.smtp.socketFactory.port",465);

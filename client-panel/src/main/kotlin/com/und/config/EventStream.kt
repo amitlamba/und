@@ -17,6 +17,4 @@ interface EventStream {
     @Output("clientEmailSend")
     fun clientEmailSend(): MessageChannel
 
-
-
 }

@@ -1,5 +1,6 @@
 package com.und.web.controller
 
+import com.und.common.utils.decrypt
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.UserSettingsService
 import com.und.web.model.AccountSettings
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import java.net.URLDecoder
 import javax.servlet.http.HttpServletResponse
 import javax.validation.Valid
 
@@ -141,6 +143,22 @@ class UserSettingsController {
         val clientID = AuthenticationUtils.clientID
         val linkOptional = userSettingsService.getUnSubscribeLink(clientID)
         return if(linkOptional.isPresent) linkOptional.get() else null
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = ["/verifyemail/{link}"])
+    fun verifyEmail(@PathVariable(value = "link")link:String){
+
+        var decodeString= URLDecoder.decode(link,"UTF-8")
+        var decryptString= decrypt(decodeString)
+        var details=decryptString.split("||")
+        var timeStamp=details[0].toLong()
+        var mail=details[1]
+        var clientId=details[2].toLong()
+
+        userSettingsService.updateStatusOfEmailSetting(timeStamp,mail,clientId)
+
+
     }
 
 }
