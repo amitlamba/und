@@ -1,7 +1,6 @@
 package com.und.repository.mongo
 
 import com.und.model.mongo.eventapi.EventUser
-import com.und.model.mongo.eventapi.Event
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import java.util.*
 

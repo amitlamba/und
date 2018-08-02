@@ -10,12 +10,17 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
+import org.springframework.stereotype.Repository
+import java.text.SimpleDateFormat
+import java.time.LocalDate
 import java.util.*
-
+@Repository
 class EventUserCustomRepositoryImpl : EventUserCustomRepository {
+
 
     @Autowired
     lateinit var mongoTemplate: MongoTemplate
+
 
     override fun findUserById(id: String, clientId: Long): Optional<EventUser> {
         val q = Query(Criteria.where("_id").`is`(ObjectId(id)))

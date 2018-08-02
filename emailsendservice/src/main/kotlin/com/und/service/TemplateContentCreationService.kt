@@ -1,6 +1,7 @@
 package com.und.service
 
 import com.und.model.utils.Email
+import com.und.model.utils.Sms
 import com.und.utils.loggerFor
 import freemarker.template.Configuration
 import freemarker.template.Template
@@ -31,7 +32,9 @@ class TemplateContentCreationService {
         BODY("body"), SUBJECT("subject")
     }
 
-
+    enum class SmsContent(val desc: String){
+        BODY(desc = "body")
+    }
     fun getEmailSubject(email: Email, model: MutableMap<String, Any>): String {
         return getContentFromTemplate(email, EmailContent.SUBJECT, model)
     }
@@ -93,4 +96,5 @@ class TemplateContentCreationService {
         }
         return replacedContent
     }
+
 }

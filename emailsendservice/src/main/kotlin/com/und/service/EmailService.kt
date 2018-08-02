@@ -11,6 +11,7 @@ import com.und.utils.loggerFor
 import org.apache.commons.lang.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.Arrays.copyOf
 import com.amazonaws.services.simpleemail.model.Message as SESMessage
 
 
@@ -89,5 +90,12 @@ class EmailService {
         return wspCredsMap[email.clientID]!!
     }
 
+    fun sendVerificationEmail(email: Email){
+        //update subject and body using template
+        var templateId=email.emailTemplateId
+        var templateName=email.emailTemplateName
 
+        //var emailToSend=emailHelperService.updateSubjectAndBody(email)
+        sendEmailWithoutTracking(email)
+    }
 }
