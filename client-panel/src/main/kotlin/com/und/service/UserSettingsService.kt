@@ -347,6 +347,10 @@ class UserSettingsService {
         if(!expired){
             //error expired regenerate verifiction link
             //here we give an option in ui to resend verification link
+            val validationError = ValidationError()
+            validationError.addFieldError("emailVerification",
+                    "Invalid Link, link has expired please request for new email")
+            throw UndBusinessValidationException(validationError)
         }else{
             //update setting
             emailSetting.verified=true
