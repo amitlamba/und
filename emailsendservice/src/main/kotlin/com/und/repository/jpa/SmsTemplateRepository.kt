@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository
 import java.util.*
 @Repository
 interface SmsTemplateRepository :JpaRepository<SmsTemplate,Long>{
-    @Query("""select st from sms_template st""")
-    fun findByIdAndClientId(id:Long,clientId:Long):SmsTemplate?
+
+    fun findByIdAndClientID(id:Long,clientId:Long):SmsTemplate?
 }

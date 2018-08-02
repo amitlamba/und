@@ -330,7 +330,7 @@ class UserSettingsService {
 //        data.put("verificationLink",emailVerificationLink)
         var email = Email(clientID, fromEmailAddress, arrayOf(toEmailAddress), emailBody = emailBody,emailSubject = emailSubject,emailTemplateId = templateId,emailTemplateName = templateName)
 
-        toKafka(email)
+        toVerificationKafka(email)
     }
 
     private fun toKafka(email: Email) {
@@ -353,6 +353,10 @@ class UserSettingsService {
             clientSettingsEmailRepository.save(emailSetting)
             //give a successfull message
         }
+    }
+
+    private fun toVerificationKafka(email:Email){
+        eventStream.verificationEmailReceive().send(MessageBuilder.withPayload(email).build())
     }
 
 }

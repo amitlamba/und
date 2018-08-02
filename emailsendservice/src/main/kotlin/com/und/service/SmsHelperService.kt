@@ -22,7 +22,7 @@ class SmsHelperService {
     fun updateBody(sms: Sms): Sms {
 
         var smsToSend=sms.copy()
-        var smsTemplate=smsTemplateRepository.findByIdAndClientId(sms.smsTemplateId,sms.clientID)
+        var smsTemplate=smsTemplateRepository.findByIdAndClientID(sms.smsTemplateId,sms.clientID)
         smsToSend.smsBody=smsTemplate?.smsTemplateBody
         return smsToSend
     }

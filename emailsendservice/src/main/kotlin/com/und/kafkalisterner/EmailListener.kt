@@ -50,7 +50,7 @@ class EmailListener {
             logger.error("Error while Updating Email $emailUpdate", ex.message)
         }
     }
-    @StreamListener(value="VerificationEmailReceiver")
+    @StreamListener(value="VerificationEmailReceive")
     fun sendVerificationEmail(email: Email){
         emailService.sendVerificationEmail(email)
     }
