@@ -35,11 +35,11 @@ class Campaign {
     @Column(name = "campaign_type") //Email / SMS / Notifications etc
     @NotNull
     @Enumerated(EnumType.STRING)
-    var campaignType: CampaignType? = null
+    lateinit var campaignType: CampaignType
 
     @Column(name = "segmentation_id") //TODO Foreign Key
     @NotNull
-    var segmentationID: Long? = null
+    var segmentationID: Long?=null
 
 
     @Column(name = "schedule")

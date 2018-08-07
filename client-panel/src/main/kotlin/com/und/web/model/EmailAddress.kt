@@ -5,6 +5,9 @@ import javax.mail.internet.InternetAddress
 import javax.validation.constraints.Email
 
 data class EmailAddress(@JsonProperty("address") @Email val address: String, @JsonProperty("personal") val personal: String) {
+
+    var status:Boolean=false
+
     companion object {
         fun fromInternetAddress(internetAddress: InternetAddress): EmailAddress {
             return EmailAddress(internetAddress.address, internetAddress.personal)

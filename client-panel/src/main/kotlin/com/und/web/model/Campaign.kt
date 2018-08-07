@@ -16,11 +16,13 @@ class Campaign {
     @Size(min = 2, max = 50)
     @Pattern(regexp = "[A-Za-z0-9-_][A-Za-z0-9-_\\s]*")
     var name: String = ""
-
     var schedule: Schedule? = null
-    var campaignType: CampaignType? = null
-    var segmentationID: Long? = null
-    var templateID: Long? = null
+    @NotNull
+    lateinit var campaignType: CampaignType
+    @NotNull
+    var segmentationID: Long?=null
+    @NotNull
+    var templateID: Long?=null
     var status: CampaignStatus? = null
     var dateCreated: LocalDateTime? = null
     var dateModified: LocalDateTime? = null

@@ -1,5 +1,6 @@
 package com.und.model.utils
 
+import com.und.common.utils.DateUtils
 import com.und.model.mongo.EmailStatus
 import com.und.model.mongo.EventUser
 import java.util.*
@@ -17,7 +18,9 @@ data class Email(
         var emailTemplateId: Long,
         var emailTemplateName: String,
         var data: MutableMap<String, Any> = mutableMapOf(),
-        var eventUser: EventUser? = null
+        var eventUser: EventUser? = null,
+        var campaignId:Long,
+        var creationTime: Date = DateUtils.nowInUTC()
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

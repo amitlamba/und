@@ -58,7 +58,8 @@ class KafkaProducerTest {
                 emailSubject = SUBJECT,
                 emailBody = BODY,
                 emailTemplateId = 0L,
-                emailTemplateName = ""
+                emailTemplateName = "",
+                campaignId = 0
                 )
         eventStream.emailEventSend().send(MessageBuilder.withPayload(email).build())
     }

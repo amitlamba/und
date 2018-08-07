@@ -8,4 +8,5 @@ interface EventCustomRepository {
     fun usersFromEvent(query: Aggregation, clientId: Long): List<String>
     fun findEventById(id: String, clientId: Long): Optional<Event>
     fun findEventsListById(id: String, clientId: Long): List<Event>
+
 }

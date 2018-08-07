@@ -4,6 +4,7 @@ import com.und.config.EventStream
 import com.und.model.jpa.Campaign
 import com.und.model.mongo.EventUser
 import com.und.model.utils.Email
+import com.und.model.utils.Sms
 import com.und.repository.jpa.CampaignRepository
 import com.und.utils.loggerFor
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,16 +29,30 @@ class CampaignService {
     private lateinit var eventStream: EventStream
 
     fun executeCampaign(campaignId: Long, clientId: Long) {
-        val campaign = campaignRepository.getCampaignByCampaignId(campaignId, clientId)
-        val usersData = getUsersData(campaign?.segmentId ?: 0, clientId)
+        val campaignOption  = campaignRepository.getCampaignByCampaignId(campaignId, clientId)
+        val campaign =  campaignOption.orElseThrow( {IllegalStateException("campaign not found for campaign id $campaignId and client $clientId")})
+        val usersData = getUsersData(campaign.segmentId , clientId)
         usersData.forEach { user ->
             try {
                 //TODO: filter out unsubscribed and blacklisted users
                 //TODO: How to skip transactional Messages
-                if(user.communication?.email?.dnd == true)
-                    return@forEach //Local lambda return
-                val email: Email = email(clientId, campaign, user)
-                toKafka(email)
+
+                //check mode of communication is email
+                if(campaign?.campaignType=="EMAIL"){
+
+                    if(user.communication?.email?.dnd == true)
+                        return@forEach //Local lambda return
+                    val email: Email = email(clientId, campaign, user)
+                    toKafka(email)
+                }
+                //check mode of communication is sms
+                if(campaign?.campaignType=="SMS"){
+
+                    if(user.communication?.mobile?.dnd == true)
+                        return@forEach //Local lambda return
+                    val sms: Sms = sms(clientId, campaign, user)
+                    toKafka(sms)
+                }
             } catch (ex: Exception) {
                 logger.error(ex.message)
 
@@ -47,18 +62,28 @@ class CampaignService {
         }
     }
 
-    private fun email(clientId: Long, campaign: Campaign?, user: EventUser): Email {
-        return Email(
+
+    private fun sms(clientId: Long, campaign: Campaign?, user: EventUser):Sms{
+        return Sms(
                 clientId,
-                InternetAddress.parse(campaign?.fromEmailAddress, false)[0],
-                InternetAddress.parse(user.identity.email, false),
-                null,
-                null,
-                null,
-                null,
-                null,
-                campaign?.emailTemplateId ?: 0L,
-                campaign?.emailTemplateName ?: ""
+                campaign?.fromSMSUser,
+                user.identity.mobile,
+                smsBody =null,
+                smsTemplateId = campaign?.smsTemplateId?:0L,
+                //assign name also
+                smsTemplateName=null,
+                eventUser = user
+        )
+    }
+
+    private fun email(clientId: Long, campaign: Campaign, user: EventUser): Email {
+        return Email(
+                clientID = clientId,
+                fromEmailAddress = InternetAddress.parse(campaign.fromEmailAddress, false)[0],
+                toEmailAddresses = InternetAddress.parse(user.identity.email, false),
+                emailTemplateId = campaign.emailTemplateId ?: 0L,
+                emailTemplateName = campaign.emailTemplateName ?: "",
+                campaignId = campaign.campaignId
         )
     }
 
@@ -69,6 +94,10 @@ class CampaignService {
 
     fun toKafka(email: Email): Boolean =
             eventStream.emailEventSend().send(MessageBuilder.withPayload(email).build())
+
+
+    fun toKafka(sms: Sms): Boolean =
+            eventStream.smsEventSend().send(MessageBuilder.withPayload(sms).build())
 
 
 }

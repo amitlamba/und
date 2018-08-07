@@ -1,12 +1,14 @@
 package com.und.web.controller
 
 import com.und.common.utils.loggerFor
+import com.und.security.utils.AuthenticationUtils
 import com.und.service.EmailTemplateService
 import com.und.web.model.EmailTemplate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
+import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 @CrossOrigin
 @RestController
@@ -37,8 +39,15 @@ class EmailTemplateController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/save-template"])
     fun saveEmailTemplate(@Valid @RequestBody emailTemplate: EmailTemplate): Long {
+        var clientId=AuthenticationUtils.clientID
+        if(clientId!=null) {
+            var exist = emailTemplateService.checkFromUserExistOrNot(clientId, emailTemplate.from)
 
-        return emailTemplateService.saveEmailTemplate(emailTemplate)
+            if (exist) {
+                return emailTemplateService.saveEmailTemplate(emailTemplate)
+            }
+        }
+        return -1L
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

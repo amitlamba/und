@@ -54,6 +54,7 @@ class ServiceProviderCredentialsService {
     }
 
     fun findActiveEmailServiceProvider(clientID: Long): ServiceProviderCredentials {
+
         val serviceCredOption = serviceProviderCredentialsRepository.findTop1ByClientIDAndServiceProviderTypeAndStatus(
                 clientID, ServiceProviderType.EMAIL_SERVICE_PROVIDER.desc, Status.ACTIVE)
         return if (serviceCredOption.isPresent)
@@ -83,6 +84,7 @@ class ServiceProviderCredentialsService {
         AWS_SES_SMTP("AWS - Simple Email Service (SMTP)"),
         AWS_SNS("AWS - Simple Notification Service"),
         GOOGLE_FCM("Google - FCM"),
+        Twillio("Twillio"),
 
 
     }
@@ -165,6 +167,11 @@ class ServiceProviderCredentialsService {
 
     fun getServiceProviderCredentials(email: Email): com.und.model.utils.ServiceProviderCredentials {
         val serviceProviderCred = this.findActiveEmailServiceProvider(email.clientID)
+        return this.buildWebServiceProviderCredentials(serviceProviderCred)
+    }
+
+    fun getServiceProviderCredentials(clientId: Long): com.und.model.utils.ServiceProviderCredentials {
+        val serviceProviderCred = this.findActiveSMSServiceProvider(clientId)
         return this.buildWebServiceProviderCredentials(serviceProviderCred)
     }
 }

@@ -2,6 +2,8 @@ package com.und.service
 
 import com.und.common.utils.DateUtils
 import com.und.repository.mongo.EventRepository
+import com.und.repository.mongo.EventUserCustomRepository
+import com.und.repository.mongo.EventUserRepo
 import com.und.repository.mongo.EventUserRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.EventNotFoundException
@@ -11,6 +13,7 @@ import com.und.web.controller.exception.EventsListNotFoundException
 import com.und.web.model.EventUser
 import com.und.web.model.event.Event
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import java.util.*
 import com.und.model.mongo.eventapi.Event as EventMongo
@@ -25,6 +28,13 @@ class EventUserService {
 
     @Autowired
     private lateinit var eventRepository: EventRepository
+
+    @Autowired
+    private lateinit var eventUserCustomRepository: EventUserRepo
+
+    fun getTotalEventUserToday():Long{
+        return eventUserCustomRepository.totalEventUserToday()
+    }
 
     fun findEventUserById(id: String): EventUser {
         return findUser(id, eventUserRepository::findUserById)

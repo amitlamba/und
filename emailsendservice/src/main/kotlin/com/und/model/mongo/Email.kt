@@ -1,5 +1,6 @@
 package com.und.model.mongo
 
+import com.und.common.utils.DateUtils
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.mapping.Document
@@ -9,26 +10,28 @@ import javax.mail.internet.InternetAddress
 
 @Document(collection = "#{tenantProvider.getTenant()}_email")
 data class Email(
+        @Id
+        var id: String? = null, //Mongo Auto-generated Document id
         var clientID: Long,
-        var fromEmailAddress: InternetAddress? = null,
         var toEmailAddresses: Array<InternetAddress>,
+        var emailSubject: String,
+        var campaignID: Long,
+        var emailStatus: EmailStatus,
+        var statusUpdates: MutableList<EmailStatusUpdate> = mutableListOf(),
+        var emailTemplateId: Long,
+        var fromEmailAddress: InternetAddress? = null,
         var ccEmailAddresses: Array<InternetAddress>? = null,
         var bccEmailAddresses: Array<InternetAddress>? = null,
         var replyToEmailAddresses: Array<InternetAddress>? = null,
-        var emailSubject: String? = null,
-        @Transient
-        var emailBody: String="",
-        var emailTemplateId: Long? = null,
         var userID: String? = null,
-        var campaignID: Long? = null,
-        @Id
-        var id: String? = null, //Mongo Auto-generated Document id
         var emailProviderMessageID: String? = null,
         var emailServiceProvider: String? = null,
-        var emailStatus: EmailStatus,
-        var statusUpdates: MutableList<EmailStatusUpdate> = mutableListOf()
+        var creationTime: Date = DateUtils.nowInUTC()
 //FIXME add creation date
-)
+) {
+    @Transient
+    var emailBody: String=""
+}
 
 data class EmailStatusUpdate (
         val date: LocalDateTime,
