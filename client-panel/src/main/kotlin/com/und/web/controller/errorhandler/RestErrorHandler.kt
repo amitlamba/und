@@ -214,7 +214,13 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
     }
 
-
+    @ExceptionHandler(WrongCredentialException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleException(ex:WrongCredentialException,request: WebRequest):ResponseEntity<Any>{
+        logger.error("400 Status Code", ex)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.wrongCredential", null, request.locale), ex.localizedMessage)
+        return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.BAD_REQUEST)
+    }
 
 
 }

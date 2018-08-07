@@ -2,6 +2,7 @@ package com.und.service
 
 import com.und.model.jpa.EmailTemplate
 import com.und.model.jpa.Template
+import com.und.repository.jpa.ClientSettingsEmailRepository
 import com.und.repository.jpa.EmailTemplateRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.EmailTemplateDuplicateNameException
@@ -18,6 +19,9 @@ class EmailTemplateService {
 
     @Autowired
     private lateinit var emailTemplateRepository: EmailTemplateRepository
+
+    @Autowired
+    private lateinit var clientSettingsEmailRepository: ClientSettingsEmailRepository
 
 
     fun getDefaultEmailTemplates(): List<WebEmailTemplate> {
@@ -37,6 +41,7 @@ class EmailTemplateService {
     @Cacheable(cacheNames = ["emailtemplate"],key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_template_'+#emailTemplateId" )
     fun getEmailTemplate(emailTemplateId: Long): List<WebEmailTemplate> {
         val clientId = AuthenticationUtils.clientID
+        println(clientId)
         return clientId?.let {
             val emailTemplateOtion = emailTemplateRepository.findByIdAndClientID(emailTemplateId, clientId)
             if (emailTemplateOtion.isPresent) listOf(buildWebEmailTemplate(emailTemplateOtion.get())) else emptyList()
@@ -130,5 +135,9 @@ class EmailTemplateService {
         template.template = templateText
         template.name = name
         return template
+    }
+
+    fun checkFromUserExistOrNot(clientId: Long, from: String): Boolean {
+        return clientSettingsEmailRepository.existsByClientIdAndEmailAndVerified(clientId,from,true)
     }
 }

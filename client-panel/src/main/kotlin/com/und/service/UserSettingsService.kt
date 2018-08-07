@@ -17,12 +17,29 @@ import org.springframework.transaction.annotation.Transactional
 import java.util.*
 import javax.annotation.PostConstruct
 import com.fasterxml.jackson.module.kotlin.*
+import com.und.common.utils.DateUtils
+import com.und.common.utils.encrypt
+import com.und.common.utils.loggerFor
+import com.und.config.EventStream
+import com.und.model.Email
+import com.und.model.jpa.Client
 import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.model.jpa.ClientSettingsEmail
+import com.und.repository.jpa.ClientRepository
 import com.und.repository.jpa.ClientSettingsEmailRepository
 import com.und.security.utils.AuthenticationUtils
+import com.und.web.controller.exception.WrongCredentialException
 import com.und.web.model.ValidationError
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.messaging.support.MessageBuilder
+import java.net.URLEncoder
+import java.sql.Timestamp
+import java.time.LocalDateTime
 import java.time.ZoneId
+import javax.mail.AuthenticationFailedException
+import javax.mail.MessagingException
+import javax.mail.Session
+import javax.mail.internet.InternetAddress
 
 @Service
 class UserSettingsService {
@@ -39,11 +56,24 @@ class UserSettingsService {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
+    @Autowired
+    private lateinit var eventStream: EventStream
+
+    @Autowired
+    private lateinit var clientRepository: ClientRepository
+
+    //@Value("\${und.url.client}")
+    lateinit var clientUrl: String
+
     private var emptyArrayJson: String = "[]"
 
 
     private val emailServiceProvider = "Email Service Provider"
     private val smsServiceProvider = "Sms Service Provider"
+
+    private var templateId=1L
+    private var templateName="fromEmailVerification"
+    private var expiration=24*60*60
 
     @PostConstruct
     fun setUp() {
@@ -124,14 +154,14 @@ class UserSettingsService {
     @Transactional
     fun saveAccountSettings(accountSettings: AccountSettings, clientID: Long?, userID: Long?) {
         //FIXME: Validate Timezone and Email Addresses
-        if(clientID != null) {
+        if (clientID != null) {
             val clientSettings = ClientSettings()
             val clientSettingspersisted = clientSettingsRepository.findByClientID(clientID)
             clientSettings.id = clientSettingspersisted?.id
             clientSettings.clientID = clientID
             clientSettings.authorizedUrls = objectMapper.writeValueAsString(accountSettings.urls)
             clientSettings.timezone = accountSettings.timezone
-            if(clientSettingspersisted == null) {
+            if (clientSettingspersisted == null) {
                 clientSettingsRepository.save(clientSettings)
             } else {
                 clientSettingsRepository.updateAccountSettings(clientSettings.authorizedUrls, clientSettings.timezone, clientID)
@@ -161,11 +191,14 @@ class UserSettingsService {
             val clientSettingEmail = ClientSettingsEmail()
             clientSettingEmail.email = emailAddress.address
             clientSettingEmail.address = emailAddress.personal
-            clientSettingEmail.verified = false
+            clientSettingEmail.verified = emailAddress.status
             clientSettingEmail.clientId = clientID
             clientSettingsEmailRepository.save(clientSettingEmail)
 
         }
+
+        //send verification link
+        sendVerificationEmail(emailAddress, clientID)
 
     }
 
@@ -188,8 +221,6 @@ class UserSettingsService {
 
     private fun emailExists(emailAddress: EmailAddress, clientID: Long) =
             clientSettingsEmailRepository.existsByEmailAndClientIdAndDeleted(emailAddress.address, clientID, false)
-
-
 
 
     fun saveUnSubscribeLink(request: UnSubscribeLink, clientID: Long?) {
@@ -215,18 +246,20 @@ class UserSettingsService {
 
         val clientSettings = clientSettingsRepository.findByClientID(clientID!!)
         val linkUrl = clientSettings?.unSubscribeLink
-        val unSubscribeLink  = linkUrl?.let { link ->
+        val unSubscribeLink = linkUrl?.let { link ->
             val unSubscribeLink = UnSubscribeLink()
             unSubscribeLink.unSubscribeLink = link
             unSubscribeLink
         }
-        return if(unSubscribeLink == null) Optional.empty() else Optional.of(unSubscribeLink)
+        return if (unSubscribeLink == null) Optional.empty() else Optional.of(unSubscribeLink)
 
 
     }
 
-     fun getSenderEmailAddresses(clientID: Long): List<EmailAddress> {
-        val emailAddresses = clientSettingsEmailRepository.findByClientIdAndDeleted(clientID, false)
+    fun getSenderEmailAddresses(clientID: Long): List<EmailAddress> {
+        //wrong query
+        //val emailAddresses = clientSettingsEmailRepository.findByClientIdAndDeleted(clientID, false)
+        var emailAddresses=clientSettingsEmailRepository.findByClientIdAndVerified(clientID,true)
         return emailAddresses?.let {
             it.map { address -> EmailAddress(address.email ?: "", address.address ?: "") }
         } ?: emptyList()
@@ -236,11 +269,98 @@ class UserSettingsService {
 
     fun getTimeZone(): ZoneId {
         val clientId = AuthenticationUtils.clientID
-        val tz =  clientId?.let {
+        val tz = clientId?.let {
             clientSettingsRepository.findByClientID(clientId)?.timezone
-        }?:TimeZone.getDefault().id
+        } ?: TimeZone.getDefault().id
         return ZoneId.of(tz)
 
+    }
+
+    fun testConnection(serviceProviderCredential: com.und.web.model.ServiceProviderCredentials): Boolean {
+
+        var port = Integer.parseInt(serviceProviderCredential.credentialsMap.get("port"))
+        var host = serviceProviderCredential.credentialsMap.get("url")
+        var username = serviceProviderCredential.credentialsMap.get("username")
+        var password = serviceProviderCredential.credentialsMap.get("password")
+        var ssl = serviceProviderCredential.credentialsMap.get("ssl") as Boolean
+        var protocaol = serviceProviderCredential.serviceProvider.toLowerCase()
+        if (protocaol.equals("smtp")) {
+            var props = Properties()
+            props["mail.smtp.host"] = host
+            props["mail.smtp.port"] = port
+            props["mail.smtp.auth"] = "true"
+            props["mail.smtp.starttls.enable"] = "true"
+
+            if (ssl) {
+                props["mail.smtp.ssl.enable"] = ssl
+            }
+
+
+            try {
+                val session = Session.getDefaultInstance(props)
+                val transport = session.getTransport(protocaol)
+                transport.connect(username, password)
+                transport.close()
+                return true
+            } catch (e: AuthenticationFailedException) {
+                throw WrongCredentialException("authentication failed")
+                return false
+            } catch (e: MessagingException) {
+                throw WrongCredentialException(" Not valid credential")
+                return false
+            }
+
+        }
+        return true
+    }
+
+    fun sendVerificationEmail(emailAddress: EmailAddress, clientID: Long) {
+
+        var data= mutableMapOf<String,Any>()
+        var client = clientRepository.findById(clientID) as Client
+        var toEmailAddress = InternetAddress(client.email)
+        var fromEmailAddress = InternetAddress(emailAddress.address)
+        var timeStamp = System.currentTimeMillis() / 1000
+        var verificationCode = encrypt("$timeStamp||${emailAddress.address}||$clientID")
+        var emailVerificationLink = "emailVerificationLink" to "${clientUrl}/setting/verifyemail/"+URLEncoder.encode(verificationCode,"UTF-8")
+        var name = emailAddress.personal
+        var emailSubject = "Verify from email Address"
+        var emailBody="Hi ${name} \n Please verify your email by clicking on below link\n $emailVerificationLink"
+//        data.put("name",name)
+//        data.put("verificationLink",emailVerificationLink)
+        var email = Email(clientID, fromEmailAddress, arrayOf(toEmailAddress), emailBody = emailBody,emailSubject = emailSubject,emailTemplateId = templateId,emailTemplateName = templateName)
+
+        toVerificationKafka(email)
+    }
+
+    private fun toKafka(email: Email) {
+        eventStream.clientEmailSend().send(MessageBuilder.withPayload(email).build())
+    }
+
+    fun updateStatusOfEmailSetting(timestamp:Long,mail:String,clientID: Long) {
+
+        var emailSetting=clientSettingsEmailRepository.findByEmailAndClientId(mail,clientID)
+
+        //check verification link is clik before 24 hour
+        var currentTimeStamp=System.currentTimeMillis()/1000
+        val expired = currentTimeStamp < timestamp + expiration
+        if(!expired){
+            //error expired regenerate verifiction link
+            //here we give an option in ui to resend verification link
+            val validationError = ValidationError()
+            validationError.addFieldError("emailVerification",
+                    "Invalid Link, link has expired please request for new email")
+            throw UndBusinessValidationException(validationError)
+        }else{
+            //update setting
+            emailSetting.verified=true
+            clientSettingsEmailRepository.save(emailSetting)
+            //give a successfull message
+        }
+    }
+
+    private fun toVerificationKafka(email:Email){
+        eventStream.verificationEmailReceive().send(MessageBuilder.withPayload(email).build())
     }
 
 }

@@ -17,5 +17,6 @@ interface EventStream {
     @Output("clientEmailSend")
     fun clientEmailSend(): MessageChannel
 
-
+    @Output(value = "VerificationEmailSend")
+    fun verificationEmailReceive(): MessageChannel
 }

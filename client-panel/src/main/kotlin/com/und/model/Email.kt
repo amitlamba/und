@@ -10,6 +10,8 @@ data class Email(
         var bccEmailAddresses: Array<InternetAddress>? = null,
         var replyToEmailAddresses: Array<InternetAddress>? = null,
         var emailSubject: String,
-        var emailBody: String,
-        var userID: String? = null
+        var emailBody: String?=null,
+        var emailTemplateId: Long,
+        var emailTemplateName: String,
+        var data: MutableMap<String, Any> = mutableMapOf()
 )

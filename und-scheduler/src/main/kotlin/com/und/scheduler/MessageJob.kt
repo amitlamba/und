@@ -24,7 +24,7 @@ class MessageJob : Job {
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Autowired
-    lateinit var  jobService : MessageJobService
+    lateinit var jobService: MessageJobService
 
     @Autowired
     protected lateinit var scheduler: Scheduler
@@ -39,7 +39,7 @@ class MessageJob : Job {
         val nextFireTime = jobGroupNextDate(JobUtil.getGroupName(clientId, campaignId))
         //val keys = scheduler.get(GroupMatcher.groupEquals(JobUtil.getGroupName(clientId,campaignId)))
 
-        if(nextFireTime .isEmpty()) {
+        if (nextFireTime.isEmpty()) {
 
             val status = markCompleted(clientId, campaignId, campaignName, JobDescriptor.Action.COMPLETED)
             eventStream.scheduleJobAck().send(MessageBuilder.withPayload(status).build())
@@ -52,18 +52,19 @@ class MessageJob : Job {
     }
 
 
+    fun jobGroupNextDate(groupName: String): List<Date> {
+        val jobKeys = scheduler.getJobKeys(GroupMatcher.groupEquals(groupName))
+                .sortedBy { key -> key.name.split("-").last().toLong() }.filterNotNull()
+        val jobTriggers = jobKeys.flatMap { key -> scheduler.getTriggersOfJob(key).filterNotNull() }
 
-    fun jobGroupNextDate(groupName:String):List<Date>{
-        val jobKeys = scheduler.getJobKeys(GroupMatcher.groupEquals(groupName)).sortedBy { key->key.name.split("-").last().toLong() }
+        return jobTriggers.dropWhile { trigger -> trigger.nextFireTime== null }.map { it.nextFireTime }.sortedByDescending { it }
 
-        return jobKeys.filterNotNull()
-                .flatMap { key ->  scheduler.getTriggersOfJob(key).filterNotNull() }.takeWhile { trigger->trigger.nextFireTime != null}.map{it.nextFireTime}.sortedByDescending { it }
 
     }
 
     @SendTo("scheduleJobAckSend")
-    fun markCompleted(clientId:String,campaignId:String, campaignName:String , action: JobDescriptor.Action): JobActionStatus {
-         fun jobActionStatus(): JobActionStatus {
+    fun markCompleted(clientId: String, campaignId: String, campaignName: String, action: JobDescriptor.Action): JobActionStatus {
+        fun jobActionStatus(): JobActionStatus {
             val jobAction = JobAction(
                     campaignId = campaignId,
                     clientId = clientId,
@@ -78,7 +79,6 @@ class MessageJob : Job {
 
         return jobActionStatus()
     }
-
 
 
 }

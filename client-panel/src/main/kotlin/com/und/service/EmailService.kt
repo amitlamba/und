@@ -4,6 +4,7 @@ import com.und.common.utils.loggerFor
 import com.und.config.EventStream
 import com.und.model.Email
 import com.und.model.EmailRead
+import com.und.web.model.ServiceProviderCredentials
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
@@ -11,6 +12,11 @@ import org.springframework.kafka.support.SendResult
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import org.springframework.util.concurrent.ListenableFutureCallback
+import java.util.*
+import javax.mail.Session
+import javax.mail.AuthenticationFailedException
+import javax.mail.MessagingException
+
 
 @Service
 class EmailService {
@@ -61,4 +67,5 @@ class EmailService {
     private fun toKafka(email: Email) {
         eventStream.clientEmailSend().send(MessageBuilder.withPayload(email).build())
     }
+
 }

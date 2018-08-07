@@ -17,8 +17,9 @@ class SmsTemplateService {
     }
 
     fun getClientSmsTemplates(clientID: Long, smsTemplateID: Long?): List<SmsTemplate> {
-        if (smsTemplateID == null)
+        if (smsTemplateID == null) {
             return smsTemplateRepository.findByClientIDAndStatus(clientID)
+        }
         else
             return listOf(smsTemplateRepository.findByIdAndClientIDAndStatus(smsTemplateID, clientID))
     }
