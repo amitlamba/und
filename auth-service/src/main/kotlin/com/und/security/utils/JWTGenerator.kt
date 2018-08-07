@@ -22,6 +22,8 @@ class JWTGenerator(private val expirationDate: Date,
         }
         cachedJwt.secret = user.secret
         cachedJwt.username = user.username
+        cachedJwt.firstname = user.firstname
+        cachedJwt.lastname = user.lastname
         cachedJwt.password = user.password!!
         cachedJwt.email = user.email ?: "Notfound"
         cachedJwt.clientId = "${user.clientId}"
