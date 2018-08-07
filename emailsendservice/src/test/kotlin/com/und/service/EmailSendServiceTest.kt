@@ -28,9 +28,9 @@ class EmailSendServiceTest {
             """
         val unsubscribeLink1 = "https://und.com/unsubscribe?d=2"
         val unsubscribeLink2 = "https://und.com/unsubscribe"
-        val clinetId = 1
+        val clientId = 1L
         val mongoEmailId = "accdef"
-        val content1 = emailSendService.insertUnsubscribeLinkIfApplicable(content, unsubscribeLink1, clinetId, mongoEmailId)
+        val content1 = emailSendService.insertUnsubscribeLinkIfApplicable(content, unsubscribeLink1, clientId, mongoEmailId)
         val finalContent1 = """
             <html>
             <head></head>
@@ -38,7 +38,7 @@ class EmailSendServiceTest {
             </html>
             """
         assert(content1 == finalContent1)
-        val content2 = emailSendService.insertUnsubscribeLinkIfApplicable(content, unsubscribeLink2, clinetId, mongoEmailId)
+        val content2 = emailSendService.insertUnsubscribeLinkIfApplicable(content, unsubscribeLink2, clientId, mongoEmailId)
         val finalContent2 = """
             <html>
             <head></head>

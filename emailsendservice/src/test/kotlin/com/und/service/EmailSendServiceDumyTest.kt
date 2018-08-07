@@ -39,7 +39,8 @@ class EmailSendServiceDumyTest {
             0L,
             "",
             mutableMapOf(),
-            null)
+            null,
+            campaignId = 0L)
 
 
     @Before

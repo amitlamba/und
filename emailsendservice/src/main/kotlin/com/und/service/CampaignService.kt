@@ -29,9 +29,9 @@ class CampaignService {
     private lateinit var eventStream: EventStream
 
     fun executeCampaign(campaignId: Long, clientId: Long) {
-        //metod should be getCampaignByCampaignIdAndClientId
-        val campaign = campaignRepository.getCampaignByCampaignId(campaignId, clientId)
-        val usersData = getUsersData(campaign?.segmentId ?: 0, clientId)
+        val campaignOption  = campaignRepository.getCampaignByCampaignId(campaignId, clientId)
+        val campaign =  campaignOption.orElseThrow( {IllegalStateException("campaign not found for campaign id $campaignId and client $clientId")})
+        val usersData = getUsersData(campaign.segmentId , clientId)
         usersData.forEach { user ->
             try {
                 //TODO: filter out unsubscribed and blacklisted users
@@ -62,6 +62,7 @@ class CampaignService {
         }
     }
 
+
     private fun sms(clientId: Long, campaign: Campaign?, user: EventUser):Sms{
         return Sms(
                 clientId,
@@ -75,19 +76,14 @@ class CampaignService {
         )
     }
 
-
-    private fun email(clientId: Long, campaign: Campaign?, user: EventUser): Email {
+    private fun email(clientId: Long, campaign: Campaign, user: EventUser): Email {
         return Email(
-                clientId,
-                InternetAddress.parse(campaign?.fromEmailAddress, false)[0],
-                InternetAddress.parse(user.identity.email, false),
-                null,
-                null,
-                null,
-                null,
-                null,
-                campaign?.emailTemplateId ?: 0L,
-                campaign?.emailTemplateName ?: ""
+                clientID = clientId,
+                fromEmailAddress = InternetAddress.parse(campaign.fromEmailAddress, false)[0],
+                toEmailAddresses = InternetAddress.parse(user.identity.email, false),
+                emailTemplateId = campaign.emailTemplateId ?: 0L,
+                emailTemplateName = campaign.emailTemplateName ?: "",
+                campaignId = campaign.campaignId
         )
     }
 

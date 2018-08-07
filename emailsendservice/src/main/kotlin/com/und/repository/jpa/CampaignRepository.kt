@@ -4,6 +4,7 @@ import com.und.model.jpa.Campaign
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
+import java.util.*
 
 @Repository
 interface CampaignRepository : JpaRepository<Campaign, Long> {
@@ -25,5 +26,5 @@ interface CampaignRepository : JpaRepository<Campaign, Long> {
                       LEFT JOIN sms_template st on st.id = sc.sms_template_id and st.client_id = c.client_id
                     where c.id = :campaignId and (c.campaign_status <> 'deleted' or c.campaign_status is null) and c.client_id = :clientId""",
             nativeQuery = true)
-    fun getCampaignByCampaignId(campaignId: Long, clientId: Long): Campaign?
+    fun getCampaignByCampaignId(campaignId: Long, clientId: Long): Optional<Campaign>
 }

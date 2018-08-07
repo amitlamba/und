@@ -9,9 +9,9 @@ import com.und.model.utils.ServiceProviderCredentials
 import com.und.repository.jpa.ClientSettingsRepository
 import com.und.utils.loggerFor
 import org.apache.commons.lang.StringUtils
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.Arrays.copyOf
 import com.amazonaws.services.simpleemail.model.Message as SESMessage
 
 
@@ -45,16 +45,40 @@ class EmailService {
         emailSendService.sendEmailByAWSSDK(emailSESConfig, email)
     }
 
-    fun sendEmail(email: Email) {
-        //FIXME: cache the findByClientID clientSettings
-        val clientSettings = clientSettingsRepository.findByClientID(email.clientID)
-        val mongoEmailId = emailHelperService.saveMailInMongo(email, NOT_SENT)
-        if (StringUtils.isNotBlank(clientSettings?.unSubscribeLink))
-            email.data["unsubscribeLink"] = emailHelperService.getUnsubscribeLink(clientSettings?.unSubscribeLink!!, email.clientID.toInt(), mongoEmailId!!)
-        email.data["pixelTrackingPlaceholder"] = """<div><img src="""" + emailHelperService.getImageUrl(email.clientID.toInt(), mongoEmailId!!) + """">"""
 
-        val emailToSend = emailHelperService.updateSubjectAndBody(email)
-        email.emailBody = emailHelperService.trackAllURLs(emailToSend.emailBody!!, email.clientID, mongoEmailId)
+
+    fun sendEmail(email: Email) {
+
+
+         fun String.addUrlTracking(uniqueTrackingId:String ):String {
+            return emailHelperService.trackAllURLs(this, email.clientID, uniqueTrackingId)
+        }
+         fun String.addPixelTracking(uniqueTrackingId:String ):String {
+            return emailHelperService.addPixelTracking(this, email.clientID, uniqueTrackingId)
+        }
+
+        val emailToSend = email.copy()
+        val model = emailToSend.data
+        //FIXME: cache the findByClientID clientSettings
+        val clientSettings = clientSettingsRepository.findByClientID(emailToSend.clientID)
+        val mongoEmailId = ObjectId().toString()
+        emailToSend.eventUser?.let {
+            model["user"] = it
+        }
+        if (StringUtils.isNotBlank(clientSettings?.unSubscribeLink))
+            model["unsubscribeLink"] = emailHelperService.getUnsubscribeLink(clientSettings?.unSubscribeLink!!, emailToSend.clientID, mongoEmailId)
+
+        model["pixelTrackingPlaceholder"] = """<div><img src="""" + emailHelperService.getImageUrl(emailToSend.clientID, mongoEmailId) + """">"""
+
+        val (subject, body) = emailHelperService.subjectAndBody(emailToSend)
+
+
+        emailToSend.emailBody = body.addUrlTracking(mongoEmailId).addPixelTracking(mongoEmailId)
+        emailToSend.emailSubject = subject
+
+
+
+        emailHelperService.saveMailInMongo(emailToSend, NOT_SENT, mongoEmailId)
         sendEmailWithoutTracking(emailToSend)
         emailHelperService.updateEmailStatus(mongoEmailId, SENT, emailToSend.clientID)
     }

@@ -51,10 +51,12 @@ class DatabaseTemplateLoader : TemplateLoader {
 
             val template = retrievetemplate(clientId, templateId, "$clientId:$templatename:$bodyOrSubject")
             template?.let {
-                if (bodyOrSubject.contains("body") && clientId != 1L) {
-                    return addPixelTrackingPlaceholder(template.emailTemplateBody)
+                if (bodyOrSubject.contains("body")) {
+                    return if( clientId != 1L) addPixelTrackingPlaceholder(template.emailTemplateBody) else template.emailTemplateBody
                 }
-                else template.emailTemplateSubject
+                else {
+                    template.emailTemplateSubject
+                }
             }
         } else null
 

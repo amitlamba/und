@@ -60,7 +60,9 @@ class SampleTest {
                 emailSubject = SUBJECT,
                 emailBody = BODY,
                 emailTemplateId = 0L,
-                emailTemplateName = "")
+                emailTemplateName = "",
+                campaignId = 0
+                )
         val emailSMTPConfig = EmailSMTPConfig(null, 1, HOST, PORT, SMTP_USERNAME, SMTP_PASSWORD, CONFIGSET)
 
         emailSendService.sendEmailBySMTP(emailSMTPConfig, email)
@@ -74,7 +76,8 @@ class SampleTest {
                 emailSubject = SUBJECT,
                 emailBody = BODY,
                 emailTemplateId = 0,
-                emailTemplateName = "")
+                emailTemplateName = "",
+                campaignId = 0)
         val emailSMTPConfig = EmailSMTPConfig(null, 1, "email-smtp.us-east-1.amazonaws.com", 587, "AKIAIS6IJSVKWL7VUIIQ", "AlEf0RBhmCMDcTuwDDrl9BonxawtKZrPC2b4Mtn4o2v4", null)
 
         emailSendService.sendEmailBySMTP(emailSMTPConfig, email)
