@@ -26,6 +26,9 @@ class EmailService {
     @Value("\${und.auth-url}")
     lateinit var authUrl: String
 
+    @Value("\${und.url.clientpanelui}")
+    lateinit var clientPanelUrl: String
+
     @Autowired
     private lateinit var eventStream: EventStream
 
@@ -43,7 +46,8 @@ class EmailService {
     fun sendForgotPasswordEmail(code: UserCache, email: String) {
         val dataMap = mutableMapOf<String, Any>(
                 "name" to "${code.firstname} ${code.lastname}",
-                "resetPasswordLink" to "${authUrl}/register/resetpassword/${code.pswrdRstKey}"
+                "resetPasswordLink" to "${clientPanelUrl}/resetpwd/${code.pswrdRstKey}"
+//                "resetPasswordLink" to "${authUrl}/register/resetpassword/${code.pswrdRstKey}"
         )
 
         val email = Email(
