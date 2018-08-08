@@ -41,12 +41,6 @@ class EmailHelperService {
     fun createMimeMessage(session: Session, email: Email): MimeMessage {
         val emailSMTPConfig = emailServiceProviderConnectionFactory.getEmailServiceProvider(email.clientID)
 
-
-
-        if (email.clientID == 1L) {
-            email.fromEmailAddress = InternetAddress(emailSMTPConfig.SMTP_USERNAME)
-        }
-
         val msg = MimeMessage(session)
 
         val messageBuildHelper = MimeMessageHelper(msg)

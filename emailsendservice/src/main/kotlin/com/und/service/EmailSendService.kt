@@ -64,7 +64,8 @@ class EmailSendService {
         // Send the message.
         try {
             val session = emailHelperService.session(email.clientID, emailSMTPConfig)
-            val transport = session.transport
+            val transport = emailHelperService.transport(email.clientID)
+            //val transport = session.transport
             if(!transport.isConnected) { transport.connect()}
 
 

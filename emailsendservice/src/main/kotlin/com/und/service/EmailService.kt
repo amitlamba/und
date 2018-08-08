@@ -7,11 +7,13 @@ import com.und.model.utils.EmailSESConfig
 import com.und.model.utils.EmailSMTPConfig
 import com.und.model.utils.ServiceProviderCredentials
 import com.und.repository.jpa.ClientSettingsRepository
+import com.und.repository.jpa.EmailTemplateRepository
 import com.und.utils.loggerFor
 import org.apache.commons.lang.StringUtils
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import javax.mail.internet.InternetAddress
 import com.amazonaws.services.simpleemail.model.Message as SESMessage
 
 
@@ -33,6 +35,9 @@ class EmailService {
 
     @Autowired
     private lateinit var emailSendService: EmailSendService
+
+    @Autowired
+    private lateinit var emailTemplateRepository: EmailTemplateRepository
 
     private var wspCredsMap: MutableMap<Long, ServiceProviderCredentials> = mutableMapOf()
 
@@ -76,12 +81,20 @@ class EmailService {
         emailToSend.emailBody = body.addUrlTracking(mongoEmailId).addPixelTracking(mongoEmailId)
         emailToSend.emailSubject = subject
 
-
+        if(isSytemClient(email)) {
+            val template = emailTemplateRepository.findByIdAndClientID(email.emailTemplateId, email.clientID)
+            val from = template.map { it.from }
+            if(from.isPresent) {
+                emailToSend.fromEmailAddress = InternetAddress(from.get())
+            } else throw Exception("from email for template id ${email.emailTemplateId} is not present for system user")
+        }
 
         emailHelperService.saveMailInMongo(emailToSend, NOT_SENT, mongoEmailId)
         sendEmailWithoutTracking(emailToSend)
         emailHelperService.updateEmailStatus(mongoEmailId, SENT, emailToSend.clientID)
     }
+
+    private fun isSytemClient(email: Email) = email.clientID == 1L
 
     fun sendEmailWithoutTracking(email: Email) {
         val serviceProviderCredential = serviceProviderCredentials(email = email)

@@ -5,6 +5,7 @@ import com.und.model.utils.Sms
 import com.und.utils.loggerFor
 import freemarker.template.Configuration
 import freemarker.template.Template
+import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils
@@ -15,7 +16,7 @@ import java.util.regex.Pattern
 class TemplateContentCreationService {
 
     companion object {
-        val logger = loggerFor(TemplateContentCreationService::class.java)
+        val logger:Logger = loggerFor(TemplateContentCreationService::class.java)
     }
 
     @Autowired
