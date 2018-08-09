@@ -19,8 +19,8 @@ class EmailService {
 
         protected val logger = loggerFor(EmailService::class.java)
         const val forgotPasswordTemplate = 1L
-        const val contactusTemplate = 2L
-        const val verificationTemplate = 3L
+        const val verificationTemplate = 2L
+        const val contactusTemplate = 3L
     }
 
     @Value("\${und.auth-url}")
