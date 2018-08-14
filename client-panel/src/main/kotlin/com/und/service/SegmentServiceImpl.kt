@@ -11,6 +11,7 @@ import com.und.web.controller.exception.SegmentNotFoundException
 import com.und.web.model.ConditionType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.aggregation.Aggregation
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
 import com.und.web.model.EventUser as EventUserWeb
 import com.und.web.model.Segment as WebSegment
@@ -98,6 +99,10 @@ class SegmentServiceImpl : SegmentService {
         if (didQueries.isNotEmpty()) {
             val userDidList = retrieveUsers(didQueries, joincondition, clientId)
             allResult.add(userDidList.toSet())
+        }else{
+            var query= Query().addCriteria(queries.query)
+            val userList=eventRepository.usersFromEvent(query,clientId)
+            allResult.add(userList.toSet())
         }
 
         val (didNotQueries, joinconditionfornot) = queries.didntq

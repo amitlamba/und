@@ -73,14 +73,16 @@ class SegmentParserCriteria {
                 did?.let { Pair(parseEvents(it.events, tz, true, eventPropertyMatch, geoCriteria), it.joinCondition.conditionType) }
                         ?: Pair(emptyList(), ConditionType.AllOf)
 
-
         //and not
         val didnot = segment.didNotEvents
         val didnotq = didnot?.let { Pair(parseEvents(it.events, tz, false, null, null), ConditionType.AnyOf) }
                 ?: Pair(emptyList(), ConditionType.AnyOf)
 
-
-        return SegmentQuery(didq, didnotq, userQuery)
+        if(didq.first.isEmpty()){
+            return SegmentQuery(didq, didnotq, userQuery,geoCriteria)
+        }else {
+            return SegmentQuery(didq, didnotq, userQuery)
+        }
     }
 
 
@@ -106,13 +108,13 @@ class SegmentParserCriteria {
                     fields = fields.and(name, name)
                 }
             }
-            val project = Aggregation.project(fields)
-                    .and("clientTime.month").`as`(Field.month.name)
-                    .and("clientTime.dayOfMonth").`as`(Field.monthday.name)
-                    .and("clientTime.dayOfWeek").`as`(Field.weekday.name)
-                    .and("clientTime.hour").`as`(Field.hour.name)
-                    .and("clientTime.minute").`as`(Field.minute.name)
-                    .and("clientTime.year").`as`(Field.year.name)
+//            val project = Aggregation.project(fields)
+//                    .and("clientTime.month").`as`(Field.month.name)
+//                    .and("clientTime.dayOfMonth").`as`(Field.monthday.name)
+//                    .and("clientTime.dayOfWeek").`as`(Field.weekday.name)
+//                    .and("clientTime.hour").`as`(Field.hour.name)
+//                    .and("clientTime.minute").`as`(Field.minute.name)
+//                    .and("clientTime.year").`as`(Field.year.name)
 
 
             val matchOps = Aggregation.match(Criteria().andOperator(*matches.toTypedArray()))
@@ -124,10 +126,10 @@ class SegmentParserCriteria {
             if (whereCond.isPresent) {
                 val group = whereCond.get().first
                 val matchOnGroup = whereCond.get().second
-                Aggregation.newAggregation(project, matchOps, group, matchOnGroup)
+                Aggregation.newAggregation(/*project,*/ matchOps, group, matchOnGroup)
             } else {
                 val group = Aggregation.group(Aggregation.fields().and(Field.userId.name, Field.userId.name))
-                Aggregation.newAggregation(project, matchOps, group)
+                Aggregation.newAggregation(/*project,*/ matchOps, group)
             }
 
 
@@ -457,9 +459,9 @@ class SegmentParserCriteria {
     private fun filterGeography(geofilter: List<Geography>): Criteria {
 
         val criteria = geofilter.map { geo ->
-            val country = geo.country?.name?.let { name -> Criteria.where("geogrophy.country.name").`is`(name) }
-            val state = geo.state?.name?.let { name -> Criteria.where("geogrophy.state.name").`is`(name) }
-            val city = geo.city?.name?.let { name -> Criteria.where("geogrophy.city.name").`is`(name) }
+            val country = geo.country?.name?.let { name -> Criteria.where("geogrophy.country").`is`(name) }
+            val state = geo.state?.name?.let { name -> Criteria.where("geogrophy.state").`is`(name) }
+            val city = geo.city?.name?.let { name -> Criteria.where("geogrophy.city").`is`(name) }
             val geoCriteria = listOfNotNull(country, state, city)
             if (geoCriteria.isNotEmpty()) {
                 Criteria().andOperator(*geoCriteria.toTypedArray())
@@ -475,6 +477,6 @@ class SegmentParserCriteria {
 }
 
 
-class SegmentQuery(val didq: Pair<List<Aggregation>, ConditionType>, val didntq: Pair<List<Aggregation>, ConditionType>, val userQuery: Aggregation?) : Serializable
+class SegmentQuery(val didq: Pair<List<Aggregation>, ConditionType>, val didntq: Pair<List<Aggregation>, ConditionType>, val userQuery: Aggregation?,val query:Criteria?=null) : Serializable
 
 
