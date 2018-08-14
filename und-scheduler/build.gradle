@@ -12,7 +12,10 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-data-rest')
     compile('org.springframework.cloud:spring-cloud-starter-stream-kafka')
     compile('org.springframework.cloud:spring-cloud-stream-binder-kafka')
-    compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    compile('org.springframework.boot:spring-boot-starter-data-jpa'){
+        exclude group: 'org.apache.tomcat' , module: 'tomcat-jdbc'
+        exclude group: 'com.mchange' , module: 'c3p0'
+    }
     compile('org.flywaydb:flyway-core:5.0.7')
     compile('org.springframework.boot:spring-boot-starter-quartz')
     compile('org.springframework.boot:spring-boot-starter-security')

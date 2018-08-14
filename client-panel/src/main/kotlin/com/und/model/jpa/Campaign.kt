@@ -129,19 +129,26 @@ class CampaignTime {
     lateinit var ampm: AmPm
 
     fun toLocalDateTime(): LocalDateTime {
-        var hours = hours ?: 0
-        val minutes = minutes ?: 0
 
-        ampm.let {
-            if (it == AmPm.PM) {
-                hours += 12
+        val minutes = minutes ?: 0
+        val hour = ampm.let { amPm ->
+
+            hours?.let {h->
+                when (amPm) {
+                    AmPm.PM -> {
+                        if (h in 1..11) h + 12 else h
+                    }
+                    AmPm.AM -> {
+                        if (h == 12) h - 12 else h
+                    }
+                }
             }
-        }
-        val localTime = LocalTime.of(hours, minutes)
+
+        } ?: 0
+        val localTime = LocalTime.of(hour, minutes)
         return LocalDateTime.of(date, localTime)
     }
 }
-
 enum class Now {
     Now,
     Later

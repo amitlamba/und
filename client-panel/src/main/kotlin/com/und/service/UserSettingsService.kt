@@ -62,7 +62,7 @@ class UserSettingsService {
     @Autowired
     private lateinit var clientRepository: ClientRepository
 
-    //@Value("\${und.url.client}")
+    @Value("\${und.url.client}")
     lateinit var clientUrl: String
 
     private var emptyArrayJson: String = "[]"
@@ -256,13 +256,13 @@ class UserSettingsService {
 
     }
 
-    fun getSenderEmailAddresses(clientID: Long): List<EmailAddress> {
-        //wrong query
-        //val emailAddresses = clientSettingsEmailRepository.findByClientIdAndDeleted(clientID, false)
-        var emailAddresses=clientSettingsEmailRepository.findByClientIdAndVerified(clientID,true)
-        return emailAddresses?.let {
-            it.map { address -> EmailAddress(address.email ?: "", address.address ?: "") }
-        } ?: emptyList()
+    fun getSenderEmailAddresses(clientID: Long, onlyVerified: Boolean): List<EmailAddress> {
+
+        var emailAddresses=clientSettingsEmailRepository.findByClientIdAndDeleted(clientID, false)
+        return emailAddresses?.filter { address->address.verified==onlyVerified }?.let {
+            it.map { address ->EmailAddress(address.email ?: "", address.address ?: "",address.verified!!)
+            }
+        }?: emptyList()
 
     }
 
@@ -282,7 +282,7 @@ class UserSettingsService {
         var host = serviceProviderCredential.credentialsMap.get("url")
         var username = serviceProviderCredential.credentialsMap.get("username")
         var password = serviceProviderCredential.credentialsMap.get("password")
-        var ssl = serviceProviderCredential.credentialsMap.get("ssl") as Boolean
+        //var ssl = serviceProviderCredential.credentialsMap.get("ssl") as Boolean
         var protocaol = serviceProviderCredential.serviceProvider.toLowerCase()
         if (protocaol.equals("smtp")) {
             var props = Properties()
@@ -290,10 +290,13 @@ class UserSettingsService {
             props["mail.smtp.port"] = port
             props["mail.smtp.auth"] = "true"
             props["mail.smtp.starttls.enable"] = "true"
-
-            if (ssl) {
-                props["mail.smtp.ssl.enable"] = ssl
-            }
+            props.put("mail.smtp.socketFactory.class","javax.net.ssl.SSLSocketFactory")
+            props.put("mail.smtp.socketFactory.port",port)
+//            if (ssl) {
+//                props.put("mail.smtp.ssl.socketFactory.class","javax.net.ssl.SSLSocketFactory");
+//                props.put("mail.smtp.ssl.socketFactory.port",port)
+//                props["mail.smtp.ssl.enable"] = ssl
+//            }
 
 
             try {
@@ -345,7 +348,6 @@ class UserSettingsService {
         var currentTimeStamp=System.currentTimeMillis()/1000
         val expired = currentTimeStamp < timestamp + expiration
         if(!expired){
-            //error expired regenerate verifiction link
             //here we give an option in ui to resend verification link
             val validationError = ValidationError()
             validationError.addFieldError("emailVerification",

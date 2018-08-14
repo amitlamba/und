@@ -1,6 +1,7 @@
 package com.und.web.controller
 
 import com.und.common.utils.loggerFor
+import com.und.repository.jpa.ClientRepository
 import com.und.security.utils.KEYTYPE
 import com.und.security.utils.RestTokenUtil
 import com.und.service.EmailService
@@ -71,21 +72,21 @@ class RegisterController {
 
     @GetMapping(value = ["/forgotpassword/{email:.+}"])
     fun forgotPassword(@PathVariable email: String, request: HttpServletRequest): ResponseEntity<Response> {
-        val response = request.getParameter("recaptchaToken")
-        captchaService.processResponse(response)
-        val code = userService.generateJwtForForgotPassword(email)
-        return if (code.pswrdRstKey.isNullOrBlank()) {
-            ResponseEntity.status(HttpStatus.NOT_FOUND).body(Response(
-                    message = "Invalid Email Id",
-                    status = ResponseStatus.FAIL
-            ))
-        } else {
-            emailService.sendForgotPasswordEmail(code, email)
-            ResponseEntity.ok().body(Response(
-                    message = "",
-                    status = ResponseStatus.SUCCESS
-            ))
-        }
+            val response = request.getParameter("recaptchaToken")
+            captchaService.processResponse(response)
+            val code = userService.generateJwtForForgotPassword(email)
+            return if (code.pswrdRstKey.isNullOrBlank()) {
+                ResponseEntity.status(HttpStatus.NOT_FOUND).body(Response(
+                        message = "Invalid Email Id",
+                        status = ResponseStatus.FAIL
+                ))
+            } else {
+                emailService.sendForgotPasswordEmail(code, email)
+                ResponseEntity.ok().body(Response(
+                        message = "",
+                        status = ResponseStatus.SUCCESS
+                ))
+            }
     }
 
 
