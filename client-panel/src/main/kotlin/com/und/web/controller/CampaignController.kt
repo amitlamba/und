@@ -73,7 +73,6 @@ class CampaignController {
                 var tempelate= listOf<EmailTemplate>()
 
                 if (campaignType.equals(CampaignType.EMAIL)){
-                    println(campaign.templateID)
                     tempelate=emailTempleteService.getEmailTemplate(campaign.templateID!!)
                 }
                 if(campaignType.equals(CampaignType.SMS)){

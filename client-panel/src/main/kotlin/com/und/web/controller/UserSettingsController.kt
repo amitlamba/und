@@ -55,7 +55,9 @@ class UserSettingsController {
         serviceProviderCredentials.clientID = clientID
         serviceProviderCredentials.serviceProviderType = "Email Service Provider"
         //check credential are correct or not
+        println("checking connection")
         var success=userSettingsService.testConnection(serviceProviderCredentials)
+        println(success)
         if(success)
         return userSettingsService.saveEmailServiceProvider(serviceProviderCredentials)
         return 0L
@@ -97,9 +99,11 @@ class UserSettingsController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/senders-email/list"])
-    fun getSendersEmailList(): List<EmailAddress> {
+    fun getSendersEmailList(@RequestParam(value = "verified", required = false) verified: Boolean?): List<EmailAddress> {
+
+        val onlyVerified = verified?:true;
         val clientID = AuthenticationUtils.clientID
-        return userSettingsService.getSenderEmailAddresses(clientID!!)
+        return userSettingsService.getSenderEmailAddresses(clientID!!, onlyVerified)
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

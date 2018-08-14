@@ -8,6 +8,9 @@ data class EmailAddress(@JsonProperty("address") @Email val address: String, @Js
 
     var status:Boolean=false
 
+    constructor(address:String,personal:String,status:Boolean):this(address,personal){
+        this.status=status
+    }
     companion object {
         fun fromInternetAddress(internetAddress: InternetAddress): EmailAddress {
             return EmailAddress(internetAddress.address, internetAddress.personal)
