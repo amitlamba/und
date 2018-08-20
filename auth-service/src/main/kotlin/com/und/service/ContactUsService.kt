@@ -32,7 +32,7 @@ class ContactUsService {
         val endDate = LocalDateTime.now(ZoneId.of("UTC"))
         val contactUsEmail = contactUsRepository
                 .findByEmailBetweenDates(webContactUs.email, startDate, endDate)
-        if (contactUsEmail.isPresent && contactUsEmail.get().size >= 2) {
+        if (contactUsEmail.isPresent && contactUsEmail.get().size >= 10) {
             val error = ValidationError()
             error.addFieldError("email", "Email is already registered for contact")
             throw EmailAlreadyRegisteredException(error)
@@ -56,7 +56,4 @@ class ContactUsService {
 
         return contactUS
     }
-
-
-
 }

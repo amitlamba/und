@@ -136,12 +136,12 @@ class EmailHelperService {
     }
 
     fun getImageUrl(clientId: Long, mongoEmailId: String): String {
-        val id = clientId.toString() + "###" + mongoEmailId
+        val id = clientId.toString() + "&" + mongoEmailId
         return getImageUrl(id)
     }
 
     private fun getImageUrl(id: String): String {
-        return "$eventApiUrl/email/image/${URLEncoder.encode(URLEncoder.encode(encrypt(id), "UTF-8"), "UTF-8")}.jpg"
+        return "$eventApiUrl/email/image/${id}.jpg"
     }
 
     fun trackAllURLs(content: String, clientId: Long, mongoEmailId: String): String {

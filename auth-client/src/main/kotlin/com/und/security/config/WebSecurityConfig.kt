@@ -74,6 +74,7 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
                         "/**/*.html",
                         "/**/*.css",
                         "/**/*.js",
+                        "/**/*.jpg",
                         "/api/**",
                         "/v2/**",
                         "/login",

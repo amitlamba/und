@@ -10,7 +10,11 @@
 </a>
 <p>Hey ${name} , </p>
 <p>This email is in response to your request to reset your password.</p>
+
 <p>Please follow the <a href="${resetPasswordLink}">link</a> below to reset your password.</p>
+
+<p>Please follow the <a href="${resetPasswordLink}">link</a> below for to reset your password.</p>
+
 <a href="${resetPasswordLink}">${resetPasswordLink}"</a>
 <p>If you did not make this request,you can safely ignore this email.This is an auto generated email. Please do not
     reply to this email.</p>

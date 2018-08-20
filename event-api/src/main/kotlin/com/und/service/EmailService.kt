@@ -20,6 +20,7 @@ import java.net.URLDecoder
 import java.net.URLEncoder
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.util.*
 import javax.imageio.ImageIO
 
 @Service
@@ -62,7 +63,6 @@ class EmailService {
         try {
             //Get Client Id and Mongo Email Id
             val split = extractClientIdAndMongoEmailId(id)
-
             //Track the Email in Mongo DB
             trackEmailRead(EmailRead(split[0].toLong(), split[1]))
 
@@ -79,9 +79,12 @@ class EmailService {
     }
 
     fun extractClientIdAndMongoEmailId(id: String): List<String> {
-        val code: String? = decrypt(URLDecoder.decode(id, "UTF-8"))
-        val split = code!!.split("###".toRegex(), 2)
-        return split
+        //val code: String? = decrypt(URLDecoder.decode(id, "UTF-8"))
+        //val split = code!!.split("###".toRegex(), 2)
+        val split=id.split("&")
+        var clientId=split[0]
+        var mongoId=split[1].replace(".jpg","")
+        return Arrays.asList(clientId,mongoId)
     }
 
     fun getImageUrl(clientId: Int, mongoEmailId: String): String {

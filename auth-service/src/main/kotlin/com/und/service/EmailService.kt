@@ -21,6 +21,7 @@ class EmailService {
         const val forgotPasswordTemplate = 1L
         const val verificationTemplate = 2L
         const val contactusTemplate = 3L
+        const val supportTemplate=4L
     }
 
     @Value("\${und.auth-url}")
@@ -61,7 +62,27 @@ class EmailService {
         sendEmail(email)
     }
 
+    fun sendContactUserDetails(contactInfo: ContactUs){
+        val dataMap = mutableMapOf<String, Any>(
+                "name" to contactInfo.name,
+                "email" to contactInfo.email,
+                "companyname" to contactInfo.companyName,
+                "message" to contactInfo.message,
+                "mobile" to contactInfo.mobileNo
+        )
+
+        val email = Email(
+                clientID = 1,
+                toEmailAddresses = arrayOf(InternetAddress("support@userndot.com")),
+                emailTemplateId = EmailService.supportTemplate,
+                emailTemplateName = "support",
+                data = dataMap
+
+        )
+        sendEmail(email)
+    }
     fun sendContactUsEmail(contactInfo: ContactUs) {
+        sendContactUserDetails(contactInfo)
         val dataMap = mutableMapOf<String, Any>(
                 "name" to "${contactInfo.name}"
         )
