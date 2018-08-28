@@ -99,7 +99,7 @@ class SegmentServiceImpl : SegmentService {
         if (didQueries.isNotEmpty()) {
             val userDidList = retrieveUsers(didQueries, joincondition, clientId)
             allResult.add(userDidList.toSet())
-        }else{
+        }else if (queries.query!=null){
             var query= Query().addCriteria(queries.query)
             val userList=eventRepository.usersFromEvent(query,clientId)
             allResult.add(userList.toSet())
@@ -120,10 +120,11 @@ class SegmentServiceImpl : SegmentService {
         }
 
         val userList = allResult.reduce { f, s -> f.intersect(s) }
-        return userList.asSequence().map {
-            eventUserRepository.findUserById(it, clientId)
-
-        }.filter { it.isPresent }.map { it.get() }.toList()
+//        return userList.asSequence().map {
+//            eventUserRepository.findUserById(it, clientId)
+//
+//        }.filter { it.isPresent }.map { it.get() }.toList()
+        return eventUserRepository.findUserByIds(userList,clientId)
 
     }
 

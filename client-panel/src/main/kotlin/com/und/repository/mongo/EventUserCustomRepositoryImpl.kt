@@ -16,7 +16,12 @@ import java.time.LocalDate
 import java.util.*
 @Repository
 class EventUserCustomRepositoryImpl : EventUserCustomRepository {
-
+    override fun findUserByIds(ids:Set<String>, clientId: Long): List<EventUser> {
+        var query=Query()
+        query.addCriteria(Criteria("_id").`in`(ids))
+        var result=mongoTemplate.find(query,EventUser::class.java,"${clientId}_eventUser")
+        return result
+    }
 
     @Autowired
     lateinit var mongoTemplate: MongoTemplate

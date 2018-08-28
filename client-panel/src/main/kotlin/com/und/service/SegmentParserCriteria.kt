@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.GroupOperation
 import org.springframework.data.mongodb.core.aggregation.MatchOperation
 import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Component
 import java.io.Serializable
 import java.time.LocalDate
@@ -87,10 +88,10 @@ class SegmentParserCriteria {
 
 
     fun parseUsers(criteria: Criteria): Aggregation {
-        val project = Aggregation.project(Aggregation.fields("_id"))
+        //val project = Aggregation.project(Aggregation.fields("_id"))
         val matchOps = Aggregation.match(criteria)
         val group = Aggregation.group(Aggregation.fields().and("_id", "_id"))
-        return Aggregation.newAggregation(project, matchOps, group)
+        return Aggregation.newAggregation( matchOps, group)
     }
 
     fun parseEvents(events: List<Event>, tz: ZoneId, did: Boolean, eventPropertyMatch: Criteria?, geoCriteria: Criteria?): List<Aggregation> {
@@ -118,7 +119,6 @@ class SegmentParserCriteria {
 
 
             val matchOps = Aggregation.match(Criteria().andOperator(*matches.toTypedArray()))
-
             val whereCond = if (did) {
                 event.whereFilter?.let { whereFilter -> whereFilterParse(whereFilter, tz) } ?: Optional.empty()
             } else Optional.empty()
@@ -204,6 +204,7 @@ class SegmentParserCriteria {
 
                     val group = Aggregation.group(Aggregation.fields().and(Field.userId.name, Field.userId.name)).count().`as`(Field.count.name)
                     val match = matchNumber(values.map { it.toString() }, whereFilter.operator, Field.count.name)
+
                     Pair(group, Aggregation.match(match))
                 }
                 whereFilter.whereFilterName == WhereFilterName.SumOfValuesOf && !whereFilter.propertyName.isNullOrBlank() -> {
@@ -403,9 +404,19 @@ class SegmentParserCriteria {
         }
     }
 
+    private fun getFieldPath(filterType:GlobalFilterType):String{
+        when(filterType){
+            GlobalFilterType.Demographics->return "standardInfo."
+            GlobalFilterType.Technographics->return "system."
+            GlobalFilterType.UserProperties-> return "additionalInfo"
+            else-> return ""
+        }
+    }
+
     private fun filterGlobalQ(globalFilters: List<GlobalFilter>, tz: ZoneId): Pair<Criteria?, Criteria?> {
-        fun parseGlobalFilter(filter: GlobalFilter): Criteria {
-            val fieldName = filter.name
+        fun parseGlobalFilter(filter: GlobalFilter,filterType:GlobalFilterType): Criteria {
+            var fieldPath= getFieldPath(filterType)
+            val fieldName = "$fieldPath${filter.name}"
             val type = filter.type
             val unit = filter.valueUnit
             val values = filter.values
@@ -417,7 +428,8 @@ class SegmentParserCriteria {
 
             val criteriaList = filters.map { filterList ->
                 val sameNameCriteria = filterList.value.map { filter ->
-                    parseGlobalFilter(filter)
+                    var filterType=filter.globalFilterType
+                    parseGlobalFilter(filter,filterType)
 
                 }
                 Criteria().orOperator(*sameNameCriteria.toTypedArray())
@@ -459,9 +471,9 @@ class SegmentParserCriteria {
     private fun filterGeography(geofilter: List<Geography>): Criteria {
 
         val criteria = geofilter.map { geo ->
-            val country = geo.country?.name?.let { name -> Criteria.where("geogrophy.country").`is`(name) }
-            val state = geo.state?.name?.let { name -> Criteria.where("geogrophy.state").`is`(name) }
-            val city = geo.city?.name?.let { name -> Criteria.where("geogrophy.city").`is`(name) }
+            val country = geo.country?.name?.let { name -> Criteria.where("geography.country").`is`(name) }
+            val state = geo.state?.name?.let { name -> Criteria.where("geography.state").`is`(name) }
+            val city = geo.city?.name?.let { name -> Criteria.where("geography.city").`is`(name) }
             val geoCriteria = listOfNotNull(country, state, city)
             if (geoCriteria.isNotEmpty()) {
                 Criteria().andOperator(*geoCriteria.toTypedArray())
