@@ -63,7 +63,7 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
                 .authorizeRequests()
                 //FIXME: Find a better way to allow cross domain requests
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
+                .antMatchers("/v2/api-docs", "/swagger-resources/configuration/ui", "/swagger-resources", "/swagger-resources/configuration/security", "/swagger-ui.html", "/webjars/**").permitAll()
                 // allow anonymous resource requests
                 //FIXME protect actuator health points
                 .antMatchers(
