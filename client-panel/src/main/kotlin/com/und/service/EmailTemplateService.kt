@@ -41,7 +41,6 @@ class EmailTemplateService {
     @Cacheable(cacheNames = ["emailtemplate"],key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_template_'+#emailTemplateId" )
     fun getEmailTemplate(emailTemplateId: Long): List<WebEmailTemplate> {
         val clientId = AuthenticationUtils.clientID
-        println(clientId)
         return clientId?.let {
             val emailTemplateOtion = emailTemplateRepository.findByIdAndClientID(emailTemplateId, clientId)
             if (emailTemplateOtion.isPresent) listOf(buildWebEmailTemplate(emailTemplateOtion.get())) else emptyList()

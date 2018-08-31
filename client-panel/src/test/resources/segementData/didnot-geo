@@ -1,0 +1,44 @@
+{
+  "didEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [
+      {
+        "dateFilter": {
+          "operator": "Before",
+          "values": [
+            "2018-08-28"
+          ]
+        },
+        "whereFilter": {},
+        "name": "Add to WishList",
+        "propertyFilters": []
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [],
+  "geographyFilters": [
+    {
+      "country": {
+        "id": "102",
+        "name": "Indonesia"
+      },
+      "state": {
+        "id": "1691",
+        "name": "Solo"
+      },
+      "city": {
+        "id": "21536",
+        "name": "Solo"
+      }
+    }
+  ],
+  "type": "Behaviour"
+}

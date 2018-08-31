@@ -1,0 +1,32 @@
+{
+  "didEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [],
+  "geographyFilters": [
+    {
+      "country": {
+        "id": "101",
+        "name": "India"
+      },
+      "state": {
+        "id": "11",
+        "name": "Goa"
+      },
+      "city": {
+        "id": "712",
+        "name": "Bambolim"
+      }
+    }
+  ],
+  "type": "Behaviour"
+}

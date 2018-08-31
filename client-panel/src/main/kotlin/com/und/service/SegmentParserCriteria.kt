@@ -471,9 +471,9 @@ class SegmentParserCriteria {
     private fun filterGeography(geofilter: List<Geography>): Criteria {
 
         val criteria = geofilter.map { geo ->
-            val country = geo.country?.name?.let { name -> Criteria.where("geography.country").`is`(name) }
-            val state = geo.state?.name?.let { name -> Criteria.where("geography.state").`is`(name) }
-            val city = geo.city?.name?.let { name -> Criteria.where("geography.city").`is`(name) }
+            val country = geo.country?.name?.let { name -> Criteria.where("geogrophy.country").`is`(name) }
+            val state = geo.state?.name?.let { name -> Criteria.where("geogrophy.state").`is`(name) }
+            val city = geo.city?.name?.let { name -> Criteria.where("geogrophy.city").`is`(name) }
             val geoCriteria = listOfNotNull(country, state, city)
             if (geoCriteria.isNotEmpty()) {
                 Criteria().andOperator(*geoCriteria.toTypedArray())

@@ -4,7 +4,7 @@ data class TrendCount(var usercount: Int, var name: String)
 
 data class TrendByTime(var usercount: Int, var time: Int)
 
-data class TrendTimeSeries(var date: String, var trendata: List<TrendByTime>)
+data class TrendTimeSeries(var date: String, var trenddata: List<TrendByTime>)
 
 data class UserCountByTime(var newusercount: Int, var oldusercount: Int, var time: Int)
 

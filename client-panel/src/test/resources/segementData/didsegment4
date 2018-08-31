@@ -1,0 +1,44 @@
+{
+  "didEvents": {
+    "events": [
+      {
+        "dateFilter": {
+          "operator": "Before",
+          "values": [
+            "2018-08-28"
+          ]
+        },
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [
+            3
+          ],
+          "whereFilterName": "Count"
+        },
+        "name": "Search",
+        "propertyFilters": [
+          {
+            "values": [
+              "shirt"
+            ],
+            "name": "Item",
+            "type": "string",
+            "operator": "DoesNotContain"
+          }
+        ]
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [],
+  "geographyFilters": [],
+  "type": "Behaviour"
+}

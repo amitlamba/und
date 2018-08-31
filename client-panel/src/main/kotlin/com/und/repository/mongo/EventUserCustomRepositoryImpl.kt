@@ -16,15 +16,17 @@ import java.time.LocalDate
 import java.util.*
 @Repository
 class EventUserCustomRepositoryImpl : EventUserCustomRepository {
+
+    @Autowired
+    lateinit var mongoTemplate: MongoTemplate
+
+
     override fun findUserByIds(ids:Set<String>, clientId: Long): List<EventUser> {
         var query=Query()
         query.addCriteria(Criteria("_id").`in`(ids))
         var result=mongoTemplate.find(query,EventUser::class.java,"${clientId}_eventUser")
         return result
     }
-
-    @Autowired
-    lateinit var mongoTemplate: MongoTemplate
 
 
     override fun findUserById(id: String, clientId: Long): Optional<EventUser> {
@@ -76,7 +78,10 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
 
     override fun usersFromUserProfile(query: Aggregation, clientId: Long): List<String> {
         val output = mongoTemplate.aggregate(query, "${clientId}_eventUser", Document::class.java)
-        return extractids(output)
+        if(output!=null)
+            return extractids(output)
+        else
+            return emptyList<String>()
     }
 
     private fun updateEventUser(q: Query, update: Update, clientId: Long) {
@@ -85,12 +90,16 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
 
     override fun findUsersNotIn(ids: Set<String>, clientId: Long): List<String> {
 
-        val project = Aggregation.project("_id")
+        //val project = Aggregation.project("_id")
         val match = Aggregation.match(Criteria.where("_id").nin(ids.map { id -> ObjectId(id) }))
-        val group = Aggregation.group("_id")
-        val q = Aggregation.newAggregation(project, match, group)
-        val output = mongoTemplate.aggregate(q, "${clientId}_eventUser", Document::class.java)
-        return extractids(output)
+        //val group = Aggregation.group("_id")
+        val project=Aggregation.project("_id")
+        val query = Aggregation.newAggregation( match, project)
+        val output = mongoTemplate.aggregate(query, "${clientId}_eventUser", Document::class.java)
+        if(output!=null)
+            return extractids(output)
+        else
+            return emptyList<String>()
     }
 
     private fun extractids(output: AggregationResults<Document>): List<String> = output.map { it["_id"].toString() }

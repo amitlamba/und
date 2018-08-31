@@ -1,0 +1,59 @@
+{
+  "didEvents": {
+    "events": [
+      {
+        "dateFilter": {
+          "operator": "Before",
+          "values": [
+            "2018-08-06"
+          ]
+        },
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [
+            0
+          ],
+          "whereFilterName": "Count"
+        },
+        "name": "Search",
+        "propertyFilters": [
+          {
+            "values": [
+              "small"
+            ],
+            "name": "Size",
+            "type": "string",
+            "operator": "Equals"
+          }
+        ]
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [],
+  "geographyFilters": [
+    {
+      "country": {
+        "id": "102",
+        "name": "Indonesia"
+      },
+      "state": {
+        "id": "1691",
+        "name": "Solo"
+      },
+      "city": {
+        "id": "21536",
+        "name": "Solo"
+      }
+    }
+  ],
+  "type": "Behaviour"
+}

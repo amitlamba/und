@@ -1,0 +1,38 @@
+{
+  "didEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [
+      {
+        "dateFilter": {
+          "operator": "Before",
+          "values": [
+            "2018-08-28"
+          ]
+        },
+        "whereFilter": {},
+        "name": "Add to Cart",
+        "propertyFilters": [
+          {
+            "values": [
+              300
+            ],
+            "name": "Amount",
+            "type": "number",
+            "operator": "GreaterThan"
+          }
+        ]
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [],
+  "geographyFilters": [],
+  "type": "Behaviour"
+}

@@ -9,7 +9,7 @@ import java.util.*
 interface EmailTemplateRepository : JpaRepository<EmailTemplate, Long> {
     fun existsByNameAndClientID(name:String, clientID: Long): Boolean
     fun findByNameAndClientID(name:String, clientID: Long): Optional<EmailTemplate>
-    fun findByClientID(clientID: Long = 1): List<EmailTemplate>
+    fun findByClientID(clientID:Long=1): List<EmailTemplate>
     //why we would return a list template id is unique key so there is always either one or zero template
     fun findByIdAndClientID(id: Long, clientID: Long): Optional<EmailTemplate>
 }

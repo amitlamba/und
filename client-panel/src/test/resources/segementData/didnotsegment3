@@ -1,0 +1,58 @@
+{
+  "didEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [
+      {
+        "dateFilter": {
+          "operator": "Before",
+          "values": [
+            "2018-08-28"
+          ]
+        },
+        "whereFilter": {},
+        "name": "Search",
+        "propertyFilters": [
+          {
+            "values": [
+              "black,red"
+            ],
+            "name": "Color",
+            "type": "string",
+            "operator": "Contains"
+          }
+        ]
+      },
+      {
+        "dateFilter": {
+          "operator": "On",
+          "values": [
+            "2018-08-01"
+          ]
+        },
+        "whereFilter": {},
+        "name": "Search Category",
+        "propertyFilters": [
+          {
+            "values": [
+              "men"
+            ],
+            "name": "Category",
+            "type": "string",
+            "operator": "Equals"
+          }
+        ]
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [],
+  "geographyFilters": [],
+  "type": "Behaviour"
+}
