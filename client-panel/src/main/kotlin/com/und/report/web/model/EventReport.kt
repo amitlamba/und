@@ -1,9 +1,11 @@
 package com.und.report.web.model
 
+import java.time.LocalDate
+
 class EventReport {
 
-    data class PropertyFilter(var name: String, var value: String)
-    data class EventReportFilter(var segmentid: Long, var days: Long, var eventName: String, var propFilter: List<EventReport.PropertyFilter>)
+    data class PropertyFilter(var entityType: EntityType, var name: String, var value: String)
+    data class EventReportFilter(var segmentid: Long, var fromDate: LocalDate, var toDate: LocalDate, var eventName: String, var propFilter: List<EventReport.PropertyFilter>)
 
 
     data class EventCount(var usercount: Int, var eventcount: Int, var name: String)
