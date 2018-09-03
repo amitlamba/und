@@ -7,6 +7,7 @@ import com.und.model.jpa.Schedule
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.CampaignService
 import com.und.service.EmailTemplateService
+import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.web.model.Campaign
 import com.und.web.model.EmailTemplate
 import org.springframework.beans.factory.annotation.Autowired
@@ -64,27 +65,22 @@ class CampaignController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/save"])
     fun saveCampaign(@Valid @RequestBody campaign: Campaign): ResponseEntity<Campaign> {
-        logger.info("campaign save request inititated ${campaign.name}")
+        logger.info("campaign save request initiated ${campaign.name}")
         val clientId = AuthenticationUtils.clientID
-        if (clientId != null) {
+        val templateId = campaign.templateID
+        if (clientId != null && templateId!=null) {
 
-            var campaignType=campaign.campaignType
+            val template = when(campaign.campaignType) {
+                CampaignType.EMAIL -> emailTempleteService.getEmailTemplate(templateId)
+                CampaignType.SMS -> {throw Exception("SMS campaign are not available")}
+                CampaignType.MOBILE_PUSH_NOTIFICATION -> {throw Exception("MOBILE Push  campaign are not available")}
 
-                var tempelate= listOf<EmailTemplate>()
+            }
 
-                if (campaignType.equals(CampaignType.EMAIL)){
-                    tempelate=emailTempleteService.getEmailTemplate(campaign.templateID!!)
-                }
-                if(campaignType.equals(CampaignType.SMS)){
-
-                }
-                if(campaignType.equals(CampaignType.MOBILE_PUSH_NOTIFICATION)){
-
-                }
-            if(tempelate.isNotEmpty()) {
-                        val persistedCampaign = campaignService.save(campaign)
-                        return ResponseEntity(persistedCampaign, HttpStatus.CREATED)
-                    }
+            if (template.isNotEmpty()) {
+                val persistedCampaign = campaignService.save(campaign)
+                return ResponseEntity(persistedCampaign, HttpStatus.CREATED)
+            }
         }
         logger.info("campaign saved with name ${campaign.name}")
         return ResponseEntity(campaign, HttpStatus.EXPECTATION_FAILED)

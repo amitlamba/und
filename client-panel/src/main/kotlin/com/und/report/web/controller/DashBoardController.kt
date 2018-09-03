@@ -51,7 +51,7 @@ class DashBoardController {
     fun sampleUsersByEvent(@RequestParam("segmentid", required = true, defaultValue = "1") segmentId: Long,
                          @RequestParam("dates", required = true, defaultValue = "today") date: List<String>):List<String> {
 
-        return emptyList<String>()
+        return emptyList()
     }
 
 
