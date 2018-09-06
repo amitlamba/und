@@ -17,5 +17,4 @@ interface EventStream {
     fun campaignTriggerEvent(): MessageChannel
 
 
-
 }

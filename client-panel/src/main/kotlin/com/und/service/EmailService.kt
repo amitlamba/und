@@ -2,20 +2,16 @@ package com.und.service
 
 import com.und.common.utils.loggerFor
 import com.und.config.EventStream
+import com.und.exception.EmailError
 import com.und.model.Email
 import com.und.model.EmailRead
-import com.und.web.model.ServiceProviderCredentials
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.support.SendResult
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import org.springframework.util.concurrent.ListenableFutureCallback
-import java.util.*
-import javax.mail.Session
-import javax.mail.AuthenticationFailedException
-import javax.mail.MessagingException
+import javax.mail.internet.InternetAddress
 
 
 @Service
@@ -30,7 +26,12 @@ class EmailService {
     private lateinit var eventStream: EventStream
 
     @Autowired
+    private lateinit var clientService: ClientService
+
+    @Autowired
     private lateinit var kafkaTemplateEmailRead: KafkaTemplate<String, EmailRead>
+
+    private val emailConnectionErrorTemplate: Long = 5L
 
     //@Value(value = "\${kafka.topic.email}")
     private var topic: String = "Email"
@@ -63,6 +64,29 @@ class EmailService {
         toKafka(email)
         logger.info("email sent -------------")
     }
+
+    fun sendEmailConnectionErrorEmail(emailError: EmailError) {
+        emailError.clientid?.let {clientId->
+            val client = clientService.getClientByClientId(clientId)
+
+
+            val dataMap = mutableMapOf<String, Any>(
+                    "name" to "${client.firstname} ${client.lastname}",
+                    "error" to "${emailError.causeMessage}"
+
+            )
+
+            val email = Email(
+                    clientID = 1,
+                    toEmailAddresses = arrayOf(InternetAddress(client.email)),
+                    emailTemplateId = emailConnectionErrorTemplate,
+                    emailTemplateName = "emailConnectionError",
+                    data = dataMap
+            )
+            sendEmail(email)
+        }
+    }
+
 
     private fun toKafka(email: Email) {
         eventStream.clientEmailSend().send(MessageBuilder.withPayload(email).build())

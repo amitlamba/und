@@ -1,5 +1,6 @@
 package com.und.kafkalisterner
 
+import com.und.exception.EmailFailureException
 import com.und.factory.EmailServiceProviderConnectionFactory
 import com.und.model.utils.Email
 import com.und.model.utils.EmailUpdate
@@ -29,13 +30,21 @@ class EmailListener {
 
     @StreamListener("emailEventSend")
     fun sendEmailCampaign(email: Email) {
-        emailService.sendEmail(email)
+        try {
+            emailService.sendEmail(email)
+        } catch (ef: EmailFailureException) {
+            emailService.toKafkaEmailError(ef.error)
+        }
     }
 
     @StreamListener("clientEmailReceive")
     fun sendClientEmail(email: Email) {
         email.clientID = 1
-        emailService.sendEmail(email)
+        try {
+            emailService.sendEmail(email)
+        } catch (ef: EmailFailureException) {
+            emailService.toKafkaEmailError(ef.error)
+        }
     }
 
     @StreamListener("EmailUpdateReceive")
@@ -50,8 +59,9 @@ class EmailListener {
             logger.error("Error while Updating Email $emailUpdate", ex.message)
         }
     }
-    @StreamListener(value="VerificationEmailReceive")
-    fun sendVerificationEmail(email: Email){
+
+    @StreamListener(value = "VerificationEmailReceive")
+    fun sendVerificationEmail(email: Email) {
         emailService.sendVerificationEmail(email)
     }
 }

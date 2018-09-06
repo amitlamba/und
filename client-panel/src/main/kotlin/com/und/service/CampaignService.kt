@@ -3,13 +3,12 @@ package com.und.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.common.utils.loggerFor
 import com.und.config.EventStream
-import com.und.model.CampaignStatus
-import com.und.model.JobActionStatus
-import com.und.model.JobDescriptor
-import com.und.model.TriggerDescriptor
+import com.und.exception.EmailError
+import com.und.model.*
 import com.und.model.jpa.*
 import com.und.repository.jpa.CampaignAuditLogRepository
 import com.und.repository.jpa.CampaignRepository
+import com.und.repository.jpa.EmailFailureAuditLogRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.ScheduleUpdateException
 import com.und.web.controller.exception.UndBusinessValidationException
@@ -40,8 +39,10 @@ class CampaignService {
     @Autowired
     private lateinit var userSettingsService: UserSettingsService
 
+
     @Autowired
     private lateinit var campaignAuditRepository: CampaignAuditLogRepository
+
 
     @Autowired
     private lateinit var eventStream: EventStream
@@ -256,6 +257,28 @@ class CampaignService {
         return handleSchedule(campaignId, JobDescriptor.Action.PAUSE)
     }
 
+    @Transactional
+    fun pauseAllRunning(clientId: Long): List<Long> {
+        val runningCampaigns =
+                campaignRepository.findByStatusIn(clientId, listOf(CampaignStatus.RESUMED, CampaignStatus.CREATED))
+        runningCampaigns.forEach { campaignId ->
+            handleSchedule(campaignId, JobDescriptor.Action.FORCE_PAUSE)
+        }
+        return emptyList()
+    }
+
+
+    @Transactional
+    fun resumeAllForcePaused(clientId: Long): List<Long> {
+        val forcePausedCampaigns =
+                campaignRepository.findByStatusIn(clientId, listOf(CampaignStatus.FORCE_PAUSED))
+        forcePausedCampaigns.forEach { campaignId ->
+            resume(campaignId)
+        }
+
+        return emptyList()
+    }
+
     fun resume(campaignId: Long): Long? {
         return handleSchedule(campaignId, JobDescriptor.Action.RESUME)
     }
@@ -359,6 +382,7 @@ class CampaignService {
     fun actionToCampaignStatus(action: JobDescriptor.Action): CampaignStatus {
         return when (action) {
             JobDescriptor.Action.PAUSE -> CampaignStatus.PAUSED
+            JobDescriptor.Action.FORCE_PAUSE -> CampaignStatus.FORCE_PAUSED
             JobDescriptor.Action.RESUME -> CampaignStatus.RESUMED
             JobDescriptor.Action.DELETE -> CampaignStatus.DELETED
             JobDescriptor.Action.CREATE -> CampaignStatus.CREATED
@@ -370,9 +394,11 @@ class CampaignService {
 
     fun getScheduleError(campaignId: Long, clientId: Long): Optional<String> {
         val auditLog = campaignAuditRepository.findTopBycampaignIdAndClientIDOrderByIdDesc(campaignId, clientId)
-        return auditLog.filter {  it.status !in setOf(JobActionStatus.Status.OK, JobActionStatus.Status.DUPLICATE) && it.message.isNotEmpty()}.map {it.message}
+        return auditLog.filter { it.status !in setOf(JobActionStatus.Status.OK, JobActionStatus.Status.DUPLICATE) && it.message.isNotEmpty() }.map { it.message }
 
     }
+
+
 
 
 }
