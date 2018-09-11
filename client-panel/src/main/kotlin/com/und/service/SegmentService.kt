@@ -16,6 +16,8 @@ interface SegmentService {
 
     fun segmentById(id:Long): WebSegment
 
+    fun segmentUserIds(segmentId: Long, clientId: Long): List<String>
+
     fun segmentUsers(segmentId: Long, clientId: Long): List<EventUser>
 
     fun segmentUsers(segment: WebSegment, clientId: Long): List<EventUserWeb>

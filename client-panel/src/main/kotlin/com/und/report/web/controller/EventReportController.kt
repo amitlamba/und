@@ -1,14 +1,23 @@
 package com.und.report.web.controller
 
 
+import com.und.report.service.UserEventAnalyticsService
+import com.und.report.web.model.AggregateBy
 import com.und.report.web.model.EventReport
 import com.und.report.web.model.EventReport.EventCount
+import com.und.report.web.model.GroupBy
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController("/report/event")
+@RequestMapping("/report/event")
 class EventReportController {
+
+    @Autowired
+    private lateinit var userAnalyticsService: UserEventAnalyticsService
 
     /**
      * @param groupBy name of property on which count of users will be split
@@ -32,12 +41,9 @@ class EventReportController {
     //select timeZoneId, count(id/distinct(userId)) from event group by timeZoneId where clientId = 3 and creationTime > -100 days and name = 'charged'
     //              and userId in (users in segment)
     //              <more property filters>
-    fun countTrendC(@RequestParam(name = "ftr") requestFilter: EventReport.EventReportFilter,
-                    @RequestParam(name = "entityType") entityType: EventReport.EntityType,
-                    @RequestParam(name = "groupby", defaultValue = "os") groupBy: EventReport.PropertyFilter): List<EventCount> {
-
-        //FIXME call service methods
-        return emptyList()
+    fun countTrend(@RequestParam(name = "entityType") entityType: EventReport.EntityType,
+                    groupBy: GroupBy, requestFilter: EventReport.EventReportFilter): List<EventCount> {
+        return userAnalyticsService.countTrend(requestFilter, entityType, groupBy)
     }
 
 
@@ -46,12 +52,9 @@ class EventReportController {
     //EntityType is missing in request parameters?
     //Users/Distinct(Users)? -> In event trend users, in user trend distinct(user)
     //same as above mostly
-    fun timePeriodTrend(@RequestParam(name = "ftr") requestFilter: EventReport.EventReportFilter,
-                        @RequestParam(name = "entityType") entityType: EventReport.EntityType,
-                        @RequestParam(name = "period") period: EventReport.PERIOD): List<EventReport.EventPeriodCount> {
-        //FIXME call service methods
-        return emptyList()
-
+    fun timePeriodTrend(@RequestParam(name = "entityType") entityType: EventReport.EntityType,
+                        @RequestParam(name = "period") period: EventReport.PERIOD, requestFilter: EventReport.EventReportFilter): List<EventReport.EventPeriodCount> {
+        return userAnalyticsService.timePeriodTrend(requestFilter, entityType, period)
     }
 
 
@@ -60,8 +63,8 @@ class EventReportController {
     //For last 100 days?
     //Users/Distinct(Users)?
     //All possible count of events to be shown, no ranging to be done (assumption is there won't be more than 10-20 possible counts)
-    fun eventUserTrend(@RequestParam(name = "ftr") requestFilter: EventReport.EventReportFilter): List<EventReport.EventUserFrequency> {
-        return emptyList()
+    fun eventUserTrend(requestFilter: EventReport.EventReportFilter): List<EventReport.EventUserFrequency> {
+        return userAnalyticsService.eventUserTrend(requestFilter)
     }
 
 
@@ -69,17 +72,14 @@ class EventReportController {
     @GetMapping("/eventTimeTrend")
     //Period is always houly?
     //For last 100 days?
-    fun eventTimeTrend(@RequestParam(name = "ftr") requestFilter: EventReport.EventReportFilter): List<EventReport.EventTimeFrequency> {
-        return emptyList()
+    fun eventTimeTrend(requestFilter: EventReport.EventReportFilter): List<EventReport.EventTimeFrequency> {
+        return userAnalyticsService.eventTimeTrend(requestFilter)
     }
 
     //aggregate on a property on time scale of days, week, month  if property is amount than revenue report,
     @GetMapping("/eventAggregateTrend")
-    fun aggregateTrend(@RequestParam(name = "ftr") requestFilter: EventReport.EventReportFilter,
-                       @RequestParam(name = "period") period: EventReport.PERIOD,
-                       @RequestParam(name = "aggregateOn", defaultValue = "amount") aggregateOn: String): List<EventReport.Aggregate> {
-
-        //FIXME call service methods
-        return emptyList()
+    fun aggregateTrend(@RequestParam(name = "period") period: EventReport.PERIOD,
+                       aggregateBy: AggregateBy, requestFilter: EventReport.EventReportFilter): List<EventReport.Aggregate> {
+        return userAnalyticsService.aggregateTrend(requestFilter, period, aggregateBy)
     }
 }
