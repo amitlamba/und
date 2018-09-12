@@ -404,19 +404,27 @@ class SegmentParserCriteria {
         }
     }
 
-    private fun getFieldPath(filterType:GlobalFilterType):String{
+    fun getFieldPath(filterType:GlobalFilterType):String{
         when(filterType){
             GlobalFilterType.Demographics->return "standardInfo."
             GlobalFilterType.Technographics->return "system."
-            GlobalFilterType.UserProperties-> return "additionalInfo"
+            GlobalFilterType.UserProperties-> return "additionalInfo."
+
+            GlobalFilterType.EventAttributeProperties-> return "attributes."
+            GlobalFilterType.EventTimeProperties-> return "clientTime."
             else-> return ""
         }
     }
 
-    private fun filterGlobalQ(globalFilters: List<GlobalFilter>, tz: ZoneId): Pair<Criteria?, Criteria?> {
+    private fun isUserCollection(globalFilterType: GlobalFilterType): Boolean{
+        //TODO, move it to the enum so in case of a new entry in enum it doesn't get missed
+        return globalFilterType in listOf(GlobalFilterType.UserProperties, GlobalFilterType.Demographics, GlobalFilterType.Reachability, GlobalFilterType.UserComputedProperties)
+    }
+
+    fun joinAwareFilterGlobalQ(globalFilters: List<GlobalFilter>, tz: ZoneId, joinWithUser: Boolean): Pair<Criteria?, Criteria?>{
         fun parseGlobalFilter(filter: GlobalFilter,filterType:GlobalFilterType): Criteria {
             var fieldPath= getFieldPath(filterType)
-            val fieldName = "$fieldPath${filter.name}"
+            val fieldName = if(joinWithUser &&  isUserCollection(filterType)) "$USER_DOC.$fieldPath${filter.name}" else "$fieldPath${filter.name}"
             val type = filter.type
             val unit = filter.valueUnit
             val values = filter.values
@@ -432,10 +440,10 @@ class SegmentParserCriteria {
                     parseGlobalFilter(filter,filterType)
 
                 }
-                Criteria().orOperator(*sameNameCriteria.toTypedArray())
+                if(sameNameCriteria.size == 1) sameNameCriteria.get(0) else Criteria().orOperator(*sameNameCriteria.toTypedArray())
             }
 
-            return Criteria().andOperator(*criteriaList.toTypedArray())
+            return if(criteriaList.size == 1) criteriaList.get(0) else Criteria().andOperator(*criteriaList.toTypedArray())
         }
 
         val eventPropertyMatchCriteria = mutableListOf<Criteria>()
@@ -453,18 +461,26 @@ class SegmentParserCriteria {
                         GlobalFilterType.Demographics -> userPropertyMatchCriteria.add(criteria)
                         GlobalFilterType.Reachability -> userPropertyMatchCriteria.add(criteria)
                         GlobalFilterType.UserProperties -> userPropertyMatchCriteria.add(criteria)
+
+                        GlobalFilterType.EventProperties -> eventPropertyMatchCriteria.add(criteria)
+                        GlobalFilterType.EventAttributeProperties -> eventPropertyMatchCriteria.add(criteria)
+                        GlobalFilterType.EventComputedProperties -> eventPropertyMatchCriteria.add(criteria)
                     }
                 }
 
-        val eventCriteria = if (eventPropertyMatchCriteria.isNotEmpty()) Criteria().andOperator(*eventPropertyMatchCriteria.toTypedArray()) else null
+        val eventCriteria = if(eventPropertyMatchCriteria.size == 1) eventPropertyMatchCriteria.get(0)
+        else (if (eventPropertyMatchCriteria.isNotEmpty()) Criteria().andOperator(*eventPropertyMatchCriteria.toTypedArray()) else null)
         //val eventMatch = Aggregation.match(eventCriteria)
 
-        val userCriteria = if (userPropertyMatchCriteria.isNotEmpty()) Criteria().andOperator(*userPropertyMatchCriteria.toTypedArray()) else null
+        val userCriteria = if(userPropertyMatchCriteria.size == 1) userPropertyMatchCriteria.get(0)
+        else (if (userPropertyMatchCriteria.isNotEmpty()) Criteria().andOperator(*userPropertyMatchCriteria.toTypedArray()) else null)
         //val userMatch = Aggregation.match(userCriteria)
 
         return Pair(eventCriteria, userCriteria)
+    }
 
-
+    fun filterGlobalQ(globalFilters: List<GlobalFilter>, tz: ZoneId): Pair<Criteria?, Criteria?> {
+        return joinAwareFilterGlobalQ(globalFilters, tz, false)
     }
 
 
@@ -489,6 +505,10 @@ class SegmentParserCriteria {
 }
 
 
-class SegmentQuery(val didq: Pair<List<Aggregation>, ConditionType>, val didntq: Pair<List<Aggregation>, ConditionType>, val userQuery: Aggregation?,val query:Criteria?=null) : Serializable
+class SegmentQuery(
+        val didq: Pair<List<Aggregation>, ConditionType>,
+        val didntq: Pair<List<Aggregation>, ConditionType>,
+        val userQuery: Aggregation?,
+        val query:Criteria?=null) : Serializable
 
 

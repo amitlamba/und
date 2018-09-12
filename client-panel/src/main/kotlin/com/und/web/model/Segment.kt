@@ -100,6 +100,11 @@ enum class WhereFilterName : Serializable {
     SumOfValuesOf
 }
 
+enum class AggregationType : Serializable {
+    Avg,
+    Sum
+}
+
 enum class DateOperator : Serializable {
     Before,
     After,
@@ -160,7 +165,13 @@ enum class GlobalFilterType(val type: String) : Serializable {
     Demographics("Demographics"),
     Technographics("Technographics"),
     Reachability("Reachability"),
-    AppFields("appFields")
+    AppFields("AppFields"),
+
+    EventProperties("EventProperties"),
+    EventAttributeProperties("EventAttributes"),
+    EventTimeProperties("EventTimeProperties"),
+    EventComputedProperties("EventComputed"),
+    UserComputedProperties("UserComputed")
 }
 
 class Geography : Serializable {
