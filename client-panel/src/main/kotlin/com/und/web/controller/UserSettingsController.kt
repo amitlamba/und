@@ -1,7 +1,10 @@
 package com.und.web.controller
 
 import com.und.common.utils.decrypt
+import com.und.model.Status
 import com.und.security.utils.AuthenticationUtils
+import com.und.service.CampaignService
+import com.und.service.ServiceProviderType
 import com.und.service.UserSettingsService
 import com.und.web.model.AccountSettings
 import com.und.web.model.EmailAddress
@@ -23,6 +26,9 @@ class UserSettingsController {
 
     @Autowired
     private lateinit var userSettingsService: UserSettingsService
+
+    @Autowired
+    private lateinit var campaignService: CampaignService
 
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -53,14 +59,15 @@ class UserSettingsController {
         val userID = AuthenticationUtils.principal.id
         serviceProviderCredentials.appuserID = userID
         serviceProviderCredentials.clientID = clientID
-        serviceProviderCredentials.serviceProviderType = "Email Service Provider"
+        serviceProviderCredentials.serviceProviderType = ServiceProviderType.EMAIL_SERVICE_PROVIDER.desc
         //check credential are correct or not
-        println("checking connection")
-        var success=userSettingsService.testConnection(serviceProviderCredentials)
-        println(success)
-        if(success)
-        return userSettingsService.saveEmailServiceProvider(serviceProviderCredentials)
-        return 0L
+        //println("checking connection")
+        val success = userSettingsService.testConnection(serviceProviderCredentials)
+        //println(success)
+        return if (success) {
+            userSettingsService.saveEmailServiceProvider(serviceProviderCredentials, Status.ACTIVE)
+            //clientID?.let{ id->campaignService.resumeAllForcePaused(id)}
+        } else 0L
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -84,10 +91,9 @@ class UserSettingsController {
         val userID = AuthenticationUtils.principal.id
         serviceProviderCredentials.appuserID = userID
         serviceProviderCredentials.clientID = clientID
-        serviceProviderCredentials.serviceProviderType = "Sms Service Provider"
+        serviceProviderCredentials.serviceProviderType = ServiceProviderType.SMS_SERVICE_PROVIDER.desc
         return userSettingsService.saveSmsServiceProvider(serviceProviderCredentials)
     }
-
 
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -101,7 +107,7 @@ class UserSettingsController {
     @GetMapping(value = ["/senders-email/list"])
     fun getSendersEmailList(@RequestParam(value = "verified", required = false) verified: Boolean?): List<EmailAddress> {
 
-        val onlyVerified = verified?:true;
+        val onlyVerified = verified ?: true;
         val clientID = AuthenticationUtils.clientID
         return userSettingsService.getSenderEmailAddresses(clientID!!, onlyVerified)
     }
@@ -146,21 +152,21 @@ class UserSettingsController {
     fun getUnsubscribeLink(): UnSubscribeLink? {
         val clientID = AuthenticationUtils.clientID
         val linkOptional = userSettingsService.getUnSubscribeLink(clientID)
-        return if(linkOptional.isPresent) linkOptional.get() else null
+        return if (linkOptional.isPresent) linkOptional.get() else null
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/verifyemail/{link}"])
-    fun verifyEmail(@PathVariable(value = "link")link:String){
+    fun verifyEmail(@PathVariable(value = "link") link: String) {
 
-        var decodeString= URLDecoder.decode(link,"UTF-8")
-        var decryptString= decrypt(decodeString)
-        var details=decryptString.split("||")
-        var timeStamp=details[0].toLong()
-        var mail=details[1]
-        var clientId=details[2].toLong()
+        var decodeString = URLDecoder.decode(link, "UTF-8")
+        var decryptString = decrypt(decodeString)
+        var details = decryptString.split("||")
+        var timeStamp = details[0].toLong()
+        var mail = details[1]
+        var clientId = details[2].toLong()
 
-        userSettingsService.updateStatusOfEmailSetting(timeStamp,mail,clientId)
+        userSettingsService.updateStatusOfEmailSetting(timeStamp, mail, clientId)
 
 
     }

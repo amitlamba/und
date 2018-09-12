@@ -10,8 +10,5 @@ class EmptyEmailBodyException : RuntimeException {
 
     constructor(cause: Throwable) : super(cause)
 
-    companion object {
 
-        private val serialVersionUID = 5861310537366287163L
-    }
 }

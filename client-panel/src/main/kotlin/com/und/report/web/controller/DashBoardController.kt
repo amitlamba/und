@@ -63,8 +63,10 @@ class DashBoardController {
     @GetMapping("/samepleusersbyevent")
     //FIXME call service methods and data types
     fun sampleUsersByEvent(@RequestParam("segmentid", required = true, defaultValue = "1") segmentId: Long,
+
                          @RequestParam("date", required = true, defaultValue = "today") date: String):List<EventUser> {
         return emptyList<EventUser>()
+
     }
 
 

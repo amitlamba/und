@@ -9,5 +9,6 @@ enum class CampaignStatus {
     SCHEDULE_ERROR,
     DELETED,
     STOPPED,
-    COMPLETED
+    COMPLETED,
+    FORCE_PAUSED
 }

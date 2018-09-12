@@ -67,10 +67,6 @@ class UserSettingsService {
 
     private var emptyArrayJson: String = "[]"
 
-
-    private val emailServiceProvider = "Email Service Provider"
-    private val smsServiceProvider = "Sms Service Provider"
-
     private var templateId=1L
     private var templateName="fromEmailVerification"
     private var expiration=24*60*60
@@ -81,33 +77,33 @@ class UserSettingsService {
     }
 
     fun getEmailServiceProvider(clientID: Long): List<WebServiceProviderCredentials> {
-        val spCredsList = serviceProviderCredentialsRepository.findAllByClientIDAndServiceProviderType(clientID, emailServiceProvider)
+        val spCredsList = serviceProviderCredentialsRepository.findAllByClientIDAndServiceProviderType(clientID, ServiceProviderType.EMAIL_SERVICE_PROVIDER.desc)
         val wspCreds = mutableListOf<WebServiceProviderCredentials>()
         spCredsList.forEach { wspCreds.add(buildWebServiceProviderCredentials(it)) }
         return wspCreds
     }
 
     fun getEmailServiceProvider(clientID: Long, id: Long): WebServiceProviderCredentials? {
-        val spCreds = serviceProviderCredentialsRepository.findAllByClientIDAndIdAndServiceProviderType(clientID, id, emailServiceProvider)
+        val spCreds = serviceProviderCredentialsRepository.findAllByClientIDAndIdAndServiceProviderType(clientID, id, ServiceProviderType.EMAIL_SERVICE_PROVIDER.desc)
         return buildWebServiceProviderCredentials(spCreds!!)
     }
 
-    fun saveEmailServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
-        webServiceProviderCredentials.status = Status.ACTIVE
+    fun saveEmailServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials, status:Status): Long? {
+        webServiceProviderCredentials.status = status
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
     }
 
     fun getSmsServiceProvider(clientID: Long): List<WebServiceProviderCredentials> {
-        val spCredsList = serviceProviderCredentialsRepository.findAllByClientIDAndServiceProviderType(clientID, smsServiceProvider)
+        val spCredsList = serviceProviderCredentialsRepository.findAllByClientIDAndServiceProviderType(clientID, ServiceProviderType.SMS_SERVICE_PROVIDER.desc)
         val wspCreds = mutableListOf<WebServiceProviderCredentials>()
         spCredsList.forEach { wspCreds.add(buildWebServiceProviderCredentials(it)) }
         return wspCreds
     }
 
     fun getSmsServiceProvider(clientID: Long, id: Long): WebServiceProviderCredentials? {
-        val spCreds = serviceProviderCredentialsRepository.findAllByClientIDAndIdAndServiceProviderType(clientID, id, smsServiceProvider)
+        val spCreds = serviceProviderCredentialsRepository.findAllByClientIDAndIdAndServiceProviderType(clientID, id, ServiceProviderType.SMS_SERVICE_PROVIDER.desc)
         return buildWebServiceProviderCredentials(spCreds!!)
     }
 
@@ -364,5 +360,14 @@ class UserSettingsService {
     private fun toVerificationKafka(email:Email){
         eventStream.verificationEmailReceive().send(MessageBuilder.withPayload(email).build())
     }
+
+
+
+}
+
+enum class ServiceProviderType(val desc: String) {
+    EMAIL_SERVICE_PROVIDER("Email Service Provider"),
+    SMS_SERVICE_PROVIDER("SMS Service Provider"),
+    NOTIFICATION_SERVICE_PROVIDER("Notification Service Provider")
 
 }

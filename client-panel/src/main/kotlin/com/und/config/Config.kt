@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.data.mongodb.MongoDbFactory
 
 
-@EnableBinding(EventStream::class)
+//@EnableBinding(EventStream::class)
 class Config {
 
 
