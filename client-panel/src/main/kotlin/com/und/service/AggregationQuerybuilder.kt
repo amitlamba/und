@@ -96,13 +96,13 @@ class AggregationQuerybuilder {
             }
 
             allGroupBys.eventSimpleGroupBys.forEach {
-                val scopedName = getCompleteScopedName(it.name, it.globalFilterType)
+                val scopedName = getCompleteScopedName(it.groupName, it.groupFilterType)
                 projectOperation = projectOperation.and(scopedName).`as`(scopedName)
             }
 
             //add those computed event groupBy only which are not in computed event filters
-            allGroupBys.eventComputedGroupBys.filter {group -> !allFilters.eventComputedFilters.map { it.name }.contains(group.name)}.forEach {
-                projectOperation = projectOperation.and(getAggregationExpression(it.name, paramValues)).`as`(it.name)
+            allGroupBys.eventComputedGroupBys.filter {group -> !allFilters.eventComputedFilters.map { it.name }.contains(group.groupName)}.forEach {
+                projectOperation = projectOperation.and(getAggregationExpression(it.groupName, paramValues)).`as`(it.groupName)
             }
 
             if(aggregateBy != null && !isUserCollection(aggregateBy.globalFilterType)){
@@ -130,8 +130,8 @@ class AggregationQuerybuilder {
         val eventOutputJoinWithUser = (entityType == EventReport.EntityType.event && (eventGroupByPresent || eventAggregateByPresent))
                 && (userFilterPresent || userGroupByPresent || userAggregateByPresent)
         if(eventGroupByPresent){
-            eventGroupFields.putAll(allGroupBys.eventSimpleGroupBys.map { it.name to getCompleteScopedName(it.name, it.globalFilterType)}.toMap())
-            eventGroupFields.putAll(allGroupBys.eventComputedGroupBys.map { it.name to it.name}.toMap())
+            eventGroupFields.putAll(allGroupBys.eventSimpleGroupBys.map { it.groupName to getCompleteScopedName(it.groupName, it.groupFilterType)}.toMap())
+            eventGroupFields.putAll(allGroupBys.eventComputedGroupBys.map { it.groupName to it.groupName}.toMap())
 
             /**
              * User count output: put userId in a set
@@ -209,7 +209,7 @@ class AggregationQuerybuilder {
 
             if(eventGroupByPresent || userGroupByPresent){
                 //TODO handling for computed user group by
-                userGroupFields.putAll(allGroupBys.userSimpleGroupBys.map { it.name to getCompleteScopedName(it.name, it.globalFilterType)}.toMap())
+                userGroupFields.putAll(allGroupBys.userSimpleGroupBys.map { it.groupName to getCompleteScopedName(it.groupName, it.groupFilterType)}.toMap())
                 val allGroupByFields = mutableListOf<String>()
                 allGroupByFields.addAll(eventGroupFields.values)
                 allGroupByFields.addAll(userGroupFields.values)
@@ -286,10 +286,10 @@ class AggregationQuerybuilder {
 
 
         groupBys.forEach{
-            if(isUserCollection(it.globalFilterType)){
-                if(isComputedProperty(it.globalFilterType)) groupByHolder.userComputedGroupBys.add(it) else groupByHolder.userSimpleGroupBys.add(it)
+            if(isUserCollection(it.groupFilterType)){
+                if(isComputedProperty(it.groupFilterType)) groupByHolder.userComputedGroupBys.add(it) else groupByHolder.userSimpleGroupBys.add(it)
             } else {
-                if(isComputedProperty(it.globalFilterType)) groupByHolder.eventComputedGroupBys.add(it) else groupByHolder.eventSimpleGroupBys.add(it)
+                if(isComputedProperty(it.groupFilterType)) groupByHolder.eventComputedGroupBys.add(it) else groupByHolder.eventSimpleGroupBys.add(it)
             }
         }
 

@@ -49,22 +49,22 @@ class AggregationQuerybuilderTest {
 
     private fun getEventGroup1(): List<GroupBy>{
         val groupBy = GroupBy();
-        groupBy.name = "os"
-        groupBy.globalFilterType = GlobalFilterType.Technographics
+        groupBy.groupName = "os"
+        groupBy.groupFilterType = GlobalFilterType.Technographics
         return listOf(groupBy)
     }
 
     private fun getEventGroup2(): List<GroupBy>{
         val groupBy = GroupBy();
-        groupBy.name = "name"
-        groupBy.globalFilterType = GlobalFilterType.EventProperties
+        groupBy.groupName = "name"
+        groupBy.groupFilterType = GlobalFilterType.EventProperties
         return listOf(groupBy)
     }
 
     private fun getUserGroup1(): List<GroupBy>{
         val groupBy = GroupBy();
-        groupBy.name = "gender"
-        groupBy.globalFilterType = GlobalFilterType.Demographics
+        groupBy.groupName = "gender"
+        groupBy.groupFilterType = GlobalFilterType.Demographics
         return listOf(groupBy)
     }
 
@@ -74,8 +74,8 @@ class AggregationQuerybuilderTest {
         val tenInt = ten.toDouble().toInt()
 
         val groupBy = GroupBy();
-        groupBy.name = "name"
-        groupBy.globalFilterType = GlobalFilterType.EventProperties
+        groupBy.groupName = "name"
+        groupBy.groupFilterType = GlobalFilterType.EventProperties
         val groupBys =  listOf(groupBy)
 
         val filters = mutableListOf<GlobalFilter>()
@@ -172,12 +172,12 @@ class AggregationQuerybuilderTest {
     @Test
     fun testCountTrendByPeriodForBothFilterAndGroupByPeriod(){
         val monthGroupBy = GroupBy();
-        monthGroupBy.name = "month"
-        monthGroupBy.globalFilterType = GlobalFilterType.EventTimeProperties
+        monthGroupBy.groupName = "month"
+        monthGroupBy.groupFilterType = GlobalFilterType.EventTimeProperties
 
         val yearGroupBy = GroupBy();
-        yearGroupBy.name = "year"
-        yearGroupBy.globalFilterType = GlobalFilterType.EventTimeProperties
+        yearGroupBy.groupName = "year"
+        yearGroupBy.groupFilterType = GlobalFilterType.EventTimeProperties
 
         val groupBys = listOf(monthGroupBy, yearGroupBy)
 
@@ -195,12 +195,12 @@ class AggregationQuerybuilderTest {
     @Test
     fun testCountTrendByPeriodForBothFilterAndGroupByPeriodAndAggregateByClientId(){
         val monthGroupBy = GroupBy()
-        monthGroupBy.name = "month"
-        monthGroupBy.globalFilterType = GlobalFilterType.EventTimeProperties
+        monthGroupBy.groupName = "month"
+        monthGroupBy.groupFilterType = GlobalFilterType.EventTimeProperties
 
         val yearGroupBy = GroupBy()
-        yearGroupBy.name = "year"
-        yearGroupBy.globalFilterType = GlobalFilterType.EventTimeProperties
+        yearGroupBy.groupName = "year"
+        yearGroupBy.groupFilterType = GlobalFilterType.EventTimeProperties
 
         val aggregateBy = AggregateBy()
         aggregateBy.aggregationType = AggregationType.Sum
@@ -228,12 +228,12 @@ class AggregationQuerybuilderTest {
     @Test
     fun testHourlyCountTrendForBothFilter(){
         val monthGroupBy = GroupBy()
-        monthGroupBy.name = "hour"
-        monthGroupBy.globalFilterType = GlobalFilterType.EventTimeProperties
+        monthGroupBy.groupName = "hour"
+        monthGroupBy.groupFilterType = GlobalFilterType.EventTimeProperties
 
         val yearGroupBy = GroupBy()
-        yearGroupBy.name = "year"
-        yearGroupBy.globalFilterType = GlobalFilterType.EventTimeProperties
+        yearGroupBy.groupName = "year"
+        yearGroupBy.groupFilterType = GlobalFilterType.EventTimeProperties
 
         val aggregateBy = AggregateBy()
         aggregateBy.aggregationType = AggregationType.Sum
@@ -259,12 +259,12 @@ class AggregationQuerybuilderTest {
     @Test
     fun testUserCountByEventForEventFilterAndEventGroupBy(){
         val groupBy1 = GroupBy();
-        groupBy1.name = "dateVal"
-        groupBy1.globalFilterType = GlobalFilterType.EventComputedProperties
+        groupBy1.groupName = "dateVal"
+        groupBy1.groupFilterType = GlobalFilterType.EventComputedProperties
 
         val groupBy2 = GroupBy();
-        groupBy2.name = "userId"
-        groupBy2.globalFilterType = GlobalFilterType.EventProperties
+        groupBy2.groupName = "userId"
+        groupBy2.groupFilterType = GlobalFilterType.EventProperties
         val groupBys = listOf(groupBy1, groupBy2)
 
 

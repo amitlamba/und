@@ -1,9 +1,7 @@
 package com.und.report.web.model
 
 import com.und.web.model.AggregationType
-import com.und.web.model.DataType
 import com.und.web.model.GlobalFilterType
-import com.und.web.model.Unit
 import java.io.Serializable
 
 data class UserCountForProperty(var usercount: Int, var groupedBy: Map<String, Any>)
@@ -22,8 +20,8 @@ data class UserCountByEventForDate(var date: String, var userCountData: List<Use
 
 
 class GroupBy : Serializable {
-    var globalFilterType: GlobalFilterType = GlobalFilterType.EventAttributeProperties
-    var name: String = ""
+    var groupFilterType: GlobalFilterType = GlobalFilterType.EventAttributeProperties
+    var groupName: String = ""
 }
 
 class AggregateBy : Serializable {
