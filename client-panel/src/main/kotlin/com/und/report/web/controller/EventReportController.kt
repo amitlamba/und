@@ -50,7 +50,7 @@ class EventReportController {
 
 
     //count of events/users on date, week, months (count, 28-aug-2018), (count, week(25-31 august 2018), (count, month(1-31 august 2018))
-    @GetMapping("/trendBytimePeriod")
+    @PostMapping("/trendBytimePeriod")
     //EntityType is missing in request parameters?
     //Users/Distinct(Users)? -> In event trend users, in user trend distinct(user)
     //same as above mostly
@@ -63,7 +63,7 @@ class EventReportController {
 
 
     //frequency chart (count of users  group by count of events )
-    @GetMapping("/eventUserTrend")
+    @PostMapping("/eventUserTrend")
     //For last 100 days?
     //Users/Distinct(Users)?
     //All possible count of events to be shown, no ranging to be done (assumption is there won't be more than 10-20 possible counts)
@@ -76,7 +76,7 @@ class EventReportController {
 
 
     //count of events based on time range e.g how many events on 1-2 , how many on 2-3 pm etc.
-    @GetMapping("/eventTimeTrend")
+    @PostMapping("/eventTimeTrend")
     //Period is always houly?
     //For last 100 days?
     fun eventTimeTrend(requestFilter: EventReport.EventReportFilter,
@@ -87,7 +87,7 @@ class EventReportController {
     }
 
     //aggregate on a property on time scale of days, week, month  if property is amount than revenue report,
-    @GetMapping("/eventAggregateTrend")
+    @PostMapping("/eventAggregateTrend")
     fun aggregateTrend(@RequestParam(name = "period") period: EventReport.PERIOD,
                        aggregateBy: AggregateBy, requestFilter: EventReport.EventReportFilter,
                        @RequestBody propFilter: List<GlobalFilter>): List<EventReport.Aggregate> {
