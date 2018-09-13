@@ -13,6 +13,7 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.springframework.test.util.ReflectionTestUtils
 import java.time.ZoneId
 import com.und.service.AggregationQuerybuilder.*
+import org.springframework.data.mongodb.core.aggregation.Aggregation
 
 @RunWith(MockitoJUnitRunner::class)
 class AggregationQuerybuilderTest {
@@ -282,6 +283,30 @@ class AggregationQuerybuilderTest {
     }
 
     @Test
+    fun testLiveUSerByTypeTrend1(){
+        val filters = listOf(buildFilter(GlobalFilterType.EventProperties, Field.UserId.fName, DataType.string, StringOperator.Contains.name, listOf("5b1f5b080be60f4cc2942875", "5b49c41c00156a1860d1f82d", "5b49d11400156a1860d1f83a"), null),
+                buildFilter(GlobalFilterType.EventComputedProperties, Field.DateVal.fName, DataType.string, StringOperator.Contains.name, listOf("2018-07-17"), null))
+
+        val groupBys = listOf(buildGroupBy(Field.DateVal.fName, GlobalFilterType.EventComputedProperties),
+                buildGroupBy(Field.MinutesPeriod.fName, GlobalFilterType.EventComputedProperties),
+                buildGroupBy("gender", GlobalFilterType.Demographics))
+
+        val propertyValues = mapOf(NUM_OF_MINUTES to 10)
+        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, propertyValues, EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3)
+        println("testLiveUSerByTypeTrend1 UserCount: $userAggregation")
+
+
+        val buildAggregationPipeline = agregationQuerybuilder.buildAggregationPipeline(filters, groupBys, null, propertyValues, EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3)
+        val projectionOperation = Aggregation.project().and("${Field.DateVal.fName}").`as`(Field.DateVal.fName)
+                .and("${Field.MinutesPeriod.fName}").`as`(Field.MinutesPeriod.fName)
+                .and(agregationQuerybuilder.getAggregationExpression(Field.UserType.fName, propertyValues)).`as`(Field.UserType.fName)
+        val groupOperation = Aggregation.group(Field.DateVal.fName, Field.MinutesPeriod.fName, Field.UserType.fName).count().`as`(AGGREGATE_VALUE)
+
+        val userAggregation1 = Aggregation.newAggregation(*buildAggregationPipeline.dropLast(2).toTypedArray(), projectionOperation, groupOperation)
+        println("testLiveUSerByTypeTrend1 UserCount: $userAggregation1")
+    }
+
+    @Test
     @Ignore
     fun testCountTrendForBothFilterAndBothGroupBy(){
         val groupBys = mutableListOf<GroupBy>()
@@ -311,5 +336,12 @@ class AggregationQuerybuilderTest {
         if (values != null) filter.values = values
         if (valueUnit != null) filter.valueUnit = valueUnit
         return filter
+    }
+
+    private fun buildGroupBy(name: String, globalFilterType: GlobalFilterType): GroupBy{
+        val groupBy = GroupBy()
+        groupBy.name = name
+        groupBy.globalFilterType = globalFilterType
+        return groupBy
     }
 }

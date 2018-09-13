@@ -26,13 +26,14 @@ class AggregationQuerybuilder {
         MinutesPeriod("minutesPeriod", Collection.Event, GlobalFilterType.EventComputedProperties, listOf(NUM_OF_MINUTES)),
         DateVal("dateVal", Collection.Event, GlobalFilterType.EventComputedProperties),
         TimePeriod("timePeriod", Collection.Event, GlobalFilterType.EventComputedProperties),
-        Hour("hour", Collection.Event, GlobalFilterType.EventTimeProperties)
+        Hour("hour", Collection.Event, GlobalFilterType.EventTimeProperties),
+        UserType("userType", Collection.User, GlobalFilterType.UserComputedProperties),
     }
 
     @Autowired
     private lateinit var segmentParserCriteria: SegmentParserCriteria
 
-    private fun getAggregationExpression(fieldName: String, properties: Map<String, Any> = emptyMap()): AggregationExpression {
+    fun getAggregationExpression(fieldName: String, properties: Map<String, Any> = emptyMap()): AggregationExpression {
         return when(fieldName){
             //{ $floor: {$divide: [{$add: [ {$multiply: [60, "$clientTime.hour"]}, "$clientTime.minute"]}, 5] } }
             // equivalent in Spel: ((clientTime.hour * 60) + (clientTime.minute - (clientTime.minute % 5)))/5
@@ -47,15 +48,9 @@ class AggregationQuerybuilder {
             Field.UserIdObject.fName -> {
                 ConvertOperators.ToObjectId.toObjectId("$${Field.UserId.fName}")
             }
-            Field.TimePeriod.fName -> {
-                val timePeriod = properties.get(TIME_PERIOD) as EventReport.PERIOD
-                when(timePeriod){
-                    EventReport.PERIOD.weekly -> {
-                        //TODO
-                    }
-                }
-
-                ConvertOperators.ToObjectId.toObjectId("$${Field.UserId.fName}")
+            Field.UserType.fName -> {
+                val eventDateSameAsUserCreationDate = ComparisonOperators.Eq.valueOf(Field.DateVal.fName).equalTo(DateOperators.dateOf("userDoc.creationTime").toString("%Y-%m-%d"))
+                ConditionalOperators.`when`(eventDateSameAsUserCreationDate).then("new").otherwise("old")
             }
             else -> {
                 throw Exception("${fieldName} is not supported in computed fields")

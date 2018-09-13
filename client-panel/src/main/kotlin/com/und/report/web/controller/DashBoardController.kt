@@ -52,8 +52,7 @@ class DashBoardController {
     fun liveUserByTypeTrend(@RequestParam("segmentid", required = true, defaultValue = "1") segmentId: Long,
                    @RequestParam("dates", required = true, defaultValue = "today") date: List<String>,
                    @RequestParam("interval", required = true, defaultValue = "5") interval: Long):List<UserTypeTrendForDate> {
-        //FIXME call service methods
-        return emptyList()
+        return userAnalyticsService.liveUserByTypeTrend(segmentId, date, interval)
     }
 
 
