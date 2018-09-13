@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.aggregation.*
 import org.springframework.stereotype.Component
 import java.time.ZoneId
-import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
 const val NUM_OF_MINUTES = "numOfMinutes"
 const val USER_DOC = "userDoc"
@@ -136,8 +135,8 @@ class MongoQueryUtil {
         val matchOperation = Aggregation.match(filterGlobalQ.first)
 
 
-        val groupByFieldPath = segmentParserCriteria.getFieldPath(groupBy.globalFilterType)
-        val groupByField = "$groupByFieldPath${groupBy.name}"
+        val groupByFieldPath = segmentParserCriteria.getFieldPath(groupBy.groupFilterType)
+        val groupByField = "$groupByFieldPath${groupBy.groupName}"
         val groupOperation = Aggregation.group(groupByField).addToSet(Field.UserId.fName).`as`(Field.UserId.fName)
 
         val projectOperation = Aggregation.project(Fields.from(Fields.field(groupByField))).and(Field.UserId.fName).size().`as`(AGGREGATE_VALUE)
@@ -187,7 +186,7 @@ class MongoQueryUtil {
 
         val allFilters = segregateEventUserFilter(userIds, requestFilter)
         val userFilterPresent = allFilters.second.isNotEmpty()
-        val userGroupByPresent = isUserCollection(groupBy.globalFilterType)
+        val userGroupByPresent = isUserCollection(groupBy.groupFilterType)
 
         //event match
         val eventFilterCriterias = segmentParserCriteria.filterGlobalQ(allFilters.first, tz)
@@ -195,8 +194,8 @@ class MongoQueryUtil {
 
         //join with user collection if needed
         val joinWithUserPipeline = mutableListOf<AggregationOperation>()
-        val groupByFieldPath = segmentParserCriteria.getFieldPath(groupBy.globalFilterType)
-        var groupByField = "$groupByFieldPath${groupBy.name}"
+        val groupByFieldPath = segmentParserCriteria.getFieldPath(groupBy.groupFilterType)
+        var groupByField = "$groupByFieldPath${groupBy.groupName}"
 
         if(userGroupByPresent) groupByField = "$USER_DOC.$groupByField"
 
@@ -224,8 +223,8 @@ class MongoQueryUtil {
         //group
         val groupPipeline = mutableListOf<AggregationOperation>()
         if(entityType == EventReport.EntityType.user){
-            val groupOperation = Aggregation.group().push(groupByField).`as`(groupBy.name).addToSet(Field.UserId.fName).`as`(Field.UserId.fName)
-            val projectOperation = Aggregation.project(groupBy.name).and(Field.UserId.fName).size().`as`(AGGREGATE_VALUE)
+            val groupOperation = Aggregation.group().push(groupByField).`as`(groupBy.groupName).addToSet(Field.UserId.fName).`as`(Field.UserId.fName)
+            val projectOperation = Aggregation.project(groupBy.groupName).and(Field.UserId.fName).size().`as`(AGGREGATE_VALUE)
 
             groupPipeline.add(groupOperation)
             groupPipeline.add(projectOperation)

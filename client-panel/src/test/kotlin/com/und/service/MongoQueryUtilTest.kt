@@ -1,20 +1,14 @@
 package com.und.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.mongodb.MongoClient
 import com.und.report.web.model.EventReport
 import com.und.report.web.model.GroupBy
-import com.und.repository.mongo.EventCustomRepositoryImpl
-import com.und.repository.mongo.EventUserCustomRepositoryImpl
 import com.und.web.model.GlobalFilter
 import com.und.web.model.GlobalFilterType
 import com.und.web.model.StringOperator
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito
 import org.mockito.junit.MockitoJUnitRunner
-import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.test.util.ReflectionTestUtils
 import java.time.ZoneId
 
@@ -36,8 +30,8 @@ class MongoQueryUtilTest {
     @Test
     fun testLiveUser1(){
         val groupBy = GroupBy();
-        groupBy.name = "name"
-        groupBy.globalFilterType = GlobalFilterType.EventProperties
+        groupBy.groupName = "name"
+        groupBy.groupFilterType = GlobalFilterType.EventProperties
         val aggregation = mongoQueryUtil.buildLiveUserAggregation(listOf("testuser"), groupBy, 5, ZoneId.of("Europe/Paris"))
         println(aggregation.toString())
     }
@@ -52,8 +46,8 @@ class MongoQueryUtilTest {
     //buildCountTrendAggregation(userIds: List<String>, requestFilter: EventReport.EventReportFilter, entityType: EventReport.EntityType, groupBy: GroupBy, tz: ZoneId, clientId: Long)
     fun testCountTrendAggregationWithBothFilterAndEventGroupBy(){
         val groupBy = GroupBy();
-        groupBy.name = "browser"
-        groupBy.globalFilterType = GlobalFilterType.Technographics
+        groupBy.groupName = "browser"
+        groupBy.groupFilterType = GlobalFilterType.Technographics
 
         val userGlobalFilter = GlobalFilter()
         userGlobalFilter.values = listOf("xyz")
@@ -76,8 +70,8 @@ class MongoQueryUtilTest {
     //buildCountTrendAggregation(userIds: List<String>, requestFilter: EventReport.EventReportFilter, entityType: EventReport.EntityType, groupBy: GroupBy, tz: ZoneId, clientId: Long)
     fun testCountTrendAggregationWithBothFilterAndUserGroupBy(){
         val groupBy = GroupBy();
-        groupBy.name = "lastname"
-        groupBy.globalFilterType = GlobalFilterType.Demographics
+        groupBy.groupName = "lastname"
+        groupBy.groupFilterType = GlobalFilterType.Demographics
 
         val userGlobalFilter = GlobalFilter()
         userGlobalFilter.values = listOf("xyz")
@@ -100,8 +94,8 @@ class MongoQueryUtilTest {
     //buildCountTrendAggregation(userIds: List<String>, requestFilter: EventReport.EventReportFilter, entityType: EventReport.EntityType, groupBy: GroupBy, tz: ZoneId, clientId: Long)
     fun testCountTrendAggregatioWithNoFilterAndEventGroupBy(){
         val groupBy = GroupBy();
-        groupBy.name = "browser"
-        groupBy.globalFilterType = GlobalFilterType.Technographics
+        groupBy.groupName = "browser"
+        groupBy.groupFilterType = GlobalFilterType.Technographics
 
         val eventReportFilter = EventReport.EventReportFilter(1001, "2018-08-10", "2018-08-20", "Search")
 
@@ -118,8 +112,8 @@ class MongoQueryUtilTest {
     //buildCountTrendAggregation(userIds: List<String>, requestFilter: EventReport.EventReportFilter, entityType: EventReport.EntityType, groupBy: GroupBy, tz: ZoneId, clientId: Long)
     fun testCountTrendAggregatioWithNoFilterAndUserGroupBy(){
         val groupBy = GroupBy();
-        groupBy.name = "lastname"
-        groupBy.globalFilterType = GlobalFilterType.Demographics
+        groupBy.groupName = "lastname"
+        groupBy.groupFilterType = GlobalFilterType.Demographics
 
         val eventReportFilter = EventReport.EventReportFilter(1001, "2018-08-10", "2018-08-20", "Search")
 

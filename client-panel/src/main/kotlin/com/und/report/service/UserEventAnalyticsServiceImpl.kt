@@ -77,8 +77,36 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
         return buildLiveUserTrendResult(aggregateResult)
     }
 
-    override fun liveUserByTypeTrend(segmentId: Long, date: List<String>, interval: Long): List<UserTypeTrendForDate> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun liveUserByTypeTrend(segmentId: Long, dates: List<String>, interval: Long): List<UserTypeTrendForDate> {
+        logger.debug("LiveUSerByTypeTrend aggregation for segmentId : $segmentId, dates: $dates, interval: $interval")
+        val clientID = AuthenticationUtils.clientID
+
+        if(clientID == null){
+            return emptyList()
+        }
+
+        val segmentUserIds = segmentService.segmentUserIds(segmentId, clientID)
+        val tz = userSettingsService.getTimeZone()
+
+        val filters = listOf(buildFilter(GlobalFilterType.EventProperties, Field.UserId.fName, DataType.string, StringOperator.Contains.name, segmentUserIds, null),
+                buildFilter(GlobalFilterType.EventComputedProperties, Field.DateVal.fName, DataType.string, StringOperator.Contains.name, dates, null))
+
+        val groupBys = listOf(buildGroupBy(Field.DateVal.fName, GlobalFilterType.EventComputedProperties),
+                buildGroupBy(Field.MinutesPeriod.fName, GlobalFilterType.EventComputedProperties),
+                buildGroupBy("gender", GlobalFilterType.Demographics)) //last group by is a dummy group by to get similar query, it is replaced with userType group by later in this method
+
+        val propertyValues = mapOf<String, Any>(NUM_OF_MINUTES to interval.toString())
+
+        val buildAggregationPipeline = aggregationQuerybuilder.buildAggregationPipeline(filters, groupBys, null, propertyValues, EventReport.EntityType.user, tz, clientID)
+        val projectionOperation = Aggregation.project().and(Field.DateVal.fName).`as`(Field.DateVal.fName)
+                .and(Field.MinutesPeriod.fName).`as`(Field.MinutesPeriod.fName)
+                .and(aggregationQuerybuilder.getAggregationExpression(Field.UserType.fName, propertyValues)).`as`(Field.UserType.fName)
+        val groupOperation = Aggregation.group(Field.DateVal.fName, Field.MinutesPeriod.fName, Field.UserType.fName).count().`as`(AGGREGATE_VALUE)
+
+        val userAggregation = Aggregation.newAggregation(*buildAggregationPipeline.dropLast(2).toTypedArray(), projectionOperation, groupOperation)
+        val aggregateResult = userAnalyticsRepository.aggregate(userAggregation, clientID)
+
+        return buildLiveUserByTypeTrendResult(aggregateResult)
     }
 
     override fun userCountByEvent(segmentId: Long, dates: List<String>): List<UserCountByEventForDate> {
@@ -209,8 +237,8 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
 
     private fun buildGroupBy(name: String, globalFilterType: GlobalFilterType): GroupBy{
         val groupBy = GroupBy()
-        groupBy.name = name
-        groupBy.globalFilterType = globalFilterType
+        groupBy.groupName = name
+        groupBy.groupFilterType = globalFilterType
         return groupBy
     }
 
@@ -246,6 +274,33 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
                  .groupBy({it.date}, {it.trenddata.first()})
                  .map { UserCountTrendForDate(it.key, it.value) }
     }
+
+    private fun buildLiveUserByTypeTrendResult(aggregate: List<AggregateOutput>): List<UserTypeTrendForDate>{
+        val groupedByDate = aggregate.map { it -> mapOf(it.groupByInfo[Field.DateVal.fName] to mapOf(AGGREGATE_VALUE to it.aggregateVal.toInt(),
+                            Field.MinutesPeriod.fName to it.groupByInfo[Field.MinutesPeriod.fName], Field.UserType.fName to it.groupByInfo[Field.UserType.fName])) }
+                .groupBy({it.keys.toList().first()}, {it.values.toList().first()})
+
+        val result = mutableListOf<UserTypeTrendForDate>()
+        groupedByDate.forEach(){
+            val userCountDataList = mutableListOf<UserCountByTypeForTime>()
+            val groupedByTime = it.value.groupBy ({it[Field.MinutesPeriod.fName].toString().toDouble().toInt()}, {it})
+
+            groupedByTime.forEach(){
+                val newUserCountList = it.value.filter { it[Field.UserType.fName] == "new" }
+                val oldUserCountList = it.value.filter { it[Field.UserType.fName] == "old" }
+
+                val newUserCount = if(newUserCountList.isEmpty()) 0 else newUserCountList.first()[AGGREGATE_VALUE].toString().toDouble().toInt()
+                val oldUserCount = if(oldUserCountList.isEmpty()) 0 else oldUserCountList.first()[AGGREGATE_VALUE].toString().toDouble().toInt()
+                val record = UserCountByTypeForTime(newUserCount, oldUserCount, it.key)
+                userCountDataList.add(record)
+            }
+            result.add(UserTypeTrendForDate(it.key.toString(), userCountDataList))
+        }
+
+        return result
+    }
+
+
 
     private fun buildUserCountByEventResult(aggregate: List<AggregateOutput>): List<UserCountByEventForDate>{
         return aggregate.map{ UserCountByEventForDate(it.groupByInfo[Field.DateVal.fName].toString(),
