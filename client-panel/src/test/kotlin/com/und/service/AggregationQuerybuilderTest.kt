@@ -340,8 +340,8 @@ class AggregationQuerybuilderTest {
 
     private fun buildGroupBy(name: String, globalFilterType: GlobalFilterType): GroupBy{
         val groupBy = GroupBy()
-        groupBy.name = name
-        groupBy.globalFilterType = globalFilterType
+        groupBy.groupName = name
+        groupBy.groupFilterType = globalFilterType
         return groupBy
     }
 }
