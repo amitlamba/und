@@ -1,7 +1,7 @@
 spring:
   cloud:
     config:
-      uri: http://${CONFIG_IP}:${CONFIG_PORT}
+      uri: http://nestros.com:8888
       enabled: true
       name: und-scheduler
   application:

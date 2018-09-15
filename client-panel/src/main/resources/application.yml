@@ -1,0 +1,148 @@
+# config context path to "/" by setting an empty string
+server:
+  port: 9191
+
+# JACKSON
+spring:
+  application:
+    name: client-panel
+  thymeleaf:
+    cache: false
+  redis:
+    host: ${REDIS_IP}
+    port: ${REDIS_PORT}
+  cache:
+    redis:
+      use-key-prefix: true
+    type: redis
+  jackson:
+    serialization:
+      INDENT_OUTPUT: true
+  cloud:
+      stream:
+        kafka:
+          binder:
+            brokers: ${KAFKA_IP}
+            defaultBrokerPort: ${KAFKA_PORT}
+            #zkNodes: ${KAFKA_IP}
+            defaultZkPort: 2181
+            consumer-configuration:
+              maxAttempts: 1
+        bindings:
+          scheduleJobSend:
+            group: scheduleJobGroup
+            destination: scheduleJobshiv
+            consumer:
+              enableDlq: true
+              autoCommitOnError: true
+              dlqName: scheduleJobShivError
+          scheduleJobAckReceive:
+            group: scheduleJobAckGroup
+            destination: scheduleJobAckshiv
+          clientEmailSend:
+            group: clientEmailSendGroup
+            destination: clientEmailshiv
+  kafka:
+    bootstrap-servers: ${KAFKA_IP}:${KAFKA_PORT}
+  mvc:
+    view:
+      prefix: /WEB-INF/views/
+      suffix: .jsp
+# Disable feature detection by this undocumented parameter. Check the org.hibernate.engine.jdbc.internal.JdbcServiceImpl.configure method for more details.
+# Because detection is disabled you have to set correct dialect by hand.
+  jpa:
+    show-sql: true
+    database-platform: org.hibernate.dialect.PostgreSQL9Dialect
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
+
+  datasource:
+    url: jdbc:postgresql://${POSTGRES_IP}:${POSTGRES_PORT}/shiv
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password:  postgres
+    tomcat:
+      initial-size: 10
+      max-wait: 10000
+      max-active: 50
+      test-on-borrow: true
+  data:
+    mongodb:
+      database: shiv
+      host: ${MONGO_IP}
+      port: ${MONGO_PORT}
+  flyway:
+    placeholder-replacement: false
+
+  zipkin:
+    base-url: http://springbootzipkin:7777
+    sender:
+      type: kafka
+  sleuth:
+    sampler:
+      probability: 1
+  kafka:
+    bootstrap-servers: ${KAFKA_IP}:${KAFKA_PORT}
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    health-check-url-path: /client-panel/health
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    region: desktop
+    service-url:
+      defaultZone: http://${EUREKA_IP}:${EUREKA_PORT}/eureka
+
+
+
+logging:
+  level:
+    org:
+      springframework: info
+      apache: info
+      hibernate: info
+    com:
+      und: info
+      data:
+        mongodb:
+          core:
+            MongoTemplate: DEBUG
+  file: log/und-client-panel.log
+
+
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: full
+        errorDecoder: com.und.feign.AuthFeignErrorDecoder
+
+
+
+
+security:
+  header:
+    token: Authorization
+    username: UserName
+  secret: mySecret
+  expiration: 604800
+  route:
+    authentication:
+      path: auth
+      refresh: refresh
+
+und:
+  system:
+    user:
+      token: jasdghajskdhg
+  url:
+    event: http://userndot.com/event
+  auth-url: http://nestros.com:8080/auth
+  from-email: shiv@und.com

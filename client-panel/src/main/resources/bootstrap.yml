@@ -10,8 +10,5 @@ spring:
     name: client-panel
 
 encrypt:
-
-
-
   key: ${ENCRYPT_KEY}
 #  fail-on-error: false
