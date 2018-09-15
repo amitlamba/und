@@ -87,7 +87,7 @@ class EmailFailureHandlerService {
         emailError.clientid?.let { clientId ->
             val invalidAddresses: List<String> = emailError.invalidAddresses
             // val validSentAddresses: List<String> = emailError
-            val validUnsentAddresses: List<String> = emailError.unsentAddresses
+            val validUnsentAddresses: List<String> = emailError.validUnsentAddresses
             //log failed email ids
             val failedEmails = mutableListOf<BlockHistory>()
             invalidAddresses.forEach { email ->
