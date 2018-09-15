@@ -1,0 +1,71 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: Und Reports and Dashboards
+  description: Reports and Dashroard api of userndot
+  termsOfService: http://userndot.com/terms/
+  contact:
+    name: userndot.com
+    email: support@userndot.com
+    url: http://userndot.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+servers:
+  - url: http://userndot.com/report/v1/
+paths:
+  /dashboard/trendcount/{date}:
+    get:
+      description: |
+        retriecve the count of total users, as well users count by device type e.g. android, ios
+
+      operationId: findTrend
+      parameters:
+        - name: date
+          in: path
+          description: date for ewhich trend count is required
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        '200':
+          description: count response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventTrendCount'
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+
+components:
+  schemas:
+
+    EventTrendCount:
+      allOf:
+        - $ref: '#/components/schemas/EventTrendCount'
+        - required:
+          - id
+          properties:
+            total:
+              type: integer
+              format: int64
+
+
+    Error:
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string

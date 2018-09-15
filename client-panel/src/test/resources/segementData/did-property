@@ -1,0 +1,45 @@
+{
+  "didEvents": {
+    "events": [
+      {
+        "dateFilter": {
+          "operator": "Before",
+          "values": [
+            "2018-08-28"
+          ]
+        },
+        "whereFilter": {
+          "operator": "GreaterThan",
+          "values": [
+            0
+          ],
+          "whereFilterName": "Count"
+        },
+        "name": "Support",
+        "propertyFilters": []
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [
+    {
+      "values": [
+        "Male"
+      ],
+      "globalFilterType": "Demographics",
+      "name": "gender",
+      "type": "string",
+      "operator": "Equals"
+    }
+  ],
+  "geographyFilters": [],
+  "type": "Behaviour"
+}

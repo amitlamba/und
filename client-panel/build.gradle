@@ -16,6 +16,8 @@ dependencies {
     }
     compile('org.springframework.boot:spring-boot-starter-data-mongodb')
 
+    testCompileOnly('de.flapdoodle.embed:de.flapdoodle.embed.mongo')
+
     compile('org.springframework.boot:spring-boot-starter-data-rest')
     compile("org.springframework.boot:spring-boot-starter-mobile:1.5.9.RELEASE")
     compile('org.flywaydb:flyway-core:5.0.7')

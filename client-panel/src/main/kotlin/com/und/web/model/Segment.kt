@@ -100,6 +100,11 @@ enum class WhereFilterName : Serializable {
     SumOfValuesOf
 }
 
+enum class AggregationType : Serializable {
+    Avg,
+    Sum
+}
+
 enum class DateOperator : Serializable {
     Before,
     After,
@@ -160,7 +165,18 @@ enum class GlobalFilterType(val type: String) : Serializable {
     Demographics("Demographics"),
     Technographics("Technographics"),
     Reachability("Reachability"),
-    AppFields("appFields")
+    AppFields("AppFields"),
+
+    //Simple (i.e. no nested field path) properties of event collection (e.g. clientId, name)
+    EventProperties("EventProperties"),
+    //All properties of event collection in attribute field (e.g. attributes.xyz)
+    EventAttributeProperties("EventAttributes"),
+    //All properties of event collection in clientTime field (e.g. clientTime.hour, clientTime.minute)
+    EventTimeProperties("EventTimeProperties"),
+    //Derived properties from event collection (e.g. minutesPeriod which is calculated basis given length of a period, i.e. for interval=20 minutes, minutesPeriod(02:35:00) = 7 (starting from 0)
+    EventComputedProperties("EventComputed"),
+    //Same as EventComputedProperties but for user collection (e.g. userType (new/old)
+    UserComputedProperties("UserComputed")
 }
 
 class Geography : Serializable {

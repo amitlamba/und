@@ -4,7 +4,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert
 import org.junit.Test
 import java.util.*
-
 /**
  * Created by shiv on 21/07/17.
  */

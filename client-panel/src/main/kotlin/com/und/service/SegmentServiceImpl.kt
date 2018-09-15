@@ -11,6 +11,7 @@ import com.und.web.controller.exception.SegmentNotFoundException
 import com.und.web.model.ConditionType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.aggregation.Aggregation
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
 import com.und.web.model.EventUser as EventUserWeb
 import com.und.web.model.Segment as WebSegment
@@ -72,6 +73,16 @@ class SegmentServiceImpl : SegmentService {
         throw SegmentNotFoundException("No Segment Exists with id $id")
     }
 
+    override fun segmentUserIds(segmentId: Long, clientId: Long): List<String> {
+        val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
+        return if (segmentOption.isPresent) {
+            val segment = segmentOption.get()
+            getSegmentUserIds(segment, clientId)
+
+        } else emptyList()
+        //return listOf("5b1f5b080be60f4cc2942875", "5b49c41c00156a1860d1f82d", "5b49d11400156a1860d1f83a")
+    }
+
     override fun segmentUsers(segmentId: Long, clientId: Long): List<EventUser> {
         val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
         return if (segmentOption.isPresent) {
@@ -88,6 +99,11 @@ class SegmentServiceImpl : SegmentService {
     }
 
     private fun getSegmentUsersList(segment: Segment, clientId: Long): List<EventUser> {
+        val userIds = getSegmentUserIds(segment, clientId)
+        return eventUserRepository.findUserByIds(userIds.toSet(), clientId)
+    }
+
+    private fun getSegmentUserIds(segment: Segment, clientId: Long): List<String> {
 
         val tz = userSettingsService.getTimeZone()
         val allResult = mutableListOf<Set<String>>()
@@ -98,6 +114,10 @@ class SegmentServiceImpl : SegmentService {
         if (didQueries.isNotEmpty()) {
             val userDidList = retrieveUsers(didQueries, joincondition, clientId)
             allResult.add(userDidList.toSet())
+        }else if (queries.query!=null){
+            var query= Query().addCriteria(queries.query)
+            val userList=eventRepository.usersFromEvent(query,clientId)
+            allResult.add(userList.toSet())
         }
 
         val (didNotQueries, joinconditionfornot) = queries.didntq
@@ -115,11 +135,7 @@ class SegmentServiceImpl : SegmentService {
         }
 
         val userList = allResult.reduce { f, s -> f.intersect(s) }
-        return userList.asSequence().map {
-            eventUserRepository.findUserById(it, clientId)
-
-        }.filter { it.isPresent }.map { it.get() }.toList()
-
+        return userList.toList()
     }
 
     private fun retrieveUsers(queries: List<Aggregation>, conditionType: ConditionType, clientId: Long): MutableSet<String> {

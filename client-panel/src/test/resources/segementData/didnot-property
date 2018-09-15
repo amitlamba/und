@@ -1,0 +1,39 @@
+{
+  "didEvents": {
+    "events": [],
+    "joinCondition": {
+      "conditionType": "AllOf"
+    }
+  },
+  "didNotEvents": {
+    "events": [
+      {
+        "dateFilter": {
+          "operator": "Before",
+          "values": [
+            "2018-08-28"
+          ]
+        },
+        "whereFilter": {},
+        "name": "Add to WishList",
+        "propertyFilters": []
+      }
+    ],
+    "joinCondition": {
+      "conditionType": "AnyOf"
+    }
+  },
+  "globalFilters": [
+    {
+      "values": [
+        "Male"
+      ],
+      "globalFilterType": "Demographics",
+      "name": "gender",
+      "type": "string",
+      "operator": "Equals"
+    }
+  ],
+  "geographyFilters": [],
+  "type": "Behaviour"
+}
