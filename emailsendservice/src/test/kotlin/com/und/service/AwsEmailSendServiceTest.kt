@@ -9,7 +9,7 @@ import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder
 import com.amazonaws.services.simpleemail.model.*
 import com.amazonaws.services.sns.model.InternalErrorException
 import com.amazonaws.services.sns.model.ThrottledException
-import com.und.exception.Connection
+//import com.und.exception.Connection
 import com.und.exception.EmailError
 import com.und.exception.EmailFailureException
 import com.und.model.utils.EmailSESConfig
@@ -161,10 +161,10 @@ class AwsEmailSendServiceTest {
                 clientid = 1
                 failureType = EmailError.FailureType.OTHER   //errrorCode
                 causeMessage = "Message rejected : ${ex.errorMessage}"
-                errorType="${ex.errorType}"
-                errorCode="${ex.errorCode}"
-                validSentAddresses=validEmail
-                unsentAddresses=unsentEmail
+//                errorType="${ex.errorType}"
+//                errorCode="${ex.errorCode}"
+//                validSentAddresses=validEmail
+//                unsentAddresses=unsentEmail
                 failedSettingId = emailSESConfig.serviceProviderCredentialsId
 
             }
