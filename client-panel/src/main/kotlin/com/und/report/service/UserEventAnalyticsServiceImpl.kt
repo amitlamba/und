@@ -223,11 +223,11 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
         when(period){
             EventReport.PERIOD.daily -> {
                 //TODO correct for daily
-                return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties))
+                return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties),buildGroupBy("dayOfMonth", GlobalFilterType.EventTimeProperties))
             }
             EventReport.PERIOD.weekly -> {
                 //TODO correct for weekly
-                return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties))
+                return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties),buildGroupBy("dayOfWeek", GlobalFilterType.EventTimeProperties))
             }
             EventReport.PERIOD.monthly -> {
                 return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties))
