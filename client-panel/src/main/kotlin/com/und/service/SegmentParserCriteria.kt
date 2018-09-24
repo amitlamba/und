@@ -461,10 +461,13 @@ class SegmentParserCriteria {
                         GlobalFilterType.Demographics -> userPropertyMatchCriteria.add(criteria)
                         GlobalFilterType.Reachability -> userPropertyMatchCriteria.add(criteria)
                         GlobalFilterType.UserProperties -> userPropertyMatchCriteria.add(criteria)
+                        GlobalFilterType.UserComputedProperties -> userPropertyMatchCriteria.add(criteria)
 
                         GlobalFilterType.EventProperties -> eventPropertyMatchCriteria.add(criteria)
                         GlobalFilterType.EventAttributeProperties -> eventPropertyMatchCriteria.add(criteria)
                         GlobalFilterType.EventComputedProperties -> eventPropertyMatchCriteria.add(criteria)
+                        GlobalFilterType.EventTimeProperties -> eventPropertyMatchCriteria.add(criteria)
+
                     }
                 }
 
