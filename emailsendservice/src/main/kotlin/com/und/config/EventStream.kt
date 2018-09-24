@@ -14,7 +14,10 @@ interface EventStream {
     @Output(value="smsEventSend")
     fun smsEventSend():MessageChannel
 
-    @Output(value="VerificationEmailReceive")
+    @Output(value="emailFailureEventSend")
+    fun emailFailureEventSend():MessageChannel
+
+    @Input(value="VerificationEmailReceive")
     fun verificationEmailReceive():SubscribableChannel
 
     @Input("clientEmailReceive")

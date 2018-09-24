@@ -69,6 +69,7 @@ class DashBoardController {
     fun sampleUsersByEvent(@RequestParam("segmentid", required = true, defaultValue = "1") segmentId: Long,
                          @RequestParam("date", required = true, defaultValue = "today") date: String):List<EventUser> {
         return emptyList<EventUser>()
+
     }
 
 

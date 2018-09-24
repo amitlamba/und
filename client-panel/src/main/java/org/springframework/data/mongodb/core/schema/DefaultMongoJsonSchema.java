@@ -3,6 +3,8 @@ package org.springframework.data.mongodb.core.schema;
 
 import org.bson.Document;
 
+import java.io.BufferedReader;
+
 /**
  * Value object representing a MongoDB-specific JSON schema which is the default {@link MongoJsonSchema} implementation.
  *

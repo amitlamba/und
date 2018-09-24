@@ -59,9 +59,9 @@ class AggregationQuerybuilder {
     }
 
     private fun getCompleteScopedName(name: String, globalFilterType: GlobalFilterType): String {
-        val fieldPath = segmentParserCriteria.getFieldPath(globalFilterType)
-        if(isUserCollection(globalFilterType)) return "$USER_DOC.$fieldPath${name}"
-        else return "$fieldPath${name}"
+        val fieldPath = segmentParserCriteria.getFieldPath(globalFilterType,name)
+        if(isUserCollection(globalFilterType)) return "$USER_DOC.$fieldPath"
+        else return "$fieldPath"
     }
 
     fun buildAggregationPipeline(filters: List<GlobalFilter>, groupBys: List<GroupBy>, aggregateBy: AggregateBy?, paramValues: Map<String, Any> = emptyMap(), entityType: EventReport.EntityType, tz: ZoneId, clientId: Long): List<AggregationOperation> {

@@ -2,6 +2,7 @@ package com.und.config
 
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean
+import org.springframework.cloud.stream.annotation.EnableBinding
 import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -25,6 +26,7 @@ import org.springframework.web.servlet.view.JstlView
  * @author amit
  */
 @Configuration
+@EnableBinding(EventStream::class)
 class SpringMVCConfig : WebMvcConfigurer {
 
 

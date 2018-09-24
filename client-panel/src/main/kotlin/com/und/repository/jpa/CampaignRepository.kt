@@ -15,6 +15,7 @@ interface CampaignRepository : JpaRepository<Campaign, Long> {
     fun findByClientID(clientID: Long): List<Campaign>
     //fun findByClientIDAndCampaignStatus(clientID: Long = 1, status:CampaignStatus): List<Campaign>
     fun findByIdAndClientID(id: Long, clientID: Long): Optional<Campaign>
+
     fun findByClientIDAndCampaignType(clientID: Long, campaignType: CampaignType): List<Campaign>
     fun findByIdAndClientIDAndCampaignType(id: Long, clientID: Long, campaignType: CampaignType): Campaign
 
@@ -28,11 +29,13 @@ interface CampaignRepository : JpaRepository<Campaign, Long> {
     @Modifying(clearAutomatically = true)
     @Query("UPDATE campaign  SET schedule = :schedule, date_modified = now() WHERE client_id = :clientId and id=:campaignId", nativeQuery = true)
     fun updateSchedule(@Param("campaignId") campaignId: Long,
-                             @Param("clientId") clientId: Long,
-                             @Param("schedule") schedule: String)
+                       @Param("clientId") clientId: Long,
+                       @Param("schedule") schedule: String)
 
     @Query("SELECT campaign_status from campaign c  WHERE c.client_id = :clientId and c.id=:campaignId", nativeQuery = true)
     fun retrievecheduleStatus(@Param("campaignId") campaignId: Long,
                               @Param("clientId") clientId: Long): String
 
+    @Query("SELECT id from Campaign c  WHERE c.clientID = :clientId and c.status in (:statuses)", nativeQuery = false)
+    fun findByStatusIn(clientId: Long, statuses: List<CampaignStatus>): List<Long>
 }

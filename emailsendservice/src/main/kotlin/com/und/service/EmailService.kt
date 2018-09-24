@@ -1,17 +1,18 @@
 package com.und.service
 
+import com.und.config.EventStream
+import com.und.exception.EmailError
+import com.und.exception.EmailFailureException
 import com.und.model.mongo.EmailStatus.NOT_SENT
 import com.und.model.mongo.EmailStatus.SENT
-import com.und.model.utils.Email
-import com.und.model.utils.EmailSESConfig
-import com.und.model.utils.EmailSMTPConfig
-import com.und.model.utils.ServiceProviderCredentials
+import com.und.model.utils.*
 import com.und.repository.jpa.ClientSettingsRepository
 import com.und.repository.jpa.EmailTemplateRepository
 import com.und.utils.loggerFor
 import org.apache.commons.lang.StringUtils
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import javax.mail.internet.InternetAddress
 import com.amazonaws.services.simpleemail.model.Message as SESMessage
@@ -39,6 +40,9 @@ class EmailService {
     @Autowired
     private lateinit var emailTemplateRepository: EmailTemplateRepository
 
+    @Autowired
+    private lateinit var eventStream: EventStream
+
     private var wspCredsMap: MutableMap<Long, ServiceProviderCredentials> = mutableMapOf()
 
 
@@ -51,14 +55,14 @@ class EmailService {
     }
 
 
-
     fun sendEmail(email: Email) {
 
 
-         fun String.addUrlTracking(uniqueTrackingId:String ):String {
+        fun String.addUrlTracking(uniqueTrackingId: String): String {
             return emailHelperService.trackAllURLs(this, email.clientID, uniqueTrackingId)
         }
-         fun String.addPixelTracking(uniqueTrackingId:String ):String {
+
+        fun String.addPixelTracking(uniqueTrackingId: String): String {
             return emailHelperService.addPixelTracking(this, email.clientID, uniqueTrackingId)
         }
 
@@ -81,12 +85,24 @@ class EmailService {
         emailToSend.emailBody = body.addUrlTracking(mongoEmailId).addPixelTracking(mongoEmailId)
         emailToSend.emailSubject = subject
 
-        if(isSytemClient(email)) {
+        if (isSytemClient(email)) {
             val template = emailTemplateRepository.findByIdAndClientID(email.emailTemplateId, email.clientID)
             val from = template.map { it.from }
-            if(from.isPresent) {
+            if (from.isPresent) {
                 emailToSend.fromEmailAddress = InternetAddress(from.get())
-            } else throw Exception("from email for template id ${email.emailTemplateId} is not present for system user")
+            } else {
+
+                logger.error("from email for template id ${email.emailTemplateId} is not present for system user")
+                val error = EmailError()
+                with(error) {
+                    clientid = email.clientID
+                    failureType = EmailError.FailureType.CONNECTION
+                    causeMessage = "from email for template id ${email.emailTemplateId} is not present for system user"
+                    failedSettingId = clientSettings?.id
+
+                }
+                throw  EmailFailureException("from email for template id ${email.emailTemplateId} is not present for system user", error)
+            }
         }
 
         emailHelperService.saveMailInMongo(emailToSend, NOT_SENT, mongoEmailId)
@@ -127,12 +143,15 @@ class EmailService {
         return wspCredsMap[email.clientID]!!
     }
 
-    fun sendVerificationEmail(email: Email){
+    fun sendVerificationEmail(email: Email) {
         //update subject and body using template
-        var templateId=email.emailTemplateId
-        var templateName=email.emailTemplateName
+        var templateId = email.emailTemplateId
+        var templateName = email.emailTemplateName
 
         //var emailToSend=emailHelperService.updateSubjectAndBody(email)
         sendEmailWithoutTracking(email)
     }
+
+    fun toKafkaEmailError(emailError: EmailError): Boolean =
+            eventStream.emailFailureEventSend().send(MessageBuilder.withPayload(emailError).build())
 }

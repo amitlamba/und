@@ -17,6 +17,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
+import kotlin.collections.HashMap
 
 /*
 1. parse events, didn't do and do
@@ -37,6 +38,38 @@ class SegmentParserCriteria {
         val logger: Logger = loggerFor(SegmentParserCriteria::class.java)
     }
 
+    var userMap:HashMap<String,String>;
+    var eventMap:HashMap<String,String>;
+    constructor(){
+        userMap=HashMap();
+        userMap.put("gender","standardInfo.gender")
+        userMap.put("dob","standardInfo.dob")
+        userMap.put("country","standardInfo.country")
+        userMap.put("state","standardInfo.state")
+        userMap.put("countryCode","standardInfo.countryCode")
+        userMap.put("City","standardInfo.City")
+        userMap.put("emailIdentity","identity.email")
+        userMap.put("mobileIdentity","identity.mobile")
+        userMap.put("emailReach","communication.email.dnd")
+        userMap.put("mobileReach","communication.mobile.dnd")
+        userMap.put("creationTime","creationTime")
+        userMap.put("os","system.os.name")
+        userMap.put("browser","system.browser.name")
+        userMap.put("device","system.device.name")
+
+        eventMap=HashMap();
+        eventMap.put("country","geogrophy.country")
+        eventMap.put("state","geogrophy.state")
+        eventMap.put("city","geogrophy.city")
+        eventMap.put("clientTime","clientTime")
+        eventMap.put("name","name")
+        eventMap.put("os","system.os.name")
+        eventMap.put("browser","system.browser.name")
+        eventMap.put("device","system.device.name")
+        eventMap.put("creationTime","creationTime")
+
+
+    }
     private val dateUtils = DateUtils()
 
     enum class Field(val fName: String = "") {
@@ -129,7 +162,7 @@ class SegmentParserCriteria {
                 Aggregation.newAggregation(/*project,*/ matchOps, group, matchOnGroup)
             } else {
                 val group = Aggregation.group(Aggregation.fields().and(Field.userId.name, Field.userId.name))
-                Aggregation.newAggregation(/*project,*/ matchOps, group)
+                 Aggregation.newAggregation(/*project,*/ matchOps, group)
             }
 
 
@@ -404,14 +437,21 @@ class SegmentParserCriteria {
         }
     }
 
-    fun getFieldPath(filterType:GlobalFilterType):String{
+    fun getFieldPath(filterType:GlobalFilterType,name:String):String{
         when(filterType){
-            GlobalFilterType.Demographics->return "standardInfo."
-            GlobalFilterType.Technographics->return "system."
-            GlobalFilterType.UserProperties-> return "additionalInfo."
+            GlobalFilterType.Demographics->return "standardInfo.${name}"
+            GlobalFilterType.UserProperties-> return "additionalInfo.${name}"
+            GlobalFilterType.Reachability->return  "communication.${name}.dnd"
+            GlobalFilterType.UserComputedProperties-> return "${name}"
+            GlobalFilterType.UserIdentity->return "identity.${name}"
+            GlobalFilterType.UserTechnographics->return return "system.${name}.name"
 
-            GlobalFilterType.EventAttributeProperties-> return "attributes."
-            GlobalFilterType.EventTimeProperties-> return "clientTime."
+            GlobalFilterType.Geogrophy->return "geogrophy.${name}"
+            GlobalFilterType.Technographics->return "system.${name}.name"
+            GlobalFilterType.EventProperties->return "${name}"
+            GlobalFilterType.EventAttributeProperties-> return "attributes.${name}"
+            GlobalFilterType.EventTimeProperties-> return "clientTime.${name}"
+            GlobalFilterType.EventComputedProperties->return "${name}"
             else-> return ""
         }
     }
@@ -423,8 +463,10 @@ class SegmentParserCriteria {
 
     fun joinAwareFilterGlobalQ(globalFilters: List<GlobalFilter>, tz: ZoneId, joinWithUser: Boolean): Pair<Criteria?, Criteria?>{
         fun parseGlobalFilter(filter: GlobalFilter,filterType:GlobalFilterType): Criteria {
-            var fieldPath= getFieldPath(filterType)
-            val fieldName = if(joinWithUser &&  isUserCollection(filterType)) "$USER_DOC.$fieldPath${filter.name}" else "$fieldPath${filter.name}"
+            var fieldPath= getFieldPath(filterType,filter.name)
+            val fieldName = if(joinWithUser &&  isUserCollection(filterType)) "$USER_DOC.$fieldPath" else "$fieldPath"
+
+
             val type = filter.type
             val unit = filter.valueUnit
             val values = filter.values
@@ -456,18 +498,19 @@ class SegmentParserCriteria {
                     val criteria = parse(filter)
                     when (gFilterType) {
                         //GlobalFilterType.AppFields -> eventPropertyMatchCriteria.add(criteria)
-                        GlobalFilterType.Technographics -> eventPropertyMatchCriteria.add(criteria)
-
                         GlobalFilterType.Demographics -> userPropertyMatchCriteria.add(criteria)
                         GlobalFilterType.Reachability -> userPropertyMatchCriteria.add(criteria)
                         GlobalFilterType.UserProperties -> userPropertyMatchCriteria.add(criteria)
-                        GlobalFilterType.UserComputedProperties -> userPropertyMatchCriteria.add(criteria)
+                        GlobalFilterType.UserComputedProperties->userPropertyMatchCriteria.add(criteria)
+                        GlobalFilterType.UserIdentity->userPropertyMatchCriteria.add(criteria)
+                        GlobalFilterType.UserTechnographics->userPropertyMatchCriteria.add(criteria)
 
                         GlobalFilterType.EventProperties -> eventPropertyMatchCriteria.add(criteria)
                         GlobalFilterType.EventAttributeProperties -> eventPropertyMatchCriteria.add(criteria)
                         GlobalFilterType.EventComputedProperties -> eventPropertyMatchCriteria.add(criteria)
-                        GlobalFilterType.EventTimeProperties -> eventPropertyMatchCriteria.add(criteria)
-
+                        GlobalFilterType.EventTimeProperties->eventPropertyMatchCriteria.add(criteria)
+                        GlobalFilterType.Technographics -> eventPropertyMatchCriteria.add(criteria)
+                        GlobalFilterType.Geogrophy->eventPropertyMatchCriteria.add(criteria)
                     }
                 }
 
@@ -479,6 +522,7 @@ class SegmentParserCriteria {
         else (if (userPropertyMatchCriteria.isNotEmpty()) Criteria().andOperator(*userPropertyMatchCriteria.toTypedArray()) else null)
         //val userMatch = Aggregation.match(userCriteria)
 
+        println()
         return Pair(eventCriteria, userCriteria)
     }
 

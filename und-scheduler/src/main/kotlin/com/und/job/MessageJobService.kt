@@ -61,7 +61,7 @@ class MessageJobService(private val jobService: JobService, private val eventStr
                     performAction(jobDescriptor, jobService::createJob)
                 }
             }
-            JobDescriptor.Action.PAUSE -> {
+            JobDescriptor.Action.PAUSE , JobDescriptor.Action.FORCE_PAUSE  -> {
                 performActionGroup(jobDescriptor, jobService::pauseJobs)
             }
             JobDescriptor.Action.RESUME -> {
