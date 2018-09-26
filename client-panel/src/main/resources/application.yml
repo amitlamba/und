@@ -26,7 +26,7 @@ spring:
             defaultBrokerPort: ${KAFKA_PORT}
             #zkNodes: ${KAFKA_IP}
             defaultZkPort: 2181
-            consumer-configuration:
+            consumer:
               maxAttempts: 1
         bindings:
           scheduleJobSend:
@@ -83,8 +83,8 @@ spring:
   sleuth:
     sampler:
       probability: 1
-  kafka:
-    bootstrap-servers: ${KAFKA_IP}:${KAFKA_PORT}
+#  kafka:
+#    bootstrap-servers: ${KAFKA_IP}:${KAFKA_PORT}
 
 eureka:
   instance:

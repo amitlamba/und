@@ -36,6 +36,6 @@ interface CampaignRepository : JpaRepository<Campaign, Long> {
     fun retrievecheduleStatus(@Param("campaignId") campaignId: Long,
                               @Param("clientId") clientId: Long): String
 
-    @Query("SELECT id from campaign c  WHERE c.client_id = :clientId and c.staus in (:statuses)", nativeQuery = false)
+    @Query("SELECT id from Campaign c  WHERE c.clientID = :clientId and c.status in (:statuses)", nativeQuery = false)
     fun findByStatusIn(clientId: Long, statuses: List<CampaignStatus>): List<Long>
 }
