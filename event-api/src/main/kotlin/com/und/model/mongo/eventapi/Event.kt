@@ -14,7 +14,7 @@ import java.util.*
 class Event(
         @field: Id var id: String? = null,
         val name: String,
-        val clientId: Int,
+        val clientId: Long,
         var lineItem: MutableList<LineItem> = mutableListOf(),
         var attributes: HashMap<String, Any> = hashMapOf(),
         var system: System = System(),
@@ -34,10 +34,10 @@ class Event(
     var timeZoneId = ZoneId.of("UTC")
 
     var clientTime = ClientTimeNow(LocalDateTime.now(timeZoneId))
+    var notificationId: String? = null
 }
 
 class ClientTimeNow(val time: LocalDateTime) {
-
 
 
     var hour: Int = time.hour

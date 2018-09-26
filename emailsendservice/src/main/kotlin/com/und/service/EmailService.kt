@@ -85,7 +85,7 @@ class EmailService {
         emailToSend.emailBody = body.addUrlTracking(mongoEmailId).addPixelTracking(mongoEmailId)
         emailToSend.emailSubject = subject
 
-        if (isSytemClient(email)) {
+        if (isSystemClient(email)) {
             val template = emailTemplateRepository.findByIdAndClientID(email.emailTemplateId, email.clientID)
             val from = template.map { it.from }
             if (from.isPresent) {
@@ -110,7 +110,7 @@ class EmailService {
         emailHelperService.updateEmailStatus(mongoEmailId, SENT, emailToSend.clientID)
     }
 
-    private fun isSytemClient(email: Email) = email.clientID == 1L
+    private fun isSystemClient(email: Email) = email.clientID == 1L
 
     fun sendEmailWithoutTracking(email: Email) {
         val serviceProviderCredential = serviceProviderCredentials(email = email)

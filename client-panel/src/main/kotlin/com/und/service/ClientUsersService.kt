@@ -12,6 +12,7 @@ class ClientUsersService {
     @Autowired
     private lateinit var eventUserRepository: EventUserRepository
 
+
     fun getEventUsers(clientId: Long): List<EventUser> {
         TenantProvider().setTenat(clientId.toString())
         return eventUserRepository.findAll()

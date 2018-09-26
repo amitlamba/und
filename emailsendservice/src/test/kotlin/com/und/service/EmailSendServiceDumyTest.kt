@@ -1,5 +1,6 @@
 package com.und.service
 
+import com.und.factory.Security
 import com.und.model.utils.Email
 import com.und.model.utils.EmailSMTPConfig
 import org.junit.Before
@@ -26,7 +27,7 @@ class EmailSendServiceDumyTest {
             465,
             "userndot19@gmail.com",
             "Userndot1@",
-            null)
+            Security.STARTTLS)
 
     var email = Email(3L,
             InternetAddress("userndot19@gmail.com"),

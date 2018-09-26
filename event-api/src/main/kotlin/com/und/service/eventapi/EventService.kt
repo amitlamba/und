@@ -81,7 +81,7 @@ class EventService {
 
     fun buildEvent(fromEvent: Event, request: HttpServletRequest): Event {
         with(fromEvent) {
-            clientId = tenantProvider.tenant.toInt()
+            clientId = tenantProvider.tenant.toLong()
             ipAddress = request.ipAddr()
             timeZone = AuthenticationUtils.principal.timeZoneId
             agentString = request.getHeader("User-Agent")

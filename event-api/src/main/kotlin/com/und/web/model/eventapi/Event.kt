@@ -21,7 +21,7 @@ open class Event {
     @Size(min=2,max=40,message="{event.name.invalidSize}")
     lateinit var name: String
 
-    var clientId: Int = -1
+    var clientId: Long = -1L
     var identity: Identity = Identity()
     var creationTime: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
 
@@ -53,6 +53,10 @@ open class Event {
 
     //@get:JsonIgnore
     var timeZone:String? = null
+
+    var notificationId:String? = null
+
+
 
 }
 

@@ -1,5 +1,6 @@
 package com.und.service
 
+import com.und.factory.Security
 import com.und.model.utils.Email
 import com.und.model.utils.EmailSMTPConfig
 import org.junit.Test
@@ -63,7 +64,7 @@ class SampleTest {
                 emailTemplateName = "",
                 campaignId = 0
                 )
-        val emailSMTPConfig = EmailSMTPConfig(null, 1, HOST, PORT, SMTP_USERNAME, SMTP_PASSWORD, CONFIGSET)
+        val emailSMTPConfig = EmailSMTPConfig(null, 1, HOST, PORT, SMTP_USERNAME, SMTP_PASSWORD, Security.STARTTLS,CONFIGSET)
 
         emailSendService.sendEmailBySMTP(emailSMTPConfig, email)
     }
@@ -78,7 +79,7 @@ class SampleTest {
                 emailTemplateId = 0,
                 emailTemplateName = "",
                 campaignId = 0)
-        val emailSMTPConfig = EmailSMTPConfig(null, 1, "email-smtp.us-east-1.amazonaws.com", 587, "AKIAIS6IJSVKWL7VUIIQ", "AlEf0RBhmCMDcTuwDDrl9BonxawtKZrPC2b4Mtn4o2v4", null)
+        val emailSMTPConfig = EmailSMTPConfig(null, 1, "email-smtp.us-east-1.amazonaws.com", 587, "AKIAIS6IJSVKWL7VUIIQ", "AlEf0RBhmCMDcTuwDDrl9BonxawtKZrPC2b4Mtn4o2v4",  Security.STARTTLS)
 
         emailSendService.sendEmailBySMTP(emailSMTPConfig, email)
     }

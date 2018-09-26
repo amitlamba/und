@@ -31,7 +31,7 @@ class SmsService {
     private var wspCredsMap: MutableMap<Long, ServiceProviderCredentials> = mutableMapOf()
 
 
-     fun sendSms(sms: Sms){
+    fun sendSms(sms: Sms) {
         val smsToSend = smsHelperService.updateBody(sms)
         val mongoSmsId = smsHelperService.saveSmsInMongo(smsToSend, SmsStatus.NOT_SENT)
         //FIXME: cache the findByClientID clientSettings
@@ -40,14 +40,14 @@ class SmsService {
         smsHelperService.updateSmsStatus(mongoSmsId, SmsStatus.SENT, smsToSend.clientID)
     }
 
-    fun sendSmsWithoutTracking(sms: Sms){
-            val serviceProviderCredential = serviceProviderCredentials(sms)
-            serviceProviderCredential.sendSms(sms)
+    fun sendSmsWithoutTracking(sms: Sms) {
+        val serviceProviderCredential = serviceProviderCredentials(sms)
+        serviceProviderCredential.sendSms(sms)
 
     }
 
     @Cacheable
-    private fun serviceProviderCredentials(sms: Sms): ServiceProviderCredentials {
+    fun serviceProviderCredentials(sms: Sms): ServiceProviderCredentials {
         synchronized(sms.clientID) {
             //TODO: This code can be cached in Redis
             if (!wspCredsMap.containsKey(sms.clientID)) {
@@ -59,11 +59,11 @@ class SmsService {
     }
 }
 
-fun ServiceProviderCredentials.sendSms(sms:Sms){
-    when(this.serviceProvider){
-        ServiceProviderCredentialsService.ServiceProvider.Twillio.desc->
-            TwilioSmsSendService().sendSms(this,sms)
-        ServiceProviderCredentialsService.ServiceProvider.AWS_SNS.desc->
-            AWS_SNSSmsService().sendSms(this,sms)
+fun ServiceProviderCredentials.sendSms(sms: Sms) {
+    when (this.serviceProvider) {
+        ServiceProviderCredentialsService.ServiceProvider.Twillio.desc ->
+            TwilioSmsSendService().sendSms(this, sms)
+        ServiceProviderCredentialsService.ServiceProvider.AWS_SNS.desc ->
+            AWS_SNSSmsService().sendSms(this, sms)
     }
 }

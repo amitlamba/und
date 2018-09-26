@@ -20,7 +20,8 @@ data class Email(
         var data: MutableMap<String, Any> = mutableMapOf(),
         var eventUser: EventUser? = null,
         var campaignId:Long,
-        var creationTime: Date = DateUtils.nowInUTC()
+        var creationTime: Date = DateUtils.nowInUTC(),
+        var retries:Int = 0
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -1,24 +1,17 @@
 package com.und.service
 
-import com.und.common.utils.encrypt
 import com.und.factory.EmailServiceProviderConnectionFactory
 import com.und.model.mongo.EmailStatus
-import com.und.model.mongo.EmailStatusUpdate
 import com.und.model.utils.Email
 import com.und.model.utils.EmailSMTPConfig
 import com.und.repository.mongo.EmailSentRepository
-import com.und.utils.TenantProvider
 import org.jsoup.Jsoup
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 import java.net.URLEncoder
-import java.time.LocalDateTime
-import java.time.ZoneId
-import javax.mail.Message
 import javax.mail.Session
-import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
 import com.und.model.mongo.Email as MongoEmail
 
@@ -61,7 +54,7 @@ class EmailHelperService {
         return msg
     }
 
-    fun saveMailInMongo(email: Email, emailStatus: EmailStatus, mongoEmailId: String? = null): String {
+    fun saveMailInMongo(email: Email, emailStatus: EmailStatus, mongoEmailId: String? = null) {
         val mongoEmail = MongoEmail(
                 id = mongoEmailId,
                 clientID = email.clientID,
@@ -74,27 +67,21 @@ class EmailHelperService {
                 userID = email.eventUser?.id
 
         )
-        TenantProvider().setTenant(email.clientID.toString())
-        val mongoEmailPersisted = emailSentRepository.save(mongoEmail)
-        val id = mongoEmailPersisted.id
-        id?: throw IllegalStateException("couldn't save email data for tracking of campaign id ${email.campaignId} sending email to ${email.toEmailAddresses}")
-
-        val emailBody = mongoEmailPersisted.emailBody
-        val clientId = email.clientID
-        templateContentCreationService.trackAllURLs(emailBody, clientId, id)
-        return id
-
+        //TenantProvider().setTenant(email.clientID.toString())
+        mongoEmailId
+                ?: throw IllegalStateException("couldn't save email data for tracking of campaign id ${email.campaignId} sending email to ${email.toEmailAddresses}")
+        emailSentRepository.saveEmail(mongoEmail, clientId = email.clientID)
     }
 
 
     fun updateEmailStatus(mongoEmailId: String, emailStatus: EmailStatus, clientId: Long, clickTrackEventId: String? = null) {
-        TenantProvider().setTenant(clientId.toString())
-        val mongoEmail = emailSentRepository.findById(mongoEmailId).get()
-        if (mongoEmail.emailStatus.order < emailStatus.order) {
-            mongoEmail.emailStatus = EmailStatus.READ
-            mongoEmail.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), emailStatus, clickTrackEventId))
-            emailSentRepository.save(mongoEmail)
-        }
+        //TenantProvider().setTenant(clientId.toString())
+        //val mongoEmail = emailSentRepository.findById(mongoEmailId).get()
+        //if (mongoEmail.emailStatus.order < emailStatus.order) {
+           // mongoEmail.emailStatus = EmailStatus.READ
+           // mongoEmail.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), emailStatus, clickTrackEventId))
+            emailSentRepository.updateStatus(mongoEmailId,emailStatus, clientId, clickTrackEventId)
+       // }
     }
 
     fun subjectAndBody(email: Email): Pair<String, String> {

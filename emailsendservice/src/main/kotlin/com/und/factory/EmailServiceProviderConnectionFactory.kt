@@ -1,5 +1,6 @@
 package com.und.factory
 
+import com.und.exception.EmailFailureException
 import com.und.model.utils.EmailSMTPConfig
 import com.und.service.ServiceProviderCredentialsService
 import com.und.utils.loggerFor
@@ -7,6 +8,8 @@ import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import java.util.concurrent.ConcurrentHashMap
+import javax.mail.Authenticator
+import javax.mail.PasswordAuthentication
 import javax.mail.Session
 import javax.mail.Transport
 
@@ -35,10 +38,17 @@ class EmailServiceProviderConnectionFactory {
                     val emailSMTPConfig = EmailSMTPConfig(
                             serviceProviderCredentialsId = wspCreds.id,
                             clientID = clientID,
-                            HOST = wspCreds.credentialsMap["url"]!!,
-                            PORT = wspCreds.credentialsMap["port"]!!.toInt(),
-                            SMTP_USERNAME = wspCreds.credentialsMap["username"]!!,
-                            SMTP_PASSWORD = wspCreds.credentialsMap["password"]!!
+                            HOST = wspCreds.credentialsMap["url"]
+                                    ?: throw EmailFailureException("Host is not provided"),
+                            PORT = wspCreds.credentialsMap["port"]?.toInt()
+                                    ?: throw EmailFailureException("Port is not provided"),
+                            SMTP_USERNAME = wspCreds.credentialsMap["username"]
+                                    ?: throw EmailFailureException("Username is not provided"),
+                            SMTP_PASSWORD = wspCreds.credentialsMap["password"]
+                                    ?: throw EmailFailureException("Password is not provided"),
+                            security = wspCreds.credentialsMap["security"]?.let { security -> Security.valueOf(security) }
+                                    ?: Security.STARTTLS
+
                     )
                     emailSMPTConfigs[clientID] = emailSMTPConfig
                     emailSMTPConfig
@@ -56,7 +66,7 @@ class EmailServiceProviderConnectionFactory {
             else -> {
                 synchronized(clientID) {
                     emailSMPTConfigs[clientID] = emailSMTPConfig
-                    val session = createSMTPSession(emailSMTPConfig.PORT)
+                    val session = createSMTPSession(emailSMTPConfig)
                     emailSMTPSessions[clientID] = session
                     session
                 }
@@ -75,7 +85,6 @@ class EmailServiceProviderConnectionFactory {
                     val transport = getSMTPSession(clientID, emailSMTPConfig).transport
                     val esp = getEmailServiceProvider(clientID)
                     logger.debug("Email Service Provider: $esp")
-                    transport.connect(esp.HOST, esp.SMTP_USERNAME, esp.SMTP_PASSWORD)
                     emailSMTPTransportConnections[clientID] = transport
                     transport
                 }
@@ -84,11 +93,12 @@ class EmailServiceProviderConnectionFactory {
 
     }
 
+
     fun closeSMTPTransportConnection(clientID: Long) {
         synchronized(clientID) {
             if (emailSMTPTransportConnections.containsKey(clientID)) {
                 try {
-                    emailSMTPTransportConnections[clientID]!!.close()
+                    emailSMTPTransportConnections[clientID]?.close()
                 } finally {
                     emailSMTPTransportConnections.remove(clientID)
                 }
@@ -96,18 +106,40 @@ class EmailServiceProviderConnectionFactory {
         }
     }
 
-    private fun createSMTPSession(port: Int): Session {
-        // Create a Properties object to contain connection configuration information.
+    private fun createSMTPSession(emailSmtpConfig: EmailSMTPConfig): Session {
         val props = System.getProperties()
-        props["mail.transport.protocol"] = "smtp"
-        props["mail.smtp.port"] = port
-        props["mail.smtp.starttls.enable"] = "true"
-        props["mail.smtp.auth"] = "true"
-        props["mail.smtp.socketFactory.class"]="javax.net.ssl.SSLSocketFactory"
-        props["mail.smtp.socketFactory.port"]=port
 
-        //props["mail.smtp.quitwait"]=false
-        // Create a Session object to represent a mail session with the specified properties.
-        return Session.getDefaultInstance(props)
+
+        props.put("mail.smtp.host", emailSmtpConfig.HOST);
+        props.put("mail.smtp.port", emailSmtpConfig.PORT);
+
+        when (emailSmtpConfig.security) {
+            Security.SSL, Security.TLS -> {
+                props["mail.smtp.ssl.enable"] = true
+                props["mail.smtp.starttls.enable"] = false
+            }
+            Security.STARTTLS -> {
+                props["mail.smtp.ssl.enable"] = false
+                props["mail.smtp.starttls.enable"] = true
+            }
+            Security.NONE -> {
+                props["mail.smtp.ssl.enable"] = false
+                props["mail.smtp.starttls.enable"] = false
+            }
+        }
+
+
+        val authenticator
+                : Authenticator
+        ? = object : Authenticator() {
+            override fun getPasswordAuthentication(): PasswordAuthentication {
+                return PasswordAuthentication(emailSmtpConfig.SMTP_USERNAME, emailSmtpConfig.SMTP_PASSWORD)
+            }
+        }
+        return Session.getInstance(props, authenticator)
     }
+}
+
+enum class Security {
+    SSL, TLS, STARTTLS, NONE
 }

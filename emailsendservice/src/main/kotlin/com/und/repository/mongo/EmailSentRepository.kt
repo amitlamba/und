@@ -5,6 +5,4 @@ import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface EmailSentRepository: MongoRepository<Email, String> {
-
-}
+interface EmailSentRepository: MongoRepository<Email, String> , EmailSentCustomRepository

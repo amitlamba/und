@@ -1,5 +1,3 @@
-
-
 jar {
     group = 'com.und'
     baseName = 'client-panel'

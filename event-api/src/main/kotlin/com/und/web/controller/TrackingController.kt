@@ -14,21 +14,21 @@ import javax.servlet.http.HttpServletResponse
 class TrackingController {
 
     @Autowired
-    private lateinit  var eventTrackService: EventTrackService
+    private lateinit var eventTrackService: EventTrackService
 
     @GetMapping(value = ["/track"])
-    fun trackUrlClick(@RequestParam("c") clientId: Int, @RequestParam("e") mongoEmailId: String,
+    fun trackUrlClick(@RequestParam("c") clientId: Long, @RequestParam("e") mongoEmailId: String,
                       @RequestParam("u") redirectToUrl: String, httpServletResponse: HttpServletResponse) {
 
-        var toKafka: Event = Event()
-        toKafka.clientId = clientId
-        toKafka.name = "und_email_track"
-        toKafka.attributes = hashMapOf<String, Any>(
-                Pair("und_mongo_email_id", mongoEmailId),
+        val event = Event()
+        event.clientId = clientId
+        event.name = "Notification"
+        event.notificationId = mongoEmailId
+        event.attributes = hashMapOf(
                 Pair("und_redirect_to_url", redirectToUrl)
-                )
+        )
 
-        eventTrackService.toKafka(toKafka)
+        eventTrackService.toKafka(event)
 
         httpServletResponse.setHeader("Location", redirectToUrl)
     }

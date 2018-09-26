@@ -37,17 +37,24 @@ class EventTrackService {
         val clientId = event.clientId
         tenantProvider.setTenat(clientId.toString())
 
-        val mongoEmailId = event.attributes["und_mongo_email_id"].toString()
-        var email: Email? = null
-        emailSentRepository.findById(mongoEmailId).ifPresent({ e -> email = e })
-        event.identity.userId = email?.userID
+        val notificationId = event.notificationId
+        val email: Email? =  emailSentRepository.findById(notificationId).orElse(null)
 
-        val mongoEventId = eventService.saveEvent(event)
+        //val mongoEventId = eventService.saveEvent(event)
         email?.let {
+
+            with(event) {
+                event.identity.userId = email.userID
+                attributes["campaignId"] = it.campaignID?:-1L
+                attributes["status"] =  EmailStatus.CTA_PERFORMED
+            }
+            val mongoEventId = eventService.saveEvent(event)
+
             it.emailStatus = EmailStatus.CTA_PERFORMED
             it.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), EmailStatus.CTA_PERFORMED, mongoEventId))
             emailSentRepository.save(it)
         }
+
 
     }
 }

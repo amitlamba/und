@@ -39,6 +39,7 @@ fun Event.copyToMongo(): MongoEvent {
     mongoEvent.userId = event.identity.userId
     mongoEvent.sessionId = event.identity.sessionId
     mongoEvent.deviceId = event.identity.deviceId
+    mongoEvent.notificationId = event.notificationId
 
     //copy geo details
     with(mongoEvent.geoDetails) {

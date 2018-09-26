@@ -17,6 +17,6 @@ class SmsListner {
 
     @StreamListener("smsEventSend")
     fun sendSmsCampaign(sms: Sms) {
-        smsService.sendSms(sms);
+        smsService.sendSms(sms)
     }
 }

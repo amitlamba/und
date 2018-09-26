@@ -35,7 +35,8 @@ dependencies {
     compile group: 'org.jsoup', name: 'jsoup', version: '1.11.3'
     compile( "com.amazonaws:aws-java-sdk-ses:1.11.221")
     compile( "com.amazonaws:aws-java-sdk-sns:1.11.221")
-
+    compile group: "com.twilio.sdk", name: "twilio", version: "7.24.2"
+    //compile group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: '1.11.336'
     compile(
             "org.springframework.boot:spring-boot-starter-redis:$bootRedisVersion",
             "org.springframework.data:spring-data-redis:$dataRedisVersion",

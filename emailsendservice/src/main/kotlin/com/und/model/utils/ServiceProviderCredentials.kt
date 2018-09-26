@@ -1,6 +1,9 @@
 package com.und.model.utils
 
 import com.amazonaws.regions.Regions
+import com.und.exception.EmailError
+import com.und.exception.EmailFailureException
+import com.und.factory.Security
 import com.und.model.jpa.Status
 import java.time.LocalDateTime
 
@@ -55,10 +58,17 @@ data class EmailSESConfig(
             val accessKeyId = credentialMap["AWS_ACCESS_KEY_ID"]
             val secretAccessKey = credentialMap["AWS_SECRET_ACCESS_KEY"]
             val clientId = serviceProviderCredentials.clientID
-            return if (region == null || accessKeyId == null || secretAccessKey == null ) {
-                throw IllegalArgumentException("region : $region , accesKeyId : $accessKeyId , secretAccesKey :$secretAccessKey ")
+            return if (region == null || accessKeyId == null || secretAccessKey == null) {
+                val error = EmailError()
+                with(error) {
+                    clientid = serviceProviderCredentials.clientID
+                    causeMessage = "details for email setting are incorrect region : $region , accesKeyId : $accessKeyId , secretAccesKey :$secretAccessKey  "
+                    failedSettingId = serviceProviderCredentials.id
+                    failureType = EmailError.FailureType.CONNECTION
+                }
+                throw EmailFailureException("details for email setting are incorrect region : $region , accesKeyId : $accessKeyId , secretAccesKey :$secretAccessKey  ", error)
             } else {
-                 EmailSESConfig(
+                EmailSESConfig(
                         serviceProviderCredentials.id,
                         clientId,
                         Regions.fromName(region),
@@ -77,6 +87,7 @@ data class EmailSMTPConfig(
         var PORT: Int,
         var SMTP_USERNAME: String,
         var SMTP_PASSWORD: String,
+        var security:Security,
         var CONFIGSET: String? = null
 ) {
     companion object {
@@ -85,16 +96,25 @@ data class EmailSMTPConfig(
             val port = serviceProviderCredentials.credentialsMap["port"]
             val username = serviceProviderCredentials.credentialsMap["username"]
             val password = serviceProviderCredentials.credentialsMap["password"]
-            return if (host == null || port == null || username == null || password == null ) {
-                throw IllegalArgumentException("host : $host , port : $port , username :$username , password : $password ")
+            val security = serviceProviderCredentials.credentialsMap["security"]?.let {security->Security.valueOf(security)}?:Security.STARTTLS
+            return if (host == null || port == null || username == null || password == null) {
+                val error = EmailError()
+                with(error) {
+                    clientid = serviceProviderCredentials.clientID
+                    causeMessage = "details for email setting are incorrect host : $host , port : $port , username :$username , password : $password "
+                    failedSettingId = serviceProviderCredentials.id
+                    failureType = EmailError.FailureType.CONNECTION
+                }
+                throw EmailFailureException("details for email setting are incorrect host : $host , port : $port , username :$username , password : $password ", error)
             } else {
-                 EmailSMTPConfig(
+                EmailSMTPConfig(
                         serviceProviderCredentials.id,
                         serviceProviderCredentials.clientID,
                         host,
                         port.toInt(),
                         username,
-                        password
+                        password,
+                        security=security
                 )
             }
         }
