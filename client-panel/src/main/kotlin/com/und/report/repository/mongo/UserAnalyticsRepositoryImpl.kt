@@ -2,6 +2,7 @@ package com.und.report.repository.mongo
 
 import com.und.common.utils.loggerFor
 import com.und.report.model.AggregateOutput
+import com.und.report.model.UserData
 import com.und.service.AGGREGATE_VALUE
 import com.und.service.SegmentParserCriteria
 import org.bson.Document
@@ -13,7 +14,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class UserAnalyticsRepositoryImpl: UserAnalyticsRepository{
-
     companion object {
         val logger: Logger = loggerFor(UserAnalyticsRepositoryImpl::class.java)
     }
@@ -26,7 +26,7 @@ class UserAnalyticsRepositoryImpl: UserAnalyticsRepository{
 
         val aggregate = mongoTemplate.aggregate<Document>(query, "${clientId}_event", Document::class.java)
 
-        SegmentParserCriteria.logger.debug("Total ${aggregate.mappedResults.size} results found")
+        logger.debug("Total ${aggregate.mappedResults.size} results found")
 
         if(aggregate.mappedResults.size == 0) return emptyList()
 
@@ -39,4 +39,13 @@ class UserAnalyticsRepositoryImpl: UserAnalyticsRepository{
     }
 
 
+    override fun funnelData(query: Aggregation, clientId: Long): List<UserData> {
+        logger.debug("Fetching funnelData results for query : $query, clientId: $clientId")
+
+        val aggregate = mongoTemplate.aggregate<UserData>(query, "${clientId}_event", UserData::class.java)
+
+        logger.debug("Total ${aggregate.mappedResults.size} results found")
+
+        return aggregate.mappedResults
+    }
 }
