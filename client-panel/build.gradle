@@ -25,11 +25,13 @@ dependencies {
 
     compile ("com.und:auth-client:0.4.0-SNAPSHOT")
 
+
     compile("io.springfox:springfox-swagger2:$swaggerVersion")
     compile("io.springfox:springfox-swagger-ui:$swaggerVersion")
     compile group: 'nl.martijndwars', name: 'web-push', version: '3.0.1'
     compile group: 'de.bytefish.fcmjava', name: 'fcmjava-core', version: '2.4'
     compile group: 'de.bytefish.fcmjava', name: 'fcmjava-client', version: '2.4'
+    compile group: 'com.amazonaws', name: 'aws-java-sdk-lambda', version: '1.11.336'
 
     runtime('org.postgresql:postgresql')
 

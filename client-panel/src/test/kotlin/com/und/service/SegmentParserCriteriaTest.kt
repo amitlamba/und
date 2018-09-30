@@ -63,6 +63,7 @@ class SegmentParserCriteriaTest {
         val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
         println(q.didq.first)
         println(q.didq.second)
+        println(q.userQuery)
         MatcherAssert.assertThat(2, Is(2))
     }
 
