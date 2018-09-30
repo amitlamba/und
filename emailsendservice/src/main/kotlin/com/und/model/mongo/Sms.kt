@@ -11,7 +11,7 @@ data class Sms(
         var fromSmsAddress: String? = null,
         var toSmsAddresses: String?,
         @Transient
-        var smsBody:String?,
+        var smsBody: String?,
         var smsTemplateId: Long? = null,
 
         var userID: String? = null,
@@ -28,11 +28,13 @@ enum class SmsStatus(val order: Int) {
     NOT_SENT(1),
     SENT(2),
     READ(3),
-    CTA_PERFORMED(4);
+    CTA_PERFORMED(4),
+    ERROR(5)
 }
 
-data class SmsStatusUpdate (
+data class SmsStatusUpdate(
         val date: LocalDateTime,
         val smsStatus: SmsStatus,
-        val clickTrackEventId: String? = null
+        val clickTrackEventId: String? = null,
+        var message: String? = null
 )

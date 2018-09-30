@@ -1,5 +1,7 @@
 package com.und.service
 
+//import com.und.exception.Connection
+
 import com.amazonaws.auth.AWSCredentialsProvider
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
@@ -8,21 +10,14 @@ import com.amazonaws.services.simpleemail.AmazonSimpleEmailService
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder
 import com.amazonaws.services.simpleemail.model.*
 import com.amazonaws.services.sns.model.InternalErrorException
-import com.amazonaws.services.sns.model.ThrottledException
-//import com.und.exception.Connection
 import com.und.exception.EmailError
 import com.und.exception.EmailFailureException
 import com.und.model.utils.EmailSESConfig
 import org.junit.Before
 import org.junit.Test
-
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.io.BufferedReader
-import java.io.File
-import java.io.FileReader
 import javax.mail.internet.InternetAddress
-import kotlin.math.log
 
 class Email(var from: InternetAddress, var to: List<InternetAddress>) {
     var body = "testing";

@@ -1,35 +1,17 @@
-package main
+package sms
 
 import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/aws/aws-lambda-go/lambda"
 	"log"
 	"net/http"
 )
 
 var (
-	// ErrNameNotProvided is thrown when a name is not provided
 	ErrNameNotProvided = errors.New("no name was provided in the HTTP body")
 )
-
-func main() {
-	lambda.Start(Handler)
-/*	event := ExotelInput{
-		Sid:   "shiv53",
-		Body:  "HelloWorld",
-		From:  "09513886363",
-		To:    "7838540240",
-		Token: "54743a3bab3609e08473ace008df1d64bcf998cd",
-	}
-
-	response, err := Handler(event)
-	log.Print(response.)
-	log.Print(err)*/
-
-}
 
 type ExotelInput struct {
 	Sid   string `json:"sid"`
@@ -44,11 +26,8 @@ type ExotelResponse struct {
 	Message string `json:"message"`
 }
 
-// Handler is your Lambda function handler
-// It uses Amazon API Gateway request/responses provided by the aws-lambda-go/events package,
-// However you could use other event sources (S3, Kinesis etc), or JSON-decoded primitive types such as 'string'.
-func Handler(event ExotelInput) (ExotelResponse, error) {
 
+func SmsHandler(event ExotelInput) (ExotelResponse, error) {
 
 	if event.Body == "" {
 		return ExotelResponse{Status: 501, Message: "Body is empty"}, ErrNameNotProvided
@@ -95,10 +74,7 @@ func toJsonHelper(resp *http.Response) (ExotelResponse) {
 		}
 
 	}
-	//fmt.Println("Phone No. = ", record.SMSMessage.From)
-	//fmt.Println("Phone No. = ", record.SMSMessage.From)
 
-	// If no name is provided in the HTTP request body, throw an error
 }
 
 func exotelApi(input ExotelInput) (ExotelResponse) {
@@ -107,8 +83,8 @@ func exotelApi(input ExotelInput) (ExotelResponse) {
 	from := input.From
 	to := input.To
 	body := input.Body
-	log.Printf("hitting url https://%s:%s@api.exotel.com//v1/Accounts/%s/Sms/send.json?From=%s&To=%s&Body=%s", sid, token, sid, from, to, body)
 	exotelUrl := fmt.Sprintf("https://%s:%s@api.exotel.com//v1/Accounts/%s/Sms/send.json?From=%s&To=%s&Body=%s", sid, token, sid, from, to, body)
+	log.Printf(exotelUrl)
 
 	// Build the request
 	req, err := http.NewRequest("POST", exotelUrl, nil)
@@ -137,7 +113,6 @@ func exotelApi(input ExotelInput) (ExotelResponse) {
 	// when done reading from it
 	// Defer the closing of the body
 	defer resp.Body.Close()
-	//b, _ := ioutil.ReadAll(resp.Body)
 
 	log.Printf("response status %d ", response.Status)
 	log.Printf("response message %s ", response.Message)

@@ -59,9 +59,9 @@ fun ServiceProviderCredentials.sendSms(sms:Sms){
     when(this.serviceProvider){
         ServiceProviderCredentialsService.ServiceProvider.Twillio.desc->{
             print(this.serviceProvider)
-            TwilioSmsSendService().sendSms(this,sms)}
+            TwilioSmsSendService.sendSms(this,sms)}
         ServiceProviderCredentialsService.ServiceProvider.AWS_SNS.desc->{
             print(this.serviceProvider)
-            AWS_SNSSmsService().sendSms(this,sms)}
+            AWS_SNSSmsService.sendSms(this,sms)}
     }
 }

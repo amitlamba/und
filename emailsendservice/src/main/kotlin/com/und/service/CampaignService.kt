@@ -29,26 +29,26 @@ class CampaignService {
     private lateinit var eventStream: EventStream
 
     fun executeCampaign(campaignId: Long, clientId: Long) {
-        val campaignOption  = campaignRepository.getCampaignByCampaignId(campaignId, clientId)
-        val campaign =  campaignOption.orElseThrow( {IllegalStateException("campaign not found for campaign id $campaignId and client $clientId")})
-        val usersData = getUsersData(campaign.segmentId , clientId)
+        val campaignOption = campaignRepository.getCampaignByCampaignId(campaignId, clientId)
+        val campaign = campaignOption.orElseThrow({ IllegalStateException("campaign not found for campaign id $campaignId and client $clientId") })
+        val usersData = getUsersData(campaign.segmentId, clientId)
         usersData.forEach { user ->
             try {
                 //TODO: filter out unsubscribed and blacklisted users
                 //TODO: How to skip transactional Messages
 
                 //check mode of communication is email
-                if(campaign?.campaignType=="EMAIL"){
+                if (campaign?.campaignType == "EMAIL") {
 
-                    if(user.communication?.email?.dnd == true)
+                    if (user.communication?.email?.dnd == true)
                         return@forEach //Local lambda return
                     val email: Email = email(clientId, campaign, user)
                     toKafka(email)
                 }
                 //check mode of communication is sms
-                if(campaign?.campaignType=="SMS"){
+                if (campaign?.campaignType == "SMS") {
 
-                    if(user.communication?.mobile?.dnd == true)
+                    if (user.communication?.mobile?.dnd == true)
                         return@forEach //Local lambda return
                     val sms: Sms = sms(clientId, campaign, user)
                     toKafka(sms)
@@ -63,15 +63,15 @@ class CampaignService {
     }
 
 
-    private fun sms(clientId: Long, campaign: Campaign?, user: EventUser):Sms{
+    private fun sms(clientId: Long, campaign: Campaign?, user: EventUser): Sms {
         return Sms(
                 clientId,
                 campaign?.fromSMSUser,
                 user.identity.mobile,
-                smsBody =null,
-                smsTemplateId = campaign?.smsTemplateId?:0L,
+                smsBody = null,
+                smsTemplateId = campaign?.smsTemplateId ?: 0L,
                 //assign name also
-                smsTemplateName=null,
+                smsTemplateName = null,
                 eventUser = user
         )
     }

@@ -12,6 +12,7 @@ class SmsListner {
     companion object {
         val logger = loggerFor(SmsListner::class.java)
     }
+
     @Autowired
     private lateinit var smsService: SmsService
 

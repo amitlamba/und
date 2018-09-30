@@ -15,40 +15,41 @@ import java.time.ZoneId
 class SmsHelperService {
 
     @Autowired
-    private lateinit var smsSentRepository:SmsSentRepository
+    private lateinit var smsSentRepository: SmsSentRepository
     @Autowired
     private lateinit var smsTemplateRepository: SmsTemplateRepository
 
     fun updateBody(sms: Sms): Sms {
 
-        var smsToSend=sms.copy()
-        var smsTemplate=smsTemplateRepository.findByIdAndClientID(sms.smsTemplateId,sms.clientID)
-        smsToSend.smsBody=smsTemplate?.smsTemplateBody
+        val smsToSend = sms.copy()
+        val smsTemplate = smsTemplateRepository.findByIdAndClientID(sms.smsTemplateId, sms.clientID)
+        smsToSend.smsBody = smsTemplate?.smsTemplateBody
         return smsToSend
     }
 
-    fun saveSmsInMongo(smsToSend: Sms, noT_SENT: SmsStatus): String? {
-        var mongoSms:com.und.model.mongo.Sms =com.und.model.mongo.Sms(
-                smsToSend.clientID,
-                smsToSend.fromSmsAddress,
-                smsToSend.toSmsAddresses,
-                smsToSend.smsBody,
-                smsToSend.smsTemplateId,
-                smsToSend.eventUser?.id,
-                smsStatus = noT_SENT
+    fun saveSmsInMongo(smsToSend: Sms, status: SmsStatus, mongoEmailId: String? = null): String? {
+        val mongoSms: com.und.model.mongo.Sms = com.und.model.mongo.Sms(
+                id = mongoEmailId,
+                clientID = smsToSend.clientID,
+                fromSmsAddress = smsToSend.fromSmsAddress,
+                toSmsAddresses = smsToSend.toSmsAddresses,
+                smsBody = smsToSend.smsBody,
+                smsTemplateId = smsToSend.smsTemplateId,
+                userID = smsToSend.eventUser?.id,
+                smsStatus = status
         )
         TenantProvider().setTenant(smsToSend.clientID.toString())
-        val mmongoSmsPersisted: com.und.model.mongo.Sms? = smsSentRepository.save(mongoSms)
+        val mongoSmsPersisted: com.und.model.mongo.Sms? = smsSentRepository.save(mongoSms)
 
-            return mmongoSmsPersisted?.id
+        return mongoSmsPersisted?.id
     }
 
-    fun updateSmsStatus(mongoSmsId: String?, sent: SmsStatus, clientID: Long,clickTrackEventId: String? = null) {
+    fun updateSmsStatus(mongoSmsId: String?, sent: SmsStatus, clientID: Long, message: String?, clickTrackEventId: String? = null) {
         TenantProvider().setTenant(clientID.toString())
-        var mongoSms=smsSentRepository.findById(mongoSmsId).get()
-        if(mongoSms.smsStatus.order<sent.order){
-            mongoSms.smsStatus=SmsStatus.READ
-            mongoSms.statusUpdates.add(SmsStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")),sent,clickTrackEventId))
+        val mongoSms = mongoSmsId?.let { smsSentRepository.findById(mongoSmsId).get() }
+        if (mongoSms != null && mongoSms.smsStatus.order < sent.order) {
+            mongoSms.smsStatus = SmsStatus.READ
+            mongoSms.statusUpdates.add(SmsStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), sent, clickTrackEventId, message))
             smsSentRepository.save(mongoSms)
         }
 

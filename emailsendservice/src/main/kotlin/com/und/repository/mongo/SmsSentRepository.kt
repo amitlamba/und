@@ -5,5 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface SmsSentRepository:MongoRepository<Sms,String> {
+interface SmsSentRepository : MongoRepository<Sms, String>, SmsSentCustomRepository {
+
+
 }

@@ -85,6 +85,7 @@ class ServiceProviderCredentialsService {
         AWS_SNS("AWS - Simple Notification Service"),
         GOOGLE_FCM("Google - FCM"),
         Twillio("Twillio"),
+        Exotel("Exotel"),
 
 
     }
