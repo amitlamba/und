@@ -59,9 +59,9 @@ class AggregationQuerybuilder {
     }
 
     private fun getCompleteScopedName(name: String, globalFilterType: GlobalFilterType): String {
-        val fieldPath = segmentParserCriteria.getFieldPath(globalFilterType)
-        if(isUserCollection(globalFilterType)) return "$USER_DOC.$fieldPath${name}"
-        else return "$fieldPath${name}"
+        val fieldPath = segmentParserCriteria.getFieldPath(globalFilterType,name)
+        if(isUserCollection(globalFilterType)) return "$USER_DOC.$fieldPath"
+        else return "$fieldPath"
     }
 
     fun buildAggregationPipeline(filters: List<GlobalFilter>, groupBys: List<GroupBy>, aggregateBy: AggregateBy?, paramValues: Map<String, Any> = emptyMap(), entityType: EventReport.EntityType, tz: ZoneId, clientId: Long): List<AggregationOperation> {
@@ -138,17 +138,18 @@ class AggregationQuerybuilder {
              * Event count output & (user filter or user group by): group by userId to a user-count
              * Event count output with no user filter/group by: count events to result [last point of pipeline]
              */
-            var eventGroupOperation = Aggregation.group(*eventGroupFields.values.toTypedArray())
+            val fields = eventGroupFields.map { it -> Fields.field(it.key, it.value) }.toTypedArray()
+            var eventGroupOperation = Aggregation.group(Fields.from(*fields))
 
             if(eventOutputJoinWithUser) {
                 if(eventAggregateByPresent && aggregateBy!=null){
                     val scopedName = getCompleteScopedName(aggregateBy.name, aggregateBy.globalFilterType)
                     when(aggregateBy.aggregationType){
-                        AggregationType.Sum -> eventGroupOperation = Aggregation.group(*eventGroupFields.values.toTypedArray(), Field.UserId.fName).sum(scopedName).`as`(AGGREGATE_VALUE)
-                        AggregationType.Avg -> eventGroupOperation = Aggregation.group(*eventGroupFields.values.toTypedArray(), Field.UserId.fName).avg(scopedName).`as`(AGGREGATE_VALUE)
+                        AggregationType.Sum -> eventGroupOperation = Aggregation.group(Fields.from(*fields, Fields.field(Field.UserId.fName))).sum(scopedName).`as`(AGGREGATE_VALUE)
+                        AggregationType.Avg -> eventGroupOperation = Aggregation.group(Fields.from(*fields, Fields.field(Field.UserId.fName))).avg(scopedName).`as`(AGGREGATE_VALUE)
                     }
                 }
-                else eventGroupOperation = Aggregation.group(*eventGroupFields.values.toTypedArray(), Field.UserId.fName).count().`as`(USER_COUNT)
+                else eventGroupOperation = Aggregation.group(Fields.from(*fields, Fields.field(Field.UserId.fName))).count().`as`(USER_COUNT)
             }
             else if(entityType == EventReport.EntityType.user)
                 eventGroupOperation = eventGroupOperation.addToSet(Field.UserId.fName).`as`(Field.UserId.fName)
@@ -243,9 +244,9 @@ class AggregationQuerybuilder {
 
         //final output if not allready pushed in pipeline
         if(entityType == EventReport.EntityType.user && !userAggregateByPresent){
-            val allGroupByFields = mutableMapOf<String, String>()
-            allGroupByFields.putAll(eventGroupFields)
-            allGroupByFields.putAll(userGroupFields)
+//            val allGroupByFields = mutableMapOf<String, String>()
+//            allGroupByFields.putAll(eventGroupFields)
+//            allGroupByFields.putAll(userGroupFields)
 
             var resultProjectOperation = Aggregation.project().and(Field.UserId.fName).size().`as`(AGGREGATE_VALUE)
 //            if(allGroupByFields.size > 1) {

@@ -1,5 +1,6 @@
 package com.und.report.web.controller
 
+import com.und.report.service.FunnelReportService
 import com.und.report.web.model.FunnelReport
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -7,6 +8,8 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController("/report/funnel")
 class FunnelController {
+
+    private lateinit var funnelReportService: FunnelReportService
 
 /*
         for a segment lets say all users and for a time period lets say 100 days
@@ -34,8 +37,7 @@ class FunnelController {
 
 
     @GetMapping("/funnel")
-    fun funnel(@RequestParam(name = "period") funnelFilter: FunnelReport.FunnelReportFilter): List<FunnelReport.FunnelStep> {
-        return emptyList()
-
+    fun funnel(funnelFilter: FunnelReport.FunnelReportFilter): List<FunnelReport.FunnelStep> {
+        return funnelReportService.funnel(funnelFilter)
     }
 }

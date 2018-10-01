@@ -135,8 +135,9 @@ class MongoQueryUtil {
         val matchOperation = Aggregation.match(filterGlobalQ.first)
 
 
-        val groupByFieldPath = segmentParserCriteria.getFieldPath(groupBy.groupFilterType)
-        val groupByField = "$groupByFieldPath${groupBy.groupName}"
+        val groupByFieldPath = segmentParserCriteria.getFieldPath(groupBy.groupFilterType,groupBy.groupName)
+        val groupByField = "$groupByFieldPath"
+//        val groupByField = "$groupByFieldPath${groupBy.groupName}"
         val groupOperation = Aggregation.group(groupByField).addToSet(Field.UserId.fName).`as`(Field.UserId.fName)
 
         val projectOperation = Aggregation.project(Fields.from(Fields.field(groupByField))).and(Field.UserId.fName).size().`as`(AGGREGATE_VALUE)
@@ -194,10 +195,11 @@ class MongoQueryUtil {
 
         //join with user collection if needed
         val joinWithUserPipeline = mutableListOf<AggregationOperation>()
-        val groupByFieldPath = segmentParserCriteria.getFieldPath(groupBy.groupFilterType)
-        var groupByField = "$groupByFieldPath${groupBy.groupName}"
-
+        val groupByFieldPath = segmentParserCriteria.getFieldPath(groupBy.groupFilterType,groupBy.groupName)
+        var groupByField = "$groupByFieldPath"
+//        var groupByField = "$groupByFieldPath${groupBy.groupName}"
         if(userGroupByPresent) groupByField = "$USER_DOC.$groupByField"
+
 
         if(userFilterPresent || userGroupByPresent){
             var projectOperation = Aggregation.project(Field.UserId.fName)

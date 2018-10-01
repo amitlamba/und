@@ -45,7 +45,7 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
         val segmentUserIds = segmentService.segmentUserIds(segmentId, clientID)
         val tz = userSettingsService.getTimeZone()
         //TODO include creationTime filter based on interval
-        val filters = listOf(buildFilter(GlobalFilterType.EventProperties, "userId", DataType.string, StringOperator.Contains.name, segmentUserIds, null))
+        val filters = listOf(ReportUtil.buildFilter(GlobalFilterType.EventProperties, "userId", DataType.string, StringOperator.Contains.name, segmentUserIds, null))
         val groupBys = listOf(groupBy)
         val userAggregation = aggregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap(), EventReport.EntityType.user, tz, clientID)
 
@@ -64,8 +64,8 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
         val segmentUserIds = segmentService.segmentUserIds(segmentId, clientID)
         val tz = userSettingsService.getTimeZone()
 
-        val filters = listOf(buildFilter(GlobalFilterType.EventProperties, Field.UserId.fName, DataType.string, StringOperator.Contains.name, segmentUserIds, null),
-                buildFilter(GlobalFilterType.EventComputedProperties, Field.DateVal.fName, DataType.string, StringOperator.Contains.name, dates, null))
+        val filters = listOf(ReportUtil.buildFilter(GlobalFilterType.EventProperties, Field.UserId.fName, DataType.string, StringOperator.Contains.name, segmentUserIds, null),
+                ReportUtil.buildFilter(GlobalFilterType.EventComputedProperties, Field.DateVal.fName, DataType.string, StringOperator.Contains.name, dates, null))
 
         val groupBys = listOf(buildGroupBy(Field.DateVal.fName, GlobalFilterType.EventComputedProperties),
                 buildGroupBy(Field.MinutesPeriod.fName, GlobalFilterType.EventComputedProperties))
@@ -88,8 +88,8 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
         val segmentUserIds = segmentService.segmentUserIds(segmentId, clientID)
         val tz = userSettingsService.getTimeZone()
 
-        val filters = listOf(buildFilter(GlobalFilterType.EventProperties, Field.UserId.fName, DataType.string, StringOperator.Contains.name, segmentUserIds, null),
-                buildFilter(GlobalFilterType.EventComputedProperties, Field.DateVal.fName, DataType.string, StringOperator.Contains.name, dates, null))
+        val filters = listOf(ReportUtil.buildFilter(GlobalFilterType.EventProperties, Field.UserId.fName, DataType.string, StringOperator.Contains.name, segmentUserIds, null),
+                ReportUtil.buildFilter(GlobalFilterType.EventComputedProperties, Field.DateVal.fName, DataType.string, StringOperator.Contains.name, dates, null))
 
         val groupBys = listOf(buildGroupBy(Field.DateVal.fName, GlobalFilterType.EventComputedProperties),
                 buildGroupBy(Field.MinutesPeriod.fName, GlobalFilterType.EventComputedProperties),
@@ -120,8 +120,8 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
         val segmentUserIds = segmentService.segmentUserIds(segmentId, clientID)
         val tz = userSettingsService.getTimeZone()
 
-        val filters = listOf(buildFilter(GlobalFilterType.EventProperties, Field.UserId.fName, DataType.string, StringOperator.Contains.name, segmentUserIds, null),
-                buildFilter(GlobalFilterType.EventComputedProperties, Field.DateVal.fName, DataType.string, StringOperator.Contains.name,
+        val filters = listOf(ReportUtil.buildFilter(GlobalFilterType.EventProperties, Field.UserId.fName, DataType.string, StringOperator.Contains.name, segmentUserIds, null),
+                ReportUtil.buildFilter(GlobalFilterType.EventComputedProperties, Field.DateVal.fName, DataType.string, StringOperator.Contains.name,
                         dates, null))
         val groupBys = listOf(buildGroupBy(Field.DateVal.fName, GlobalFilterType.EventComputedProperties),
                 buildGroupBy(Field.EventName.fName, GlobalFilterType.EventProperties))
@@ -223,11 +223,11 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
         when(period){
             EventReport.PERIOD.daily -> {
                 //TODO correct for daily
-                return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties))
+                return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties),buildGroupBy("dayOfMonth", GlobalFilterType.EventTimeProperties))
             }
             EventReport.PERIOD.weekly -> {
                 //TODO correct for weekly
-                return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties))
+                return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties),buildGroupBy("dayOfWeek", GlobalFilterType.EventTimeProperties))
             }
             EventReport.PERIOD.monthly -> {
                 return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties))
@@ -246,11 +246,11 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
     private fun buildCommonfilters(requestFilter: EventReport.EventReportFilter, entityType: EventReport.EntityType, clientID: Long): List<GlobalFilter> {
         val segmentUserIds = segmentService.segmentUserIds(requestFilter.segmentid, clientID)
         val filters = mutableListOf<GlobalFilter>()
-        filters.add(buildFilter(GlobalFilterType.EventProperties, Field.EventName.fName, DataType.string, StringOperator.Equals.name,
+        filters.add(ReportUtil.buildFilter(GlobalFilterType.EventProperties, Field.EventName.fName, DataType.string, StringOperator.Equals.name,
                 listOf(requestFilter.eventName), null))
-        filters.add(buildFilter(GlobalFilterType.EventProperties, Field.UserId.fName, DataType.string, StringOperator.Contains.name,
+        filters.add(ReportUtil.buildFilter(GlobalFilterType.EventProperties, Field.UserId.fName, DataType.string, StringOperator.Contains.name,
                 segmentUserIds, null))
-        filters.add(buildFilter(GlobalFilterType.EventProperties, Field.CreationTime.fName, DataType.date, DateOperator.Between.name,
+        filters.add(ReportUtil.buildFilter(GlobalFilterType.EventProperties, Field.CreationTime.fName, DataType.date, DateOperator.Between.name,
                 listOf(requestFilter.fromDate, requestFilter.toDate), null))
 
 
@@ -329,16 +329,5 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
         return aggregate.map{ EventReport.Aggregate(it.aggregateVal.toLong(), it.groupByInfo)}
     }
 
-
-    private fun buildFilter(globalFilterType: GlobalFilterType, name: String, type: DataType, operator: String, values: List<String>, valueUnit: Unit?): GlobalFilter {
-        var filter = GlobalFilter()
-        if(globalFilterType != null) filter.globalFilterType = globalFilterType
-        if (name != null) filter.name = name
-        if (type != null) filter.type = type
-        if (operator != null) filter.operator = operator
-        if (values != null) filter.values = values
-        if (valueUnit != null) filter.valueUnit = valueUnit
-        return filter
-    }
 
 }
