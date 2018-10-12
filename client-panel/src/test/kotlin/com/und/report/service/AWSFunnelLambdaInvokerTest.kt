@@ -39,9 +39,9 @@ class AWSFunnelLambdaInvokerTest {
 
         val userData = UserData()
         userData.userId = "testuser"
-        userData.chronologies = listOf(EventChronology("Search", "all", listOf(10, 20, 30, 40, 50)),
-                EventChronology("View", "all", listOf(15, 25, 45, 65)),
-                EventChronology("Charged", "all", listOf(30, 50, 70)))
+        userData.eventChronology = listOf(EventChronology("Search", "all", listOf("10", "20", "30", "40", "50")),
+                EventChronology("View", "all", listOf("15", "25", "45", "65")),
+                EventChronology("Charged", "all", listOf("30", "50", "70")))
 
         val funnelData = FunnelData(listOf(userData), listOf("Search", "View", "Charged"), 30)
 
