@@ -163,11 +163,12 @@ class GlobalFilter : Serializable {
 enum class GlobalFilterType(val type: String) : Serializable {
     UserProperties("UserProperties"),
     Demographics("Demographics"),
-    Technographics("Technographics"),
     Reachability("Reachability"),
     AppFields("AppFields"),
     UserIdentity("UserIdentity"),
     UserTechnographics("UserTechnographics"),
+
+    Technographics("Technographics"),
     //Simple (i.e. no nested field path) properties of event collection (e.g. clientId, name)
     EventProperties("EventProperties"),
     //All properties of event collection in attribute field (e.g. attributes.xyz)
