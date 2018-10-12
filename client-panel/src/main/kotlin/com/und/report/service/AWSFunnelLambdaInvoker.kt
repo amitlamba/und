@@ -21,8 +21,10 @@ import springfox.documentation.spring.web.json.Json
 @Component
 class AWSFunnelLambdaInvoker {
 
-    private val AWS_ACCESS_KEY = "DSFSDFSDFDSFDS"
-    private val AWS_SECRET_KEY = "eMoCdR+SfdsfDFdsfsdfSDFdsfsdFDSfs"
+    private val AWS_ACCESS_KEY = "AKIAIFFDPORQ4VDJTTJQ"
+    private val AWS_SECRET_KEY = "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"
+//    private val AWS_ACCESS_KEY = "DSFSDFSDFDSFDS"
+//    private val AWS_SECRET_KEY = "eMoCdR+SfdsfDFdsfsdfSDFdsfsdFDSfs"
     private val AWS_REGION = "us-east-1"
     private val AWS_LAMBDA_FUNCTION = "FunnelData"
 

@@ -4,10 +4,7 @@ import com.und.report.service.UserEventAnalyticsService
 import com.und.report.web.model.*
 import com.und.web.model.EventUser
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 
 @RestController("/dashboard")
@@ -71,7 +68,5 @@ class DashBoardController {
         return emptyList<EventUser>()
 
     }
-
-
 
 }

@@ -6,7 +6,7 @@ class FunnelReport {
     data class FunnelReportFilter(
             var segmentid: Long,
             var days: Long,
-            var steps: List<Step>,
+            var steps: List<Step> = emptyList(),
             var funnelOrder: FunnelOrder,
             var conversionTime: Int,
             var splitProprty: String?,

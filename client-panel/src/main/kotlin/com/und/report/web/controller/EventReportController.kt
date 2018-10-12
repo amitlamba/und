@@ -7,6 +7,7 @@ import com.und.report.web.model.AggregateBy
 import com.und.report.web.model.EventReport
 import com.und.report.web.model.EventReport.EventCount
 import com.und.report.web.model.GroupBy
+import com.und.web.model.EventUser
 import com.und.web.model.GlobalFilter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
@@ -17,7 +18,6 @@ class EventReportController {
 
     @Autowired
     private lateinit var userAnalyticsService: UserEventAnalyticsService
-
     /**
      * @param groupBy name of property on which count of users will be split
      */
