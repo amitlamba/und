@@ -98,7 +98,7 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(Exception::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     fun handleInternal(ex: RuntimeException, request: WebRequest): ResponseEntity<Any> {
-        logger.error("500 Status Code", ex.fillInStackTrace())
+        logger.error("500 Status Code", ex)
         val bodyOfResponse = GenericResponse(messageSource.getMessage("message.error", null, request.locale), "InternalError")
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR)
     }

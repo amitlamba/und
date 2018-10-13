@@ -1,15 +1,11 @@
 package com.und.service
 
 import com.und.model.mongo.SmsStatus
-import com.und.model.mongo.SmsStatusUpdate
 import com.und.model.utils.Sms
 import com.und.repository.jpa.SmsTemplateRepository
 import com.und.repository.mongo.SmsSentRepository
-import com.und.utils.TenantProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
-import java.time.ZoneId
 
 @Service
 class SmsHelperService {
@@ -38,20 +34,20 @@ class SmsHelperService {
                 userID = smsToSend.eventUser?.id,
                 smsStatus = status
         )
-        TenantProvider().setTenant(smsToSend.clientID.toString())
-        val mongoSmsPersisted: com.und.model.mongo.Sms? = smsSentRepository.save(mongoSms)
+        //TenantProvider().setTenant(smsToSend.clientID.toString())
+        smsSentRepository.saveSms(mongoSms, smsToSend.clientID )
 
-        return mongoSmsPersisted?.id
+        return mongoEmailId
     }
 
-    fun updateSmsStatus(mongoSmsId: String?, sent: SmsStatus, clientID: Long, message: String?, clickTrackEventId: String? = null) {
-        TenantProvider().setTenant(clientID.toString())
-        val mongoSms = mongoSmsId?.let { smsSentRepository.findById(mongoSmsId).get() }
-        if (mongoSms != null && mongoSms.smsStatus.order < sent.order) {
-            mongoSms.smsStatus = SmsStatus.READ
-            mongoSms.statusUpdates.add(SmsStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), sent, clickTrackEventId, message))
-            smsSentRepository.save(mongoSms)
-        }
+    fun updateSmsStatus(mongoSmsId: String, sent: SmsStatus, clientID: Long, message: String?, clickTrackEventId: String? = null) {
+        //TenantProvider().setTenant(clientID.toString())
+       // val mongoSms = mongoSmsId?.let { smsSentRepository.findById(mongoSmsId).get() }
+        //if (mongoSms != null && mongoSms.smsStatus.order < sent.order) {
+           // mongoSms.smsStatus = SmsStatus.READ
+            //mongoSms.statusUpdates.add(SmsStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), sent, clickTrackEventId, message))
+            smsSentRepository.updateStatus(mongoSmsId, SmsStatus.READ, clientID, null, "")
+        //}
 
     }
 

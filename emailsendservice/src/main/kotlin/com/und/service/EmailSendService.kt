@@ -62,51 +62,49 @@ class EmailSendService {
             client.sendEmail(request)
 
             logger.debug("Email sent!")
-        }catch (e:ThrottledException){
+        } catch (e: ThrottledException) {
             logger.error(e.message)
-            var retries=email.retries
+            var retries = email.retries
             val error = EmailError()
             with(error) {
                 clientid = email.clientID
                 failureType = EmailError.FailureType.CONNECTION
                 causeMessage = "${e.message}"
                 failedSettingId = emailSESConfig.serviceProviderCredentialsId
-                invalidAddresses=email.toEmailAddresses.toEmail()
+                invalidAddresses = email.toEmailAddresses.toEmail()
                 from = email.fromEmailAddress?.toString()
-                retries=++retries
-                retry=true
+                retries = ++retries
+                retry = true
             }
             throw  EmailFailureException("Throttled Exception : ${e.message}", e, error)
-        }
-        catch (e: MessageRejectedException) {
+        } catch (e: MessageRejectedException) {
             logger.error(e.message)
             val error = EmailError()
-            with(error){
+            with(error) {
                 clientid = 1
                 failureType = EmailError.FailureType.CONNECTION
                 causeMessage = "${e.errorMessage}"
-                errorType="${e.errorType}"
-                errorCode="${e.errorCode}"
-                invalidAddresses=email.toEmailAddresses.toEmail()
+                errorType = "${e.errorType}"
+                errorCode = "${e.errorCode}"
+                invalidAddresses = email.toEmailAddresses.toEmail()
                 from = email.fromEmailAddress?.toString()
                 failedSettingId = emailSESConfig.serviceProviderCredentialsId
 
             }
             throw  EmailFailureException("Message rejected : ${e.message}", e, error)
 
-        }
-        catch (e: MailFromDomainNotVerifiedException) {
+        } catch (e: MailFromDomainNotVerifiedException) {
             e.errorType
             e.errorCode
             logger.error(e.message)
             val error = EmailError()
-            with(error){
+            with(error) {
                 clientid = 1
                 failureType = EmailError.FailureType.OTHER
                 causeMessage = "${e.errorMessage}"
-                errorType="${e.errorType}"
-                errorCode="${e.errorCode}"
-                invalidAddresses=email.toEmailAddresses.toEmail()
+                errorType = "${e.errorType}"
+                errorCode = "${e.errorCode}"
+                invalidAddresses = email.toEmailAddresses.toEmail()
                 from = email.fromEmailAddress?.toString()
                 failedSettingId = emailSESConfig.serviceProviderCredentialsId
 
@@ -116,42 +114,41 @@ class EmailSendService {
         } catch (e: ConfigurationSetDoesNotExistException) {
             logger.error(e.message)
             val error = EmailError()
-            with(error){
+            with(error) {
                 clientid = 1
                 failureType = EmailError.FailureType.CONNECTION
                 causeMessage = "${e.errorMessage}"
-                errorType="${e.errorType}"
-                errorCode="${e.errorCode}"
-                invalidAddresses=email.toEmailAddresses.toEmail()
+                errorType = "${e.errorType}"
+                errorCode = "${e.errorCode}"
+                invalidAddresses = email.toEmailAddresses.toEmail()
                 from = email.fromEmailAddress?.toString()
                 failedSettingId = emailSESConfig.serviceProviderCredentialsId
 
             }
             throw  EmailFailureException("Configuration set ${e.configurationSetName} doesn't exist : ${e.message}", e, error)
 
-        }catch (e:AmazonSimpleEmailServiceException){
+        } catch (e: AmazonSimpleEmailServiceException) {
             logger.error("The email was not sent. Error message: ${e.message}")
             val error = EmailError()
-            for (c in Connection.values()){
-                if(c.toString().equals(e.errorCode)){
-                    error.failureType=EmailError.FailureType.CONNECTION
-                }else{
-                    error.failureType=EmailError.FailureType.OTHER
+            for (c in Connection.values()) {
+                if (c.toString().equals(e.errorCode)) {
+                    error.failureType = EmailError.FailureType.CONNECTION
+                } else {
+                    error.failureType = EmailError.FailureType.OTHER
                 }
             }
-            with(error){
+            with(error) {
                 clientid = 1
                 causeMessage = "${e.errorMessage}"
-                errorType="${e.errorType}"
-                errorCode="${e.errorCode}"
-                invalidAddresses=email.toEmailAddresses.toEmail()
+                errorType = "${e.errorType}"
+                errorCode = "${e.errorCode}"
+                invalidAddresses = email.toEmailAddresses.toEmail()
                 from = email.fromEmailAddress?.toString()
                 failedSettingId = emailSESConfig.serviceProviderCredentialsId
 
             }
             throw  EmailFailureException("${e.message}", e, error)
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             logger.error("The email was not sent. Error message: ${e.message}")
             val error = EmailError()
             with(error) {
@@ -159,7 +156,7 @@ class EmailSendService {
                 failureType = EmailError.FailureType.OTHER
                 causeMessage = "Unable to send email : ${e.message}"
                 failedSettingId = emailSESConfig.serviceProviderCredentialsId
-                invalidAddresses=email.toEmailAddresses.toEmail()
+                invalidAddresses = email.toEmailAddresses.toEmail()
                 from = email.fromEmailAddress?.toString()
             }
             throw  EmailFailureException("Unable to send email : ${e.message}", e, error)
@@ -197,9 +194,9 @@ class EmailSendService {
 
             logger.debug("Sending...")
             val msg = emailHelperService.createMimeMessage(session, email)
-            logger.info("email sent to   ${email.toEmailAddresses} from  ${email.fromEmailAddress}} with msg ${email.emailBody}")
             //FIXME transport is single thread use thread safety synchronization
             transport.sendMessage(msg, msg.allRecipients)
+            logger.info("email sent to   ${email.toEmailAddresses} from  ${email.fromEmailAddress}} with msg ${email.emailBody}")
         } catch (e: SendFailedException) {
 
             logger.error(e.message)
@@ -209,9 +206,9 @@ class EmailSendService {
                 failureType = EmailError.FailureType.DELIVERY
                 causeMessage = "Incorrect Authentication : ${e.message}"
                 failedSettingId = emailSMTPConfig.serviceProviderCredentialsId
-                invalidAddresses = e.invalidAddresses.toEmail()
-                validSentAddresses = e.validSentAddresses.toEmail()
-                unsentAddresses = e.validUnsentAddresses.toEmail()
+                invalidAddresses = e.invalidAddresses?.toEmail() ?: emptyList()
+                validSentAddresses = e.validSentAddresses?.toEmail() ?: emptyList()
+                unsentAddresses = e.validUnsentAddresses?.toEmail() ?: emptyList()
 
             }
             throw  EmailFailureException("Failure while4 sending emails : ${e.message}", e, error)
@@ -252,9 +249,9 @@ class EmailSendService {
                 failedSettingId = emailSMTPConfig.serviceProviderCredentialsId
             }
             throw  EmailFailureException("Unable to send email : ${e.message}", e, error)
-        } finally {
+        } /*finally {
             //emailHelperService.closeTransport(email.clientID)
-        }
+        }*/
 
     }
 
@@ -289,10 +286,11 @@ class EmailSendService {
         }
     }
 
-    fun Array<InternetAddress>.toEmail():List<String>{
+    fun Array<InternetAddress>.toEmail(): List<String> {
         return this.map { address -> address.address }
     }
-    fun Array<Address>.toEmail():List<String>{
+
+    fun Array<Address>.toEmail(): List<String> {
         return this.filter { it is InternetAddress }.map { address -> (address as InternetAddress).address }
     }
 

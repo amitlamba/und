@@ -52,7 +52,8 @@ class SmsService {
         val serviceProviderCredential = serviceProviderCredentials(sms)
         return try {
             val smsData = buildSmsData(sms, serviceProviderCredential)
-            smsLambdaInvoker.sendSms(smsData)
+            val response = smsLambdaInvoker.sendSms(smsData)
+            return response
         } catch (e: Exception) {
             logger.error("Couldn't build smsData to invoke sms api", e)
             Response(400, "invalid input values for sms")

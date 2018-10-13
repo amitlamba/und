@@ -29,7 +29,7 @@ class AWSFunnelLambdaInvoker {
     @Value("\${und.lambda.funnel.region}")
     private lateinit var AWS_REGION: String
 
-    @Value("\${und.lambda.funnel.function}")
+    @Value("\${und.lambda.funnel.functionName}")
     private lateinit var AWS_LAMBDA_FUNCTION: String
 
     @Autowired

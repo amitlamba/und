@@ -4,7 +4,6 @@ spring:
       uri: http://${CONFIG_IP}:${CONFIG_PORT}
       #uri: http://nestros.com:8898
       enabled: true
-      #profile: staging
       name: client-panel
   application:
     name: client-panel

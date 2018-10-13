@@ -14,6 +14,7 @@ import com.und.web.model.eventapi.Event
 import com.und.web.model.eventapi.Identity
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
+import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import javax.servlet.http.HttpServletRequest
@@ -45,9 +46,11 @@ class EventService {
 
 
     @StreamListener("inEvent")
+    @SendTo("outEvent")
     fun save(event: Event) {
 
         saveEvent(event)
+
     }
 
     fun saveEvent(event: Event): String? {

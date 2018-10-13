@@ -10,18 +10,17 @@ import org.springframework.stereotype.Service
 class SmsTemplateService {
 
     @Autowired
-    lateinit private var smsTemplateRepository: SmsTemplateRepository
+    private lateinit var smsTemplateRepository: SmsTemplateRepository
 
     fun getDefaultSmsTemplates(): List<SmsTemplate> {
         return smsTemplateRepository.findByClientIDAndStatus()
     }
 
     fun getClientSmsTemplates(clientID: Long, smsTemplateID: Long?): List<SmsTemplate> {
-        if (smsTemplateID == null) {
-            return smsTemplateRepository.findByClientIDAndStatus(clientID)
-        }
-        else
-            return listOf(smsTemplateRepository.findByIdAndClientIDAndStatus(smsTemplateID, clientID))
+        return if (smsTemplateID == null) {
+            smsTemplateRepository.findByClientIDAndStatus(clientID)
+        } else
+            listOf(smsTemplateRepository.findByIdAndClientIDAndStatus(smsTemplateID, clientID))
     }
 
     fun saveSmsTemplate(smsTemplate: SmsTemplate): Long {

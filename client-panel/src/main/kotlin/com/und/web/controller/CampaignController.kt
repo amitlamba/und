@@ -7,6 +7,7 @@ import com.und.model.jpa.Schedule
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.CampaignService
 import com.und.service.EmailTemplateService
+import com.und.service.SmsTemplateService
 import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.web.model.Campaign
 import com.und.web.model.EmailTemplate
@@ -31,6 +32,10 @@ class CampaignController {
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    private lateinit var smsTempleteService: SmsTemplateService
+
 
     @Autowired
     private lateinit var emailTempleteService: EmailTemplateService
@@ -72,7 +77,7 @@ class CampaignController {
 
             val template = when(campaign.campaignType) {
                 CampaignType.EMAIL -> emailTempleteService.getEmailTemplate(templateId)
-                CampaignType.SMS -> {throw Exception("SMS campaign are not available")}
+                CampaignType.SMS -> smsTempleteService.getClientSmsTemplates(clientId, templateId)
                 CampaignType.MOBILE_PUSH_NOTIFICATION -> {throw Exception("MOBILE Push  campaign are not available")}
 
             }

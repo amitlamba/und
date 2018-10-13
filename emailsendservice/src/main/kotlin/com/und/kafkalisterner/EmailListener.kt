@@ -30,37 +30,30 @@ class EmailListener {
 
     @StreamListener("emailEventSend")
     fun sendEmailCampaign(email: Email) {
-        var retry=false
-        do{
-            try {
-                emailService.sendEmail(email)
-            } catch (ef: EmailFailureException) {
-                if(ef.error.retry&&ef.error.retries<=3){
-                    retry=true
-                }else{
-                    retry=false
-                    emailService.toKafkaEmailError(ef.error)
-                }
-            }
-        }while (retry)
+        sendEmail(email)
     }
 
     @StreamListener("clientEmailReceive")
     fun sendClientEmail(email: Email) {
         email.clientID = 1
-        var retry=false
-        do{
+
+        sendEmail(email)
+    }
+
+    private fun sendEmail(email: Email) {
+        var retry = false
+        do {
             try {
                 emailService.sendEmail(email)
             } catch (ef: EmailFailureException) {
-                if(ef.error.retry&&ef.error.retries<=3){
-                    retry=true
-                }else{
-                    retry=false
+                if (ef.error.retry && ef.error.retries <= 3) {
+                    retry = true
+                } else {
+                    retry = false
                     emailService.toKafkaEmailError(ef.error)
                 }
             }
-        }while (retry)
+        } while (retry)
     }
 
     @StreamListener("EmailUpdateReceive")

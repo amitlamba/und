@@ -7,6 +7,7 @@ import com.und.utils.loggerFor
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import javax.mail.Authenticator
 import javax.mail.PasswordAuthentication
@@ -107,11 +108,13 @@ class EmailServiceProviderConnectionFactory {
     }
 
     private fun createSMTPSession(emailSmtpConfig: EmailSMTPConfig): Session {
-        val props = System.getProperties()
+        val props = Properties()
 
-
-        props.put("mail.smtp.host", emailSmtpConfig.HOST);
-        props.put("mail.smtp.port", emailSmtpConfig.PORT);
+        props["mail.transport.protocol"] = "smtp"
+        props["mail.smtp.auth"] = true
+        props["mail.smtp.host"] = emailSmtpConfig.HOST
+        props["mail.smtp.port"] = emailSmtpConfig.PORT
+        props["mail.smtp.socketFactory.class"] = "javax.net.ssl.SSLSocketFactory"
 
         when (emailSmtpConfig.security) {
             Security.SSL, Security.TLS -> {

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import org.yaml.snakeyaml.util.UriEncoder
 
 
 @Component
@@ -26,7 +27,7 @@ class AWSSmsLambdaInvoker {
     @Value("\${und.lambda.sms.region}")
     private lateinit var AWS_REGION: String
 
-    @Value("\${und.lambda.sms.function}")
+    @Value("\${und.lambda.sms.functionName}")
     private lateinit var AWS_LAMBDA_FUNCTION: String
 
 
@@ -39,6 +40,8 @@ class AWSSmsLambdaInvoker {
 
     fun sendSms(smsData: SmsData): Response {
 
+        val body = UriEncoder.encode(smsData.body)
+        smsData.body=body
         val region = Regions.fromName(AWS_REGION)
 
         val basicAWSCredentials = BasicAWSCredentials(AWS_ACCESS_KEY, AWS_SECRET_KEY)

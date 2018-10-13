@@ -73,6 +73,7 @@ class SegmentServiceImpl : SegmentService {
         throw SegmentNotFoundException("No Segment Exists with id $id")
     }
 
+
     override fun segmentUserIds(segmentId: Long, clientId: Long): List<String> {
         val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
         return if (segmentOption.isPresent) {
