@@ -2,14 +2,15 @@ package com.und.report.web.controller
 
 import com.und.report.service.FunnelReportService
 import com.und.report.web.model.FunnelReport
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.web.bind.annotation.*
 
 @RestController("/report/funnel")
+@RequestMapping("/report/funnel")
 class FunnelController {
 
-    private lateinit var funnelReportService: FunnelReportService
+    @Autowired
+    private lateinit var funnelReportService: FunnelReportService;
 
 /*
         for a segment lets say all users and for a time period lets say 100 days
@@ -36,8 +37,11 @@ class FunnelController {
  */
 
 
-    @GetMapping("/funnel")
-    fun funnel(funnelFilter: FunnelReport.FunnelReportFilter): List<FunnelReport.FunnelStep> {
+    @PostMapping("/funnel")
+    fun funnel(@RequestBody(required = true) steps:List<FunnelReport.Step>,
+               funnelFilter: FunnelReport.FunnelReportFilter): List<FunnelReport.FunnelStep> {
+
+        funnelFilter.steps=steps;
         return funnelReportService.funnel(funnelFilter)
     }
 }

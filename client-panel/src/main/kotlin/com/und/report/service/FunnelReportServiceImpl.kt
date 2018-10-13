@@ -53,7 +53,6 @@ class FunnelReportServiceImpl: FunnelReportService {
         if(clientID == null){
             return emptyList()
         }
-
         val segmentUserIds = segmentService.segmentUserIds(funnelFilter.segmentid, clientID)
         val tz = userSettingsService.getTimeZone()
         val aggregation = buildAggregation(funnelFilter, clientID, segmentUserIds, tz)
