@@ -55,7 +55,7 @@ class DateUtils : Serializable {
     }
 
 
-    private fun parseDateTime(date: String): LocalDateTime {
+    fun parseDateTime(date: String): LocalDateTime {
         return LocalDateTime.parse(date, dateTimeFormatter)
     }
 

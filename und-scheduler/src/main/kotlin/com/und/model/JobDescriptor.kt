@@ -2,9 +2,10 @@ package com.und.model
 
 import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
-import com.und.scheduler.MessageJob
+import com.und.scheduler.CampaignJob
 import com.und.util.JobUtil
 import org.quartz.JobBuilder
+import org.quartz.JobDataMap
 import org.quartz.JobDetail
 import org.quartz.Trigger
 import java.time.ZoneId
@@ -15,13 +16,11 @@ class JobDescriptor {
 
     @NotBlank
     lateinit var clientId: String
-    @NotBlank
-    lateinit var campaignId: String
-
-    @NotBlank
-    lateinit var campaignName: String
 
     var fireIndex: String = "0"
+
+    @NotBlank
+    lateinit var jobDetail: com.und.model.JobDetail
 
     @JsonProperty("triggers")
     var triggerDescriptors: List<TriggerDescriptor> = listOf()
@@ -54,16 +53,15 @@ class JobDescriptor {
      * @return the JobDetail built from this descriptor
      */
     fun buildJobDetail(): JobDetail {
-        return JobBuilder.newJob(MessageJob::class.java)
+        return JobBuilder.newJob(CampaignJob::class.java)
                 .withIdentity(JobUtil.getJobName(this), JobUtil.getGroupName(this))
                 .usingJobData("clientId", clientId)
-                .usingJobData("campaignId", campaignId)
-                .usingJobData("campaignName", campaignName)
                 .usingJobData("fireIndex", fireIndex)
+                .usingJobData(JobDataMap(jobDetail.properties))
                 .build()
     }
 
-    fun calendarName() = "${this.campaignId}_${this.campaignName}"
+    fun calendarName() = "${this.jobDetail.jobName}"
 
     companion object {
         /**
@@ -75,17 +73,21 @@ class JobDescriptor {
          * the Trigger(s) to associate with the Job
          * @return the JobDescriptor
          */
-        fun buildDescriptor(jobDetail: JobDetail, triggersOfJob: List<Trigger>): JobDescriptor {
+        fun buildDescriptor(quartzJobDetail: JobDetail, triggersOfJob: List<Trigger>): JobDescriptor {
             val triggerDescriptors = arrayListOf<TriggerDescriptor>()
 
             triggersOfJob.forEach { triggerDescriptors.add(TriggerDescriptor.buildDescriptor(it)) }
 
             val jobDescriptor = JobDescriptor()
+            val jobDetail = com.und.model.JobDetail()
+            jobDetail.jobName = quartzJobDetail.key.name
+            jobDetail.jobGroupName = quartzJobDetail.key.group
+            jobDetail.properties = quartzJobDetail.jobDataMap.filter { it -> !setOf<String>("clientId", "fireIndex").contains(it.key) }.mapValues { it -> it.value.toString() }
+
             with(jobDescriptor) {
-                clientId = jobDetail.jobDataMap["clientId"] as String
-                campaignId = jobDetail.jobDataMap["campaignId"] as String
-                campaignName = jobDetail.jobDataMap["campaignName"] as String
-                fireIndex = jobDetail.jobDataMap["fireIndex"] as String
+                this.clientId = quartzJobDetail.jobDataMap["clientId"] as String
+                this.fireIndex = quartzJobDetail.jobDataMap["fireIndex"] as String
+                this.jobDetail = jobDetail
                 this.triggerDescriptors = triggerDescriptors
 
             }
