@@ -111,35 +111,31 @@ class SmsRequest(
 
 class SmsExotelInput(var sid: String, var token: String)
 
-/*
-fun main(args: Array<String>) {
-
-    val smsRequest = SmsRequest(
-            "09513886363",
-            "7838540240",
-            "HelloWorld",
-            SMSServiceProvider.EXOTEL,
-            SmsExotelInput("shiv53", "54743a3bab3609e08473ace008df1d64bcf998cd")
-
-    )
-    val lambdaInvoker = AWSSmsLambdaInvoker()
-*/
-/*    lambdaInvoker.AWS_ACCESS_KEY = "AKIAIEEV7Q6MG5DLL52Q"
-    lambdaInvoker.AWS_SECRET_KEY = "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"
-    lambdaInvoker.AWS_REGION = "ap-south-1"
-    lambdaInvoker.AWS_LAMBDA_FUNCTION = "exotel"*//*
-
-    val smsData = SmsData(
-            "shiv53",
-            "54743a3bab3609e08473ace008df1d64bcf998cd",
-            "09513886363",
-            "7838540240",
-            "HelloWorld"
-    )
-
-    val response = lambdaInvoker.sendSms(smsData)
-    print("${response.status} ${response.message}")
-}
-*/
+//fun main(args: Array<String>) {
+//
+//    val smsRequest = SmsRequest(
+//            "09513886363",
+//            "7838540240",
+//            "HelloWorld",
+//            SMSServiceProvider.EXOTEL,
+//            SmsExotelInput("shiv53", "54743a3bab3609e08473ace008df1d64bcf998cd")
+//
+//    )
+//    val lambdaInvoker = AWSSmsLambdaInvoker()
+///*    lambdaInvoker.AWS_ACCESS_KEY = "AKIAIEEV7Q6MG5DLL52Q"
+//    lambdaInvoker.AWS_SECRET_KEY = "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"
+//    lambdaInvoker.AWS_REGION = "ap-south-1"
+//    lambdaInvoker.AWS_LAMBDA_FUNCTION = "exotel"*/
+//    val smsData = SmsData(
+//            "shiv53",
+//            "54743a3bab3609e08473ace008df1d64bcf998cd",
+//            "09513886363",
+//            "7838540240",
+//            "HelloWorld"
+//    )
+//
+//    val response = lambdaInvoker.sendSms(smsData)
+//    print("${response.status} ${response.message}")
+//}
 
 
