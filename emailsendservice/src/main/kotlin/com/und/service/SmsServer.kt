@@ -87,7 +87,7 @@ object ExotelService : SmsServer {
         val ACCOUNT_SID = "ACee7cb87331f38645aaefd0bf42cbff79"
         val AUTH_TOKEN = "d93ff2f90bb18853fea41c8915fc647a"
 
-        @JvmStatic
+/*        @JvmStatic
         fun main(args: Array<String>) {
             Twilio.init(ACCOUNT_SID, AUTH_TOKEN)
 
@@ -97,6 +97,6 @@ object ExotelService : SmsServer {
                     "This is the ship that made the Kessel Run in fourteen parsecs?").create()
 
             println(message.sid)
-        }
+        }*/
     }
 }

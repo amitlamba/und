@@ -46,7 +46,6 @@ class EventService {
 
 
     @StreamListener("inEvent")
-    @SendTo("outEvent")
     fun save(event: Event) {
 
         saveEvent(event)
