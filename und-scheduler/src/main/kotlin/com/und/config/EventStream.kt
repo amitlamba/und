@@ -16,5 +16,7 @@ interface EventStream {
     @Output("campaignTriggerSend")
     fun campaignTriggerEvent(): MessageChannel
 
+    @Output("outJobForLiveSegmentCheck")
+    fun outJobForLiveSegment(): MessageChannel
 
 }

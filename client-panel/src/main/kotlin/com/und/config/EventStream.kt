@@ -22,4 +22,13 @@ interface EventStream {
 
     @Output(value = "VerificationEmailSend")
     fun verificationEmailReceive(): MessageChannel
+
+    @Input("inEventForLiveSegment")
+    fun inEventForLiveSegment(): SubscribableChannel
+
+    @Input("inJobForLiveSegmentCheck")
+    fun inJobForLiveSegment(): SubscribableChannel
+
+    @Output("outLiveSegment")
+    fun outLiveSegment(): MessageChannel
 }

@@ -10,7 +10,9 @@ import com.und.repository.mongo.EventRepository
 import com.und.repository.mongo.EventUserRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.security.utils.TenantProvider
+import com.und.web.exception.EventNotFoundException
 import com.und.web.model.eventapi.Event
+import com.und.web.model.eventapi.EventMessage
 import com.und.web.model.eventapi.Identity
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
@@ -59,6 +61,8 @@ class EventService {
         eventMetadataRepository.save(eventMetadata)
         //FIXME add to metadata
         val saved = eventRepository.insert(mongoEvent)
+
+        eventStream.outEventForLiveSegment().send(MessageBuilder.withPayload(buildEventForLiveSegment(saved)).build())
         return saved.id
     }
 
@@ -87,6 +91,16 @@ class EventService {
             agentString = request.getHeader("User-Agent")
         }
         return fromEvent
+    }
+
+    fun buildEventForLiveSegment(fromEvent: com.und.model.mongo.eventapi.Event): EventMessage{
+        val eventId = fromEvent.id
+        if(eventId != null){
+            return EventMessage(eventId, fromEvent.clientId, fromEvent.userId, fromEvent.name, fromEvent.creationTime)
+        } else {
+            throw EventNotFoundException("Event with null id")
+        }
+
     }
 
 }
