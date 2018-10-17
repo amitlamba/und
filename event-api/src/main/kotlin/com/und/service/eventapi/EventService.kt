@@ -84,7 +84,8 @@ class EventService {
             clientId = tenantProvider.tenant.toInt()
             ipAddress = request.ipAddr()
             timeZone = AuthenticationUtils.principal.timeZoneId
-            agentString = request.getHeader("User-Agent")
+            var agent=request.getHeader("User-Agent")
+            agentString = if(agent!="mobile") agent else null
         }
         return fromEvent
     }
