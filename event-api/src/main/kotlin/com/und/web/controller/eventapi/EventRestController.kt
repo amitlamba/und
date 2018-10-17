@@ -1,5 +1,6 @@
 package com.und.web.controller.eventapi
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.web.model.eventapi.Event
 import com.und.web.model.eventapi.EventUser
 import com.und.web.model.eventapi.Identity
@@ -12,6 +13,7 @@ import com.und.security.model.ResponseStatus
 import com.und.security.utils.TenantProvider
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -64,6 +66,12 @@ class EventRestController {
                 status = ResponseStatus.SUCCESS,
                 data = Data(identityInit)
         ))
+    }
+
+    @PreAuthorize("hasRole('ROLE_EVENT')")
+    @GetMapping("/check")
+    fun checkConnection():ResponseEntity<Response<String>>{
+        return ResponseEntity.ok(Response(status = ResponseStatus.SUCCESS))
     }
 
 /*
