@@ -114,6 +114,25 @@ class UserSettingsService {
         return saved.id!!
     }
 
+    fun getNotificationServiceProvider(clientID: Long): List<WebServiceProviderCredentials> {
+        val spCredsList = serviceProviderCredentialsRepository.findAllByClientIDAndServiceProviderType(clientID, ServiceProviderType.NOTIFICATION_SERVICE_PROVIDER.desc)
+        val wspCreds = mutableListOf<WebServiceProviderCredentials>()
+        spCredsList.forEach { wspCreds.add(buildWebServiceProviderCredentials(it)) }
+        return wspCreds
+    }
+
+    fun getNotificationServiceProvider(clientID: Long, id: Long): WebServiceProviderCredentials? {
+        val spCreds = serviceProviderCredentialsRepository.findAllByClientIDAndIdAndServiceProviderType(clientID, id, ServiceProviderType.NOTIFICATION_SERVICE_PROVIDER.desc)
+        return buildWebServiceProviderCredentials(spCreds!!)
+    }
+
+    fun saveNotificationServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
+        webServiceProviderCredentials.status = Status.ACTIVE
+        val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
+        val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
+        return saved.id!!
+    }
+
     fun getServiceProviders(clientID: Long): List<WebServiceProviderCredentials> {
         return serviceProviderCredentialsRepository.findAllByClientID(clientID).map { data -> buildWebServiceProviderCredentials(data) }
     }
