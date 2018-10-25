@@ -95,6 +95,31 @@ class UserSettingsController {
         return userSettingsService.saveSmsServiceProvider(serviceProviderCredentials)
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = ["/notification-service-providers"])
+    fun getNotificationServiceProviders(): List<ServiceProviderCredentials> {
+        val clientID = AuthenticationUtils.clientID
+        return userSettingsService.getNotificationServiceProvider(clientID!!)
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = ["/notification-service-provider/{id}"])
+    fun getNotificationServiceProvider(@PathVariable id: Long): ServiceProviderCredentials? {
+        val clientID = AuthenticationUtils.clientID
+        return userSettingsService.getNotificationServiceProvider(clientID!!, id)
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(value = ["/notification-service-provider/save"])
+    fun saveNotificationServiceProvider(@Valid @RequestBody serviceProviderCredentials: ServiceProviderCredentials): Long? {
+        val clientID = AuthenticationUtils.clientID
+        val userID = AuthenticationUtils.principal.id
+        serviceProviderCredentials.appuserID = userID
+        serviceProviderCredentials.clientID = clientID
+        serviceProviderCredentials.serviceProviderType = ServiceProviderType.NOTIFICATION_SERVICE_PROVIDER.desc
+        return userSettingsService.saveNotificationServiceProvider(serviceProviderCredentials)
+    }
+
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/senders-email/add"])
