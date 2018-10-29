@@ -49,7 +49,7 @@ class Campaign {
     @Column(name = "campaign_status", updatable = false, insertable = false)
     @Enumerated(EnumType.STRING)
     @NotNull
-    var status: CampaignStatus = CampaignStatus.SCHEDULE_PENDING
+    var status:CampaignStatus = CampaignStatus.SCHEDULE_PENDING
 
     @OneToOne(mappedBy = "campaign", fetch = FetchType.LAZY,
             cascade = arrayOf(CascadeType.ALL),
