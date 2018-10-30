@@ -45,6 +45,52 @@ date_modified timestamp with time zone DEFAULT now()
 )
 ;
 
+create table notification_template_webpush(
+id bigint not null primary key,
+client_id bigint not null,
+appuser_id bigint not null,
+name varchar(100) not null,
+title varchar(512) not null,
+body text not null,
+language varchar(20),
+badge_url varchar(1024),
+icon_url varchar(1024),
+image_url varchar(1024),
+tag varchar(50),
+require_interaction boolean default false,
+urgency varchar(20),
+time_to_live bigint,
+deep_link varchar(1024),
+custom_data_pair text,
+from_userndot boolean default TRUE ,
+creation_date timestamp with time zone DEFAULT now(),
+date_modified timestamp with time zone DEFAULT now()
+);
+
+create table webpush_notification_action(
+id bigint not null primary key,
+action varchar(1024),
+title varchar(512) not null,
+icon_url varchar(1024),
+template_id bigint references notification_template_webpush(id),
+creation_date timestamp with time zone DEFAULT now(),
+date_modified timestamp with time zone DEFAULT now()
+);
+
+create table webpush_campaign_table(
+id bigserial not null primary key,
+client_id bigint not null,
+appuser_id bigint not null,
+template_id bigint not null,
+campaign_id bigint references campaign(id),
+creation_date timestamp with time zone DEFAULT now(),
+date_modified timestamp with time zone DEFAULT now()
+);
+
+create sequence webpush_template_id_seq start 1000 increment 1;
+create sequence webpush_action_id_seq start 1000 increment 1;
+create sequence webpush_campaign_id_seq start 1000 increment 1;
+
 ALTER SEQUENCE android_template_id_seq START 1000 INCREMENT 1;
 ALTER SEQUENCE android_action_id_seq START 1000 INCREMENT 1;
 ALTER SEQUENCE android_campaign_id_seq START 1000 INCREMENT 1
