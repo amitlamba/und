@@ -29,7 +29,9 @@ class Identity {
     var fbId: String? = null
     var googleId: String? = null
     var mobile: String? = null
-
+    var androidFcmToken:String?=null
+    var iosFcmToken:String?=null
+    var webFcmToken:String?=null
 }
 
 data class CommunicationDetails(val value: String, var dnd: Boolean = false)

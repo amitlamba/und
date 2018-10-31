@@ -4,6 +4,9 @@ import com.und.model.jpa.WebPushTemplate
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.WebPushService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.security.access.AccessDeniedException
 import com.und.web.model.WebPushTemplate as WebTemplate
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
@@ -15,19 +18,19 @@ class WebPushController {
     @Autowired
     private lateinit var webPushService: WebPushService
     @PostMapping("/save")
-    fun saveTemplate(@Valid @RequestBody template:WebTemplate):WebPushTemplate?{
+    fun saveTemplate(@Valid @RequestBody template:WebTemplate):ResponseEntity<WebPushTemplate?>{
         //check clientid
         var clientId=AuthenticationUtils.clientID
         if(clientId!=null) {
             var isExists=webPushService.isTemplateExists(clientId, template.name)
             if(isExists){
-                //throw error already exists
+                ResponseEntity(template,HttpStatus.EXPECTATION_FAILED)
             }
         }
         else {
-            return null //throw exception clientid is null
+            throw AccessDeniedException("")
         }
-        return webPushService.saveTemplate(template)
+        return ResponseEntity(webPushService.saveTemplate(template), HttpStatus.CREATED)
     }
     @GetMapping("/template/{id}")
     fun getTemplate(@PathVariable id:Long):WebPushTemplate?{

@@ -41,6 +41,10 @@ class AndroidServiceImp:AndroidService {
         return androidActionRepository.findByClientId(clientId)
     }
 
+    override fun getAndroidTemplatesById(clientId: Long, id: Long): List<AndroidTemplate> {
+        return androidRepository.isExistsByClientIdAndId(clientId,id)
+    }
+
     private fun buildJpaAndroidTemplate(template: WebAndroidTemplate): AndroidTemplate {
         var androidTemplate=AndroidTemplate()
         with(androidTemplate){
@@ -84,5 +88,14 @@ class AndroidServiceImp:AndroidService {
             jpaAction.add(action)
         }
         return jpaAction
+    }
+
+    private fun buildWebAndroidTemplate(template:AndroidTemplate):WebAndroidTemplate{
+        var webAndroidTemplate=WebAndroidTemplate()
+        return webAndroidTemplate
+    }
+    private fun buildWebAndroidAction(actions:List<Action>):List<WebAndroidAction>{
+        var webAndroidAction=WebAndroidAction()
+        return listOf(webAndroidAction)
     }
 }

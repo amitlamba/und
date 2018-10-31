@@ -10,4 +10,5 @@ interface AndroidService {
     fun getAllAndroidTemplate(clientId:Long):List<AndroidTemplate>
     fun getAndroidTemplateById(clientId: Long,id:Long):AndroidTemplate
     fun getAllAndroidAction(clientId: Long):List<Action>
+    fun getAndroidTemplatesById(clientId: Long,id: Long):List<AndroidTemplate>
 }

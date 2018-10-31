@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*
 
 
 @FeignClient(name = "client-panel", value = "client-panel")
+//@FeignClient(name = "client-panel",url = "http://userndot.com:9201")
 interface SegmentUserServiceClient {
 
     //FIXME define a new role and key here from config

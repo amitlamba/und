@@ -42,6 +42,7 @@ dependencies {
             "org.springframework.data:spring-data-redis:$dataRedisVersion",
             "redis.clients:jedis:$jedisVersion",
     )
+    compile('com.google.api-client:google-api-client:1.25.0')
 
 
 

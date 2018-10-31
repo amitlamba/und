@@ -1,13 +1,12 @@
 package com.und.web.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.netflix.discovery.converters.Auto
 import com.und.common.utils.loggerFor
 import com.und.model.jpa.CampaignType
 import com.und.model.jpa.Schedule
 import com.und.security.utils.AuthenticationUtils
-import com.und.service.CampaignService
-import com.und.service.EmailTemplateService
-import com.und.service.SmsTemplateService
+import com.und.service.*
 import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.web.model.Campaign
 import com.und.web.model.EmailTemplate
@@ -39,6 +38,10 @@ class CampaignController {
 
     @Autowired
     private lateinit var emailTempleteService: EmailTemplateService
+    @Autowired
+    private lateinit var androidService:AndroidService
+    @Autowired
+    private lateinit var webPushService: WebPushService
 
     @Autowired
     lateinit var campaignService: CampaignService
@@ -75,11 +78,14 @@ class CampaignController {
         val templateId = campaign.templateID
         if (clientId != null && templateId!=null) {
 
+            //why it would be list instead of unique because templateid is unique for each template
             val template = when(campaign.campaignType) {
                 CampaignType.EMAIL -> emailTempleteService.getEmailTemplate(templateId)
                 CampaignType.SMS -> smsTempleteService.getClientSmsTemplates(clientId, templateId)
-                CampaignType.MOBILE_PUSH_NOTIFICATION -> {throw Exception("MOBILE Push  campaign are not available")}
-
+                //ToDO handle empty result set error
+                CampaignType.PUSH_ANDROID -> listOf(androidService.getAndroidTemplateById(clientId,templateId))
+                CampaignType.PUSH_IOS->{throw Exception("Not present")}
+                CampaignType.PUSH_WEB -> listOf(webPushService.getTemplate(templateId))
             }
 
             if (template.isNotEmpty()) {

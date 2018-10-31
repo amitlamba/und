@@ -8,6 +8,7 @@ import com.und.web.model.WebPushTemplate as WebTemplate
 import com.und.repository.jpa.WebPushRepository
 import com.und.security.utils.AuthenticationUtils
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Component
 
 @Component
@@ -28,7 +29,7 @@ class WebPushServiceImp:WebPushService {
         if (clientId != null)
             return webPushRepository.findByClientIdAndId(clientId, id)
         else
-            return null //throw exception
+            throw AccessDeniedException("")
     }
 
     override fun getAllTemplate(): List<WebPushTemplate> {

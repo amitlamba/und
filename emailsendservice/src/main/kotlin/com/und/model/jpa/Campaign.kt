@@ -27,4 +27,6 @@ class Campaign {
     var fromSMSUser: String? = null
     @Column(name = "client_id")
     var clientId: Long = 0
+    @Column(name="android_template_id")
+    var androidTemplateId:Long?=null
 }

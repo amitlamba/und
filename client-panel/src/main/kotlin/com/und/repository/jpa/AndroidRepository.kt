@@ -14,4 +14,6 @@ interface AndroidRepository:JpaRepository<AndroidTemplate,Long> {
     //otherwise notunqiue result
     fun findByClientId(clientId: Long):List<AndroidTemplate>
     fun findByClientIdAndId(clientId: Long,id:Long):AndroidTemplate
+    @Query("SELECT a FROM AndroidTemplate a WHERE a.clientId=?1 AND a.id = ?2")
+    fun isExistsByClientIdAndId(clientId: Long,id: Long):List<AndroidTemplate>
 }
