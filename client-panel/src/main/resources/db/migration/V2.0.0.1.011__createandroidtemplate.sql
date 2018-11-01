@@ -91,6 +91,6 @@ create sequence webpush_template_id_seq start 1000 increment 1;
 create sequence webpush_action_id_seq start 1000 increment 1;
 create sequence webpush_campaign_id_seq start 1000 increment 1;
 
-ALTER SEQUENCE android_template_id_seq START 1000 INCREMENT 1;
-ALTER SEQUENCE android_action_id_seq START 1000 INCREMENT 1;
-ALTER SEQUENCE android_campaign_id_seq START 1000 INCREMENT 1
+create SEQUENCE android_template_id_seq START 1000 INCREMENT 1;
+create SEQUENCE android_action_id_seq START 1000 INCREMENT 1;
+ALTER SEQUENCE android_campaign_id_seq START 1000 INCREMENT 1;

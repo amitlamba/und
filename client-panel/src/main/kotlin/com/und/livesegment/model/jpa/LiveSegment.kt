@@ -6,6 +6,8 @@ import java.time.LocalDateTime
 import javax.persistence.*
 import javax.validation.constraints.NotNull
 
+@Entity
+@Table(name = "live_segment")
 class LiveSegment {
 
     @Id
