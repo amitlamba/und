@@ -7,6 +7,7 @@ import com.und.model.jpa.CampaignType
 import com.und.model.jpa.Schedule
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.*
+import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.web.model.Campaign
 import com.und.web.model.EmailTemplate
@@ -77,24 +78,25 @@ class CampaignController {
         val clientId = AuthenticationUtils.clientID
         val templateId = campaign.templateID
         if (clientId != null && templateId!=null) {
-
-            //why it would be list instead of unique because templateid is unique for each template
             val template = when(campaign.campaignType) {
                 CampaignType.EMAIL -> emailTempleteService.getEmailTemplate(templateId)
                 CampaignType.SMS -> smsTempleteService.getClientSmsTemplates(clientId, templateId)
-                //ToDO handle empty result set error
-                CampaignType.PUSH_ANDROID -> listOf(androidService.getAndroidTemplateById(clientId,templateId))
-                CampaignType.PUSH_IOS->{throw Exception("Not present")}
-                CampaignType.PUSH_WEB -> listOf(webPushService.getTemplate(templateId))
+                CampaignType.PUSH_ANDROID -> listOf(androidService.getAndroidTemplatesById(clientId,templateId))
+                CampaignType.PUSH_IOS->{throw CustomException("This Service Not present")}
+                CampaignType.PUSH_WEB -> webPushService.findExistsTemplate(templateId)
             }
 
             if (template.isNotEmpty()) {
                 val persistedCampaign = campaignService.save(campaign)
+                logger.info("campaign saved with name ${campaign.name}")
                 return ResponseEntity(persistedCampaign, HttpStatus.CREATED)
+            }else{
+                logger.info("campaign not saved with name ${campaign.name}")
+                throw CustomException("template with id $templateId not exist")
             }
         }
-        logger.info("campaign saved with name ${campaign.name}")
-        return ResponseEntity(campaign, HttpStatus.EXPECTATION_FAILED)
+        logger.info("campaign not saved with name ${campaign.name}")
+        return ResponseEntity(campaign,HttpStatus.EXPECTATION_FAILED)
     }
 
 

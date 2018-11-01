@@ -28,8 +28,8 @@ interface FcmFeignClient {
     fun pushMessage(@RequestHeader("Authorization") authKeyValue: String,
                     @RequestBody requestBodyString: String): ResponseEntity<Any?>
 
-    @PostMapping(value = ["/{project_id}/message:send"],consumes = ["application/json"])
-    fun pushMessage(@PathVariable("project_id") project_id:String,@RequestHeader("Authorization") auth:String,
-                    @RequestBody body:String):ResponseEntity<Any>
+//    @PostMapping(value = ["/{project_id}/message:send"],consumes = ["application/json"])
+//    fun pushMessage(@PathVariable("project_id") project_id:String,@RequestHeader("Authorization") auth:String,
+//                    @RequestBody body:String):ResponseEntity<Any>
 
 }

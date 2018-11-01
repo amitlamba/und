@@ -1,15 +1,12 @@
 package com.und.service
 
-import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
-import com.und.model.utils.fcm.FcmMessage
-import com.und.model.utils.fcm.NotificationPayloadWeb
+import com.und.model.mongo.FcmMessage
 import feign.FeignException
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
 import java.io.*
@@ -208,10 +205,12 @@ class FcmSendService {
      */
 
     fun sendMessage(message: com.und.model.utils.FcmMessage) {
-        var fcmMessageToSend = service.buildFcmMessage(message)
+        var fcmMessageToSend =buildFcmMessage(message)
         service.saveInMongo(fcmMessageToSend)
         var credential = service.getCredentials(message.clientId)
-        if (credential == null) {//throw excception credential not exists
+        if (credential == null) {
+            //throw excception credential not exists
+            throw Exception("credential not exist")
         }
         var credentialMap: HashMap<String, String>
         credentialMap = parseStringToMap(credential?.credentialsMap!!)
@@ -219,17 +218,34 @@ class FcmSendService {
         sendMessageToFcm(fcmMessageToSend, serverKey)
     }
 
+    private fun buildFcmMessage(message:com.und.model.utils.FcmMessage):com.und.model.mongo.FcmMessage{
+        when(message.type){
+            "android"-> return service.buildFcmMessage(message)
+//            "ios"->service.buildIosMessage(message)
+            "web"-> return service.buildWebFcmMessage(message)
+            else -> return com.und.model.mongo.FcmMessage()
+        }
+    }
     private fun sendMessageToFcm(fcmMessage: com.und.model.mongo.FcmMessage, serverKey: String) {
-        var response = fcmFeignClient.pushMessage(serverKey, objectMapper.writeValueAsString(fcmMessage))
-        var statusCode = response.statusCodeValue
-        if (statusCode == 200) {
-            //update mongo state to send
-        } else {
-            //throw exception
+        try {
+            var response = fcmFeignClient.pushMessage(serverKey, objectMapper.writeValueAsString(fcmMessage))
+            var statusCode = response.statusCodeValue
+            if (statusCode == 200) {
+                //update mongo state to send
+            } else {
+                //throw exception
+                throw Exception("Sending to fcm fail with status $statusCode")
+            }
+        } catch (ex: Exception) {
+            println(ex.message)
         }
     }
 
-    fun parseStringToMap(jsonString: String): HashMap<String, String> {
+    /*
+    * This method is used to parse only first level json string into hashmap
+    * for nested json value are json node.
+    * */
+    private fun parseStringToMap(jsonString: String): HashMap<String, String> {
         var hashMap = HashMap<String, String>()
         var jsonNode: JsonNode = objectMapper.readTree(jsonString)
         var entityMap = jsonNode.fields()

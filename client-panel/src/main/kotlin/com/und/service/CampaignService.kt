@@ -67,7 +67,6 @@ class CampaignService {
     @Transactional
     protected fun saveCampaign(webCampaign: com.und.web.model.Campaign): Campaign? {
         val campaign = buildCampaign(webCampaign)
-
         val persistedCampaign = campaignRepository.save(campaign)
 
         webCampaign.id = persistedCampaign.id
@@ -171,6 +170,8 @@ class CampaignService {
 
             schedule = objectMapper.writeValueAsString(webCampaign.schedule)
         }
+
+
 
         when (webCampaign.campaignType) {
             CampaignType.EMAIL -> {

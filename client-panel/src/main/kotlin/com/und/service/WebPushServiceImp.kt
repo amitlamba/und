@@ -25,19 +25,14 @@ class WebPushServiceImp:WebPushService {
     }
 
     override fun getTemplate(id: Long): WebPushTemplate? {
-        var clientId = AuthenticationUtils.clientID
-        if (clientId != null)
-            return webPushRepository.findByClientIdAndId(clientId, id)
-        else
-            throw AccessDeniedException("")
+        var clientId = AuthenticationUtils.clientID?: throw AccessDeniedException("")
+        //TODO
+        return webPushRepository.findByClientIdAndId(clientId, id)
     }
 
     override fun getAllTemplate(): List<WebPushTemplate> {
-        var clientId = AuthenticationUtils.clientID
-        if (clientId != null)
+        var clientId = AuthenticationUtils.clientID?: throw AccessDeniedException("")
             return webPushRepository.findByClientId(clientId)
-        else
-            return emptyList() //throw exception
     }
 
     override fun isTemplateExists(clientId: Long, templateName:String): Boolean {
@@ -45,6 +40,10 @@ class WebPushServiceImp:WebPushService {
         return !result.isEmpty()
     }
 
+    override fun findExistsTemplate(id: Long): List<WebPushTemplate> {
+        var clientId=AuthenticationUtils.clientID?: throw AccessDeniedException("")
+        return webPushRepository.findTemplateExistsForThisId(clientId,id)
+    }
     private fun buildJpaWebPushTemplate(template:WebTemplate):WebPushTemplate{
         var jpaTemplate=WebPushTemplate()
         with(jpaTemplate){

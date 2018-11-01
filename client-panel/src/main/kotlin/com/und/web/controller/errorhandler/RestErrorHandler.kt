@@ -103,6 +103,12 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
+    @ExceptionHandler(CustomException::class)
+    fun handleCustomException(ex:RuntimeException,request: WebRequest):ResponseEntity<Any>{
+        logger.error(ex)
+        val bodyOfResponse=GenericResponse(messageSource.getMessage("message.error",null,request.locale),ex.message)
+        return ResponseEntity(bodyOfResponse,HttpHeaders(),HttpStatus.BAD_REQUEST)
+    }
     @ExceptionHandler(UndBusinessValidationException::class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     @ResponseBody

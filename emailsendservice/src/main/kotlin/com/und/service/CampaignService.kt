@@ -57,7 +57,15 @@ class CampaignService {
                 }
 //                check mode of communication is mobile push
                 if (campaign?.campaignType=="PUSH_ANDROID"){
-                    val notification=fcmMessage(clientId,campaign,user)
+                    val notification=fcmAndroidMessage(clientId,campaign,user)
+                    toKafka(notification)
+                }
+                if(campaign?.campaignType=="PUSH_WEB"){
+                    val notification=fcmWebMessage(clientId,campaign,user)
+                    toKafka(notification)
+                }
+                if(campaign?.campaignType=="PUSH_IOS"){
+                    val notification=fcmIosMessage(clientId,campaign,user)
                     toKafka(notification)
                 }
             } catch (ex: Exception) {
@@ -93,11 +101,30 @@ class CampaignService {
                 campaignId = campaign.campaignId
         )
     }
-    private fun fcmMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
+    private fun fcmAndroidMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
         return FcmMessage(
                 clientId=clientId,
                 templateId = campaign.androidTemplateId?:0L,
-                to = user.identity.androidFcmToken?:""
+                to = user.identity.androidFcmToken?:"",
+                type = "android"
+        )
+    }
+
+    private fun fcmWebMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
+        return FcmMessage(
+                clientId = clientId,
+                templateId = campaign.webTemplateId?:0L,
+                to = user.identity.webFcmToken?:"",
+                type = "web"
+        )
+    }
+    private fun fcmIosMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
+        return FcmMessage(
+                clientId = clientId,
+//                templateId = campaign.iosTemplateId?:0L,
+                templateId = 0L,
+                to = user.identity.iosFcmToken?:"",
+                type = "ios"
         )
     }
 

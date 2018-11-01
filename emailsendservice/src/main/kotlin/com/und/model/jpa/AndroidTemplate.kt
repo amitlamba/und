@@ -89,7 +89,7 @@ class Action {
     @JsonIgnore
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name = "android_template_id")
-    var androidTemplateId:AndroidTemplate?=null// add an long field instread of andoid template
+    var androidTemplateId:AndroidTemplate?=null
     @Column(name="client_id")
     var clientId:Long?=null
     @NotNull

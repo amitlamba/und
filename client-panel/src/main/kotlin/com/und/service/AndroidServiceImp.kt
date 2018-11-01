@@ -90,6 +90,9 @@ class AndroidServiceImp:AndroidService {
         return jpaAction
     }
 
+    /*
+    * implement below two if we want to return web model to used intead of jpa
+    * */
     private fun buildWebAndroidTemplate(template:AndroidTemplate):WebAndroidTemplate{
         var webAndroidTemplate=WebAndroidTemplate()
         return webAndroidTemplate

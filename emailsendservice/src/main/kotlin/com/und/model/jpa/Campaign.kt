@@ -29,4 +29,8 @@ class Campaign {
     var clientId: Long = 0
     @Column(name="android_template_id")
     var androidTemplateId:Long?=null
+    @Column(name = "web_template_id")
+    var webTemplateId:Long?=null
+//    @Column(name = "ios_template_id")
+//    var iosTemplateId:Long?=null
 }

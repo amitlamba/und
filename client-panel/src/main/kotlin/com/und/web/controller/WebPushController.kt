@@ -19,17 +19,11 @@ class WebPushController {
     private lateinit var webPushService: WebPushService
     @PostMapping("/save")
     fun saveTemplate(@Valid @RequestBody template:WebTemplate):ResponseEntity<WebPushTemplate?>{
-        //check clientid
-        var clientId=AuthenticationUtils.clientID
-        if(clientId!=null) {
+        var clientId=AuthenticationUtils.clientID?: throw AccessDeniedException("")
             var isExists=webPushService.isTemplateExists(clientId, template.name)
             if(isExists){
-                ResponseEntity(template,HttpStatus.EXPECTATION_FAILED)
+                return ResponseEntity(HttpStatus.EXPECTATION_FAILED)
             }
-        }
-        else {
-            throw AccessDeniedException("")
-        }
         return ResponseEntity(webPushService.saveTemplate(template), HttpStatus.CREATED)
     }
     @GetMapping("/template/{id}")

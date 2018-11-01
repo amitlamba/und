@@ -6,7 +6,7 @@ class FcmMessage {
     var data:HashMap<String,String>?=null
     var android:AndroidConfig?=null
 //    var apn:ApnConfig?=null
-//    var webpush:WebPushConfig?=null
+    var webpush:WebPushConfig?=null
 }
 class CommonNotification{
     var title:String?=null
@@ -34,6 +34,41 @@ class AndroidNotification{
 
 }
 
+class WebPushConfig{
+    var headers:WebPushHeaders?=null
+    var notification:WebPushNotification?=null
+    var data:HashMap<String,String>?=null
+    var fcm_options:WebPushFcmOptions?=null
+}
+
+class WebPushHeaders{
+    var Urgency:UrgencyOption=UrgencyOption.normal
+    var TTL:Long?=28
+}
+enum class UrgencyOption(name:String){
+    low("low"),
+    normal("normal"),
+    high("high")
+}
+class WebPushNotification{
+    var title:String?=null
+    var body:String?=null
+    var badge:String?=null
+    var lang:String?=null
+    var icon:String?=null
+    var tag:String?=null
+    var image:String?=null
+    var requireInteraction:Boolean=true
+    var actions:List<WebPushNotificationAction>?=null
+}
+class WebPushNotificationAction{
+    lateinit var action:String
+    lateinit var title:String
+    var icon:String?=null
+}
+class WebPushFcmOptions{
+    var link:String?=null
+}
 enum class Priority{
     NORMAL,
     HIGH

@@ -29,18 +29,11 @@ class AndroidTemplateController {
     @PreAuthorize(value="hasRole('ROLE_ADMIN')")
     @PostMapping("/save")
     fun saveTemplate(@Valid @RequestBody template:WebAndroidTemplate):ResponseEntity<AndroidTemplate>{
-        var clientId= AuthenticationUtils.clientID
-        if(clientId!=null) {
+        var clientId= AuthenticationUtils.clientID?: throw AccessDeniedException("")
             var result = androidRepository.findByClientIdAndName(clientId, template.name)
-            if(result.isNotEmpty()){
-                println("exists already")
-                //throw exception already exist
-                ResponseEntity(template,HttpStatus.EXPECTATION_FAILED)
+            if(result.isNotEmpty()) {
+                return ResponseEntity(HttpStatus.EXPECTATION_FAILED)
             }
-
-        }else{
-            throw AccessDeniedException("")
-        }
         return  ResponseEntity(androidService.save(template),HttpStatus.CREATED)
     }
     @PreAuthorize(value="hasRole('ROLE_ADMIN')")
