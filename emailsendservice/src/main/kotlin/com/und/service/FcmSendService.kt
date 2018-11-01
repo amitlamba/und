@@ -205,7 +205,7 @@ class FcmSendService {
      */
 
     fun sendMessage(message: com.und.model.utils.FcmMessage) {
-        var fcmMessageToSend =buildFcmMessage(message)
+        var fcmMessageToSend = buildFcmMessage(message)
         service.saveInMongo(fcmMessageToSend)
         var credential = service.getCredentials(message.clientId)
         if (credential == null) {
@@ -218,14 +218,15 @@ class FcmSendService {
         sendMessageToFcm(fcmMessageToSend, serverKey)
     }
 
-    private fun buildFcmMessage(message:com.und.model.utils.FcmMessage):com.und.model.mongo.FcmMessage{
-        when(message.type){
-            "android"-> return service.buildFcmMessage(message)
+    private fun buildFcmMessage(message: com.und.model.utils.FcmMessage): com.und.model.mongo.FcmMessage {
+        when (message.type) {
+            "android" -> return service.buildFcmAndroidMessage(message)
 //            "ios"->service.buildIosMessage(message)
-            "web"-> return service.buildWebFcmMessage(message)
+            "web" -> return service.buildWebFcmMessage(message)
             else -> return com.und.model.mongo.FcmMessage()
         }
     }
+
     private fun sendMessageToFcm(fcmMessage: com.und.model.mongo.FcmMessage, serverKey: String) {
         try {
             var response = fcmFeignClient.pushMessage(serverKey, objectMapper.writeValueAsString(fcmMessage))
