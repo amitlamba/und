@@ -1,7 +1,9 @@
 package com.und.service
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.und.model.jpa.Action
 import com.und.web.model.Action as WebAndroidAction
 import com.und.model.jpa.AndroidTemplate
@@ -40,12 +42,17 @@ class AndroidServiceImp:AndroidService {
         return webAndroidTemplateList
     }
 
-    override fun getAndroidTemplateById(clientId: Long, id: Long): AndroidTemplate {
-        return androidRepository.findByClientIdAndId(clientId,id)
+    override fun getAndroidTemplateById(clientId: Long, id: Long): WebAndroidTemplate {
+        return buildWebAndroidTemplate(androidRepository.findByClientIdAndId(clientId,id))
     }
 
-    override fun getAllAndroidAction(clientId: Long): List<Action> {
-        return androidActionRepository.findByClientId(clientId)
+    override fun getAllAndroidAction(clientId: Long): List<WebAndroidAction> {
+        var listOfJpaAndroidAction = androidActionRepository.findByClientId(clientId)
+        var listOfWebAndroidAction = mutableListOf<WebAndroidAction>()
+        listOfJpaAndroidAction.forEach {
+            listOfWebAndroidAction.add(buildWebAndroidAction(it))
+        }
+        return listOfWebAndroidAction
     }
 
     override fun getAndroidTemplatesById(clientId: Long, id: Long): List<AndroidTemplate> {
@@ -142,12 +149,14 @@ class AndroidServiceImp:AndroidService {
         return webAndroidAction
     }
     private fun parseStringToMap(jsonString: String): HashMap<String, String> {
-        var hashMap = HashMap<String, String>()
-        var jsonNode: JsonNode = objectMapper.readTree(jsonString)
-        var entityMap = jsonNode.fields()
-        entityMap.forEach {
-            hashMap.put(it.key, it.value.toString())
-        }
-        return hashMap
+//        var hashMap = HashMap<String, String>()
+//        var jsonNode: JsonNode = objectMapper.readTree(jsonString)
+//        var entityMap = jsonNode.fields()
+//        entityMap.forEach {
+//            hashMap.put(it.key, it.value.toString())
+//        }
+//        return hashMap
+//        parseStringToMapByTypeReference(jsonString)
+        return objectMapper.readValue(jsonString)
     }
 }

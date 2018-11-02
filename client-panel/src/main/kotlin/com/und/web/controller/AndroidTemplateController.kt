@@ -44,13 +44,13 @@ class AndroidTemplateController {
     }
     @PreAuthorize(value="hasRole('ROLE_ADMIN')")
     @GetMapping("/template/{id}")
-    fun getTemplateById(@PathVariable id:Long):AndroidTemplate?{
+    fun getTemplateById(@PathVariable id:Long):WebAndroidTemplate?{
         var clientId=AuthenticationUtils.clientID?: throw AccessDeniedException("")
         return androidService.getAndroidTemplateById(clientId,id)
     }
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/actions")
-    fun getAllAction():List<Action>{
+    fun getAllAction():List<com.und.web.model.Action>{
         var clientId=AuthenticationUtils.clientID?: throw AccessDeniedException("")
         return androidService.getAllAndroidAction(clientId)
     }
