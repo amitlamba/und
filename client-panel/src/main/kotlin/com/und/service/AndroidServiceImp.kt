@@ -12,6 +12,7 @@ import com.und.model.jpa.Priority
 import com.und.repository.jpa.AndroidActionRepository
 import com.und.repository.jpa.AndroidRepository
 import com.und.security.utils.AuthenticationUtils
+import com.und.web.controller.exception.CustomException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 import com.und.web.model.AndroidTemplate as WebAndroidTemplate
@@ -43,7 +44,8 @@ class AndroidServiceImp:AndroidService {
     }
 
     override fun getAndroidTemplateById(clientId: Long, id: Long): WebAndroidTemplate {
-        return buildWebAndroidTemplate(androidRepository.findByClientIdAndId(clientId,id))
+        var persistedAndroidTemplate=androidRepository.findByClientIdAndId(clientId,id)
+        return if(persistedAndroidTemplate!=null) buildWebAndroidTemplate(persistedAndroidTemplate) else throw CustomException("Template with id $id not exists")
     }
 
     override fun getAllAndroidAction(clientId: Long): List<WebAndroidAction> {

@@ -6,6 +6,7 @@ import com.und.model.jpa.AndroidTemplate
 import com.und.repository.jpa.AndroidRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.AndroidService
+import com.und.web.controller.exception.CustomException
 import com.und.web.model.AndroidTemplate as WebAndroidTemplate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -32,7 +33,7 @@ class AndroidTemplateController {
         var clientId= AuthenticationUtils.clientID?: throw AccessDeniedException("")
             var result = androidRepository.findByClientIdAndName(clientId, template.name)
             if(result.isNotEmpty()) {
-                return ResponseEntity(HttpStatus.EXPECTATION_FAILED)
+                throw CustomException("Template with name ${template.name} already exists")
             }
         return  ResponseEntity(androidService.save(template),HttpStatus.CREATED)
     }
