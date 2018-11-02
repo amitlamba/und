@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.und.model.mongo.FcmMessage
+import com.und.utils.loggerFor
 import feign.FeignException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -17,6 +18,9 @@ import javax.net.ssl.HttpsURLConnection
 @Service
 class FcmSendService {
 
+    companion object {
+        protected val logger = loggerFor(FcmSendService::class.java)
+    }
     @Autowired
     private lateinit var fcmFeignClient: FcmFeignClient
     @Autowired
@@ -231,18 +235,17 @@ class FcmSendService {
         try {
             var auth="key=$serverKey"
             auth=auth.replace("\"","")
-            println(auth)
             var response = fcmFeignClient.pushMessage(auth, objectMapper.writeValueAsString(fcmMessage))
             var statusCode = response.statusCodeValue
             if (statusCode == 200) {
                 //update mongo state to send
-                println("Successfull")
+                logger.info("Fcm Send message successful for token= ${fcmMessage.to}")
             } else {
                 //TODO senddetails to client
                 throw Exception("Sending to fcm fail with status $statusCode")
             }
         } catch (ex: Exception) {
-            println(ex.localizedMessage)
+            logger.error(ex.localizedMessage)
         }
     }
 

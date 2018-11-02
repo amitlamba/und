@@ -14,7 +14,6 @@ class FcmListner {
 
     @StreamListener("fcmEventSend")
     fun sendMessage(message: FcmMessage){
-        println("Fcm Listening")
         fcmSendService.sendMessage(message)
     }
 }
