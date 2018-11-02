@@ -1,5 +1,6 @@
 package com.und.service
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.model.jpa.Action
 import com.und.web.model.Action as WebAndroidAction
@@ -23,14 +24,20 @@ class AndroidServiceImp:AndroidService {
     @Autowired
     private lateinit var androidActionRepository:AndroidActionRepository
 
-    override fun save(template: com.und.web.model.AndroidTemplate): AndroidTemplate {
+    override fun save(template: com.und.web.model.AndroidTemplate): WebAndroidTemplate {
         var jpaAndroidTemplate=buildJpaAndroidTemplate(template)
         jpaAndroidTemplate.addActionGroups(jpaAndroidTemplate.actionGroup)
-        return androidRepository.save(jpaAndroidTemplate)
+        return buildWebAndroidTemplate(androidRepository.save(jpaAndroidTemplate))
     }
 
-    override fun getAllAndroidTemplate(clientId: Long): List<AndroidTemplate> {
-            return androidRepository.findByClientId(clientId)
+    override fun getAllAndroidTemplate(clientId: Long): List<WebAndroidTemplate> {
+            var persistedModel= androidRepository.findByClientId(clientId)
+       var webAndroidTemplateList=mutableListOf<WebAndroidTemplate>()
+        persistedModel.forEach {
+            var webAndroidTemplate=buildWebAndroidTemplate(it)
+            webAndroidTemplateList.add(webAndroidTemplate)
+        }
+        return webAndroidTemplateList
     }
 
     override fun getAndroidTemplateById(clientId: Long, id: Long): AndroidTemplate {
@@ -95,10 +102,52 @@ class AndroidServiceImp:AndroidService {
     * */
     private fun buildWebAndroidTemplate(template:AndroidTemplate):WebAndroidTemplate{
         var webAndroidTemplate=WebAndroidTemplate()
+        with(webAndroidTemplate){
+            id=template.id
+            name=template.name
+            title=template.title
+            body=template.body
+            channelId=template.channelId
+            channelName=template.channelName
+            imageUrl = template.imageUrl
+            largeIconUrl = template.largeIconUrl
+            deepLink = template.deepLink
+            if (template.actionGroup != null) {
+                var list= mutableListOf<WebAndroidAction>()
+                template.actionGroup!!.forEach {
+                    list.add(buildWebAndroidAction(it))
+                }
+                actionGroup = list
+            }
+            sound = template.sound
+            badgeIcon=com.und.web.model.BadgeIconType.valueOf("${template.badgeIcon}")
+            collapse_key=template.collapse_key
+            priority=com.und.web.model.Priority.valueOf("${template.priority}")
+            timeToLive=template.timeToLive
+            fromUserNDot=template.fromUserNDot
+            if(template.customKeyValuePair!=null) customKeyValuePair=parseStringToMap(template.customKeyValuePair!!)
+            creationTime=template.creationTime
+        }
         return webAndroidTemplate
     }
-    private fun buildWebAndroidAction(actions:List<Action>):List<WebAndroidAction>{
-        var webAndroidAction=WebAndroidAction()
-        return listOf(webAndroidAction)
+    private fun buildWebAndroidAction(actions:Action):WebAndroidAction{
+        var webAndroidAction= WebAndroidAction()
+        with(webAndroidAction){
+           id=actions.id
+            actionId=actions.actionId
+            deepLink=actions.deepLink
+            icon=actions.icon
+            autoCancel=actions.autoCancel
+        }
+        return webAndroidAction
+    }
+    private fun parseStringToMap(jsonString: String): HashMap<String, String> {
+        var hashMap = HashMap<String, String>()
+        var jsonNode: JsonNode = objectMapper.readTree(jsonString)
+        var entityMap = jsonNode.fields()
+        entityMap.forEach {
+            hashMap.put(it.key, it.value.toString())
+        }
+        return hashMap
     }
 }

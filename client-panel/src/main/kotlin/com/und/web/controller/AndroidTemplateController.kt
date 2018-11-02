@@ -28,7 +28,7 @@ class AndroidTemplateController {
 
     @PreAuthorize(value="hasRole('ROLE_ADMIN')")
     @PostMapping("/save")
-    fun saveTemplate(@Valid @RequestBody template:WebAndroidTemplate):ResponseEntity<AndroidTemplate>{
+    fun saveTemplate(@Valid @RequestBody template:WebAndroidTemplate):ResponseEntity<WebAndroidTemplate>{
         var clientId= AuthenticationUtils.clientID?: throw AccessDeniedException("")
             var result = androidRepository.findByClientIdAndName(clientId, template.name)
             if(result.isNotEmpty()) {
@@ -38,7 +38,7 @@ class AndroidTemplateController {
     }
     @PreAuthorize(value="hasRole('ROLE_ADMIN')")
     @GetMapping("/templates")
-    fun getTemplates():List<AndroidTemplate>{
+    fun getTemplates():List<WebAndroidTemplate>{
         var clientId=AuthenticationUtils.clientID?:throw AccessDeniedException("")
         return androidService.getAllAndroidTemplate(clientId)
     }
