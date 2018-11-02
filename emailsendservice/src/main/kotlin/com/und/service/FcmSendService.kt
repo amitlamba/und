@@ -209,7 +209,7 @@ class FcmSendService {
         service.saveInMongo(fcmMessageToSend)
         var credential = service.getCredentials(message.clientId)
         if (credential == null) {
-            //throw excception credential not exists
+            //TODO send details to client
             throw Exception("credential not exist")
         }
         var credentialMap: HashMap<String, String>
@@ -229,16 +229,20 @@ class FcmSendService {
 
     private fun sendMessageToFcm(fcmMessage: com.und.model.mongo.FcmMessage, serverKey: String) {
         try {
-            var response = fcmFeignClient.pushMessage(serverKey, objectMapper.writeValueAsString(fcmMessage))
+            var auth="key=$serverKey"
+            auth=auth.replace("\"","")
+            println(auth)
+            var response = fcmFeignClient.pushMessage(auth, objectMapper.writeValueAsString(fcmMessage))
             var statusCode = response.statusCodeValue
             if (statusCode == 200) {
                 //update mongo state to send
+                println("Successfull")
             } else {
-                //throw exception
+                //TODO senddetails to client
                 throw Exception("Sending to fcm fail with status $statusCode")
             }
         } catch (ex: Exception) {
-            println(ex.message)
+            println(ex.localizedMessage)
         }
     }
 
@@ -257,6 +261,12 @@ class FcmSendService {
     }
 }
 
+class NotificationError{
+    var statusCode:Int=-1
+    lateinit var to:String
+    lateinit var status:String
+    lateinit var message:String
+}
 class TestMessage {
     lateinit var token: String
     lateinit var data: HashMap<String, String>
