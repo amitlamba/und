@@ -105,4 +105,4 @@ error_code bigint,
 date_created TIMESTAMP WITH time ZONE DEFAULT now()
 );
 
-CREATE sequence fcm_failure_audit_log_id_seq start 1000 increment 1;
+ALTER sequence fcm_failure_audit_log_id_seq start 1000 increment 1;
