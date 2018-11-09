@@ -75,8 +75,9 @@ class AndroidServiceImp : AndroidService {
             imageUrl = template.imageUrl
             largeIconUrl = template.largeIconUrl
             deepLink = template.deepLink
-            if (template.actionGroup != null) {
-                var jpaAndroidAction = buildJpaAndroidAction(template.actionGroup!!)
+            var actionGroups=template.actionGroup
+            if (actionGroups != null) {
+                var jpaAndroidAction = buildJpaAndroidAction(actionGroups)
                 actionGroup = jpaAndroidAction
             }
             sound = template.sound
@@ -100,6 +101,7 @@ class AndroidServiceImp : AndroidService {
             action.label = it.label
             action.deepLink = it.deepLink
             action.icon = it.icon
+            action.clientId=AuthenticationUtils.clientID
             action.autoCancel = it.autoCancel
             action.creationTime = it.creationTime
             jpaAction.add(action)
@@ -144,6 +146,7 @@ class AndroidServiceImp : AndroidService {
         with(webAndroidAction) {
             id = actions.id
             actionId = actions.actionId
+            label=actions.label
             deepLink = actions.deepLink
             icon = actions.icon
             autoCancel = actions.autoCancel

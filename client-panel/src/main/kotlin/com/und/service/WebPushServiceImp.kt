@@ -2,6 +2,7 @@ package com.und.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.und.common.utils.loggerFor
 import com.und.model.jpa.WebAction
 import com.und.web.model.WebAction as Action
 import com.und.model.jpa.WebPushTemplate
@@ -21,6 +22,9 @@ class WebPushServiceImp : WebPushService {
     @Autowired
     private lateinit var objectmapper: ObjectMapper
 
+    companion object {
+        protected var logger= loggerFor(WebPushService::class.java)
+    }
     override fun saveTemplate(template: WebTemplate): WebTemplate {
         var jpaWebPushTemplate = buildJpaWebPushTemplate(template)
         return buildWebWebPushTempalte(webPushRepository.save(jpaWebPushTemplate))
@@ -48,7 +52,7 @@ class WebPushServiceImp : WebPushService {
 
     override fun findExistsTemplate(id: Long): List<WebPushTemplate> {
         var clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
-        return webPushRepository.findTemplateExistsForThisId(clientId, id)
+        return webPushRepository.isTemplateExistsForThisId(clientId, id)
     }
 
     private fun buildJpaWebPushTemplate(template: WebTemplate): WebPushTemplate {
@@ -65,7 +69,9 @@ class WebPushServiceImp : WebPushService {
             imageUrl = template.imageUrl
             tag = template.tag
             requireInteraction = template.requireInteraction
-            if (template.actionGroup != null) actionGroup = buildJpaWebAction(template.actionGroup!!)
+            var actionGroups=template.actionGroup
+            if (actionGroups != null)
+                actionGroup = buildJpaWebAction(actionGroups)
             urgency = template.urgency
             ttl = template.ttl
             link = template.link
@@ -105,9 +111,10 @@ class WebPushServiceImp : WebPushService {
             imageUrl = template.imageUrl
             tag = template.tag
             requireInteraction = template.requireInteraction
-            if (template.actionGroup != null) {
+            var actionsGroup=template.actionGroup
+            if (actionsGroup != null) {
                 var actions = mutableListOf<Action>()
-                template.actionGroup!!.forEach {
+                actionsGroup.forEach {
                     actions.add(buildWebAction(it))
                 }
                 actionGroup = actions
@@ -126,6 +133,7 @@ class WebPushServiceImp : WebPushService {
     private fun buildWebAction(webAction: WebAction): Action {
         var waction = Action()
         with(waction) {
+            id=webAction.id
             action = webAction.action
             title = webAction.title
             iconUrl = webAction.iconUrl

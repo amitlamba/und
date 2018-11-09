@@ -93,7 +93,7 @@ ALTER sequence webpush_campaign_id_seq start 1000 increment 1;
 
 ALTER SEQUENCE android_template_id_seq START 1000 INCREMENT 1;
 ALTER SEQUENCE android_action_id_seq START 1000 INCREMENT 1;
-ALTER SEQUENCE android_campaign_id_seq START 1000 INCREMENT 1
+ALTER SEQUENCE android_campaign_id_seq START 1000 INCREMENT 1;
 
 
 create table if not exists fcm_failure_audit_log(
@@ -105,4 +105,4 @@ error_code bigint,
 date_created TIMESTAMP WITH time ZONE DEFAULT now()
 );
 
-ALTER sequence fcm_failure_audit_log_id_seq start 1000 increment 1;
+CREATE sequence fcm_failure_audit_log_id_seq start 1000 increment 1;

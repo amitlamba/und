@@ -224,6 +224,7 @@ class FcmSendService {
             with(notificationError){
                 clientId=message.clientId
                 this.message =  "credential are empty first add service provider credential"
+                errorCode=400
             }
             toFcmFailureKafka(notificationError)
         }else {
@@ -233,7 +234,7 @@ class FcmSendService {
             credentialMap = parseStringToMap(credential.credentialsMap)
             var serverKey = credentialMap.get("apiKey")!!
 
-            var statusCode:Int?=null
+            var statusCode:Int?=400
             try {
                 statusCode=sendMessageToFcm(fcmMessageToSend, serverKey)
                 if (statusCode == 200) {
@@ -246,10 +247,10 @@ class FcmSendService {
                 logger.info(ex.localizedMessage)
                 var notificationError=NotificationError()
                 with(notificationError){
-                    this.message = ex.toString()
+                    this.message = ex.message
                     to = message.to
                     clientId=message.clientId
-                    status=ex.message
+                    status=ex.toString()
                     errorCode= statusCode?.toLong()
                 }
                 toFcmFailureKafka(notificationError)

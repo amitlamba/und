@@ -49,10 +49,8 @@ class FcmHelperService {
         if (template.imageUrl != null) data.put("big_pic", template.imageUrl!!)
         if (template.largeIconUrl != null) data.put("lg_icon", template.largeIconUrl!!)
         if (template.deepLink != null) data.put("deep_link", template.deepLink!!)
-        //ToDO dont put whole action group because in action group there are some irrevelant field like creation time
         if (template.actionGroup != null) data.put("actions", objectMapper.writeValueAsString(template.actionGroup))
         if (template.sound != null) data.put("sound", template.sound!!)
-        //TODO check here enum is convert rightly
         if (template.badgeIcon != null) data.put("badge_icon", template.badgeIcon.toString())
         if (template.fromUserNDot != null) data.put("fromuserndot", template.fromUserNDot.toString())
 
@@ -61,7 +59,6 @@ class FcmHelperService {
         if (template.timeToLive != null) android.ttl = template.timeToLive
         android.notification = notification
         android.data = data
-        //TODO check here enum is convert rightly
         android.priority = Priority.valueOf(template.priority.toString())
 
         with(fcmMessage) {

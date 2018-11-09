@@ -98,6 +98,7 @@ class Action {
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name = "android_template_id")
     var androidTemplateId:AndroidTemplate?=null// add an long field instread of andoid template
+    @NotNull
     @Column(name="client_id")
     var clientId:Long?=null
     @NotNull

@@ -1,13 +1,11 @@
 package com.und.service
 
 import com.und.common.utils.loggerFor
-import com.und.config.EventStream
 import com.und.model.jpa.FcmFailureAuditLog
 import com.und.repository.jpa.FcmFailureAuditLogRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 
 @Service
 class FcmFailureHandler {
@@ -19,11 +17,25 @@ class FcmFailureHandler {
     @Autowired
     private lateinit var fcmFailureAuditLogRepository: FcmFailureAuditLogRepository
 
+    @Autowired
+    private lateinit var campaignService: CampaignService
+
+    @Autowired
+    private lateinit var emailService: EmailService
+
+
     @StreamListener("fcmFailureEventReceive")
     fun handleFcmFailure(notificationError:NotificationError){
         logger.info("fcm message failure is handled for clientid ${notificationError.clientId}")
         saveFcmFailure(notificationError)
-        //ToDO send mail also
+        notificationError.clientId?.let {
+            //pause all running campaign
+            campaignService.pauseAllRunning(it)
+            //sending mail
+            emailService.sendNotificationConnectionErrorEmail(notificationError)
+        }
+
+
     }
 
     private fun saveFcmFailure(notificationError: NotificationError){

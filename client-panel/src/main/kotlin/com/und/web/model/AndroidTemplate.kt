@@ -42,7 +42,6 @@ class Action :Serializable{
     var actionId: String?=null
     @NotNull
     var label: String?=null
-    var clientId:Long?=null
     @Pattern(regexp = "^http.{0,1}://.*$")
     var deepLink: String? = null
     var icon: String? = null
