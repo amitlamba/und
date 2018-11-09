@@ -25,6 +25,9 @@ class EventUser {
     @Email(message = "{eventUser.googleId.invalid}")
     var googleId: String? = null
 
+    var androidFcmToken:String?=null
+    var iosFcmToken:String?=null
+    var webFcmToken:String?=null
     //TODO Use custom validators here
 
     @Size(min = 10, max =15 , message = "{eventUser.mobile.invalidSize}")

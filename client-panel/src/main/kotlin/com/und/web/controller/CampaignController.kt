@@ -1,13 +1,13 @@
 package com.und.web.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.netflix.discovery.converters.Auto
 import com.und.common.utils.loggerFor
 import com.und.model.jpa.CampaignType
 import com.und.model.jpa.Schedule
 import com.und.security.utils.AuthenticationUtils
-import com.und.service.CampaignService
-import com.und.service.EmailTemplateService
-import com.und.service.SmsTemplateService
+import com.und.service.*
+import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.web.model.Campaign
 import com.und.web.model.EmailTemplate
@@ -39,6 +39,10 @@ class CampaignController {
 
     @Autowired
     private lateinit var emailTempleteService: EmailTemplateService
+    @Autowired
+    private lateinit var androidService:AndroidService
+    @Autowired
+    private lateinit var webPushService: WebPushService
 
     @Autowired
     lateinit var campaignService: CampaignService
@@ -74,21 +78,25 @@ class CampaignController {
         val clientId = AuthenticationUtils.clientID
         val templateId = campaign.templateID
         if (clientId != null && templateId!=null) {
-
             val template = when(campaign.campaignType) {
                 CampaignType.EMAIL -> emailTempleteService.getEmailTemplate(templateId)
                 CampaignType.SMS -> smsTempleteService.getClientSmsTemplates(clientId, templateId)
-                CampaignType.MOBILE_PUSH_NOTIFICATION -> {throw Exception("MOBILE Push  campaign are not available")}
-
+                CampaignType.PUSH_ANDROID -> listOf(androidService.getAndroidTemplatesById(clientId,templateId))
+                CampaignType.PUSH_IOS->{throw CustomException("This Service Not present")}
+                CampaignType.PUSH_WEB -> webPushService.findExistsTemplate(templateId)
             }
 
             if (template.isNotEmpty()) {
                 val persistedCampaign = campaignService.save(campaign)
+                logger.info("campaign saved with name ${campaign.name}")
                 return ResponseEntity(persistedCampaign, HttpStatus.CREATED)
+            }else{
+                logger.info("campaign not saved with name ${campaign.name}")
+                throw CustomException("template with id $templateId not exist")
             }
         }
-        logger.info("campaign saved with name ${campaign.name}")
-        return ResponseEntity(campaign, HttpStatus.EXPECTATION_FAILED)
+        logger.info("campaign not saved with name ${campaign.name}")
+        return ResponseEntity(campaign,HttpStatus.EXPECTATION_FAILED)
     }
 
 

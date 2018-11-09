@@ -100,7 +100,6 @@ class SegmentServiceImpl : SegmentService {
         return if (segmentOption.isPresent) {
             val segment = segmentOption.get()
             getSegmentUsersList(segment, clientId)
-
         } else emptyList()
     }
 

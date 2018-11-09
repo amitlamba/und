@@ -1,9 +1,11 @@
 package com.und.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.config.EventStream
 import com.und.model.jpa.Campaign
 import com.und.model.mongo.EventUser
 import com.und.model.utils.Email
+import com.und.model.utils.FcmMessage
 import com.und.model.utils.Sms
 import com.und.repository.jpa.CampaignRepository
 import com.und.utils.loggerFor
@@ -21,7 +23,8 @@ class CampaignService {
 
     @Autowired
     private lateinit var campaignRepository: CampaignRepository
-
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
     @Autowired
     private lateinit var segmentService: SegmentService
 
@@ -36,7 +39,6 @@ class CampaignService {
             try {
                 //TODO: filter out unsubscribed and blacklisted users
                 //TODO: How to skip transactional Messages
-
                 //check mode of communication is email
                 if (campaign?.campaignType == "EMAIL") {
 
@@ -52,6 +54,19 @@ class CampaignService {
                         return@forEach //Local lambda return
                     val sms: Sms = sms(clientId, campaign, user)
                     toKafka(sms)
+                }
+//                check mode of communication is mobile push
+                if (campaign?.campaignType=="PUSH_ANDROID"){
+                    val notification=fcmAndroidMessage(clientId,campaign,user)
+                    toKafka(notification)
+                }
+                if(campaign?.campaignType=="PUSH_WEB"){
+                    val notification=fcmWebMessage(clientId,campaign,user)
+                    toKafka(notification)
+                }
+                if(campaign?.campaignType=="PUSH_IOS"){
+                    val notification=fcmIosMessage(clientId,campaign,user)
+                    toKafka(notification)
                 }
             } catch (ex: Exception) {
                 logger.error(ex.message)
@@ -86,12 +101,40 @@ class CampaignService {
                 campaignId = campaign.campaignId
         )
     }
+    private fun fcmAndroidMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
+        return FcmMessage(
+                clientId=clientId,
+                templateId = campaign.androidTemplateId?:0L,
+                to = user.identity.androidFcmToken?:"",
+                type = "android"
+        )
+    }
+
+    private fun fcmWebMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
+        return FcmMessage(
+                clientId = clientId,
+                templateId = campaign.webTemplateId?:0L,
+                to = user.identity.webFcmToken?:"",
+                type = "web"
+        )
+    }
+    private fun fcmIosMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
+        return FcmMessage(
+                clientId = clientId,
+//                templateId = campaign.iosTemplateId?:0L,
+                templateId = 0L,
+                to = user.identity.iosFcmToken?:"",
+                type = "ios"
+        )
+    }
 
     fun getUsersData(segmentId: Long, clientId: Long): List<EventUser> {
         val segment = segmentService.getWebSegment(segmentId, clientId)
         return segmentService.getUserData(segment, clientId)
     }
-
+    fun toKafka(fcmMessage: FcmMessage){
+            eventStream.fcmEventSend().send(MessageBuilder.withPayload(fcmMessage).build())
+    }
     fun toKafka(email: Email): Boolean =
             eventStream.emailEventSend().send(MessageBuilder.withPayload(email).build())
 

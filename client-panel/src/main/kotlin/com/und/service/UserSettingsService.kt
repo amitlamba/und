@@ -133,6 +133,27 @@ class UserSettingsService {
         return saved.id!!
     }
 
+    fun saveAndroidPushServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
+        webServiceProviderCredentials.status = Status.ACTIVE
+        val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
+        val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
+        return saved.id!!
+    }
+
+    fun saveWebPushServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
+        webServiceProviderCredentials.status = Status.ACTIVE
+        val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
+        val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
+        return saved.id!!
+    }
+
+    fun saveIOSPushServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
+        webServiceProviderCredentials.status = Status.ACTIVE
+        val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
+        val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
+        return saved.id!!
+    }
+
     fun getServiceProviders(clientID: Long): List<WebServiceProviderCredentials> {
         return serviceProviderCredentialsRepository.findAllByClientID(clientID).map { data -> buildWebServiceProviderCredentials(data) }
     }
@@ -387,6 +408,9 @@ class UserSettingsService {
 enum class ServiceProviderType(val desc: String) {
     EMAIL_SERVICE_PROVIDER("Email Service Provider"),
     SMS_SERVICE_PROVIDER("SMS Service Provider"),
-    NOTIFICATION_SERVICE_PROVIDER("Notification Service Provider")
+    NOTIFICATION_SERVICE_PROVIDER("Notification Service Provider"),
+    ANDROID_PUSH_SERVICE_PROVIDER("Android Push Service Provider"),
+    WEB_PUSH_SERVICE_PROVIDER("Web Push Service Provider"),
+    IOS_PUSH_SERVICE_PROVIDER("iOS Push Service Provider")
 
 }

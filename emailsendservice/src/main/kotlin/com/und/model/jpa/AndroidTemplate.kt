@@ -1,7 +1,6 @@
 package com.und.model.jpa
 
 import com.fasterxml.jackson.annotation.*
-import com.und.security.utils.AuthenticationUtils
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDateTime
@@ -75,13 +74,6 @@ class AndroidTemplate{
     @Column(name="date_modified")
     var dateModified:LocalDateTime= LocalDateTime.now()
 
-    fun addActionGroups(actionGroup:List<Action>?){
-        actionGroup?.forEach{
-            it.androidTemplateId=this
-            it.clientId=AuthenticationUtils.clientID
-        }
-    }
-
 }
 
 @Entity
@@ -97,7 +89,7 @@ class Action {
     @JsonIgnore
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name = "android_template_id")
-    var androidTemplateId:AndroidTemplate?=null// add an long field instread of andoid template
+    var androidTemplateId:AndroidTemplate?=null
     @Column(name="client_id")
     var clientId:Long?=null
     @NotNull

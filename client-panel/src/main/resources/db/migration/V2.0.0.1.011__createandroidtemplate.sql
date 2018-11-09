@@ -1,4 +1,4 @@
-create table android_campaign(
+create table if not EXISTS android_campaign(
 id bigserial not null primary key,
 client_id bigint not null,
 appuser_id bigint not null,
@@ -8,7 +8,7 @@ date_modified timestamp with time zone DEFAULT now(),
 campaign_id bigint references campaign(id)
 )
 ;
-create table notification_template_android(
+create table if not EXISTS notification_template_android(
 id bigserial not null primary key,
 client_id bigint not null,
 name varchar(50) not null,
@@ -31,7 +31,7 @@ creation_date timestamp with time zone DEFAULT now(),
 date_modified timestamp with time zone DEFAULT now()
 )
 ;
-create table notification_template_android_action(
+create table if not EXISTS notification_template_android_action(
 id bigserial not null primary key,
 action_id varchar(20) not null,
 deep_link varchar(512),
@@ -45,7 +45,7 @@ date_modified timestamp with time zone DEFAULT now()
 )
 ;
 
-create table notification_template_webpush(
+create table if not EXISTS notification_template_webpush(
 id bigint not null primary key,
 client_id bigint not null,
 appuser_id bigint not null,
@@ -67,7 +67,7 @@ creation_date timestamp with time zone DEFAULT now(),
 date_modified timestamp with time zone DEFAULT now()
 );
 
-create table webpush_notification_action(
+create table if not EXISTS webpush_notification_action(
 id bigint not null primary key,
 action varchar(1024),
 title varchar(512) not null,
@@ -77,7 +77,7 @@ creation_date timestamp with time zone DEFAULT now(),
 date_modified timestamp with time zone DEFAULT now()
 );
 
-create table webpush_campaign_table(
+create table if not EXISTS webpush_campaign_table(
 id bigserial not null primary key,
 client_id bigint not null,
 appuser_id bigint not null,
@@ -87,9 +87,9 @@ creation_date timestamp with time zone DEFAULT now(),
 date_modified timestamp with time zone DEFAULT now()
 );
 
-create sequence webpush_template_id_seq start 1000 increment 1;
-create sequence webpush_action_id_seq start 1000 increment 1;
-create sequence webpush_campaign_id_seq start 1000 increment 1;
+ALTER sequence webpush_template_id_seq start 1000 increment 1;
+ALTER sequence webpush_action_id_seq start 1000 increment 1;
+ALTER sequence webpush_campaign_id_seq start 1000 increment 1;
 
 create SEQUENCE android_template_id_seq START 1000 INCREMENT 1;
 create SEQUENCE android_action_id_seq START 1000 INCREMENT 1;

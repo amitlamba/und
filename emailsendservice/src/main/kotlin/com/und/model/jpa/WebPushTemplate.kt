@@ -38,26 +38,26 @@ class WebPushTemplate {
     var tag:String?=null        //used to group notification
     @Column(name = "require_interaction")
     var requireInteraction:Boolean=false
-    @OneToMany(cascade=arrayOf(CascadeType.ALL))
+    @OneToMany(cascade=arrayOf(CascadeType.ALL),fetch = FetchType.EAGER)
     @JoinColumn(name="template_id")
     var actionGroup:List<WebAction>?=null
-//    header field
+    //    header field
     @Column(name = "urgency")
     var urgency:String?=null
     @Column(name="time_to_live")
     var ttl:Long?=null
-//    fcm specific
+    //    fcm specific
     @Column(name = "deep_link")
     var link:String?=null
-//    custom key value pair
+    //    custom key value pair
     @Column(name = "custom_data_pair")
     var customDataPair:String?=null
     @field:CreationTimestamp
     @Column(name = "creation_date")
-    lateinit var creationTime:LocalDateTime
+    lateinit var creationTime: LocalDateTime
     @field:UpdateTimestamp
     @Column(name = "date_modified")
-    lateinit var modifiedTime:LocalDateTime
+    lateinit var modifiedTime: LocalDateTime
     @Column(name = "from_userndot")
     var fromUserndot:Boolean=true
 }
@@ -78,8 +78,8 @@ class WebAction{
     var iconUrl:String?=null //url of icon
     @field:CreationTimestamp
     @Column(name = "creation_date")
-    lateinit var creationTime:LocalDateTime
+    lateinit var creationTime: LocalDateTime
     @field:UpdateTimestamp
     @Column(name = "date_modified")
-    lateinit var modifiedTime:LocalDateTime
+    lateinit var modifiedTime: LocalDateTime
 }

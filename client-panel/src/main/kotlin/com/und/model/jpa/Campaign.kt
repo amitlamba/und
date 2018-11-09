@@ -69,6 +69,30 @@ class Campaign {
             field?.campaign = this
         }
 
+    @OneToOne(mappedBy = "campaign", fetch = FetchType.LAZY,
+            cascade = arrayOf(CascadeType.ALL),
+            orphanRemoval = true)
+    var androidCampaign:AndroidCampaign?=null
+    set(value){
+        field=value
+        field?.campaign=this
+    }
+    @OneToOne(mappedBy = "campaign", fetch = FetchType.LAZY,
+            cascade = arrayOf(CascadeType.ALL),
+            orphanRemoval = true)
+    var webCampaign:WebPushCampaign?=null
+        set(value){
+            field=value
+            field?.campaign=this
+        }
+//    @OneToOne(mappedBy = "campaign", fetch = FetchType.LAZY,
+//            cascade = arrayOf(CascadeType.ALL),
+//            orphanRemoval = true)
+//    var iosCampaign:AndroidCampaign?=null
+//        set(value){
+//            field=value
+//            field?.campaign=this
+//        }
     @field:CreationTimestamp
     @Column(name = "date_created", updatable = false)
     lateinit var dateCreated: LocalDateTime
@@ -83,7 +107,9 @@ class Campaign {
 enum class CampaignType {
     EMAIL,
     SMS,
-    MOBILE_PUSH_NOTIFICATION
+    PUSH_ANDROID,
+    PUSH_WEB,
+    PUSH_IOS
 }
 
 
