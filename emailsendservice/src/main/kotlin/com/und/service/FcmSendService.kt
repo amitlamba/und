@@ -3,12 +3,17 @@ package com.und.service
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
+import com.und.config.EventStream
 import com.und.model.mongo.FcmMessage
+import com.und.model.mongo.FcmMessageStatus
 import com.und.utils.loggerFor
 import feign.FeignException
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
+import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import java.io.*
 import java.net.HttpURLConnection
@@ -27,6 +32,8 @@ class FcmSendService {
     private lateinit var service: FcmHelperService
     @Autowired
     private lateinit var objectMapper: ObjectMapper
+    @Autowired
+    private lateinit var eventStream:EventStream
 
     fun sendMessage(clientId: Long, authKey: String, message: FcmMessage): ResponseEntity<Any?>? {
         try {
@@ -210,16 +217,46 @@ class FcmSendService {
 
     fun sendMessage(message: com.und.model.utils.FcmMessage) {
         var fcmMessageToSend = buildFcmMessage(message)
-        service.saveInMongo(fcmMessageToSend)
         var credential = service.getCredentials(message.clientId)
         if (credential == null) {
-            //TODO send details to client
-            throw Exception("credential not exist")
+            logger.info("credential not exists for clientId ${message.clientId}")
+            var notificationError=NotificationError()
+            with(notificationError){
+                clientId=message.clientId
+                this.message =  "credential are empty first add service provider credential"
+            }
+            toFcmFailureKafka(notificationError)
+        }else {
+            var mongoFcmId=ObjectId().toString()
+            service.saveInMongo(message,FcmMessageStatus.NOT_SENT,mongoFcmId,credential.serviceProvider)
+            var credentialMap: HashMap<String, String>
+            credentialMap = parseStringToMap(credential.credentialsMap)
+            var serverKey = credentialMap.get("apiKey")!!
+
+            var statusCode:Int?=null
+            try {
+                statusCode=sendMessageToFcm(fcmMessageToSend, serverKey)
+                if (statusCode == 200) {
+                    service.updateStatus(mongoFcmId,FcmMessageStatus.SENT,message.clientId)
+                    logger.info("Fcm Send message successful for token= ${message.to}")
+                } else {
+                    throw Exception("Sending to fcm fail with status $statusCode")
+                }
+            }catch (ex:Exception){
+                logger.info(ex.localizedMessage)
+                var notificationError=NotificationError()
+                with(notificationError){
+                    this.message = ex.toString()
+                    to = message.to
+                    clientId=message.clientId
+                    status=ex.message
+                    errorCode= statusCode?.toLong()
+                }
+                toFcmFailureKafka(notificationError)
+            }
+
         }
-        var credentialMap: HashMap<String, String>
-        credentialMap = parseStringToMap(credential?.credentialsMap!!)
-        var serverKey = credentialMap.get("apiKey")!!
-        sendMessageToFcm(fcmMessageToSend, serverKey)
+
     }
 
     private fun buildFcmMessage(message: com.und.model.utils.FcmMessage): com.und.model.mongo.FcmMessage {
@@ -231,44 +268,36 @@ class FcmSendService {
         }
     }
 
-    private fun sendMessageToFcm(fcmMessage: com.und.model.mongo.FcmMessage, serverKey: String) {
-        try {
+    private fun sendMessageToFcm(fcmMessage: com.und.model.mongo.FcmMessage, serverKey: String):Int{
             var auth="key=$serverKey"
-            auth=auth.replace("\"","")
+//            auth=auth.replace("\"","")
             var response = fcmFeignClient.pushMessage(auth, objectMapper.writeValueAsString(fcmMessage))
-            var statusCode = response.statusCodeValue
-            if (statusCode == 200) {
-                //update mongo state to send
-                logger.info("Fcm Send message successful for token= ${fcmMessage.to}")
-            } else {
-                //TODO senddetails to client
-                throw Exception("Sending to fcm fail with status $statusCode")
-            }
-        } catch (ex: Exception) {
-            logger.error(ex.localizedMessage)
-        }
+            return response.statusCodeValue
     }
 
-    /*
-    * This method is used to parse only first level json string into hashmap
-    * for nested json value are json node.
-    * */
     private fun parseStringToMap(jsonString: String): HashMap<String, String> {
-        var hashMap = HashMap<String, String>()
-        var jsonNode: JsonNode = objectMapper.readTree(jsonString)
-        var entityMap = jsonNode.fields()
-        entityMap.forEach {
-            hashMap.put(it.key, it.value.toString())
-        }
-        return hashMap
+//        var hashMap = HashMap<String, String>()
+//        var jsonNode: JsonNode = objectMapper.readTree(jsonString)
+//        var entityMap = jsonNode.fields()
+//        entityMap.forEach {
+//            hashMap.put(it.key, it.value.textValue())
+//        }
+//        return hashMap
+
+        return objectMapper.readValue(jsonString)
+    }
+
+    private fun toFcmFailureKafka(notificationError: NotificationError){
+        eventStream.fcmFailureEventSend().send(MessageBuilder.withPayload(notificationError).build())
     }
 }
 
 class NotificationError{
-    var statusCode:Int=-1
-    lateinit var to:String
-    lateinit var status:String
-    lateinit var message:String
+     var to:String?=null
+     var status:String?=null
+     var message:String?=null
+     var clientId: Long?=null
+    var errorCode:Long?=null
 }
 class TestMessage {
     lateinit var token: String

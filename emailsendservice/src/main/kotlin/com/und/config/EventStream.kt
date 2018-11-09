@@ -20,6 +20,9 @@ interface EventStream {
     @Output("fcmEventSend")
     fun fcmEventSend():MessageChannel
 
+    @Output("fcmFailureEventSend")
+    fun fcmFailureEventSend():MessageChannel
+
     @Input(value="VerificationEmailReceive")
     fun verificationEmailReceive():SubscribableChannel
 

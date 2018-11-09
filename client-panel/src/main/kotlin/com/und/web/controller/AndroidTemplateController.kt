@@ -21,8 +21,6 @@ import javax.validation.Valid
 class AndroidTemplateController {
 
     @Autowired
-    private lateinit var objectmapper:ObjectMapper
-    @Autowired
     private lateinit var androidService: AndroidService
     @Autowired
     private lateinit var androidRepository: AndroidRepository
@@ -31,11 +29,14 @@ class AndroidTemplateController {
     @PostMapping("/save")
     fun saveTemplate(@Valid @RequestBody template:WebAndroidTemplate):ResponseEntity<WebAndroidTemplate>{
         var clientId= AuthenticationUtils.clientID?: throw AccessDeniedException("")
-            var result = androidRepository.findByClientIdAndName(clientId, template.name)
-            if(result.isNotEmpty()) {
-                throw CustomException("Template with name ${template.name} already exists")
-            }
-        return  ResponseEntity(androidService.save(template),HttpStatus.CREATED)
+//            var result = androidRepository.findByClientIdAndName(clientId, template.name)
+        var result=androidRepository.existsByClientIdAndName(clientId,template.name)
+//            if(result.isNotEmpty()) {
+//                throw CustomException("Template with name ${template.name} already exists")
+//            }
+        return if(result) throw CustomException("Template with name ${template.name} already exists")
+        //if exception thrown show properly
+        else  ResponseEntity(androidService.save(template),HttpStatus.CREATED)
     }
     @PreAuthorize(value="hasRole('ROLE_ADMIN')")
     @GetMapping("/templates")

@@ -4,5 +4,7 @@ data class FcmMessage(
         var clientId:Long,
         var templateId:Long,
         var to:String,
-        var type:String
+        var type:String,
+        var campaignId:Long,
+        var userId:String?=null
 )

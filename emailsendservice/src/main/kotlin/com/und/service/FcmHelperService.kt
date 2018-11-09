@@ -2,6 +2,7 @@ package com.und.service
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.netflix.discovery.converters.Auto
 import com.und.model.jpa.AndroidTemplate
 import com.und.model.jpa.ServiceProviderCredentials
@@ -9,6 +10,8 @@ import com.und.model.jpa.WebAction
 import com.und.model.mongo.*
 import com.und.repository.jpa.AndroidRepository
 import com.und.repository.jpa.WebPushRepository
+import com.und.repository.mongo.FcmCustomRepository
+import com.und.repository.mongo.FcmRepository
 import com.und.model.utils.FcmMessage as UtilFcmMessage
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -18,6 +21,8 @@ class FcmHelperService {
 
     @Autowired
     private lateinit var service: ServiceProviderCredentialsService
+    @Autowired
+    private lateinit var repository:FcmRepository
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
@@ -72,14 +77,17 @@ class FcmHelperService {
         var webPushConfig = WebPushConfig()
         var headers = WebPushHeaders()
         headers.TTL = template.ttl
-        if (template.urgency != null) headers.Urgency = UrgencyOption.valueOf(template.urgency!!)
+        if (template.urgency != null) headers.Urgency = UrgencyOption.valueOf(template.urgency.toString())
         webPushConfig.headers = headers
         var fcmOptions = WebPushFcmOptions()
         fcmOptions.link = template.link
         webPushConfig.fcm_options = fcmOptions
-        var data = HashMap<String, String>()
-        if (template.customDataPair != null) data = parseStringToMap(template.customDataPair!!)
-        webPushConfig.data = data
+        var data=HashMap<String,String>()
+        var datapair=template.customDataPair
+        if (datapair!= null) {
+            data = objectMapper.readValue(datapair)
+            webPushConfig.data = data
+        }
         var notification = WebPushNotification()
         notification.title = template.title
         notification.body = template.body
@@ -88,7 +96,8 @@ class FcmHelperService {
         notification.image = template.imageUrl
         notification.lang = template.lang
         notification.requireInteraction = template.requireInteraction
-        if (template.actionGroup != null) notification.actions = buildWebNotificationaction(template.actionGroup!!)
+        var actionGroup= template.actionGroup
+        if (actionGroup != null) notification.actions = buildWebNotificationaction(actionGroup)
         webPushConfig.notification = notification
 
         with(fcmMessage) {
@@ -110,9 +119,21 @@ class FcmHelperService {
         return list
     }
 
-    fun saveInMongo(fcmMessage: FcmMessage) {
-        //save it to mongo
-        //create status created
+    fun saveInMongo(fcmMessage: UtilFcmMessage,status: FcmMessageStatus,mongoId:String,serviceProvider:String) {
+        var analyticFcmMessage=AnalyticFcmMessage(
+                id = mongoId,
+                clientId = fcmMessage.clientId,
+                templateId = fcmMessage.templateId,
+                status = status,
+                campaignId = fcmMessage.campaignId,
+                userId = fcmMessage.userId,
+                serviceProvider = serviceProvider
+        )
+        repository.saveAnalyticMessage(analyticFcmMessage,clientId = fcmMessage.clientId)
+    }
+
+    fun updateStatus(mongoId:String,status: FcmMessageStatus,clientId: Long){
+        repository.updateStatus(mongoId,status,clientId,null)
     }
 
     private fun parseStringToMap(jsonString: String): HashMap<String, String> {
@@ -120,7 +141,7 @@ class FcmHelperService {
         var jsonNode: JsonNode = objectMapper.readTree(jsonString)
         var entityMap = jsonNode.fields()
         entityMap.forEach {
-            hashMap.put(it.key, it.value.toString())
+            hashMap.put(it.key, it.value.textValue())
         }
         return hashMap
     }

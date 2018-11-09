@@ -102,7 +102,7 @@ class Action {
     var clientId:Long?=null
     @NotNull
     @Column(name = "action_id")
-    lateinit var actionId: String
+    var actionId: String?=null
     @NotNull
     @Column(name = "label")
     var label: String? = null

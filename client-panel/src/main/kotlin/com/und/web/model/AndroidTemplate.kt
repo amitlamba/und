@@ -39,10 +39,11 @@ class AndroidTemplate :Serializable{
 class Action :Serializable{
     var id:Long?=null
     @NotNull
-    lateinit var actionId: String
+    var actionId: String?=null
     @NotNull
-    lateinit var label: String
+    var label: String?=null
     var clientId:Long?=null
+    @Pattern(regexp = "^http.{0,1}://.*$")
     var deepLink: String? = null
     var icon: String? = null
     var autoCancel: Boolean = true
