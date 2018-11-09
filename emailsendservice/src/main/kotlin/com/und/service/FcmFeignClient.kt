@@ -21,10 +21,15 @@ url: 'https://fcm.googleapis.com/fcm/send',
  */
 
 @FeignClient(name = "fcm",url = "https://fcm.googleapis.com/fcm")
+
 interface FcmFeignClient {
 
     @PostMapping(value = ["/send"], consumes = ["application/json"])
     fun pushMessage(@RequestHeader("Authorization") authKeyValue: String,
                     @RequestBody requestBodyString: String): ResponseEntity<Any?>
+
+//    @PostMapping(value = ["/{project_id}/message:send"],consumes = ["application/json"])
+//    fun pushMessage(@PathVariable("project_id") project_id:String,@RequestHeader("Authorization") auth:String,
+//                    @RequestBody body:String):ResponseEntity<Any>
 
 }

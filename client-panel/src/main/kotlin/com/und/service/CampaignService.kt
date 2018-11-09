@@ -67,7 +67,6 @@ class CampaignService {
     @Transactional
     protected fun saveCampaign(webCampaign: com.und.web.model.Campaign): Campaign? {
         val campaign = buildCampaign(webCampaign)
-
         val persistedCampaign = campaignRepository.save(campaign)
 
         webCampaign.id = persistedCampaign.id
@@ -172,6 +171,8 @@ class CampaignService {
             schedule = objectMapper.writeValueAsString(webCampaign.schedule)
         }
 
+
+
         when (webCampaign.campaignType) {
             CampaignType.EMAIL -> {
                 val emailcampaign = EmailCampaign()
@@ -187,6 +188,27 @@ class CampaignService {
                 smscampaign.templateId = webCampaign.templateID
                 campaign.smsCampaign = smscampaign
             }
+            CampaignType.PUSH_ANDROID ->{
+                var androidCampaign = AndroidCampaign()
+                androidCampaign.appuserId=campaign.appuserID
+                androidCampaign.clientId=campaign.clientID
+                androidCampaign.templateId=webCampaign.templateID
+                campaign.androidCampaign=androidCampaign
+            }
+            CampaignType.PUSH_WEB ->{
+                var webPushCampaign = WebPushCampaign()
+                webPushCampaign.appuserId=campaign.appuserID
+                webPushCampaign.clientId=campaign.clientID
+                webPushCampaign.templateId=webCampaign.templateID
+                campaign.webCampaign=webPushCampaign
+            }
+//            CampaignType.PUSH_IOS ->{
+//                var androidCampaign = AndroidCampaign()
+//                androidCampaign.appuserId=campaign.appuserID
+//                androidCampaign.clientId=campaign.clientID
+//                androidCampaign.templateId=webCampaign.templateID
+//                campaign.androidCampaign=androidCampaign
+//            }
             else -> {
             }
         }
@@ -220,7 +242,21 @@ class CampaignService {
             val smsCampaign = campaign.smsCampaign
             webCampaign.templateID = smsCampaign?.templateId
             webCampaign.campaignType = CampaignType.SMS
+        }else if(campaign.androidCampaign!=null){
+            val androidCampaign=campaign.androidCampaign
+            webCampaign.campaignType=CampaignType.PUSH_ANDROID
+            webCampaign.templateID=androidCampaign?.templateId
         }
+        else if(campaign.webCampaign!=null){
+            val webPushCampaign=campaign.webCampaign
+            webCampaign.campaignType=CampaignType.PUSH_WEB
+            webCampaign.templateID=webPushCampaign?.templateId
+        }
+//        else if(campaign.iosCampaign!=null){
+//            val iosCampaign=campaign.iosCampaign
+//            iosCampaign.campaignType=CampaignType.PUSH_IOS
+//            iosCampaign.templateID=iosCampaign?.templateId
+//        }
         return webCampaign
     }
 

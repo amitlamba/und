@@ -9,6 +9,7 @@ import java.util.*
 @Repository
 interface CampaignRepository : JpaRepository<Campaign, Long> {
     //here we select st.name as sms_template_name
+//    LEFT JOIN notification_template_android nta on nta.id = ac.template_id and nta.client_id = c.client_id
     @Query("""select
                       c.id,
                       c.segmentation_id,
@@ -18,12 +19,17 @@ interface CampaignRepository : JpaRepository<Campaign, Long> {
                       sc.sms_template_id,
                       et.from_user as email_from_user,
                       st.from_user as sms_from_user,
-                      c.client_id
+                      c.client_id,
+                      ac.template_id as android_template_id,
+                      wc.template_id as web_template_id
                     from campaign c
                       LEFT JOIN email_campaign ec on c.id = ec.campaign_id and ec.client_id = c.client_id
                       LEFT JOIN sms_campaign sc on c.id = sc.campaign_id and sc.client_id = c.client_id
+                      LEFT JOIN android_campaign ac on c.id = ac.campaign_id and ac.client_id = c.client_id
+                      LEFT JOIN webpush_campaign_table wc on c.id = wc.campaign_id and wc.client_id = c.client_id
                       LEFT JOIN email_template et on et.id = ec.email_template_id and et.client_id = c.client_id
                       LEFT JOIN sms_template st on st.id = sc.sms_template_id and st.client_id = c.client_id
+
                     where c.id = :campaignId and (c.campaign_status <> 'deleted' or c.campaign_status is null) and c.client_id = :clientId""",
             nativeQuery = true)
     fun getCampaignByCampaignId(campaignId: Long, clientId: Long): Optional<Campaign>

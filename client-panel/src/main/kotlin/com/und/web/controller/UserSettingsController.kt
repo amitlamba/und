@@ -120,6 +120,39 @@ class UserSettingsController {
         return userSettingsService.saveNotificationServiceProvider(serviceProviderCredentials)
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(value = ["/android-push-service-provider/save"])
+    fun saveAndroidPushServiceProvider(@Valid @RequestBody serviceProviderCredentials: ServiceProviderCredentials): Long? {
+        val clientID = AuthenticationUtils.clientID
+        val userID = AuthenticationUtils.principal.id
+        serviceProviderCredentials.appuserID = userID
+        serviceProviderCredentials.clientID = clientID
+        serviceProviderCredentials.serviceProviderType = ServiceProviderType.ANDROID_PUSH_SERVICE_PROVIDER.desc
+        return userSettingsService.saveAndroidPushServiceProvider(serviceProviderCredentials)
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(value = ["/web-push-service-provider/save"])
+    fun saveWebPushServiceProvider(@Valid @RequestBody serviceProviderCredentials: ServiceProviderCredentials): Long? {
+        val clientID = AuthenticationUtils.clientID
+        val userID = AuthenticationUtils.principal.id
+        serviceProviderCredentials.appuserID = userID
+        serviceProviderCredentials.clientID = clientID
+        serviceProviderCredentials.serviceProviderType = ServiceProviderType.WEB_PUSH_SERVICE_PROVIDER.desc
+        return userSettingsService.saveWebPushServiceProvider(serviceProviderCredentials)
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(value = ["/ios-push-service-provider/save"])
+    fun saveIOSPushServiceProvider(@Valid @RequestBody serviceProviderCredentials: ServiceProviderCredentials): Long? {
+        val clientID = AuthenticationUtils.clientID
+        val userID = AuthenticationUtils.principal.id
+        serviceProviderCredentials.appuserID = userID
+        serviceProviderCredentials.clientID = clientID
+        serviceProviderCredentials.serviceProviderType = ServiceProviderType.IOS_PUSH_SERVICE_PROVIDER.desc
+        return userSettingsService.saveIOSPushServiceProvider(serviceProviderCredentials)
+    }
+
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/senders-email/add"])
