@@ -271,20 +271,11 @@ class FcmSendService {
 
     private fun sendMessageToFcm(fcmMessage: com.und.model.mongo.FcmMessage, serverKey: String):Int{
             var auth="key=$serverKey"
-//            auth=auth.replace("\"","")
             var response = fcmFeignClient.pushMessage(auth, objectMapper.writeValueAsString(fcmMessage))
             return response.statusCodeValue
     }
 
     private fun parseStringToMap(jsonString: String): HashMap<String, String> {
-//        var hashMap = HashMap<String, String>()
-//        var jsonNode: JsonNode = objectMapper.readTree(jsonString)
-//        var entityMap = jsonNode.fields()
-//        entityMap.forEach {
-//            hashMap.put(it.key, it.value.textValue())
-//        }
-//        return hashMap
-
         return objectMapper.readValue(jsonString)
     }
 
