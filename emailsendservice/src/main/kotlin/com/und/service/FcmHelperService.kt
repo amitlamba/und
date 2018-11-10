@@ -32,7 +32,7 @@ class FcmHelperService {
     private lateinit var webpushRepository: WebPushRepository
 
     fun getCredentials(clientId: Long): ServiceProviderCredentials? {
-        var credential = service.findActiveNotificationServiceProvider(clientId)
+        var credential = service.findActiveAndroidServiceProvider(clientId)
         if (credential.id != null) return credential else return null
     }
 

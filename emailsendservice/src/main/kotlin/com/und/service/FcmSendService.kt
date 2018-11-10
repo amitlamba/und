@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.und.config.EventStream
+import com.und.exception.FcmFailureException
 import com.und.model.mongo.FcmMessage
 import com.und.model.mongo.FcmMessageStatus
 import com.und.utils.loggerFor
@@ -219,11 +220,11 @@ class FcmSendService {
         var fcmMessageToSend = buildFcmMessage(message)
         var credential = service.getCredentials(message.clientId)
         if (credential == null) {
-            logger.info("credential not exists for clientId ${message.clientId}")
+            logger.info("Android Credential does not exists for clientId ${message.clientId}")
             var notificationError=NotificationError()
             with(notificationError){
                 clientId=message.clientId
-                this.message =  "credential are empty first add service provider credential"
+                this.message =  "Android service provider not found.First add a service provider"
                 errorCode=400
             }
             toFcmFailureKafka(notificationError)
@@ -239,19 +240,43 @@ class FcmSendService {
                 statusCode=sendMessageToFcm(fcmMessageToSend, serverKey)
                 if (statusCode == 200) {
                     service.updateStatus(mongoFcmId,FcmMessageStatus.SENT,message.clientId)
-                    logger.info("Fcm Send message successful for token= ${message.to}")
+                    logger.info("Fcm Send message successfuly for token= ${message.to}")
                 } else {
-                    throw Exception("Sending to fcm fail with status $statusCode")
+                    throw FcmFailureException("Sending to fcm fail with status $statusCode")
                 }
-            }catch (ex:Exception){
-                logger.info(ex.localizedMessage)
+            }catch (ex:FeignException){
+                logger.info("Feign exception in sending fcm message ${ex}")
+                var notificationError=NotificationError()
+                with(notificationError){
+                    if (ex.status()==401) this.message = "UnAuthorized Please check your api key or update your android service provider"
+                    else this.message = ex.message
+                    to = message.to
+                    clientId=message.clientId
+                    status=ex.toString()
+                    errorCode=ex.status().toLong()
+                }
+                toFcmFailureKafka(notificationError)
+            }catch (ex:FcmFailureException){
+                logger.info("Fcm Failure Exception with status code $statusCode")
                 var notificationError=NotificationError()
                 with(notificationError){
                     this.message = ex.message
                     to = message.to
                     clientId=message.clientId
                     status=ex.toString()
-                    errorCode= statusCode?.toLong()
+                    errorCode=statusCode?.toLong()
+                }
+                toFcmFailureKafka(notificationError)
+
+            }catch (ex:Exception){
+                logger.info("Exception in sending fcm message $ex")
+                var notificationError=NotificationError()
+                with(notificationError){
+                    this.message = ex.message
+                    to = message.to
+                    clientId=message.clientId
+                    status=ex.toString()
+                    errorCode=statusCode?.toLong()
                 }
                 toFcmFailureKafka(notificationError)
             }
