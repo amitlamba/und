@@ -17,9 +17,9 @@ class AndroidTemplate :Serializable{
     lateinit var body:String
     var channelId:String?=null           //mandatory for api 28 sdk 26+
     var channelName:String?=null        //mandatory for api 28 sdk 26+
-    @Pattern(regexp = "^http.{0,1}://.*$")
+    @Pattern(regexp="^http.{0,1}://.+$",message = "pattern must be in this format http://link or https://link")
     var imageUrl:String?=null
-    @Pattern(regexp = "^http.{0,1}://.*$")
+    @Pattern(regexp="^http.{0,1}://.+$",message = "pattern must be in this format http://link or https://link")
     var largeIconUrl:String?=null
     var deepLink:String?=null
     var actionGroup:List<Action>?=null
@@ -42,7 +42,6 @@ class Action :Serializable{
     var actionId: String?=null
     @NotNull
     var label: String?=null
-    @Pattern(regexp = "^http.{0,1}://.*$")
     var deepLink: String? = null
     var icon: String? = null
     var autoCancel: Boolean = true
