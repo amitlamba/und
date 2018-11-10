@@ -39,11 +39,14 @@ class FcmHelperService {
     fun buildFcmAndroidMessage(message: UtilFcmMessage): FcmMessage {
         var template = androidRepository.findByClientIdAndId(message.clientId, message.templateId)
         var fcmMessage: FcmMessage = FcmMessage()
-        var notification = AndroidNotification()
-        notification.title = template.title
-        notification.body = template.body
-
         var data = HashMap<String, String>()
+        //Todo Right now we send data message
+//        var notification = AndroidNotification()
+//        notification.title = template.title
+//        notification.body = template.body
+//
+        data.put("title",template.title)
+        data.put("body",template.body)
         if (template.channelId != null) data.put("channel_id", template.channelId!!)
         if (template.channelName != null) data.put("cname", template.channelName!!)
         if (template.imageUrl != null) data.put("big_pic", template.imageUrl!!)
@@ -53,11 +56,11 @@ class FcmHelperService {
         if (template.sound != null) data.put("sound", template.sound!!)
         if (template.badgeIcon != null) data.put("badge_icon", template.badgeIcon.toString())
         if (template.fromUserNDot != null) data.put("fromuserndot", template.fromUserNDot.toString())
-
+        data.put("priority",template.priority.toString())
         var android = AndroidConfig()
         if (template.collapse_key != null) android.collapse_key = template.collapse_key
         if (template.timeToLive != null) android.ttl = template.timeToLive
-        android.notification = notification
+//        android.notification = notification
         android.data = data
         android.priority = Priority.valueOf(template.priority.toString())
 
