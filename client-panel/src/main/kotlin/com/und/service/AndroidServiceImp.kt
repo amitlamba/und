@@ -86,6 +86,7 @@ class AndroidServiceImp : AndroidService {
             priority = Priority.valueOf("${template.priority}")
             timeToLive = template.timeToLive
             fromUserNDot = template.fromUserNDot
+            if(template.customKeyValuePair!=null)
             customKeyValuePair = objectMapper.writeValueAsString(template.customKeyValuePair)
             creationTime = template.creationTime
 

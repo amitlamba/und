@@ -30,9 +30,9 @@ class FcmFailureHandler {
         saveFcmFailure(notificationError)
         notificationError.clientId?.let {
             //pause all running campaign
-            campaignService.pauseAllRunning(it)
+//            campaignService.pauseAllRunning(it)
             //sending mail
-            emailService.sendNotificationConnectionErrorEmail(notificationError)
+//            emailService.sendNotificationConnectionErrorEmail(notificationError)
         }
 
 
