@@ -4,15 +4,19 @@ import java.io.Serializable
 import java.time.LocalDateTime
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
+import javax.validation.constraints.Size
 
 class WebPushTemplate :Serializable{
 
     var id:Long?=null
     @NotNull
+    @Size(min=5,message = "length greater than 5 character")
     lateinit var title: String
     @NotNull
+    @Size(min=5,message = "length greater than 5 character")
     lateinit var body: String
     @NotNull
+    @Size(min=5,message = "length greater than 5 character")
     lateinit var name:String
     var lang: String? = null
     @Pattern(regexp="^http.{0,1}://.+$",message = "pattern must be in this format http://link or https://link")
@@ -37,6 +41,7 @@ class WebAction :Serializable{
     var id:Long?=null
     var action: String? = null  //action id unique used to determine which action is clicked
     @NotNull
+    @Size(min=5,message = "length greater than 5 character")
     lateinit var title: String
     @Pattern(regexp="^http.{0,1}://.+$",message = "pattern must be in this format http://link or https://link")
     var iconUrl: String? = null //url of icon

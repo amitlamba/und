@@ -4,18 +4,23 @@ import java.io.Serializable
 import java.time.LocalDateTime
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
+import javax.validation.constraints.Size
 
 class AndroidTemplate :Serializable{
 
     var id:Long?=null
     @NotNull
+    @Size(min=3,max = 50,message = "length greater than 3 character")
     lateinit var name:String
     @NotNull
-//    @Size(min=8,max = 45)
+    @Size(min=5,max = 100,message = "length greater than 5 character")
     lateinit var title:String
     @NotNull
+    @Size(min=10,max = 512)
     lateinit var body:String
-    var channelId:String?=null           //mandatory for api 28 sdk 26+
+    @Size(min=3 ,message = "length greater than 3 character")
+    var channelId:String?=null
+    @Size(min=3,message = "length greater than 3 character")//mandatory for api 28 sdk 26+
     var channelName:String?=null        //mandatory for api 28 sdk 26+
     @Pattern(regexp="^http.{0,1}://.+$",message = "pattern must be in this format http://link or https://link")
     var imageUrl:String?=null
@@ -41,6 +46,7 @@ class Action :Serializable{
     @NotNull
     var actionId: String?=null
     @NotNull
+    @Size(min=3,message = "length greater than 3 character")
     var label: String?=null
     var deepLink: String? = null
     var icon: String? = null
