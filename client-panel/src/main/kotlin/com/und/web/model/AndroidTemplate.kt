@@ -10,25 +10,25 @@ class AndroidTemplate :Serializable{
 
     var id:Long?=null
     @NotNull
-    @Size(min=3,max = 50,message = "length greater than 3 character")
+    @Size(min=3,max = 50,message = "Length should be greater than 3 character")
     lateinit var name:String
     @NotNull
-    @Size(min=5,max = 100,message = "length greater than 5 character")
+    @Size(min=5,max = 100,message = "Length should be greater than 5 character")
     lateinit var title:String
     @NotNull
     @Size(min=10,max = 512)
     lateinit var body:String
-    @Size(min=3 ,message = "length greater than 3 character")
+    @Size(min=3 ,message = "Length should be greater than 3 character")
     var channelId:String?=null
-    @Size(min=3,message = "length greater than 3 character")//mandatory for api 28 sdk 26+
+    @Size(min=3,message = "Length should be greater than 3 character")//mandatory for api 28 sdk 26+
     var channelName:String?=null        //mandatory for api 28 sdk 26+
-    @Pattern(regexp="^http.{0,1}://.+$",message = "pattern must be in this format http://link or https://link")
+    @Pattern(regexp="^http.{0,1}://.+$",message = "Pattern must be in this format http://link or https://link")
     var imageUrl:String?=null
-    @Pattern(regexp="^http.{0,1}://.+$",message = "pattern must be in this format http://link or https://link")
+    @Pattern(regexp="^http.{0,1}://.+$",message = "Pattern must be in this format http://link or https://link")
     var largeIconUrl:String?=null
     var deepLink:String?=null
     var actionGroup:List<Action>?=null
-    @Pattern(regexp = "^.*(.mp3)$")
+    @Pattern(regexp = "^.*(.mp3)$",message = "File must be in mp3 format eg. beach_boy.mp3")
     var sound:String?=null
     var badgeIcon=BadgeIconType.BADGE_ICON_NONE
     var collapse_key:String?=null
@@ -46,7 +46,7 @@ class Action :Serializable{
     @NotNull
     var actionId: String?=null
     @NotNull
-    @Size(min=3,message = "length greater than 3 character")
+    @Size(min=3,message = "Length should be greater than 3 character")
     var label: String?=null
     var deepLink: String? = null
     var icon: String? = null
