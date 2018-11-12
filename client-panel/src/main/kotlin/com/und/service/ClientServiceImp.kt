@@ -13,6 +13,7 @@ class ClientServiceImp:ClientService {
 
     override fun getClientByClientId(clientId: Long): Client {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun getClientCount(): Long {

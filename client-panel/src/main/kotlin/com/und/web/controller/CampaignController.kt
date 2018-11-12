@@ -81,7 +81,7 @@ class CampaignController {
             val template = when(campaign.campaignType) {
                 CampaignType.EMAIL -> emailTempleteService.getEmailTemplate(templateId)
                 CampaignType.SMS -> smsTempleteService.getClientSmsTemplates(clientId, templateId)
-                CampaignType.PUSH_ANDROID -> listOf(androidService.getAndroidTemplatesById(clientId,templateId))
+                CampaignType.PUSH_ANDROID -> androidService.getAndroidTemplatesById(clientId,templateId)
                 CampaignType.PUSH_IOS->{throw CustomException("This Service Not present")}
                 CampaignType.PUSH_WEB -> webPushService.findExistsTemplate(templateId)
             }

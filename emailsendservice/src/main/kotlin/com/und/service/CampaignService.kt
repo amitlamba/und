@@ -106,7 +106,9 @@ class CampaignService {
                 clientId=clientId,
                 templateId = campaign.androidTemplateId?:0L,
                 to = user.identity.androidFcmToken?:"",
-                type = "android"
+                type = "android",
+                campaignId = campaign.campaignId,
+                userId = user.id
         )
     }
 
@@ -115,7 +117,9 @@ class CampaignService {
                 clientId = clientId,
                 templateId = campaign.webTemplateId?:0L,
                 to = user.identity.webFcmToken?:"",
-                type = "web"
+                type = "web",
+                campaignId = campaign.campaignId,
+                userId = user.id
         )
     }
     private fun fcmIosMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
@@ -124,7 +128,9 @@ class CampaignService {
 //                templateId = campaign.iosTemplateId?:0L,
                 templateId = 0L,
                 to = user.identity.iosFcmToken?:"",
-                type = "ios"
+                type = "ios",
+                campaignId = campaign.campaignId,
+                userId = user.id
         )
     }
 
