@@ -98,11 +98,12 @@ class Action {
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name = "android_template_id")
     var androidTemplateId:AndroidTemplate?=null// add an long field instread of andoid template
+    @NotNull
     @Column(name="client_id")
     var clientId:Long?=null
     @NotNull
     @Column(name = "action_id")
-    lateinit var actionId: String
+    var actionId: String?=null
     @NotNull
     @Column(name = "label")
     var label: String? = null

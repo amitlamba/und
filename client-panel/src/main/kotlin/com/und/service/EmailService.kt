@@ -87,6 +87,28 @@ class EmailService {
         }
     }
 
+    fun sendNotificationConnectionErrorEmail(notificationError: NotificationError) {
+        notificationError.clientId?.let {clientId->
+            val client = clientService.getClientByClientId(clientId)
+
+
+            val dataMap = mutableMapOf<String, Any>(
+                    "name" to "${client.firstname} ${client.lastname}",
+                    "error" to "${notificationError.status}"
+
+            )
+
+            val email = Email(
+                    clientID = 1,
+                    toEmailAddresses = arrayOf(InternetAddress(client.email)),
+                    emailTemplateId = emailConnectionErrorTemplate,
+                    emailTemplateName = "emailConnectionError",
+                    data = dataMap
+            )
+            sendEmail(email)
+        }
+    }
+
 
     private fun toKafka(email: Email) {
         eventStream.clientEmailSend().send(MessageBuilder.withPayload(email).build())

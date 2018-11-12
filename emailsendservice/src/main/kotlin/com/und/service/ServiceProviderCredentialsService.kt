@@ -69,12 +69,22 @@ class ServiceProviderCredentialsService {
             return serviceCredOption.get()
         else ServiceProviderCredentials()
     }
+    fun findActiveAndroidServiceProvider(clientID: Long): ServiceProviderCredentials {
+        val serviceCredOption = serviceProviderCredentialsRepository.findTop1ByClientIDAndServiceProviderTypeAndStatus(
+                clientID, ServiceProviderType.Android_Service_Provider.desc, Status.ACTIVE)
+        return if (serviceCredOption.isPresent)
+            return serviceCredOption.get()
+        else ServiceProviderCredentials()
+    }
 
 
     enum class ServiceProviderType(val desc: String) {
         EMAIL_SERVICE_PROVIDER("Email Service Provider"),
         SMS_SERVICE_PROVIDER("SMS Service Provider"),
-        NOTIFICATION_SERVICE_PROVIDER("Notification Service Provider")
+        NOTIFICATION_SERVICE_PROVIDER("Notification Service Provider"),
+        Android_Service_Provider("Android Push Service Provider"),
+        Webpush_Service_Provider("Web Push Service Provider"),
+        Ios_Service_Provider("iOS Push Service Provider")
 
     }
 
