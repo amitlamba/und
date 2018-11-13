@@ -15,6 +15,7 @@ import com.und.repository.mongo.FcmRepository
 import com.und.model.utils.FcmMessage as UtilFcmMessage
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.util.StringUtils
 
 @Service
 class FcmHelperService {
@@ -36,37 +37,36 @@ class FcmHelperService {
         if (credential.id != null) return credential else return null
     }
 
-    fun buildFcmAndroidMessage(message: UtilFcmMessage): FcmMessage {
+    fun buildFcmAndroidMessage(message: UtilFcmMessage): LegacyFcmMessage {
         var template = androidRepository.findByClientIdAndId(message.clientId, message.templateId)
-        var fcmMessage: FcmMessage = FcmMessage()
+        var fcmMessage: LegacyFcmMessage = LegacyFcmMessage()
         var data = HashMap<String, String>()
-        //Todo Right now we send data message
-//        var notification = AndroidNotification()
-//        notification.title = template.title
-//        notification.body = template.body
-//
+
         data.put("title",template.title)
         data.put("body",template.body)
-        if (template.channelId != null) data.put("channel_id", template.channelId!!)
-        if (template.channelName != null) data.put("cname", template.channelName!!)
-        if (template.imageUrl != null) data.put("big_pic", template.imageUrl!!)
-        if (template.largeIconUrl != null) data.put("lg_icon", template.largeIconUrl!!)
-        if (template.deepLink != null) data.put("deep_link", template.deepLink!!)
+        if (!template.channelId.isNullOrBlank()) data.put("channel_id", template.channelId!!)
+        if (!template.channelName.isNullOrBlank()) data.put("channel_name", template.channelName!!)
+        if (!template.imageUrl.isNullOrBlank()) data.put("big_pic", template.imageUrl!!)
+        if (!template.largeIconUrl.isNullOrBlank()) data.put("lg_icon", template.largeIconUrl!!)
+        if (!template.deepLink.isNullOrBlank()) data.put("deepLink", template.deepLink!!)
         if (template.actionGroup != null) data.put("actions", objectMapper.writeValueAsString(template.actionGroup))
-        if (template.sound != null) data.put("sound", template.sound!!)
+        if (!template.sound.isNullOrBlank()) data.put("sound", template.sound!!)
         if (template.badgeIcon != null) data.put("badge_icon", template.badgeIcon.toString())
         if (template.fromUserNDot != null) data.put("fromuserndot", template.fromUserNDot.toString())
         data.put("priority",template.priority.toString())
-        var android = AndroidConfig()
-        if (template.collapse_key != null) android.collapse_key = template.collapse_key
-        if (template.timeToLive != null) android.ttl = template.timeToLive
-//        android.notification = notification
-        android.data = data
-        android.priority = Priority.valueOf(template.priority.toString())
+
+        var collapse_key:String?=null
+        if (!template.collapse_key.isNullOrBlank()) collapse_key = template.collapse_key
+        var timeToLive:Long?=null
+        if (template.timeToLive != null) timeToLive = template.timeToLive
+        var priority = Priority.valueOf(template.priority.toString())
 
         with(fcmMessage) {
             this.to = message.to
-            this.android = android
+            this.collapse_key=collapse_key
+            time_to_live=timeToLive
+            this.data=data
+            this.priority=priority
         }
         return fcmMessage
     }
@@ -112,7 +112,7 @@ class FcmHelperService {
         actions.forEach {
             var obj = WebPushNotificationAction()
             obj.title = it.title
-            obj.action = it.action!!
+            obj.action = it.action
             if (it.iconUrl != null) obj.icon = it.iconUrl
             list.add(obj)
         }

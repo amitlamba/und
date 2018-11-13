@@ -42,10 +42,10 @@ class AndroidTemplate{
     @Column(name = "channel_name")
     var channelName:String?=null        //mandatory for api 28 sdk 26+
     @Column(name = "image_url")
-    @Pattern(regexp = "^http.{0,1}://.*$")
+    @Pattern(regexp = "^$|^http.{0,1}://.*$")
     var imageUrl:String?=null
     @Column(name = "large_icon_url")
-    @Pattern(regexp = "^http.{0,1}://.*$")
+    @Pattern(regexp = "^\$|^http.{0,1}://.*$")
     var largeIconUrl:String?=null
     @Column(name = "deep_link")
     var deepLink:String?=null
@@ -54,7 +54,7 @@ class AndroidTemplate{
     @OneToMany(mappedBy = "androidTemplateId",cascade = arrayOf(CascadeType.ALL),fetch = FetchType.EAGER)//try here coloum name
     var actionGroup:List<Action>?=null
     @Column(name = "sound")
-    @Pattern(regexp = "^.*(.mp3)$")
+    @Pattern(regexp = "^\$|^.*(.mp3)$")
     var sound:String?=null
     @Column(name = "badge_icon")
     var badgeIcon=BadgeIconType.BADGE_ICON_NONE

@@ -69,7 +69,7 @@ class WebPushNotificationAction{
 class WebPushFcmOptions{
     var link:String?=null
 }
-enum class Priority{
-    NORMAL,
-    HIGH
+enum class Priority(name:String){
+    NORMAL("normal"),
+    HIGH("high")
 }
