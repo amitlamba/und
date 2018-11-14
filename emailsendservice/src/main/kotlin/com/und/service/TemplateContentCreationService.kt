@@ -1,5 +1,6 @@
 package com.und.service
 
+import com.und.model.jpa.AndroidTemplate
 import com.und.model.utils.Email
 import com.und.model.utils.Sms
 import com.und.utils.loggerFor
@@ -44,9 +45,11 @@ class TemplateContentCreationService {
         return getContentFromTemplate(email, EmailContent.BODY, model)
     }
 
+    fun getAndroidBody(template:AndroidTemplate,model: MutableMap<String, Any>):String{
+        return getContentFromTemplate(templateName = template.name,model = model)
+    }
 
     fun getContentFromTemplate(templateName: String, model: MutableMap<String, Any>): String {
-
         val template = freeMarkerConfiguration.getTemplate(templateName)
         return FreeMarkerTemplateUtils.processTemplateIntoString(template, model)
     }

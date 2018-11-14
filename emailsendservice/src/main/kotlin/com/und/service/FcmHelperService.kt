@@ -26,6 +26,9 @@ class FcmHelperService {
     private lateinit var repository:FcmRepository
 
     @Autowired
+    private lateinit var templateContentCreationService: TemplateContentCreationService
+
+    @Autowired
     private lateinit var objectMapper: ObjectMapper
     @Autowired
     private lateinit var androidRepository: AndroidRepository
@@ -38,12 +41,22 @@ class FcmHelperService {
     }
 
     fun buildFcmAndroidMessage(message: UtilFcmMessage): LegacyFcmMessage {
-        var template = androidRepository.findByClientIdAndId(message.clientId, message.templateId)
+
+        var template = fetchAndroidTemplate(message)
         var fcmMessage: LegacyFcmMessage = LegacyFcmMessage()
+
+        var model=message.data
+        message.eventUser?.let {
+            model["user"]=it
+        }
+
+        var body = updateTemplateBody(template,model)
+
         var data = HashMap<String, String>()
 
         data.put("title",template.title)
-        data.put("body",template.body)
+
+        data.put("body",body)
         if (!template.channelId.isNullOrBlank()) data.put("channel_id", template.channelId!!)
         if (!template.channelName.isNullOrBlank()) data.put("channel_name", template.channelName!!)
         if (!template.imageUrl.isNullOrBlank()) data.put("big_pic", template.imageUrl!!)
@@ -70,6 +83,14 @@ class FcmHelperService {
         }
         return fcmMessage
     }
+
+    private fun updateTemplateBody(template:AndroidTemplate,model:MutableMap<String,Any>):String {
+        var body=templateContentCreationService.getAndroidBody(template,model)
+        return body
+    }
+
+    private fun fetchAndroidTemplate(message: com.und.model.utils.FcmMessage) =
+            androidRepository.findByClientIdAndId(message.clientId, message.templateId)
 
     fun buildWebFcmMessage(message: UtilFcmMessage): FcmMessage {
         var template = webpushRepository.findByClientIdAndId(message.clientId, message.templateId)
