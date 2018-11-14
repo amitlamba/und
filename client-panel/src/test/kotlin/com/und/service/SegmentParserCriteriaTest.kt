@@ -67,6 +67,18 @@ class SegmentParserCriteriaTest {
         MatcherAssert.assertThat(2, Is(2))
     }
 
+    @Test
+    fun testWithUserSegmentParser1() {
+
+        val testData = readFileText("$testDataBase/test1-withuser.json")
+        val segment = mapper.readValue(testData, Segment::class.java)
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
+        println(q.didq.first)
+        println(q.didq.second)
+        println(q.userQuery)
+        MatcherAssert.assertThat(2, Is(2))
+    }
+
 
     @Test
     fun testSegmentParser2() {
@@ -125,6 +137,19 @@ class SegmentParserCriteriaTest {
         val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
         println(q.didq.first)
         println(q.didq.second)
+        MatcherAssert.assertThat(2, Is(2))
+
+    }
+
+    @Test
+    fun testWithUserSegmentParser6() {
+
+        val testData = readFileText("$testDataBase/test6-withuser.json")
+        val segment = mapper.readValue(testData, Segment::class.java)
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
+        println(q.didq.first)
+        println(q.didq.second)
+        println(q.userQuery)
         MatcherAssert.assertThat(2, Is(2))
 
     }

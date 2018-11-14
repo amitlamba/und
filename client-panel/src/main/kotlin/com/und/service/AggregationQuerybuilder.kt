@@ -203,7 +203,7 @@ class AggregationQuerybuilder {
 
             if(userFilterPresent){
                 //TODO handling for computed user filters
-                val userFilterCriterias = segmentParserCriteria.joinAwareFilterGlobalQ(allFilters.userSimpleFilters, tz, true)
+                val userFilterCriterias = segmentParserCriteria.joinAwareFilterGlobalQ(allFilters.userSimpleFilters, tz, null,true)
                 val userMatchOperation = Aggregation.match(userFilterCriterias.second)
                 aggregationPipeline.add(userMatchOperation)
             }

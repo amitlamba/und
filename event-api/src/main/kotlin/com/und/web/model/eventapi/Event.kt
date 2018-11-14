@@ -74,6 +74,14 @@ class date : Event() {
     //TODO
 }
 
+data class EventMessage(
+        var eventId: String = "",
+        var clientId: Long,
+        var userId: String?,
+        var name: String,
+        var creationTime: Date
+)
+
 /* {
     var eventUser: EventUser = EventUser()
 }

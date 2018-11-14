@@ -136,10 +136,10 @@ class CampaignService {
 
         val jobDescriptor = JobDescriptor()
         jobDescriptor.timeZoneId = userSettingsService.getTimeZone()
-        jobDescriptor.campaignName = campaign.name
         jobDescriptor.clientId = AuthenticationUtils.clientID.toString()
-        jobDescriptor.campaignId = campaign.id.toString()
         jobDescriptor.action = action
+
+        jobDescriptor.jobDetail = buildJobDetail(campaign.id.toString(), campaign.name, jobDescriptor.clientId)
 
 
         val triggerDescriptors = arrayListOf<TriggerDescriptor>()
@@ -149,6 +149,17 @@ class CampaignService {
         return jobDescriptor
     }
 
+    private fun buildJobDetail(campaignId: String, campaignName: String, clientId: String): JobDetail{
+        val properties = CampaignJobDetailProperties()
+        properties.campaignName = campaignName
+        properties.campaignId = campaignId
+
+        val jobDetail = JobDetail()
+        jobDetail.jobName = "${campaignId}-${campaignName}"
+        jobDetail.jobGroupName = "${clientId}-${campaignId}"
+        jobDetail.properties = properties
+        return jobDetail
+    }
 
     fun buildCampaign(webCampaign: WebCampaign): Campaign {
         val campaign = Campaign()
@@ -361,9 +372,9 @@ class CampaignService {
 
         val jobDescriptor = JobDescriptor()
         jobDescriptor.clientId = AuthenticationUtils.clientID.toString()
-        jobDescriptor.campaignId = campaignId.toString()
         jobDescriptor.action = action
-        jobDescriptor.campaignName = campaign.name//set because it cant be null FIXME find some other way around
+        //jobDescriptor.campaignName = campaign.name //set because it cant be null moved to below now FIXME find some other way around
+        jobDescriptor.jobDetail = buildJobDetail(campaignId.toString(), campaign.name, jobDescriptor.clientId)
 
         sendToKafka(jobDescriptor)
         return campaignId

@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
-class MessageJobService(private val jobService: JobService, private val eventStream: EventStream) {
+class CampaignJobService(private val jobService: JobService, private val eventStream: EventStream) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -134,7 +134,6 @@ class MessageJobService(private val jobService: JobService, private val eventStr
         val status = jobActionStatus(jobDescriptor, jobDescriptor.action)
 
         if (jobs.isNotEmpty()) {
-
             val group: String = JobUtil.getGroupName(jobDescriptor)
             val actionStatus = perform(group)
             status.status = actionStatus.status
@@ -148,9 +147,9 @@ class MessageJobService(private val jobService: JobService, private val eventStr
 
     private fun jobActionStatus(jobDescriptor: JobDescriptor, action: JobDescriptor.Action): JobActionStatus {
         val jobAction = JobAction(
-                campaignId = jobDescriptor.campaignId,
+                campaignId = jobDescriptor.jobDetail.properties["campaignId"].toString(),
                 clientId = jobDescriptor.clientId,
-                campaignName = jobDescriptor.campaignName,
+                campaignName = jobDescriptor.jobDetail.properties["campaignName"].toString(),
                 action = action
         )
         val status = JobActionStatus()

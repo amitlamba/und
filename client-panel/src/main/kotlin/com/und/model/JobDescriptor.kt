@@ -8,15 +8,12 @@ class JobDescriptor {
 
     @NotBlank
     lateinit var clientId: String
-    @NotBlank
-    lateinit var campaignId: String
 
     @NotBlank
-    var campaignName: String? = null
+    lateinit var jobDetail: JobDetail
 
     @JsonProperty("triggers")
     var triggerDescriptors: List<TriggerDescriptor> = arrayListOf()
-
 
     var action:Action = Action.NOTHING
 

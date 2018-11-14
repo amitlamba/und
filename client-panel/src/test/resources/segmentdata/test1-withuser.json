@@ -90,5 +90,6 @@
     }
   ],
   "geographyFilters": [],
-  "type": "Behaviour"
+  "type": "Behaviour",
+  "userId": "testuser1"
 }
