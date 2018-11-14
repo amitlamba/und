@@ -39,7 +39,8 @@ class WebPushTemplate :Serializable{
 
 class WebAction :Serializable{
     var id:Long?=null
-    var action: String? = null  //action id unique used to determine which action is clicked
+    @NotNull
+    lateinit var action: String  //action id unique used to determine which action is clicked
     @NotNull
     @Size(min=5,message = "Length should be greater than 5 character")
     lateinit var title: String

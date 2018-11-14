@@ -285,16 +285,16 @@ class FcmSendService {
 
     }
 
-    private fun buildFcmMessage(message: com.und.model.utils.FcmMessage): com.und.model.mongo.FcmMessage {
+    private fun buildFcmMessage(message: com.und.model.utils.FcmMessage): com.und.model.mongo.LegacyFcmMessage {
         when (message.type) {
             "android" -> return service.buildFcmAndroidMessage(message)
 //            "ios"->service.buildIosMessage(message)
-            "web" -> return service.buildWebFcmMessage(message)
-            else -> return com.und.model.mongo.FcmMessage()
+//            "web" -> return service.buildWebFcmMessage(message)
+            else -> return com.und.model.mongo.LegacyFcmMessage()
         }
     }
 
-    private fun sendMessageToFcm(fcmMessage: com.und.model.mongo.FcmMessage, serverKey: String):Int{
+    private fun sendMessageToFcm(fcmMessage: com.und.model.mongo.LegacyFcmMessage, serverKey: String):Int{
             var auth="key=$serverKey"
             var response = fcmFeignClient.pushMessage(auth, objectMapper.writeValueAsString(fcmMessage))
             return response.statusCodeValue

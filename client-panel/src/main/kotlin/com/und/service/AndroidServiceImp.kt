@@ -122,9 +122,10 @@ class AndroidServiceImp : AndroidService {
             imageUrl = template.imageUrl
             largeIconUrl = template.largeIconUrl
             deepLink = template.deepLink
-            if (template.actionGroup != null) {
+            var actionGroups=template.actionGroup
+            if (actionGroups != null) {
                 var list = mutableListOf<WebAndroidAction>()
-                template.actionGroup!!.forEach {
+                actionGroups.forEach {
                     list.add(buildWebAndroidAction(it))
                 }
                 actionGroup = list

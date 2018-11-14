@@ -70,7 +70,7 @@ class WebAction{
     @SequenceGenerator(name = "webpush_action_id_seq",sequenceName = "webpush_action_id_seq",allocationSize = 1)
     var id:Long?=null
     @Column(name = "action")
-    var action:String?=null  //action id unique used to determine which action is clicked
+    lateinit var action:String  //action id unique used to determine which action is clicked
     @NotNull
     @Column(name = "title")
     lateinit var title:String

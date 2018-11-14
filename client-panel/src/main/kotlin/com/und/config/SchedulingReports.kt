@@ -21,6 +21,7 @@ class SchedulingReports {
     @Autowired
     lateinit var eventService: EventService
 
+
     @Scheduled(cron = " */10 * * * * *")
     //@Scheduled(cron = " 0 0 24 * * * *",initialDelay = 0)
     fun createReport(){

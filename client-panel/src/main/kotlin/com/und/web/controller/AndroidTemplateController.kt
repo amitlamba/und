@@ -9,10 +9,12 @@ import com.und.service.AndroidService
 import com.und.web.controller.exception.CustomException
 import com.und.web.model.AndroidTemplate as WebAndroidTemplate
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.propertyeditors.StringTrimmerEditor
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.web.bind.WebDataBinder
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
 
@@ -29,13 +31,8 @@ class AndroidTemplateController {
     @PostMapping("/save")
     fun saveTemplate(@Valid @RequestBody template:WebAndroidTemplate):ResponseEntity<WebAndroidTemplate>{
         var clientId= AuthenticationUtils.clientID?: throw AccessDeniedException("")
-//            var result = androidRepository.findByClientIdAndName(clientId, template.name)
         var result=androidRepository.existsByClientIdAndName(clientId,template.name)
-//            if(result.isNotEmpty()) {
-//                throw CustomException("Template with name ${template.name} already exists")
-//            }
         return if(result) throw CustomException("Template with name ${template.name} already exists")
-        //if exception thrown show properly
         else  ResponseEntity(androidService.save(template),HttpStatus.CREATED)
     }
     @PreAuthorize(value="hasRole('ROLE_ADMIN')")
