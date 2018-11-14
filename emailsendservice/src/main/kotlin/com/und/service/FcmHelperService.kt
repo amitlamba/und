@@ -12,8 +12,10 @@ import com.und.repository.jpa.AndroidRepository
 import com.und.repository.jpa.WebPushRepository
 import com.und.repository.mongo.FcmCustomRepository
 import com.und.repository.mongo.FcmRepository
+import freemarker.cache.StringTemplateLoader
 import com.und.model.utils.FcmMessage as UtilFcmMessage
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
 
@@ -42,15 +44,11 @@ class FcmHelperService {
 
     fun buildFcmAndroidMessage(message: UtilFcmMessage): LegacyFcmMessage {
 
-        var template = fetchAndroidTemplate(message)
+        var template = fetchAndroidTemplate(message.clientId,message.templateId)
         var fcmMessage: LegacyFcmMessage = LegacyFcmMessage()
 
-        var model=message.data
-        message.eventUser?.let {
-            model["user"]=it
-        }
 
-        var body = updateTemplateBody(template,model)
+        var body = updateTemplateBody(template,message.eventUser?:EventUser())
 
         var data = HashMap<String, String>()
 
@@ -84,13 +82,15 @@ class FcmHelperService {
         return fcmMessage
     }
 
-    private fun updateTemplateBody(template:AndroidTemplate,model:MutableMap<String,Any>):String {
-        var body=templateContentCreationService.getAndroidBody(template,model)
+    private fun updateTemplateBody(template:AndroidTemplate,eventUser: EventUser):String {
+        var body=templateContentCreationService.getAndroidBody(template,eventUser)
         return body
     }
 
-    private fun fetchAndroidTemplate(message: com.und.model.utils.FcmMessage) =
-            androidRepository.findByClientIdAndId(message.clientId, message.templateId)
+    @Cacheable("androidTemplate",key = "'client_'+#clientId+'_template_'+#templateId")
+    private fun fetchAndroidTemplate(clientId: Long,templateId:Long): AndroidTemplate {
+        return androidRepository.findByClientIdAndId(clientId, templateId)
+    }
 
     fun buildWebFcmMessage(message: UtilFcmMessage): FcmMessage {
         var template = webpushRepository.findByClientIdAndId(message.clientId, message.templateId)
