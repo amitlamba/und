@@ -12,6 +12,8 @@ class Segment : Serializable {
 
     var id: Long? = null
 
+    var userId: String? = null
+
     @NotNull
     @Size(min = 2, max = 50)
     @Pattern(regexp = "[A-Za-z0-9-_][A-Za-z0-9-_\\s]*")
@@ -117,6 +119,8 @@ enum class DateOperator : Serializable {
     WillBeExactly,
     Exists,
     DoesNotExist,
+    AfterTime,
+    BetweenTime,
     NONE
 }
 

@@ -1,6 +1,7 @@
 package com.und.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.und.common.utils.loggerFor
 import com.und.model.jpa.Segment
 import com.und.model.mongo.eventapi.EventUser
 import com.und.repository.jpa.SegmentRepository
@@ -9,6 +10,7 @@ import com.und.repository.mongo.EventUserRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.SegmentNotFoundException
 import com.und.web.model.ConditionType
+import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.query.Query
@@ -19,6 +21,9 @@ import com.und.web.model.Segment as WebSegment
 @Service
 class SegmentServiceImpl : SegmentService {
 
+    companion object {
+        val logger: Logger = loggerFor(SegmentServiceImpl::class.java)
+    }
 
     @Autowired
     lateinit var segmentRepository: SegmentRepository
@@ -42,6 +47,7 @@ class SegmentServiceImpl : SegmentService {
 
     //@CacheEvict("segmentlist", key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_segment_'" )
     override fun createSegment(websegment: WebSegment): WebSegment {
+        logger.debug("Saving segment: ${websegment.name}")
         val segment = buildSegment(websegment)
         segmentRepository.save(segment)
         websegment.id = segment.id
@@ -63,11 +69,16 @@ class SegmentServiceImpl : SegmentService {
 
     //@Cacheable(cacheNames = ["segment"], key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_segment_'+#id" )
     override fun segmentById(id: Long): WebSegment {
+        logger.debug("Fetching segment: $id")
+        return buildWebSegment(this.persistedSegmentById(id))
+    }
+
+    override fun persistedSegmentById(id:Long): Segment {
         val clientID = AuthenticationUtils.clientID
         if (clientID != null) {
             val segmentOption = segmentRepository.findByIdAndClientID(id, clientID)
             if (segmentOption.isPresent) {
-                return buildWebSegment(segmentOption.get())
+                return segmentOption.get()
             }
         }
         throw SegmentNotFoundException("No Segment Exists with id $id")
@@ -98,6 +109,48 @@ class SegmentServiceImpl : SegmentService {
         return buildEventUserList(eventUsers)
     }
 
+    override fun isUserPresentInSegment(segment: Segment, clientId: Long, userId: String): Boolean {
+        return checkUserInSegment(segment, clientId, userId)
+    }
+
+    private fun checkUserInSegment(segment: Segment, clientId: Long, userId: String): Boolean {
+        val tz = userSettingsService.getTimeZone()
+        val websegment = buildWebSegment(segment)
+        val queries = segmentParserCriteria.segmentQueries(websegment, tz)
+
+        val (didQueries, joincondition) = queries.didq
+        if (didQueries.isNotEmpty()) {
+            val userDidList = retrieveUsers(didQueries, joincondition, clientId)
+            if(!userDidList.toSet().contains(userId)){
+                return false
+            }
+        }else if (queries.query!=null){
+            var query= Query().addCriteria(queries.query)
+            val userList=eventRepository.usersFromEvent(query,clientId)
+            if(!userList.toSet().contains(userId)){
+                return false
+            }
+        }
+
+        val (didNotQueries, joinconditionfornot) = queries.didntq
+        if (didNotQueries.isNotEmpty()) {
+            val userWhoDidIt = retrieveUsers(didNotQueries, joinconditionfornot, clientId)
+            if(userWhoDidIt.toSet().contains(userId)){
+                return false
+            }
+        }
+
+        val userQuery = queries.userQuery
+        if (userQuery != null) {
+            val userProfiles = eventUserRepository.usersFromUserProfile(userQuery, clientId)
+            if(!userProfiles.toSet().contains(userId)){
+                return false
+            }
+        }
+
+        return true
+    }
+
     private fun getSegmentUsersList(segment: Segment, clientId: Long): List<EventUser> {
         val userIds = getSegmentUserIds(segment, clientId)
         return eventUserRepository.findUserByIds(userIds.toSet(), clientId)
@@ -116,7 +169,7 @@ class SegmentServiceImpl : SegmentService {
             allResult.add(userDidList.toSet())
         }else if (queries.query!=null){
             var query= Query().addCriteria(queries.query)
-            val userList=eventRepository.usersFromEvent(query,clientId)
+            val userList=eventRepository.usersFromEvent(query, clientId)
             allResult.add(userList.toSet())
         }
 
@@ -143,8 +196,8 @@ class SegmentServiceImpl : SegmentService {
         queries.forEach { aggregation ->
             val idList = eventRepository.usersFromEvent(aggregation, clientId)
             userDidList.add(idList.toSet())
-
         }
+
         val result = when (conditionType) {
             ConditionType.AnyOf -> userDidList.reduce { f, s -> f.union(s) }
             ConditionType.AllOf -> userDidList.reduce { f, s -> f.intersect(s) }
