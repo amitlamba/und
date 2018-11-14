@@ -1,0 +1,9 @@
+package com.und.report.web.model
+
+class CampaignReached {
+    var delivered: Long = 0
+    var failed: Long = 0
+    var read: Long = 0
+    var interacted: Long = 0
+
+}
