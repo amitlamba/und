@@ -16,6 +16,7 @@ import com.und.web.model.ValidationError
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.messaging.support.MessageBuilder
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -446,6 +447,16 @@ class CampaignService {
     }
 
 
+    fun getListOfCampaign(segmentId: Long): List<com.und.web.model.Campaign> {
 
+        var clientId=AuthenticationUtils.clientID ?: throw AccessDeniedException("")
+        var campaigns= campaignRepository.findByClientIdAndSegmentationID(clientId,segmentId)
+        var listOfCampaign= mutableListOf<com.und.web.model.Campaign>()
+        campaigns.forEach {
+            var campaign=buildWebCampaign(it)
+            listOfCampaign.add(campaign)
+        }
+        return listOfCampaign
+    }
 
 }

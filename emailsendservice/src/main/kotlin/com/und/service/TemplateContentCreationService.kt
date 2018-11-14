@@ -3,7 +3,6 @@ package com.und.service
 import com.und.model.jpa.AndroidTemplate
 import com.und.model.mongo.EventUser
 import com.und.model.utils.Email
-import com.und.model.utils.Sms
 import com.und.utils.loggerFor
 import freemarker.template.Configuration
 import freemarker.template.Template

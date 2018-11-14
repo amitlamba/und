@@ -19,6 +19,7 @@ class SmsHelperService {
 
         val smsToSend = sms.copy()
         val smsTemplate = smsTemplateRepository.findByIdAndClientID(sms.smsTemplateId, sms.clientID)
+
         smsToSend.smsBody = smsTemplate?.smsTemplateBody
         return smsToSend
     }
