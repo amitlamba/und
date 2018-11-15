@@ -30,6 +30,6 @@ enum class FcmMessageStatus(var order: Int) {
 
 data class FcmMessageUpdates(
         val date: LocalDateTime,
-        val fcmStatus: FcmMessageStatus,
+        val status: FcmMessageStatus,
         val clickTrackEventId: String? = null
 )
