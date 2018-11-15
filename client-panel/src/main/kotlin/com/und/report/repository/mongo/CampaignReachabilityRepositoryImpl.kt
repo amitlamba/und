@@ -16,8 +16,8 @@ class CampaignReachabilityRepositoryImpl:CampaignReachabilityRepository {
     override fun getCampaignReachability(clientId:Long,campaignId:Long,campaignType:String): List<CampaignReachedResult> {
     var collectionName= getCollectionName(clientId,campaignType)
     var matchOperation=Aggregation.match(Criteria("campaignId").`is`(campaignId))
-    var unwindOperation=Aggregation.unwind("statusUpdate")
-    var groupOperation=Aggregation.group("statusUpdate.fcmStatus").count().`as`("count")
+    var unwindOperation=Aggregation.unwind("statusUpdates")
+    var groupOperation=Aggregation.group("statusUpdates.status").count().`as`("count")
     var aggregation=Aggregation.newAggregation(matchOperation,unwindOperation,groupOperation)
         return mongoTemplate.aggregate(aggregation,collectionName,CampaignReachedResult::class.java).mappedResults
     }
