@@ -21,28 +21,6 @@ class SegmentPageReportController {
     @Autowired
     private lateinit var reachabilityService:ReachabilityService
 
-    /*
-    * db.getCollection("3_eventUser3").aggregate([
-{$facet:{
-"email":[
-{$match:{$nor:[{"identity.email": null },{"communication.email.dnd": true }]}},{$count:"count"}
-],
-"mobile":[
-{$match:{$nor:[{"identity.mobile": null },{"communication.mobile.dnd": true }]}},{$count:"count"}
-],
-"webpush":[
-{$match:{$nor:[{"identity.webpush": null },{"communication.email.dnd": true }]}},{$count:"count"}
-],
-"android":[
-{$match:{$nor:[{"identity.android": null },{"communication.android.dnd": true }]}},{$count:"count"}
-],
-"ios":[
-{$match:{$nor:[{"identity.ios": null },{"communication.ios.dnd": true }]}},{$count:"count"}
-]
-}},
-{$project:{"emailcount":"$email.count","androidcount":"$android.count","mobilecount":"$mobile.count","ioscount":"$ios.count","webpushcount":"$webpush.count"}}
-])
-    * */
     @GetMapping("/reachability")
     fun reachability(@RequestParam(name = "segmentid") segmentId: Long): Reachability {
         return reachabilityService.getReachabilityBySegmentId(segmentId)

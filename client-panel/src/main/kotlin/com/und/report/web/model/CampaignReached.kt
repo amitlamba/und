@@ -7,3 +7,7 @@ class CampaignReached {
     var interacted: Long = 0
 
 }
+data class CampaignReachedResult(
+    var id:String,
+    var count:Long
+)

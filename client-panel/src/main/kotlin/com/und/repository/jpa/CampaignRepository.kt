@@ -39,5 +39,5 @@ interface CampaignRepository : JpaRepository<Campaign, Long> {
     @Query("SELECT id from Campaign c  WHERE c.clientID = :clientId and c.status in (:statuses)", nativeQuery = false)
     fun findByStatusIn(clientId: Long, statuses: List<CampaignStatus>): List<Long>
 
-    fun findByClientIdAndSegmentationID(clientId:Long,segmetationId:Long):List<Campaign>
+    fun findByClientIDAndSegmentationID(clientId:Long, segmetationId:Long):List<Campaign>
 }

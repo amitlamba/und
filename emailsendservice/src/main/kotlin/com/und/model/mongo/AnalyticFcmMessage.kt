@@ -13,7 +13,7 @@ data class AnalyticFcmMessage(
         var clientId: Long,
         var campaignId: Long,
         var status: FcmMessageStatus,
-        var statusUpdate: MutableList<FcmMessageUpdates> = mutableListOf<FcmMessageUpdates>(),
+        var statusUpdates: MutableList<FcmMessageUpdates> = mutableListOf<FcmMessageUpdates>(),
         var templateId: Long,
         var userId: String?=null,
         var serviceProvider: String,
@@ -24,7 +24,8 @@ enum class FcmMessageStatus(var order: Int) {
     NOT_SENT(1),
     SENT(2),
     READ(3),
-    CTA_PERFORMED(4);
+    CTA_PERFORMED(4),
+    ERROR(5)
 }
 
 data class FcmMessageUpdates(
