@@ -23,19 +23,19 @@ class ReachabilityRepositoryImpl :ReachabilityRepository{
 
         var facetOperation=Aggregation.facet()
                 .and(
-                        Aggregation.match(Criteria().norOperator(Criteria("identity.email").`is`(null),Criteria("communication.email.dnd").`is`(true))),
+                        Aggregation.match(Criteria().norOperator(Criteria("identity.email").`is`(null),Criteria("communication.email.dnd").`in`(true,null))),
                         Aggregation.count().`as`("count")).`as`("email")
                 .and(
-                        Aggregation.match(Criteria().norOperator(Criteria("identity.mobile").`is`(null),Criteria("communication.mobile.dnd").`is`(true))),
+                        Aggregation.match(Criteria().norOperator(Criteria("identity.mobile").`is`(null),Criteria("communication.mobile.dnd").`in`(true,null))),
                         Aggregation.count().`as`("count")).`as`("mobile")
                 .and(
-                        Aggregation.match(Criteria().norOperator(Criteria("identity.androidFcmToken").`is`(null),Criteria("communication.android.dnd").`is`(true))),
+                        Aggregation.match(Criteria().norOperator(Criteria("identity.androidFcmToken").`is`(null),Criteria("communication.android.dnd").`in`(true,null))),
                         Aggregation.count().`as`("count")).`as`("android")
                 .and(
-                        Aggregation.match(Criteria().norOperator(Criteria("identity.iosFcmToken").`is`(null),Criteria("communication.ios.dnd").`is`(true))),
+                        Aggregation.match(Criteria().norOperator(Criteria("identity.iosFcmToken").`is`(null),Criteria("communication.ios.dnd").`in`(true,null))),
                         Aggregation.count().`as`("count")).`as`("ios")
                 .and(
-                        Aggregation.match(Criteria().norOperator(Criteria("identity.webFcmToken").`is`(null),Criteria("communication.webpush.dnd").`is`(true))),
+                        Aggregation.match(Criteria().norOperator(Criteria("identity.webFcmToken").`is`(null),Criteria("communication.webpush.dnd").`in`(true,null))),
                         Aggregation.count().`as`("count")).`as`("webpush")
 
         var projectionOperation=Aggregation.project()
