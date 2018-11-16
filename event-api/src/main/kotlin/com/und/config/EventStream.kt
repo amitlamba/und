@@ -41,6 +41,11 @@ interface EventStream {
     @Output("outEventForLiveSegment")
     fun outEventForLiveSegment(): MessageChannel
 
+    @Output("outNotificationRead")
+    fun outNotificationRead():MessageChannel
+
+    @Input("inNotificationRead")
+    fun inNotificationRead():SubscribableChannel
 /*    @Output("event")
     fun readEvent(): SubscribableChannel
 

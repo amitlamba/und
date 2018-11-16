@@ -12,8 +12,10 @@ import com.und.repository.jpa.AndroidRepository
 import com.und.repository.jpa.WebPushRepository
 import com.und.repository.mongo.FcmCustomRepository
 import com.und.repository.mongo.FcmRepository
+import freemarker.cache.StringTemplateLoader
 import com.und.model.utils.FcmMessage as UtilFcmMessage
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
 
@@ -24,6 +26,9 @@ class FcmHelperService {
     private lateinit var service: ServiceProviderCredentialsService
     @Autowired
     private lateinit var repository:FcmRepository
+
+    @Autowired
+    private lateinit var templateContentCreationService: TemplateContentCreationService
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
@@ -38,12 +43,18 @@ class FcmHelperService {
     }
 
     fun buildFcmAndroidMessage(message: UtilFcmMessage): LegacyFcmMessage {
-        var template = androidRepository.findByClientIdAndId(message.clientId, message.templateId)
+
+        var template = fetchAndroidTemplate(message.clientId,message.templateId)
         var fcmMessage: LegacyFcmMessage = LegacyFcmMessage()
+
+
+        var body = updateTemplateBody(template,message.eventUser?:EventUser())
+
         var data = HashMap<String, String>()
 
         data.put("title",template.title)
-        data.put("body",template.body)
+
+        data.put("body",body)
         if (!template.channelId.isNullOrBlank()) data.put("channel_id", template.channelId!!)
         if (!template.channelName.isNullOrBlank()) data.put("channel_name", template.channelName!!)
         if (!template.imageUrl.isNullOrBlank()) data.put("big_pic", template.imageUrl!!)
@@ -69,6 +80,16 @@ class FcmHelperService {
             this.priority=priority
         }
         return fcmMessage
+    }
+
+    private fun updateTemplateBody(template:AndroidTemplate,eventUser: EventUser):String {
+        var body=templateContentCreationService.getAndroidBody(template,eventUser)
+        return body
+    }
+
+    @Cacheable("androidTemplate",key = "'client_'+#clientId+'_template_'+#templateId")
+    private fun fetchAndroidTemplate(clientId: Long,templateId:Long): AndroidTemplate {
+        return androidRepository.findByClientIdAndId(clientId, templateId)
     }
 
     fun buildWebFcmMessage(message: UtilFcmMessage): FcmMessage {

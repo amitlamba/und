@@ -230,6 +230,8 @@ class FcmSendService {
             toFcmFailureKafka(notificationError)
         }else {
             var mongoFcmId=ObjectId().toString()
+            fcmMessageToSend.data.put("mongo_id",mongoFcmId)
+            fcmMessageToSend.data.put("campaign_id",message.campaignId.toString())
             service.saveInMongo(message,FcmMessageStatus.NOT_SENT,mongoFcmId,credential.serviceProvider)
             var credentialMap: HashMap<String, String>
             credentialMap = parseStringToMap(credential.credentialsMap)
@@ -245,6 +247,7 @@ class FcmSendService {
                     throw FcmFailureException("Sending to fcm fail with status $statusCode")
                 }
             }catch (ex:FeignException){
+                service.updateStatus(mongoFcmId,FcmMessageStatus.ERROR,message.clientId)
                 logger.info("Feign exception in sending fcm message ${ex}")
                 var notificationError=NotificationError()
                 with(notificationError){
@@ -257,6 +260,7 @@ class FcmSendService {
                 }
                 toFcmFailureKafka(notificationError)
             }catch (ex:FcmFailureException){
+                service.updateStatus(mongoFcmId,FcmMessageStatus.ERROR,message.clientId)
                 logger.info("Fcm Failure Exception with status code $statusCode")
                 var notificationError=NotificationError()
                 with(notificationError){
@@ -269,6 +273,7 @@ class FcmSendService {
                 toFcmFailureKafka(notificationError)
 
             }catch (ex:Exception){
+                service.updateStatus(mongoFcmId,FcmMessageStatus.ERROR,message.clientId)
                 logger.info("Exception in sending fcm message $ex")
                 var notificationError=NotificationError()
                 with(notificationError){

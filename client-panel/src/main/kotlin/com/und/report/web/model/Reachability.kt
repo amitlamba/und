@@ -8,3 +8,11 @@ class Reachability {
     var ios: Long = 0
 
 }
+
+class ReachabilityResult{
+    var emailCount:List<Long> = emptyList()
+    var mobileCount:List<Long> =emptyList()
+    var androidCount:List<Long> =emptyList()
+    var webCount:List<Long> = emptyList()
+    var iosCount:List<Long> = emptyList()
+}

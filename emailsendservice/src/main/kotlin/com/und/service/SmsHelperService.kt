@@ -1,5 +1,6 @@
 package com.und.service
 
+import com.und.model.mongo.EventUser
 import com.und.model.mongo.SmsStatus
 import com.und.model.utils.Sms
 import com.und.repository.jpa.SmsTemplateRepository
@@ -14,12 +15,15 @@ class SmsHelperService {
     private lateinit var smsSentRepository: SmsSentRepository
     @Autowired
     private lateinit var smsTemplateRepository: SmsTemplateRepository
+    @Autowired
+    private lateinit var templateContentCreationService: TemplateContentCreationService
+
 
     fun updateBody(sms: Sms): Sms {
 
         val smsToSend = sms.copy()
         val smsTemplate = smsTemplateRepository.findByIdAndClientID(sms.smsTemplateId, sms.clientID)
-        smsToSend.smsBody = smsTemplate?.smsTemplateBody
+        smsToSend.smsBody = smsTemplate?.let { templateContentCreationService.getSmsBody(smsTemplate,sms.eventUser?: EventUser())}
         return smsToSend
     }
 
