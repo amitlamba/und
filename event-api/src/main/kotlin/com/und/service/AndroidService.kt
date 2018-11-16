@@ -16,6 +16,7 @@ import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.time.ZoneId
 
 @Service
 class AndroidService {
@@ -39,7 +40,7 @@ class AndroidService {
     private fun listeningNotificationUpdateStatus(message: NotificationRead){
         var criteria=Criteria("_id").`in`(ObjectId(message.mongoId))
         var query=Query().addCriteria(criteria)
-        var update=Update().push("statusUpdates",FcmMessageUpdates(LocalDateTime.now(),FcmMessageStatus.READ)).set("status",FcmMessageStatus.READ)
+        var update=Update().push("statusUpdates",FcmMessageUpdates(LocalDateTime.now(ZoneId.of("UTC")),FcmMessageStatus.READ)).set("status",FcmMessageStatus.READ)
         mongoTemplate.updateFirst(query,update,"${message.clientId}_fcmMessage")
     }
 
