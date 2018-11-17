@@ -47,8 +47,11 @@ class FcmHelperService {
         var template = fetchAndroidTemplate(message.clientId,message.templateId)
         var fcmMessage: LegacyFcmMessage = LegacyFcmMessage()
 
-
-        var body = updateTemplateBody(template,message.eventUser?:EventUser())
+        var model=message.data
+        message.eventUser?.let {
+            model["user"]=it
+        }
+        var body = updateTemplateBody(template,model)
 
         var data = HashMap<String, String>()
 
@@ -82,8 +85,8 @@ class FcmHelperService {
         return fcmMessage
     }
 
-    private fun updateTemplateBody(template:AndroidTemplate,eventUser: EventUser):String {
-        var body=templateContentCreationService.getAndroidBody(template,eventUser)
+    private fun updateTemplateBody(template:AndroidTemplate,model:MutableMap<String,Any>):String {
+        var body=templateContentCreationService.getAndroidBody(template,model)
         return body
     }
 

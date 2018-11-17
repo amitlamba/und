@@ -24,9 +24,9 @@ data class UserCountByEventForDate(var date: String, var userCountData: List<Use
 
 data class AggregateOutput(var groupByInfo: Map<String, Any>, var aggregateVal: Double)
 
-data class EventChronology(var name: String = "", var attribute: String = "all", var chronology: List<String> = emptyList())
+data class EventChronology(var Event: String = "", var attribute: String = "all", var chronology: List<Long> = emptyList())
 
-data class UserData(@Id var userId: String = "", var eventChronology: List<EventChronology> = emptyList())
+data class UserData(@Id var userId: String = "", var chronologies: List<EventChronology> = emptyList())
 
 data class FunnelData(var userData: List<UserData> = emptyList(),  var eventsOrder: List<String> = emptyList(), var maxInterval: Int = 0)
 

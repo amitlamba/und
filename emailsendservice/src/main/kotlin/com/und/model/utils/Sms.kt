@@ -10,7 +10,7 @@ data class Sms(
     var smsBody: String?,
     var smsTemplateId: Long,
     var smsTemplateName: String?,
-    //,var data: MutableMap<String, Any> = mutableMapOf(),
+    var data: MutableMap<String, Any> = mutableMapOf(),
     var eventUser: EventUser? = null
 
 )

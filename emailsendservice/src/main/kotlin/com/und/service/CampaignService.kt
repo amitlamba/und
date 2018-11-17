@@ -98,7 +98,8 @@ class CampaignService {
                 toEmailAddresses = InternetAddress.parse(user.identity.email, false),
                 emailTemplateId = campaign.emailTemplateId ?: 0L,
                 emailTemplateName = campaign.emailTemplateName ?: "",
-                campaignId = campaign.campaignId
+                campaignId = campaign.campaignId,
+                eventUser = user
         )
     }
     private fun fcmAndroidMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{

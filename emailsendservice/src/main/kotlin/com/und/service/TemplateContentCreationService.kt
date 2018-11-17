@@ -48,17 +48,17 @@ class TemplateContentCreationService {
         return getContentFromTemplate(email, EmailContent.BODY, model)
     }
 
-    fun getAndroidBody(template:AndroidTemplate,model: EventUser):String{
+    fun getAndroidBody(template:AndroidTemplate,model: MutableMap<String,Any>):String{
         return getContentFromTemplate(template,model)
     }
-    fun getSmsBody(template:SmsTemplate,model:EventUser):String{
+    fun getSmsBody(template:SmsTemplate,model:MutableMap<String,Any>):String{
         return FreeMarkerTemplateUtils.processTemplateIntoString(getSmsBodyFreeMarkerTemplate(template),model)
     }
     @Cacheable(value = "sms-template-body",key = "'sms-template-body-'+#smsTemplate.id")
     private fun getSmsBodyFreeMarkerTemplate(smsTemplate: SmsTemplate):Template{
         return Template("${smsTemplate.clientID}-a-t-${smsTemplate.id}",StringReader(smsTemplate.smsTemplateBody),freeMarkerConfiguration)
     }
-    fun getContentFromTemplate(template:AndroidTemplate, model:EventUser):String{
+    fun getContentFromTemplate(template:AndroidTemplate, model:MutableMap<String,Any>):String{
         return FreeMarkerTemplateUtils.processTemplateIntoString(getAndroidBodyFreemarkerTemplate(template), model)
     }
 
