@@ -23,7 +23,11 @@ class SmsHelperService {
 
         val smsToSend = sms.copy()
         val smsTemplate = smsTemplateRepository.findByIdAndClientID(sms.smsTemplateId, sms.clientID)
-        smsToSend.smsBody = smsTemplate?.let { templateContentCreationService.getSmsBody(smsTemplate,sms.eventUser?: EventUser())}
+        val model=sms.data
+        sms.eventUser?.let {
+            model["user"] = it
+        }
+        smsToSend.smsBody = smsTemplate?.let { templateContentCreationService.getSmsBody(smsTemplate,model)}
         return smsToSend
     }
 
