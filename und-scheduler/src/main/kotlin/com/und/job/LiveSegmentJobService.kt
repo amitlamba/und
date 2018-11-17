@@ -16,7 +16,7 @@ class LiveSegmentJobService(private val jobService: JobService, private val even
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
-    @StreamListener("scheduleJobReceive")
+//    @StreamListener("scheduleJobReceive")
     fun scheduleJob(job: JobDescriptor){
         logger.info("Scheduling job- [name: " + job.jobDetail.jobName + ", group: " + job.jobDetail.jobGroupName + "]")
 
