@@ -7,6 +7,7 @@ import com.netflix.discovery.converters.Auto
 import com.und.model.jpa.AndroidTemplate
 import com.und.model.jpa.ServiceProviderCredentials
 import com.und.model.jpa.WebAction
+import com.und.model.jpa.WebPushTemplate
 import com.und.model.mongo.*
 import com.und.repository.jpa.AndroidRepository
 import com.und.repository.jpa.WebPushRepository
@@ -25,7 +26,7 @@ class FcmHelperService {
     @Autowired
     private lateinit var service: ServiceProviderCredentialsService
     @Autowired
-    private lateinit var repository:FcmRepository
+    private lateinit var repository: FcmRepository
 
     @Autowired
     private lateinit var templateContentCreationService: TemplateContentCreationService
@@ -44,21 +45,21 @@ class FcmHelperService {
 
     fun buildFcmAndroidMessage(message: UtilFcmMessage): LegacyFcmMessage {
 
-        var template = fetchAndroidTemplate(message.clientId,message.templateId)
+        var template = fetchAndroidTemplate(message.clientId, message.templateId)
         var fcmMessage: LegacyFcmMessage = LegacyFcmMessage()
 
-        var model=message.data
+        var model = message.data
         message.eventUser?.let {
-            model["user"]=it
+            model["user"] = it
         }
-        var body = updateTemplateBody(template,model)
+        var body = updateTemplateBody(template, model)
 
         var data = HashMap<String, String>()
 
-        data.put("title",template.title)
+        data.put("title", template.title)
 
-        data.put("body",body)
-        if (!template.channelId.isNullOrBlank()) data.put("channel_id", template.channelId!!)
+        data.put("body", body)
+        if (!template.channelId.isNullOrBlank()) data.put("channel_id",template.channelId!!)
         if (!template.channelName.isNullOrBlank()) data.put("channel_name", template.channelName!!)
         if (!template.imageUrl.isNullOrBlank()) data.put("big_pic", template.imageUrl!!)
         if (!template.largeIconUrl.isNullOrBlank()) data.put("lg_icon", template.largeIconUrl!!)
@@ -67,66 +68,78 @@ class FcmHelperService {
         if (!template.sound.isNullOrBlank()) data.put("sound", template.sound!!)
         if (template.badgeIcon != null) data.put("badge_icon", template.badgeIcon.toString())
         if (template.fromUserNDot != null) data.put("fromuserndot", template.fromUserNDot.toString())
-        data.put("priority",template.priority.toString())
+        data.put("priority", template.priority.toString())
 
-        var collapse_key:String?=null
+        var collapse_key: String? = null
         if (!template.collapse_key.isNullOrBlank()) collapse_key = template.collapse_key
-        var timeToLive:Long?=null
+        var timeToLive: Long? = null
         if (template.timeToLive != null) timeToLive = template.timeToLive
         var priority = Priority.valueOf(template.priority.toString())
 
         with(fcmMessage) {
             this.to = message.to
-            this.collapse_key=collapse_key
-            time_to_live=timeToLive
-            this.data=data
-            this.priority=priority
+            this.collapse_key = collapse_key
+            time_to_live = timeToLive
+            this.data = data
+            this.priority = priority
         }
         return fcmMessage
     }
 
-    private fun updateTemplateBody(template:AndroidTemplate,model:MutableMap<String,Any>):String {
-        var body=templateContentCreationService.getAndroidBody(template,model)
+    private fun updateTemplateBody(template: AndroidTemplate, model: MutableMap<String, Any>): String {
+        var body = templateContentCreationService.getAndroidBody(template, model)
         return body
     }
 
-    @Cacheable("androidTemplate",key = "'client_'+#clientId+'_template_'+#templateId")
-    private fun fetchAndroidTemplate(clientId: Long,templateId:Long): AndroidTemplate {
+    private fun updateWebTemplateBody(webtemplate:WebPushTemplate,model: MutableMap<String, Any>):String{
+        return templateContentCreationService.getWebpushBody(webtemplate,model)
+    }
+    @Cacheable("androidTemplate", key = "'client_'+#clientId+'_template_'+#templateId")
+    private fun fetchAndroidTemplate(clientId: Long, templateId: Long): AndroidTemplate {
         return androidRepository.findByClientIdAndId(clientId, templateId)
     }
-
-    fun buildWebFcmMessage(message: UtilFcmMessage): FcmMessage {
-        var template = webpushRepository.findByClientIdAndId(message.clientId, message.templateId)
-        var fcmMessage = FcmMessage()
-        var webPushConfig = WebPushConfig()
-        var headers = WebPushHeaders()
-        headers.TTL = template.ttl
-        if (template.urgency != null) headers.Urgency = UrgencyOption.valueOf(template.urgency.toString())
-        webPushConfig.headers = headers
-        var fcmOptions = WebPushFcmOptions()
-        fcmOptions.link = template.link
-        webPushConfig.fcm_options = fcmOptions
+    @Cacheable(value = "webpushTemplate",key = "'client_'+#message.clientId+'_template'+#message.templateId")
+    private fun fetchWebpushTemplate(message:UtilFcmMessage):WebPushTemplate{
+        return webpushRepository.findByClientIdAndId(message.clientId, message.templateId)
+    }
+    fun buildWebFcmMessage(message: UtilFcmMessage): LegacyFcmMessage {
+        var template = fetchWebpushTemplate(message)
+        var fcmMessage = LegacyFcmMessage()
         var data=HashMap<String,String>()
-        var datapair=template.customDataPair
-        if (datapair!= null) {
-            data = objectMapper.readValue(datapair)
-            webPushConfig.data = data
+        var model=message.data
+        message.eventUser?.let {
+            model["user"] = it
         }
-        var notification = WebPushNotification()
-        notification.title = template.title
-        notification.body = template.body
-        notification.badge = template.badgeUrl
-        notification.icon = template.iconUrl
-        notification.image = template.imageUrl
-        notification.lang = template.lang
-        notification.requireInteraction = template.requireInteraction
-        var actionGroup= template.actionGroup
-        if (actionGroup != null) notification.actions = buildWebNotificationaction(actionGroup)
-        webPushConfig.notification = notification
+        var body=updateWebTemplateBody(template,model)
+
+        data.put("title",template.title)
+        data.put("body",template.body)
+        if(!template.badgeUrl.isNullOrBlank()) data.put("badge",template.badgeUrl!!)
+        if(!template.customDataPair.isNullOrBlank()) data.put("data",template.customDataPair!!)
+        if(!template.link.isNullOrBlank()) data.put("click_action",template.link!!)
+        if(template.requireInteraction !=null )data.put("requireInteraction",template.requireInteraction.toString())
+        if (template.fromUserndot!=null) data.put("fromuserndot",template.fromUserndot.toString())
+        if(!template.iconUrl.isNullOrBlank()) data.put("icon",template.iconUrl!!)
+        if(!template.lang.isNullOrBlank()) data.put("lang",template.lang!!)
+        if(!template.imageUrl.isNullOrBlank()) data.put("image",template.imageUrl!!)
+        if(!template.tag.isNullOrBlank()) data.put("tag",template.tag!!)
+
+        var actionGroup = template.actionGroup
+        if (actionGroup != null) data.put("actions", objectMapper.writeValueAsString(buildWebNotificationaction(actionGroup)))
+
+        var collapse_key: String? = null
+        if (!template.collapse_key.isNullOrBlank()) collapse_key = template.collapse_key
+        var timeToLive: Long? = null
+        if (template.ttl != null) timeToLive = template.ttl
+        var priority:String?= null
+        if(!template.urgency.isNullOrBlank()) priority=template.urgency
 
         with(fcmMessage) {
             to = message.to
-            webpush = webPushConfig
+            this.data=data
+            this.collapse_key=collapse_key
+            this.priority=Priority.valueOf(priority?:"NORMAL")
+            time_to_live=timeToLive
         }
         return fcmMessage
     }
@@ -143,8 +156,8 @@ class FcmHelperService {
         return list
     }
 
-    fun saveInMongo(fcmMessage: UtilFcmMessage,status: FcmMessageStatus,mongoId:String,serviceProvider:String) {
-        var analyticFcmMessage=AnalyticFcmMessage(
+    fun saveInMongo(fcmMessage: UtilFcmMessage, status: FcmMessageStatus, mongoId: String, serviceProvider: String) {
+        var analyticFcmMessage = AnalyticFcmMessage(
                 id = mongoId,
                 clientId = fcmMessage.clientId,
                 templateId = fcmMessage.templateId,
@@ -153,11 +166,11 @@ class FcmHelperService {
                 userId = fcmMessage.userId,
                 serviceProvider = serviceProvider
         )
-        repository.saveAnalyticMessage(analyticFcmMessage,clientId = fcmMessage.clientId)
+        repository.saveAnalyticMessage(analyticFcmMessage, clientId = fcmMessage.clientId)
     }
 
-    fun updateStatus(mongoId:String,status: FcmMessageStatus,clientId: Long){
-        repository.updateStatus(mongoId,status,clientId,null)
+    fun updateStatus(mongoId: String, status: FcmMessageStatus, clientId: Long) {
+        repository.updateStatus(mongoId, status, clientId, null)
     }
 
     private fun parseStringToMap(jsonString: String): HashMap<String, String> {

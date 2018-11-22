@@ -10,10 +10,10 @@ import org.springframework.stereotype.Service
 class FcmListner {
 
     @Autowired
-    private lateinit var fcmSendService:FcmSendService
+    private lateinit var fcmSendService: FcmSendService
 
     @StreamListener("fcmEventSend")
-    fun sendMessage(message: FcmMessage){
+    fun sendMessage(message: FcmMessage) {
         fcmSendService.sendMessage(message)
     }
 }

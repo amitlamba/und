@@ -25,23 +25,23 @@ class AndroidService {
     private lateinit var eventStream: EventStream
 
     @Autowired
-    private lateinit var mongoTemplate:MongoTemplate
+    private lateinit var mongoTemplate: MongoTemplate
 
-    fun updateStatus(mongoId:String,clientId:Long){
-        toKafka(NotificationRead(mongoId=mongoId,clientId = clientId))
+    fun updateStatus(mongoId: String, clientId: Long) {
+        toKafka(NotificationRead(mongoId = mongoId, clientId = clientId))
     }
 
-    private fun toKafka(message:NotificationRead){
-        var message=MessageBuilder.withPayload(message).build()
+    private fun toKafka(message: NotificationRead) {
+        var message = MessageBuilder.withPayload(message).build()
         eventStream.outNotificationRead().send(message)
     }
 
     @StreamListener("inNotificationRead")
-    private fun listeningNotificationUpdateStatus(message: NotificationRead){
-        var criteria=Criteria("_id").`in`(ObjectId(message.mongoId))
-        var query=Query().addCriteria(criteria)
-        var update=Update().push("statusUpdates",FcmMessageUpdates(LocalDateTime.now(ZoneId.of("UTC")),FcmMessageStatus.READ)).set("status",FcmMessageStatus.READ)
-        mongoTemplate.updateFirst(query,update,"${message.clientId}_fcmMessage")
+    private fun listeningNotificationUpdateStatus(message: NotificationRead) {
+        var criteria = Criteria("_id").`in`(ObjectId(message.mongoId))
+        var query = Query().addCriteria(criteria)
+        var update = Update().push("statusUpdates", FcmMessageUpdates(LocalDateTime.now(ZoneId.of("UTC")), FcmMessageStatus.READ)).set("status", FcmMessageStatus.READ)
+        mongoTemplate.updateFirst(query, update, "${message.clientId}_fcmMessage")
     }
 
 }
