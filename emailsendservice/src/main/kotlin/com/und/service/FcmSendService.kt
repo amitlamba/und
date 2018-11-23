@@ -303,8 +303,13 @@ class FcmSendService {
     private fun sendMessageToFcm(fcmMessage: com.und.model.mongo.LegacyFcmMessage, serverKey: String): Int {
         var auth = "key=$serverKey"
         var response = fcmFeignClient.pushMessage(auth, objectMapper.writeValueAsString(fcmMessage))
-        //println("${response.success}")
-        return response.statusCodeValue
+        var body: LinkedHashMap<String, Any> = response.body as LinkedHashMap<String, Any>
+        var success = body["success"]
+        print(success)
+        if (success.toString().toInt() > 0)
+            return 200
+        else
+            throw FcmFailureException("Fcm message fail with error ${body["results"]}")
     }
 
     private fun parseStringToMap(jsonString: String): HashMap<String, String> {
