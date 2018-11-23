@@ -15,18 +15,18 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 
 @Repository
-class FcmCustomRepositoryImpl:FcmCustomRepository {
+class FcmCustomRepositoryImpl : FcmCustomRepository {
 
     @Autowired
-    private lateinit var mongoTemplate:MongoTemplate
+    private lateinit var mongoTemplate: MongoTemplate
 
     override fun saveAnalyticMessage(message: AnalyticFcmMessage, clientId: Long) {
-        mongoTemplate.save(message,"${clientId}_fcmMessage")
+        mongoTemplate.save(message, "${clientId}_fcmMessage")
     }
 
-    override fun updateStatus(mongoId:String,status:FcmMessageStatus,clientId: Long,clickTrackEventId: String?) {
+    override fun updateStatus(mongoId: String, status: FcmMessageStatus, clientId: Long, clickTrackEventId: String?) {
         val query = Query(Criteria.where("clientId").`is`(clientId).and("_id").`is`(ObjectId(mongoId)))
-        val statusupdate = FcmMessageUpdates(LocalDateTime.now(ZoneId.of("UTC")), status,clickTrackEventId)
+        val statusupdate = FcmMessageUpdates(LocalDateTime.now(ZoneId.of("UTC")), status, clickTrackEventId)
         val update = Update().push("statusUpdates", statusupdate).set("status", status)
         mongoTemplate.updateFirst(query, update, AnalyticFcmMessage::class.java, "${clientId}_fcmMessage")
     }

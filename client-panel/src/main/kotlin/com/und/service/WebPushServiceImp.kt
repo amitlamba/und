@@ -68,6 +68,7 @@ class WebPushServiceImp : WebPushService {
             iconUrl = template.iconUrl
             imageUrl = template.imageUrl
             tag = template.tag
+            collapse_key=template.collapse_key
             requireInteraction = template.requireInteraction
             var actionGroups=template.actionGroup
             if (actionGroups != null)

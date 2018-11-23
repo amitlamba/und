@@ -27,6 +27,7 @@ class FcmSendService {
     companion object {
         protected val logger = loggerFor(FcmSendService::class.java)
     }
+
     @Autowired
     private lateinit var fcmFeignClient: FcmFeignClient
     @Autowired
@@ -34,7 +35,7 @@ class FcmSendService {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
     @Autowired
-    private lateinit var eventStream:EventStream
+    private lateinit var eventStream: EventStream
 
     fun sendMessage(clientId: Long, authKey: String, message: FcmMessage): ResponseEntity<Any?>? {
         try {
@@ -221,67 +222,67 @@ class FcmSendService {
         var credential = service.getCredentials(message.clientId)
         if (credential == null) {
             logger.info("Android Credential does not exists for clientId ${message.clientId}")
-            var notificationError=NotificationError()
-            with(notificationError){
-                clientId=message.clientId
-                this.message =  "Android service provider not found.First add a service provider"
-                errorCode=400
+            var notificationError = NotificationError()
+            with(notificationError) {
+                clientId = message.clientId
+                this.message = "Android service provider not found.First add a service provider"
+                errorCode = 400
             }
             toFcmFailureKafka(notificationError)
-        }else {
-            var mongoFcmId=ObjectId().toString()
-            fcmMessageToSend.data.put("mongo_id",mongoFcmId)
-            fcmMessageToSend.data.put("campaign_id",message.campaignId.toString())
-            fcmMessageToSend.data.put("client_id",message.clientId.toString())
-            service.saveInMongo(message,FcmMessageStatus.NOT_SENT,mongoFcmId,credential.serviceProvider)
+        } else {
+            var mongoFcmId = ObjectId().toString()
+            fcmMessageToSend.data.put("mongo_id", mongoFcmId)
+            fcmMessageToSend.data.put("campaign_id", message.campaignId.toString())
+            fcmMessageToSend.data.put("client_id", message.clientId.toString())
+            service.saveInMongo(message, FcmMessageStatus.NOT_SENT, mongoFcmId, credential.serviceProvider)
             var credentialMap = parseStringToMap(credential.credentialsMap)
             var serverKey = credentialMap.get("apiKey")!!
 
-            var statusCode:Int?=400
+            var statusCode: Int? = 400
             try {
-                statusCode=sendMessageToFcm(fcmMessageToSend, serverKey)
+                statusCode = sendMessageToFcm(fcmMessageToSend, serverKey)
                 if (statusCode == 200) {
-                    service.updateStatus(mongoFcmId,FcmMessageStatus.SENT,message.clientId)
+                    service.updateStatus(mongoFcmId, FcmMessageStatus.SENT, message.clientId)
                     logger.info("Fcm Send message successfuly for token= ${message.to}")
                 } else {
                     throw FcmFailureException("Sending to fcm fail with status $statusCode")
                 }
-            }catch (ex:FeignException){
-                service.updateStatus(mongoFcmId,FcmMessageStatus.ERROR,message.clientId)
+            } catch (ex: FeignException) {
+                service.updateStatus(mongoFcmId, FcmMessageStatus.ERROR, message.clientId)
                 logger.info("Feign exception in sending fcm message ${ex}")
-                var notificationError=NotificationError()
-                with(notificationError){
-                    if (ex.status()==401) this.message = "UnAuthorized Please check your api key or update your android service provider"
+                var notificationError = NotificationError()
+                with(notificationError) {
+                    if (ex.status() == 401) this.message = "UnAuthorized Please check your api key or update your android service provider"
                     else this.message = ex.message
                     to = message.to
-                    clientId=message.clientId
-                    status=ex.toString()
-                    errorCode=ex.status().toLong()
+                    clientId = message.clientId
+                    status = ex.toString()
+                    errorCode = ex.status().toLong()
                 }
                 toFcmFailureKafka(notificationError)
-            }catch (ex:FcmFailureException){
-                service.updateStatus(mongoFcmId,FcmMessageStatus.ERROR,message.clientId)
+            } catch (ex: FcmFailureException) {
+                service.updateStatus(mongoFcmId, FcmMessageStatus.ERROR, message.clientId)
                 logger.info("Fcm Failure Exception with status code $statusCode")
-                var notificationError=NotificationError()
-                with(notificationError){
+                var notificationError = NotificationError()
+                with(notificationError) {
                     this.message = ex.message
                     to = message.to
-                    clientId=message.clientId
-                    status=ex.toString()
-                    errorCode=statusCode?.toLong()
+                    clientId = message.clientId
+                    status = ex.toString()
+                    errorCode = statusCode?.toLong()
                 }
                 toFcmFailureKafka(notificationError)
 
-            }catch (ex:Exception){
-                service.updateStatus(mongoFcmId,FcmMessageStatus.ERROR,message.clientId)
+            } catch (ex: Exception) {
+                service.updateStatus(mongoFcmId, FcmMessageStatus.ERROR, message.clientId)
                 logger.info("Exception in sending fcm message $ex")
-                var notificationError=NotificationError()
-                with(notificationError){
+                var notificationError = NotificationError()
+                with(notificationError) {
                     this.message = ex.message
                     to = message.to
-                    clientId=message.clientId
-                    status=ex.toString()
-                    errorCode=statusCode?.toLong()
+                    clientId = message.clientId
+                    status = ex.toString()
+                    errorCode = statusCode?.toLong()
                 }
                 toFcmFailureKafka(notificationError)
             }
@@ -294,33 +295,40 @@ class FcmSendService {
         when (message.type) {
             "android" -> return service.buildFcmAndroidMessage(message)
 //            "ios"->service.buildIosMessage(message)
-//            "web" -> return service.buildWebFcmMessage(message)
+            "web" -> return service.buildWebFcmMessage(message)
             else -> return com.und.model.mongo.LegacyFcmMessage()
         }
     }
 
-    private fun sendMessageToFcm(fcmMessage: com.und.model.mongo.LegacyFcmMessage, serverKey: String):Int{
-            var auth="key=$serverKey"
-            var response = fcmFeignClient.pushMessage(auth, objectMapper.writeValueAsString(fcmMessage))
-            return response.statusCodeValue
+    private fun sendMessageToFcm(fcmMessage: com.und.model.mongo.LegacyFcmMessage, serverKey: String): Int {
+        var auth = "key=$serverKey"
+        var response = fcmFeignClient.pushMessage(auth, objectMapper.writeValueAsString(fcmMessage))
+        var body: LinkedHashMap<String, Any> = response.body as LinkedHashMap<String, Any>
+        var success = body["success"]
+        print(success)
+        if (success.toString().toInt() > 0)
+            return 200
+        else
+            throw FcmFailureException("Fcm message fail with error ${body["results"]}")
     }
 
     private fun parseStringToMap(jsonString: String): HashMap<String, String> {
         return objectMapper.readValue(jsonString)
     }
 
-    private fun toFcmFailureKafka(notificationError: NotificationError){
+    private fun toFcmFailureKafka(notificationError: NotificationError) {
         eventStream.fcmFailureEventSend().send(MessageBuilder.withPayload(notificationError).build())
     }
 }
 
-class NotificationError{
-     var to:String?=null
-     var status:String?=null
-     var message:String?=null
-     var clientId: Long?=null
-    var errorCode:Long?=null
+class NotificationError {
+    var to: String? = null
+    var status: String? = null
+    var message: String? = null
+    var clientId: Long? = null
+    var errorCode: Long? = null
 }
+
 class TestMessage {
     lateinit var token: String
     lateinit var data: HashMap<String, String>
