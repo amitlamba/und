@@ -31,6 +31,7 @@ class WebPushTemplate :Serializable{
     var urgency: String? = null
     var ttl: Long? = null
     var link: String? = null
+    var collapse_key:String?=null
     var customDataPair: HashMap<String, String>? = null
     var creationTime = LocalDateTime.now()
     var modifiedTime = LocalDateTime.now()

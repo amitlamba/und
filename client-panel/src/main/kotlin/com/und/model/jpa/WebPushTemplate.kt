@@ -52,6 +52,8 @@ class WebPushTemplate {
 //    custom key value pair
     @Column(name = "custom_data_pair")
     var customDataPair:String?=null
+    @Column(name="collapse_key")
+    var collapse_key:String?=null
     @field:CreationTimestamp
     @Column(name = "creation_date")
     lateinit var creationTime:LocalDateTime

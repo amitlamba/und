@@ -38,6 +38,8 @@ class WebPushTemplate {
     var tag:String?=null        //used to group notification
     @Column(name = "require_interaction")
     var requireInteraction:Boolean=false
+    @Column(name = "collapse_key")
+    var collapse_key:String?=null
     @OneToMany(cascade=arrayOf(CascadeType.ALL),fetch = FetchType.EAGER)
     @JoinColumn(name="template_id")
     var actionGroup:List<WebAction>?=null
