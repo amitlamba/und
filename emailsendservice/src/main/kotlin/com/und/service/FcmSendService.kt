@@ -262,7 +262,7 @@ class FcmSendService {
                 toFcmFailureKafka(notificationError)
             } catch (ex: FcmFailureException) {
                 service.updateStatus(mongoFcmId, FcmMessageStatus.ERROR, message.clientId)
-                logger.info("Fcm Failure Exception with status code $statusCode")
+                logger.info("Fcm Failure Exception with status code $statusCode message ${ex.message}")
                 var notificationError = NotificationError()
                 with(notificationError) {
                     this.message = ex.message
@@ -305,7 +305,6 @@ class FcmSendService {
         var response = fcmFeignClient.pushMessage(auth, objectMapper.writeValueAsString(fcmMessage))
         var body: LinkedHashMap<String, Any> = response.body as LinkedHashMap<String, Any>
         var success = body["success"]
-        print(success)
         if (success.toString().toInt() > 0)
             return 200
         else
