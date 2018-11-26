@@ -57,15 +57,39 @@ class FcmHelperService {
         var data = HashMap<String, String>()
 
         data.put("title", template.title)
-
         data.put("body", body)
-        if (!template.channelId.isNullOrBlank()) data.put("channel_id",template.channelId!!)
-        if (!template.channelName.isNullOrBlank()) data.put("channel_name", template.channelName!!)
-        if (!template.imageUrl.isNullOrBlank()) data.put("big_pic", template.imageUrl!!)
-        if (!template.largeIconUrl.isNullOrBlank()) data.put("lg_icon", template.largeIconUrl!!)
-        if (!template.deepLink.isNullOrBlank()) data.put("deepLink", template.deepLink!!)
+
+        template.channelId?.let {
+            if(it.isNotBlank()){
+                data.put("channelId",it)
+            }
+        }
+        template.channelName?.let {
+            if(it.isNotBlank()){
+                data.put("channel_name",it)
+            }
+        }
+        template.imageUrl?.let {
+            if(it.isNotBlank()){
+                data.put("big_pic",it)
+            }
+        }
+        template.largeIconUrl?.let {
+            if(it.isNotBlank()){
+                data.put("lg_icon",it)
+            }
+        }
+        template.deepLink?.let {
+            if(it.isNotBlank()){
+                data.put("deepLink",it)
+            }
+        }
+        template.sound?.let {
+            if(it.isNotBlank()){
+                data.put("sound",it)
+            }
+        }
         if (template.actionGroup != null) data.put("actions", objectMapper.writeValueAsString(template.actionGroup))
-        if (!template.sound.isNullOrBlank()) data.put("sound", template.sound!!)
         if (template.badgeIcon != null) data.put("badge_icon", template.badgeIcon.toString())
         if (template.fromUserNDot != null) data.put("fromuserndot", template.fromUserNDot.toString())
         data.put("priority", template.priority.toString())
@@ -111,22 +135,38 @@ class FcmHelperService {
             model["user"] = it
         }
         var body=updateWebTemplateBody(template,model)
-
         data.put("title",template.title)
         data.put("body",template.body)
-        if(!template.badgeUrl.isNullOrBlank()) data.put("badge",template.badgeUrl!!)
-        if(!template.customDataPair.isNullOrBlank()) data.put("data",template.customDataPair!!)
-        if(!template.link.isNullOrBlank()) data.put("click_action",template.link!!)
+        var badgeUrl=template.badgeUrl
+        if(badgeUrl!=null&& badgeUrl.isNotBlank()) data.put("badge",badgeUrl)
+        var customDataPair=template.customDataPair
+        if(customDataPair!=null&& customDataPair.isNotBlank()) data.put("data",customDataPair)
+        var link=template.link
+        if(link!=null && link.isNotBlank()) data.put("click_action",link)
         if(template.requireInteraction !=null )data.put("requireInteraction",template.requireInteraction.toString())
         if (template.fromUserndot!=null) data.put("fromuserndot",template.fromUserndot.toString())
-        if(!template.iconUrl.isNullOrBlank()) data.put("icon",template.iconUrl!!)
-        if(!template.lang.isNullOrBlank()) data.put("lang",template.lang!!)
-        if(!template.imageUrl.isNullOrBlank()) data.put("image",template.imageUrl!!)
-        if(!template.tag.isNullOrBlank()) data.put("tag",template.tag!!)
+
+        var iconUrl=template.iconUrl
+
+        if(iconUrl!=null && iconUrl.isNotBlank()) data.put("icon",iconUrl)
+        template.lang?.let {
+            if(it.isNotBlank()){
+                data.put("lang",it)
+            }
+        }
+        template.imageUrl?.let {
+            if(it.isNotBlank()){
+                data.put("image",it)
+            }
+        }
+        template.tag?.let {
+            if(it.isNotBlank()){
+                data.put("tag",it)
+            }
+        }
 
         var actionGroup = template.actionGroup
         if (actionGroup != null) data.put("actions", objectMapper.writeValueAsString(buildWebNotificationaction(actionGroup)))
-
         var collapse_key: String? = null
         if (!template.collapse_key.isNullOrBlank()) collapse_key = template.collapse_key
         var timeToLive: Long? = null
