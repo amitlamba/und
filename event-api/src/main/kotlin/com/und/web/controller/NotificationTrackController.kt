@@ -1,9 +1,7 @@
 package com.und.web.controller
 
-import com.und.security.utils.AuthenticationUtils
-import com.und.service.AndroidService
 import com.und.service.EmailService
-import com.und.service.WebpushService
+import com.und.service.FcmService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
@@ -14,10 +12,10 @@ class NotificationTrackController {
 
     @Autowired
     private lateinit var emailService: EmailService
+//    @Autowired
+//    private lateinit var androidService:AndroidService
     @Autowired
-    private lateinit var androidService:AndroidService
-    @Autowired
-    private lateinit var webpushService:WebpushService
+    private lateinit var fcmService: FcmService
 
     @GetMapping(value = ["/email/image/{id}"], headers = arrayOf("Accept=image/jpeg, image/jpg, image/png, image/gif"))
     @ResponseBody
@@ -27,12 +25,16 @@ class NotificationTrackController {
 
     @PostMapping(value ="/android/tracking")
     fun trackAndroidFcmMessage(mongoId:String,clientId:Long){
-        androidService.updateStatus(mongoId,clientId)
+       fcmService.updateStatus(mongoId,clientId,"android")
     }
 
     @PostMapping(value="/webpush/tracking")
     fun trackWebpushFcmMessage(mongoId: String,clientId: Long){
-        webpushService.updateStatus(mongoId,clientId);
+        fcmService.updateStatus(mongoId,clientId,"web");
     }
 
+    @PostMapping(value ="/ios/tracking")
+    fun trackIosFcmMessage(mongoId:String,clientId:Long){
+        fcmService.updateStatus(mongoId,clientId,"ios")
+    }
 }

@@ -4,7 +4,8 @@ import java.time.LocalDateTime
 
 open class NotificationRead(
         var mongoId:String,
-        var clientId:Long
+        var clientId:Long,
+        var type:String
 )
 
 enum class FcmMessageStatus(var order: Int) {

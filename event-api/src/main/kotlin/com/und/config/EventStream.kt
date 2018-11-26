@@ -46,6 +46,13 @@ interface EventStream {
 
     @Input("inNotificationRead")
     fun inNotificationRead():SubscribableChannel
+
+//    @Output("outWebNotificationRead")
+//    fun outWebNotificationRead():MessageChannel
+//
+//    @Input("inWebNotificationRead")
+//    fun inWebNotificationRead():SubscribableChannel
+
 /*    @Output("event")
     fun readEvent(): SubscribableChannel
 
