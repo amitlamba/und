@@ -197,11 +197,14 @@ class FcmHelperService {
     }
 
     fun saveInMongo(fcmMessage: UtilFcmMessage, status: FcmMessageStatus, mongoId: String, serviceProvider: String) {
+
+        fcmMessage.type
         var analyticFcmMessage = AnalyticFcmMessage(
                 id = mongoId,
                 clientId = fcmMessage.clientId,
                 templateId = fcmMessage.templateId,
                 status = status,
+                type = fcmMessage.type,
                 campaignId = fcmMessage.campaignId,
                 userId = fcmMessage.userId,
                 serviceProvider = serviceProvider
@@ -209,8 +212,8 @@ class FcmHelperService {
         repository.saveAnalyticMessage(analyticFcmMessage, clientId = fcmMessage.clientId)
     }
 
-    fun updateStatus(mongoId: String, status: FcmMessageStatus, clientId: Long) {
-        repository.updateStatus(mongoId, status, clientId, null)
+    fun updateStatus(mongoId: String, status: FcmMessageStatus, clientId: Long,type:String) {
+        repository.updateStatus(mongoId, status, clientId, null,type)
     }
 
     private fun parseStringToMap(jsonString: String): HashMap<String, String> {

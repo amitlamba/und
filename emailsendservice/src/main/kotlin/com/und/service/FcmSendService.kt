@@ -242,13 +242,13 @@ class FcmSendService {
             try {
                 statusCode = sendMessageToFcm(fcmMessageToSend, serverKey)
                 if (statusCode == 200) {
-                    service.updateStatus(mongoFcmId, FcmMessageStatus.SENT, message.clientId)
+                    service.updateStatus(mongoFcmId, FcmMessageStatus.SENT, message.clientId,message.type)
                     logger.info("Fcm Send message successfuly for token= ${message.to}")
                 } else {
                     throw FcmFailureException("Sending to fcm fail with status $statusCode")
                 }
             } catch (ex: FeignException) {
-                service.updateStatus(mongoFcmId, FcmMessageStatus.ERROR, message.clientId)
+                service.updateStatus(mongoFcmId, FcmMessageStatus.ERROR, message.clientId,message.type)
                 logger.info("Feign exception in sending fcm message ${ex}")
                 var notificationError = NotificationError()
                 with(notificationError) {
@@ -261,7 +261,7 @@ class FcmSendService {
                 }
                 toFcmFailureKafka(notificationError)
             } catch (ex: FcmFailureException) {
-                service.updateStatus(mongoFcmId, FcmMessageStatus.ERROR, message.clientId)
+                service.updateStatus(mongoFcmId, FcmMessageStatus.ERROR, message.clientId,message.type)
                 logger.info("Fcm Failure Exception with status code $statusCode message ${ex.message}")
                 var notificationError = NotificationError()
                 with(notificationError) {
@@ -274,7 +274,7 @@ class FcmSendService {
                 toFcmFailureKafka(notificationError)
 
             } catch (ex: Exception) {
-                service.updateStatus(mongoFcmId, FcmMessageStatus.ERROR, message.clientId)
+                service.updateStatus(mongoFcmId, FcmMessageStatus.ERROR, message.clientId,message.type)
                 logger.info("Exception in sending fcm message $ex")
                 var notificationError = NotificationError()
                 with(notificationError) {

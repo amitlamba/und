@@ -6,12 +6,13 @@ import java.time.LocalDateTime
 import java.util.*
 import javax.persistence.Id
 
-@Document(collection = "#{tenantProvider.getTenant()}_fcmMessage")
+//@Document(collection = "#{tenantProvider.getTenant()}_fcmMessage")
 data class AnalyticFcmMessage(
         @Id
         var id: String? = null,
         var clientId: Long,
         var campaignId: Long,
+        var type:String,
         var status: FcmMessageStatus,
         var statusUpdates: MutableList<FcmMessageUpdates> = mutableListOf<FcmMessageUpdates>(),
         var templateId: Long,

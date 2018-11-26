@@ -26,8 +26,8 @@ class CampaignReachabilityRepositoryImpl:CampaignReachabilityRepository {
             "EMAIL" -> return "${clientId}_email"
             "SMS" -> return "${clientId}_sms"
             "PUSH_ANDROID" -> return "${clientId}_fcmMessage"
-            "PUSH_IOS" -> return "${clientId}_fcmMessage"
-            "PUSH_WEB" -> return "${clientId}_fcmMessage"
+            "PUSH_IOS" -> return "${clientId}_webFcmMessage"
+            "PUSH_WEB" -> return "${clientId}_iosFcmMessage"
             else -> return ""
         }
     }
