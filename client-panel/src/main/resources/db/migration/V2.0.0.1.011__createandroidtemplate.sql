@@ -46,7 +46,7 @@ date_modified timestamp with time zone DEFAULT now()
 ;
 
 create table if not EXISTS notification_template_webpush(
-id bigint not null primary key,
+id bigserial not null primary key,
 client_id bigint not null,
 appuser_id bigint not null,
 name varchar(100) not null,
@@ -69,7 +69,7 @@ date_modified timestamp with time zone DEFAULT now()
 );
 
 create table if not EXISTS webpush_notification_action(
-id bigint not null primary key,
+id bigserial not null primary key,
 action varchar(1024),
 title varchar(512) not null,
 icon_url varchar(1024),
@@ -88,17 +88,17 @@ creation_date timestamp with time zone DEFAULT now(),
 date_modified timestamp with time zone DEFAULT now()
 );
 
-ALTER sequence webpush_template_id_seq start 1000 increment 1;
-ALTER sequence webpush_action_id_seq start 1000 increment 1;
-ALTER sequence webpush_campaign_id_seq start 1000 increment 1;
+ALTER sequence notification_template_webpush_id_seq RESTART 1000 increment 1;
+ALTER sequence webpush_notification_action_id_seq RESTART 1000 increment 1;
+ALTER sequence webpush_campaign_table_id_seq RESTART 1000 increment 1;
 
-ALTER SEQUENCE android_template_id_seq START 1000 INCREMENT 1;
-ALTER SEQUENCE android_action_id_seq START 1000 INCREMENT 1;
-ALTER SEQUENCE android_campaign_id_seq START 1000 INCREMENT 1;
+ALTER SEQUENCE notification_template_android_id_seq RESTART 1000 INCREMENT 1;
+ALTER SEQUENCE notification_template_android_action_id_seq RESTART 1000 INCREMENT 1;
+ALTER SEQUENCE android_campaign_id_seq RESTART 1000 INCREMENT 1;
 
 
 create table if not exists fcm_failure_audit_log(
-id bigint not null PRIMARY KEY ,
+id bigserial not null PRIMARY KEY ,
 client_id bigint not null,
 message VARCHAR(1024) not NULL ,
 status VARCHAR (1024) not NULL ,
@@ -106,4 +106,4 @@ error_code bigint,
 date_created TIMESTAMP WITH time ZONE DEFAULT now()
 );
 
-ALTER sequence fcm_failure_audit_log_id_seq start 1000 increment 1;
+ALTER sequence fcm_failure_audit_log_id_seq RESTART 1000 increment 1;

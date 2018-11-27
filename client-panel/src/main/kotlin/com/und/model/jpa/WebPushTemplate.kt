@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull
 class WebPushTemplate {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "webpush_template_id_seq")
-    @SequenceGenerator(name = "webpush_template_id_seq",sequenceName = "webpush_template_id_seq",allocationSize = 1)
+    @SequenceGenerator(name = "webpush_template_id_seq",sequenceName = "notification_template_webpush_id_seq",allocationSize = 1)
     var id:Long?=null
     @Column(name="client_id")
     var clientId:Long?=null
@@ -69,7 +69,7 @@ class WebPushTemplate {
 class WebAction{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "webpush_action_id_seq")
-    @SequenceGenerator(name = "webpush_action_id_seq",sequenceName = "webpush_action_id_seq",allocationSize = 1)
+    @SequenceGenerator(name = "webpush_action_id_seq",sequenceName = "webpush_notification_action_id_seq",allocationSize = 1)
     var id:Long?=null
     @Column(name = "action")
     lateinit var action:String  //action id unique used to determine which action is clicked
