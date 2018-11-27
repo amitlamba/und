@@ -88,8 +88,8 @@ creation_date timestamp with time zone DEFAULT now(),
 date_modified timestamp with time zone DEFAULT now()
 );
 
-CREATE sequence if NOT EXISTS notification_template_webpush_id_seq START 1000 increment 1;
-CREATE sequence  IF NOT EXISTS webpush_notification_action_id_seq START 1000 increment 1;
+ALTER sequence IF EXISTS notification_template_webpush_id_seq RESTART 1000 increment 1;
+ALTER sequence  IF  EXISTS webpush_notification_action_id_seq RESTART 1000 increment 1;
 ALTER sequence if EXISTS webpush_campaign_table_id_seq RESTART 1000 increment 1;
 
 ALTER SEQUENCE IF EXISTS notification_template_android_id_seq RESTART 1000 INCREMENT 1;
