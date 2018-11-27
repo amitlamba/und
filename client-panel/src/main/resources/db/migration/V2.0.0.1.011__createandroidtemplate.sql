@@ -88,13 +88,13 @@ creation_date timestamp with time zone DEFAULT now(),
 date_modified timestamp with time zone DEFAULT now()
 );
 
-ALTER sequence notification_template_webpush_id_seq RESTART 1000 increment 1;
-ALTER sequence webpush_notification_action_id_seq RESTART 1000 increment 1;
-ALTER sequence webpush_campaign_table_id_seq RESTART 1000 increment 1;
+CREATE sequence if NOT EXISTS notification_template_webpush_id_seq START 1000 increment 1;
+CREATE sequence  IF NOT EXISTS webpush_notification_action_id_seq START 1000 increment 1;
+ALTER sequence if EXISTS webpush_campaign_table_id_seq RESTART 1000 increment 1;
 
-ALTER SEQUENCE notification_template_android_id_seq RESTART 1000 INCREMENT 1;
-ALTER SEQUENCE notification_template_android_action_id_seq RESTART 1000 INCREMENT 1;
-ALTER SEQUENCE android_campaign_id_seq RESTART 1000 INCREMENT 1;
+ALTER SEQUENCE IF EXISTS notification_template_android_id_seq RESTART 1000 INCREMENT 1;
+ALTER SEQUENCE if EXISTS notification_template_android_action_id_seq RESTART 1000 INCREMENT 1;
+ALTER SEQUENCE IF EXISTS android_campaign_id_seq RESTART 1000 INCREMENT 1;
 
 
 create table if not exists fcm_failure_audit_log(

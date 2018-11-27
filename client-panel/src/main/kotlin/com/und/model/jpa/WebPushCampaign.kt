@@ -10,8 +10,8 @@ import javax.validation.constraints.NotNull
 @Table(name = "webpush_campaign_table")
 class WebPushCampaign {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "webpush_campaign_id_seq")
-    @SequenceGenerator(name="webpush_campaign_id_seq",sequenceName = "webpush_campaign_table_id_seq",allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "webpush_campaign_table_id_seq")
+    @SequenceGenerator(name="webpush_campaign_table_id_seq",sequenceName = "webpush_campaign_table_id_seq",allocationSize = 1)
     var id:Long?=null
     @NotNull
     @Column(name="client_id")
