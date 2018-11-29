@@ -87,7 +87,7 @@ fun com.und.model.mongo.eventapi.EventUser.copyNonNull(eventUser: EventUser): co
 
     val copyEventUser = com.und.model.mongo.eventapi.EventUser()
 
-    copyEventUser.id = unchanged(eventUser.identity.userId, id)
+    copyEventUser.id = id?:eventUser.identity.userId
     copyEventUser.additionalInfo.putAll(additionalInfo)
     copyEventUser.additionalInfo.putAll(eventUser.additionalInfo)
     copyEventUser.clientId = if (id == null) eventUser.clientId else clientId
