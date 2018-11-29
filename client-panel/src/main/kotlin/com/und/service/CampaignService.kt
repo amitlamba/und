@@ -3,12 +3,10 @@ package com.und.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.common.utils.loggerFor
 import com.und.config.EventStream
-import com.und.exception.EmailError
 import com.und.model.*
 import com.und.model.jpa.*
 import com.und.repository.jpa.CampaignAuditLogRepository
 import com.und.repository.jpa.CampaignRepository
-import com.und.repository.jpa.EmailFailureAuditLogRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.ScheduleUpdateException
 import com.und.web.controller.exception.UndBusinessValidationException
@@ -16,6 +14,7 @@ import com.und.web.model.ValidationError
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.messaging.support.MessageBuilder
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -58,6 +57,15 @@ class CampaignService {
         return campaigns?.map { buildWebCampaign(it) } ?: listOf()
     }
 
+    fun getCampaignById(campaignId: Long):WebCampaign{
+        var clientId=AuthenticationUtils.clientID?: throw AccessDeniedException("")
+        var campaign= campaignRepository.findByIdAndClientID(campaignId,clientId)
+        if(campaign.isPresent){
+            return buildWebCampaign(campaign = campaign.get())
+        }else{
+            throw ScheduleUpdateException("Campaign doesn't exist with id $campaignId and client : $clientId")
+        }
+    }
 
     fun save(webCampaign: WebCampaign): WebCampaign {
         val persistedCampaign = saveCampaign(webCampaign)
@@ -446,6 +454,16 @@ class CampaignService {
     }
 
 
+    fun getListOfCampaign(segmentId: Long): List<com.und.web.model.Campaign> {
 
+        var clientId=AuthenticationUtils.clientID ?: throw AccessDeniedException("")
+        var campaigns= campaignRepository.findByClientIDAndSegmentationID(clientId,segmentId)
+        var listOfCampaign= mutableListOf<com.und.web.model.Campaign>()
+        campaigns.forEach {
+            var campaign=buildWebCampaign(it)
+            listOfCampaign.add(campaign)
+        }
+        return listOfCampaign
+    }
 
 }

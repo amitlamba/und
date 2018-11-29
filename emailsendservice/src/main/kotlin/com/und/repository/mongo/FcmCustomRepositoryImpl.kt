@@ -15,19 +15,28 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 
 @Repository
-class FcmCustomRepositoryImpl:FcmCustomRepository {
+class FcmCustomRepositoryImpl : FcmCustomRepository {
 
     @Autowired
-    private lateinit var mongoTemplate:MongoTemplate
+    private lateinit var mongoTemplate: MongoTemplate
 
     override fun saveAnalyticMessage(message: AnalyticFcmMessage, clientId: Long) {
-        mongoTemplate.save(message,"${clientId}_fcmMessage")
+        mongoTemplate.save(message, resolveCollectionName(message.type,clientId))
     }
 
-    override fun updateStatus(mongoId:String,status:FcmMessageStatus,clientId: Long,clickTrackEventId: String?) {
+    override fun updateStatus(mongoId: String, status: FcmMessageStatus, clientId: Long, clickTrackEventId: String?,type: String) {
         val query = Query(Criteria.where("clientId").`is`(clientId).and("_id").`is`(ObjectId(mongoId)))
-        val statusupdate = FcmMessageUpdates(LocalDateTime.now(ZoneId.of("UTC")), status,clickTrackEventId)
-        val update = Update().push("statusUpdate", statusupdate).set("fcmStatus", status)
-        mongoTemplate.updateFirst(query, update, AnalyticFcmMessage::class.java, "${clientId}_fcmMessage")
+        val statusupdate = FcmMessageUpdates(LocalDateTime.now(ZoneId.of("UTC")), status, clickTrackEventId)
+        val update = Update().push("statusUpdates", statusupdate).set("status", status)
+        mongoTemplate.updateFirst(query, update, AnalyticFcmMessage::class.java, resolveCollectionName(type,clientId))
+    }
+
+    private fun resolveCollectionName(type:String,clientId:Long):String{
+        when(type){
+            "android" -> return "${clientId}_fcmMessage"
+            "web"   -> return "${clientId}_webFcmMessage"
+            "ios"   -> return "${clientId}_iosFcmMessage"
+            else    -> return ""
+        }
     }
 }

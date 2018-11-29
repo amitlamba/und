@@ -19,8 +19,8 @@ import kotlin.math.min
 class AndroidTemplate{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "android_template_id_seq")
-    @SequenceGenerator(name="android_template_id_seq",sequenceName = "android_template_id_seq" ,allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "notification_template_android_id_seq")
+    @SequenceGenerator(name="notification_template_android_id_seq",sequenceName = "notification_template_android_id_seq" ,allocationSize = 1)
     @Column(name="id")
     var id:Long?=null
     @NotNull
@@ -91,7 +91,7 @@ class AndroidTemplate{
 class Action {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "android_action_id_seq")
-    @SequenceGenerator(name="android_action_id_seq",sequenceName = "android_action_id_seq" ,allocationSize = 1)
+    @SequenceGenerator(name="android_action_id_seq",sequenceName = "notification_template_android_action_id_seq" ,allocationSize = 1)
     var id:Long?=null
 //    @JsonManagedReference
     @JsonIgnore

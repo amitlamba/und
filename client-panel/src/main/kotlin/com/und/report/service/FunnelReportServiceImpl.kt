@@ -1,5 +1,8 @@
 package com.und.report.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.mongodb.BasicDBObject
 import com.und.common.utils.loggerFor
 import com.und.report.model.FunnelData
@@ -17,6 +20,7 @@ import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.aggregation.*
+import org.springframework.data.mongodb.core.aggregation.Aggregation.group
 import org.springframework.stereotype.Component
 import java.time.ZoneId
 
@@ -71,9 +75,7 @@ class FunnelReportServiceImpl: FunnelReportService {
 
         val filterGlobalQ = segmentParserCriteria.filterGlobalQ(filters, tz)
         val matchOperation = Aggregation.match(filterGlobalQ.first)
-
         val sortOperation = Aggregation.sort(Sort.by("creationTime").ascending())
-
         val groupBys = mutableListOf<Field>()
         groupBys.add(Fields.field(AggregationQuerybuilder.Field.UserId.fName, AggregationQuerybuilder.Field.UserId.fName))
         groupBys.add(Fields.field(AggregationQuerybuilder.Field.EventName.fName, AggregationQuerybuilder.Field.EventName.fName))
@@ -83,17 +85,21 @@ class FunnelReportServiceImpl: FunnelReportService {
             groupBys.add(Fields.field("attribute", propertyPath))
         }
 
+        var c=ConvertOperators.ConvertOperatorFactory("creationTime").convertToLong()
+        var projectionOperation= Aggregation.project("userId","name").and(c).`as`("creationTime")
+
         val groupByOperation1 = Aggregation.group(Fields.from(*groupBys.toTypedArray())).push("creationTime").`as`("chronology")
 
         val aggregationOperations = mutableListOf<AggregationOperation>()
         aggregationOperations.add(matchOperation)
         aggregationOperations.add(sortOperation)
+        aggregationOperations.add(projectionOperation)
         aggregationOperations.add(groupByOperation1)
 
-        var pushObject = BasicDBObject("name", "\$_id.${AggregationQuerybuilder.Field.EventName.fName}").append("chronology", "\$chronology" )
+        var pushObject = BasicDBObject("Event", "\$_id.${AggregationQuerybuilder.Field.EventName.fName}").append("chronology", "\$chronology" )
         if(!funnelFilter.splitProprty.isNullOrBlank()) pushObject = pushObject.append("attribute", "\$_id.attribute")
 
-        val groupByOperation2 = Aggregation.group("\$${AggregationQuerybuilder.Field.UserId.fName}").push(pushObject).`as`("eventChronology")
+        val groupByOperation2 = Aggregation.group("\$${AggregationQuerybuilder.Field.UserId.fName}").push(pushObject).`as`("chronologies")
         aggregationOperations.add(groupByOperation2)
 
         return Aggregation.newAggregation(*aggregationOperations.toTypedArray())

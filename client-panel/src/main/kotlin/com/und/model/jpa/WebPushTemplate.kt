@@ -10,8 +10,8 @@ import javax.validation.constraints.NotNull
 @Table(name = "notification_template_webpush")
 class WebPushTemplate {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "webpush_template_id_seq")
-    @SequenceGenerator(name = "webpush_template_id_seq",sequenceName = "webpush_template_id_seq",allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "notification_template_webpush_id_seq")
+    @SequenceGenerator(name = "notification_template_webpush_id_seq",sequenceName = "notification_template_webpush_id_seq",allocationSize = 1)
     var id:Long?=null
     @Column(name="client_id")
     var clientId:Long?=null
@@ -52,6 +52,8 @@ class WebPushTemplate {
 //    custom key value pair
     @Column(name = "custom_data_pair")
     var customDataPair:String?=null
+    @Column(name="collapse_key")
+    var collapse_key:String?=null
     @field:CreationTimestamp
     @Column(name = "creation_date")
     lateinit var creationTime:LocalDateTime
@@ -66,8 +68,8 @@ class WebPushTemplate {
 @Table(name = "webpush_notification_action")
 class WebAction{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "webpush_action_id_seq")
-    @SequenceGenerator(name = "webpush_action_id_seq",sequenceName = "webpush_action_id_seq",allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "webpush_notification_action_id_seq")
+    @SequenceGenerator(name = "webpush_notification_action_id_seq",sequenceName = "webpush_notification_action_id_seq",allocationSize = 1)
     var id:Long?=null
     @Column(name = "action")
     lateinit var action:String  //action id unique used to determine which action is clicked

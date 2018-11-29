@@ -36,11 +36,7 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
     override fun liveUsers(segmentId: Long, groupBy: GroupBy, interval: Long): List<UserCountForProperty> {
         logger.debug("Liveusers aggregation for segmentId : $segmentId, groupBy: $groupBy, interval: $interval")
 
-        val clientID = AuthenticationUtils.clientID
-
-        if(clientID == null){
-            return emptyList()
-        }
+        val clientID = AuthenticationUtils.clientID?: return emptyList()
 
         val segmentUserIds = segmentService.segmentUserIds(segmentId, clientID)
         val tz = userSettingsService.getTimeZone()
@@ -55,11 +51,7 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
 
     override fun liveUserTrend(segmentId: Long, dates: List<String>, interval: Long): List<UserCountTrendForDate> {
         logger.debug("Liveusers aggregation for segmentId : $segmentId, dates: $dates, interval: $interval")
-        val clientID = AuthenticationUtils.clientID
-
-        if(clientID == null){
-            return emptyList()
-        }
+        val clientID = AuthenticationUtils.clientID?: return emptyList()
 
         val segmentUserIds = segmentService.segmentUserIds(segmentId, clientID)
         val tz = userSettingsService.getTimeZone()
@@ -79,12 +71,7 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
 
     override fun liveUserByTypeTrend(segmentId: Long, dates: List<String>, interval: Long): List<UserTypeTrendForDate> {
         logger.debug("LiveUSerByTypeTrend aggregation for segmentId : $segmentId, dates: $dates, interval: $interval")
-        val clientID = AuthenticationUtils.clientID
-
-        if(clientID == null){
-            return emptyList()
-        }
-
+        val clientID = AuthenticationUtils.clientID?: return emptyList()
         val segmentUserIds = segmentService.segmentUserIds(segmentId, clientID)
         val tz = userSettingsService.getTimeZone()
 
@@ -111,11 +98,7 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
 
     override fun userCountByEvent(segmentId: Long, dates: List<String>): List<UserCountByEventForDate> {
         logger.debug("Liveusers aggregation for segmentId : $segmentId, dates: $dates")
-        val clientID = AuthenticationUtils.clientID
-
-        if(clientID == null){
-            return emptyList()
-        }
+        val clientID = AuthenticationUtils.clientID?: return emptyList()
 
         val segmentUserIds = segmentService.segmentUserIds(segmentId, clientID)
         val tz = userSettingsService.getTimeZone()
@@ -134,11 +117,7 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
 
     override fun countTrend(requestFilter: EventReport.EventReportFilter, entityType: EventReport.EntityType, groupBy: GroupBy): List<EventReport.EventCount>{
         logger.debug("CountTrend aggregation for requestFilter : $requestFilter, entityType: $entityType, groupBy: $groupBy")
-        val clientID = AuthenticationUtils.clientID
-
-        if(clientID == null){
-            return emptyList()
-        }
+        val clientID = AuthenticationUtils.clientID?: return emptyList()
 
         val tz = userSettingsService.getTimeZone()
         val filters = buildCommonfilters(requestFilter, entityType, clientID)
@@ -150,11 +129,7 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
 
     override fun timePeriodTrend(requestFilter: EventReport.EventReportFilter, entityType: EventReport.EntityType, period: EventReport.PERIOD): List<EventReport.EventPeriodCount>{
         logger.debug("TimePeriodTrend aggregation for requestFilter : $requestFilter, entityType: $entityType, period: $period")
-        val clientID = AuthenticationUtils.clientID
-
-        if(clientID == null){
-            return emptyList()
-        }
+        val clientID = AuthenticationUtils.clientID?: return emptyList()
 
         val tz = userSettingsService.getTimeZone()
         val filters = buildCommonfilters(requestFilter, entityType, clientID)
@@ -167,11 +142,7 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
 
     override fun eventUserTrend(requestFilter: EventReport.EventReportFilter): List<EventReport.EventUserFrequency>{
         logger.debug("EventUserTrend aggregation for requestFilter : $requestFilter")
-        val clientID = AuthenticationUtils.clientID
-
-        if(clientID == null){
-            return emptyList()
-        }
+        val clientID = AuthenticationUtils.clientID?: return emptyList()
 
         val tz = userSettingsService.getTimeZone()
         val filters = buildCommonfilters(requestFilter, EventReport.EntityType.event, clientID)
@@ -187,11 +158,7 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
 
     override fun eventTimeTrend(requestFilter: EventReport.EventReportFilter): List<EventReport.EventTimeFrequency>{
         logger.debug("EventTimeTrend aggregation for requestFilter : $requestFilter")
-        val clientID = AuthenticationUtils.clientID
-
-        if(clientID == null){
-            return emptyList()
-        }
+        val clientID = AuthenticationUtils.clientID?: return emptyList()
 
         val tz = userSettingsService.getTimeZone()
         val filters = buildCommonfilters(requestFilter, EventReport.EntityType.event, clientID)
@@ -204,11 +171,7 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
 
     override fun aggregateTrend(requestFilter: EventReport.EventReportFilter, period: EventReport.PERIOD, aggregateBy: AggregateBy): List<EventReport.Aggregate>{
         logger.debug("AggregateTrend aggregation for requestFilter : $requestFilter, period: $period, aggregateBy: $aggregateBy")
-        val clientID = AuthenticationUtils.clientID
-
-        if(clientID == null){
-            return emptyList()
-        }
+        val clientID = AuthenticationUtils.clientID?: return emptyList()
 
         val tz = userSettingsService.getTimeZone()
         val filters = buildCommonfilters(requestFilter, EventReport.EntityType.event, clientID)

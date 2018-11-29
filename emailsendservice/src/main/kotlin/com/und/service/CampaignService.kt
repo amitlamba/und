@@ -98,17 +98,20 @@ class CampaignService {
                 toEmailAddresses = InternetAddress.parse(user.identity.email, false),
                 emailTemplateId = campaign.emailTemplateId ?: 0L,
                 emailTemplateName = campaign.emailTemplateName ?: "",
-                campaignId = campaign.campaignId
+                campaignId = campaign.campaignId,
+                eventUser = user
         )
     }
     private fun fcmAndroidMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
+        //Todo passing data model
         return FcmMessage(
                 clientId=clientId,
                 templateId = campaign.androidTemplateId?:0L,
                 to = user.identity.androidFcmToken?:"",
                 type = "android",
                 campaignId = campaign.campaignId,
-                userId = user.id
+                userId = user.id,
+                eventUser = user
         )
     }
 
@@ -119,7 +122,8 @@ class CampaignService {
                 to = user.identity.webFcmToken?:"",
                 type = "web",
                 campaignId = campaign.campaignId,
-                userId = user.id
+                userId = user.id,
+                eventUser = user
         )
     }
     private fun fcmIosMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
@@ -130,7 +134,8 @@ class CampaignService {
                 to = user.identity.iosFcmToken?:"",
                 type = "ios",
                 campaignId = campaign.campaignId,
-                userId = user.id
+                userId = user.id,
+                eventUser = user
         )
     }
 

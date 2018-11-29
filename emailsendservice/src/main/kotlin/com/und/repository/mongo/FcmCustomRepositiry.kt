@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface FcmCustomRepository {
     fun saveAnalyticMessage(message: AnalyticFcmMessage,clientId:Long)
-    fun updateStatus(mongoId:String,status: FcmMessageStatus,clientId: Long,clickTrackEventId: String?)
+    fun updateStatus(mongoId:String,status: FcmMessageStatus,clientId: Long,clickTrackEventId: String?,type:String)
 }
