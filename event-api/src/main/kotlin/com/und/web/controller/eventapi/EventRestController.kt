@@ -33,6 +33,8 @@ class EventRestController {
     @Autowired
     private lateinit var tenantProvider: TenantProvider
 
+
+
     @PreAuthorize("hasRole('ROLE_EVENT')")
     @PostMapping(value = ["/event/initialize"], produces = ["application/json"], consumes =["application/json"])
     fun initialize(@Valid @RequestBody identity: Identity?): ResponseEntity<Response<Identity>> {
@@ -54,10 +56,11 @@ class EventRestController {
     @PreAuthorize("hasRole('ROLE_EVENT')")
     @PostMapping(value = ["/push/profile"], produces = ["application/json"], consumes =["application/json"])
     fun profile(@Valid @RequestBody eventUser : EventUser): ResponseEntity<Response<Identity>> {
-
+        var userId:String?=null
+        eventUser.uid?.let { userId=eventUserService.checkUserExistOrNot(it)}
         //this method can't be called before identity has been initialized
         val identityInit = eventUserService.initialiseIdentity(eventUser.identity)
-        identityInit.userId = identityInit.userId ?: ObjectId.get().toString()
+        identityInit.userId = userId?: ObjectId.get().toString()
         identityInit.clientId = tenantProvider.tenant.toInt()
         eventUser.identity = identityInit
         eventUserService.toKafka(eventUser)

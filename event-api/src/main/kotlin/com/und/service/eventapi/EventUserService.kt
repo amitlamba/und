@@ -38,6 +38,13 @@ class EventUserService {
     @Autowired
     private lateinit var eventStream: EventStream
 
+    fun checkUserExistOrNot(uId:String):String?{
+        var eventUser=eventUserRepository.findByIdentityUid(uId)
+        if(eventUser.isPresent) {
+            return eventUser.get().id
+        }
+        return null
+    }
 
     fun save(eventUser: MongoEventUser): MongoEventUser {
         val clientId = eventUser.clientId

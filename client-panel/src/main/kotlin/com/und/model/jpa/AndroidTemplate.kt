@@ -49,8 +49,6 @@ class AndroidTemplate{
     var largeIconUrl:String?=null
     @Column(name = "deep_link")
     var deepLink:String?=null
-//    @JsonBackReference
-//    @JsonIgnore
     @OneToMany(mappedBy = "androidTemplateId",cascade = arrayOf(CascadeType.ALL),fetch = FetchType.EAGER)//try here coloum name
     var actionGroup:List<Action>?=null
     @Column(name = "sound")
@@ -93,7 +91,6 @@ class Action {
     @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "android_action_id_seq")
     @SequenceGenerator(name="android_action_id_seq",sequenceName = "notification_template_android_action_id_seq" ,allocationSize = 1)
     var id:Long?=null
-//    @JsonManagedReference
     @JsonIgnore
     @ManyToOne(fetch=FetchType.EAGER)
     @JoinColumn(name = "android_template_id")
