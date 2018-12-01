@@ -100,6 +100,9 @@ fun com.und.model.mongo.eventapi.EventUser.copyNonNull(eventUser: EventUser): co
     copyEventUser.identity.mobile = unchanged(eventUser.mobile, identity.mobile)
     copyEventUser.identity.email = unchanged(eventUser.email, identity.email)
     copyEventUser.identity.undId = unchanged(eventUser.undId, identity.undId)
+    copyEventUser.identity.androidFcmToken=unchanged(eventUser.androidFcmToken,identity.androidFcmToken)
+    copyEventUser.identity.webFcmToken=unchanged(eventUser.webFcmToken,identity.webFcmToken)
+    copyEventUser.identity.iosFcmToken=unchanged(eventUser.iosFcmToken,identity.iosFcmToken)
 
     copyEventUser.standardInfo = StandardInfo()
     copyEventUser.standardInfo.firstname = unchanged(eventUser.firstName, standardInfo.firstname)
