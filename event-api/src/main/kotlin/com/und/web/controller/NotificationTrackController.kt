@@ -23,18 +23,18 @@ class NotificationTrackController {
         return emailService.getImage(id)
     }
 
-    @PostMapping(value ="/android/tracking")
-    fun trackAndroidFcmMessage(mongoId:String,clientId:Long){
-       fcmService.updateStatus(mongoId,clientId,"android")
+    @GetMapping(value ="/android/tracking/{mongoId}/{clientId}")
+    fun trackAndroidFcmMessage(@PathVariable(required = true)mongoId:String,@PathVariable(required = true)clientId:Long){
+        fcmService.updateStatus(mongoId,clientId,"android")
     }
 
-    @PostMapping(value="/webpush/tracking")
-    fun trackWebpushFcmMessage(mongoId: String,clientId: Long){
+    @GetMapping(value ="/webpush/tracking/{mongoId}/{clientId}")
+    fun trackWebpushFcmMessage(@PathVariable(required = true)mongoId:String,@PathVariable(required = true)clientId:Long){
         fcmService.updateStatus(mongoId,clientId,"web");
     }
 
-    @PostMapping(value ="/ios/tracking")
-    fun trackIosFcmMessage(mongoId:String,clientId:Long){
+    @GetMapping(value ="/ios/tracking/{mongoId}/{clientId}")
+    fun trackIosFcmMessage(@PathVariable(required = true)mongoId:String,@PathVariable(required = true)clientId:Long){
         fcmService.updateStatus(mongoId,clientId,"ios")
     }
 }
