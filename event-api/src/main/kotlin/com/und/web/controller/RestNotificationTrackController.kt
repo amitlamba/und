@@ -11,20 +11,30 @@ public class RestNotificationTrackController{
     @Autowired
     private lateinit var fcmService: FcmService
 
-    @GetMapping(value="/android/tracking/{mongoId}/{clientId}")
-
-    fun trackAndroidFcmMessage(@PathVariable(required = true)mongoId:String, @PathVariable(required = true)clientId:Long){
+    @PostMapping(value="/android/tracking")
+    fun trackAndroidFcmMessage(@RequestBody track:Track){
+        var mongoId=track.mongoId
+        var clientId=track.clientId
         fcmService.updateStatus(mongoId,clientId,"android")
     }
 
-    @RequestMapping(value ="/webpush/tracking/{mongoId}/{clientId}",method =[RequestMethod.GET],consumes = ["application/json"])
-    fun trackWebpushFcmMessage(@PathVariable(required = true)mongoId:String, @PathVariable(required = true)clientId:Long){
+    @PostMapping(value="/webpush/tracking")
+    fun trackWebpushFcmMessage(@RequestBody track:Track){
+        var mongoId=track.mongoId
+        var clientId=track.clientId
         fcmService.updateStatus(mongoId,clientId,"web");
     }
 
-    @GetMapping(value ="/ios/tracking/{mongoId}/{clientId}")
-    fun trackIosFcmMessage(@PathVariable(required = true)mongoId:String, @PathVariable(required = true)clientId:Long){
+    @PostMapping(value="/ios/tracking")
+    fun trackIosFcmMessage(@RequestBody track:Track){
+        var mongoId=track.mongoId
+        var clientId=track.clientId
         fcmService.updateStatus(mongoId,clientId,"ios")
     }
 
+}
+
+class Track{
+    lateinit var mongoId:String
+    var clientId: Long=-1
 }
