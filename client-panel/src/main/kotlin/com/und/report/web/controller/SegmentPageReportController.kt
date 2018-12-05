@@ -5,7 +5,6 @@ import com.und.report.service.ReachabilityService
 import com.und.report.web.model.Reachability
 import com.und.service.CampaignService
 import com.und.web.model.Campaign
-import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestMapping
@@ -19,7 +18,7 @@ class SegmentPageReportController {
     @Autowired
     private lateinit var campaignService: CampaignService
     @Autowired
-    private lateinit var reachabilityService:ReachabilityService
+    private lateinit var reachabilityService: ReachabilityService
 
     @GetMapping("/reachability")
     fun reachability(@RequestParam(name = "segmentid") segmentId: Long): Reachability {

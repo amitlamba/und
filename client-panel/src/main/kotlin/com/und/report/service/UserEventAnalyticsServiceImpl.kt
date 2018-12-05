@@ -7,7 +7,6 @@ import com.und.report.web.model.*
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.*
 import com.und.web.model.*
-import com.und.web.model.Unit
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.aggregation.Aggregation
@@ -15,10 +14,11 @@ import org.springframework.stereotype.Service
 import com.und.service.AggregationQuerybuilder.*
 
 @Service
-class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
+class UserEventAnalyticsServiceImpl : UserEventAnalyticsService {
 
     companion object {
         val logger: Logger = loggerFor(UserEventAnalyticsServiceImpl::class.java)
+        const val allUser = ReportUtil.ALL_USER_SEGMENT
     }
 
     @Autowired
@@ -36,13 +36,12 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
     override fun liveUsers(segmentId: Long, groupBy: GroupBy, interval: Long): List<UserCountForProperty> {
         logger.debug("Liveusers aggregation for segmentId : $segmentId, groupBy: $groupBy, interval: $interval")
 
-        val clientID = AuthenticationUtils.clientID?: return emptyList()
+        val clientID = AuthenticationUtils.clientID ?: return emptyList()
+        val filters = createFilterList(segmentId, clientID, emptyList())
 
-        val segmentUserIds = segmentService.segmentUserIds(segmentId, clientID)
-        val tz = userSettingsService.getTimeZone()
-        //TODO include creationTime filter based on interval
-        val filters = listOf(ReportUtil.buildFilter(GlobalFilterType.EventProperties, "userId", DataType.string, StringOperator.Contains.name, segmentUserIds, null))
         val groupBys = listOf(groupBy)
+        //TODO include creationTime filter based on interval
+        val tz = userSettingsService.getTimeZone()
         val userAggregation = aggregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap(), EventReport.EntityType.user, tz, clientID)
 
         val aggregateResult = userAnalyticsRepository.aggregate(userAggregation, clientID)
@@ -51,19 +50,16 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
 
     override fun liveUserTrend(segmentId: Long, dates: List<String>, interval: Long): List<UserCountTrendForDate> {
         logger.debug("Liveusers aggregation for segmentId : $segmentId, dates: $dates, interval: $interval")
-        val clientID = AuthenticationUtils.clientID?: return emptyList()
+        val clientID = AuthenticationUtils.clientID ?: return emptyList()
 
-        val segmentUserIds = segmentService.segmentUserIds(segmentId, clientID)
-        val tz = userSettingsService.getTimeZone()
-
-        val filters = listOf(ReportUtil.buildFilter(GlobalFilterType.EventProperties, Field.UserId.fName, DataType.string, StringOperator.Contains.name, segmentUserIds, null),
-                ReportUtil.buildFilter(GlobalFilterType.EventComputedProperties, Field.DateVal.fName, DataType.string, StringOperator.Contains.name, dates, null))
-
+        val otherFilters = listOf(ReportUtil.buildFilter(GlobalFilterType.EventComputedProperties, Field.DateVal.fName, DataType.string, StringOperator.Contains.name, dates, null))
+        val filters = createFilterList(segmentId, clientID, otherFilters)
         val groupBys = listOf(buildGroupBy(Field.DateVal.fName, GlobalFilterType.EventComputedProperties),
                 buildGroupBy(Field.MinutesPeriod.fName, GlobalFilterType.EventComputedProperties))
 
         val propertyValues = mapOf<String, Any>(NUM_OF_MINUTES to interval.toString())
 
+        val tz = userSettingsService.getTimeZone()
         val userAggregation = aggregationQuerybuilder.buildAggregation(filters, groupBys, null, propertyValues, EventReport.EntityType.user, tz, clientID)
         val aggregateResult = userAnalyticsRepository.aggregate(userAggregation, clientID)
         return buildLiveUserTrendResult(aggregateResult)
@@ -71,12 +67,9 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
 
     override fun liveUserByTypeTrend(segmentId: Long, dates: List<String>, interval: Long): List<UserTypeTrendForDate> {
         logger.debug("LiveUSerByTypeTrend aggregation for segmentId : $segmentId, dates: $dates, interval: $interval")
-        val clientID = AuthenticationUtils.clientID?: return emptyList()
-        val segmentUserIds = segmentService.segmentUserIds(segmentId, clientID)
-        val tz = userSettingsService.getTimeZone()
-
-        val filters = listOf(ReportUtil.buildFilter(GlobalFilterType.EventProperties, Field.UserId.fName, DataType.string, StringOperator.Contains.name, segmentUserIds, null),
-                ReportUtil.buildFilter(GlobalFilterType.EventComputedProperties, Field.DateVal.fName, DataType.string, StringOperator.Contains.name, dates, null))
+        val clientID = AuthenticationUtils.clientID ?: return emptyList()
+        val otherFilters = listOf(ReportUtil.buildFilter(GlobalFilterType.EventComputedProperties, Field.DateVal.fName, DataType.string, StringOperator.Contains.name, dates, null))
+        val filters = createFilterList(segmentId, clientID, otherFilters)
 
         val groupBys = listOf(buildGroupBy(Field.DateVal.fName, GlobalFilterType.EventComputedProperties),
                 buildGroupBy(Field.MinutesPeriod.fName, GlobalFilterType.EventComputedProperties),
@@ -84,6 +77,7 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
 
         val propertyValues = mapOf<String, Any>(NUM_OF_MINUTES to interval.toString())
 
+        val tz = userSettingsService.getTimeZone()
         val buildAggregationPipeline = aggregationQuerybuilder.buildAggregationPipeline(filters, groupBys, null, propertyValues, EventReport.EntityType.user, tz, clientID)
         val projectionOperation = Aggregation.project().and(Field.DateVal.fName).`as`(Field.DateVal.fName)
                 .and(Field.MinutesPeriod.fName).`as`(Field.MinutesPeriod.fName)
@@ -98,26 +92,24 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
 
     override fun userCountByEvent(segmentId: Long, dates: List<String>): List<UserCountByEventForDate> {
         logger.debug("Liveusers aggregation for segmentId : $segmentId, dates: $dates")
-        val clientID = AuthenticationUtils.clientID?: return emptyList()
+        val clientID = AuthenticationUtils.clientID ?: return emptyList()
 
-        val segmentUserIds = segmentService.segmentUserIds(segmentId, clientID)
-        val tz = userSettingsService.getTimeZone()
+        val otherFilters = listOf(ReportUtil.buildFilter(GlobalFilterType.EventComputedProperties, Field.DateVal.fName, DataType.string, StringOperator.Contains.name, dates, null))
+        val filters = createFilterList(segmentId, clientID, otherFilters)
 
-        val filters = listOf(ReportUtil.buildFilter(GlobalFilterType.EventProperties, Field.UserId.fName, DataType.string, StringOperator.Contains.name, segmentUserIds, null),
-                ReportUtil.buildFilter(GlobalFilterType.EventComputedProperties, Field.DateVal.fName, DataType.string, StringOperator.Contains.name,
-                        dates, null))
         val groupBys = listOf(buildGroupBy(Field.DateVal.fName, GlobalFilterType.EventComputedProperties),
                 buildGroupBy(Field.EventName.fName, GlobalFilterType.EventProperties))
 
+        val tz = userSettingsService.getTimeZone()
         val userAggregation = aggregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap(), EventReport.EntityType.user, tz, clientID)
         val aggregateResult = userAnalyticsRepository.aggregate(userAggregation, clientID)
 
         return buildUserCountByEventResult(aggregateResult)
     }
 
-    override fun countTrend(requestFilter: EventReport.EventReportFilter, entityType: EventReport.EntityType, groupBy: GroupBy): List<EventReport.EventCount>{
+    override fun countTrend(requestFilter: EventReport.EventReportFilter, entityType: EventReport.EntityType, groupBy: GroupBy): List<EventReport.EventCount> {
         logger.debug("CountTrend aggregation for requestFilter : $requestFilter, entityType: $entityType, groupBy: $groupBy")
-        val clientID = AuthenticationUtils.clientID?: return emptyList()
+        val clientID = AuthenticationUtils.clientID ?: return emptyList()
 
         val tz = userSettingsService.getTimeZone()
         val filters = buildCommonfilters(requestFilter, entityType, clientID)
@@ -127,9 +119,9 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
         return buildCountTrend(resultList)
     }
 
-    override fun timePeriodTrend(requestFilter: EventReport.EventReportFilter, entityType: EventReport.EntityType, period: EventReport.PERIOD): List<EventReport.EventPeriodCount>{
+    override fun timePeriodTrend(requestFilter: EventReport.EventReportFilter, entityType: EventReport.EntityType, period: EventReport.PERIOD): List<EventReport.EventPeriodCount> {
         logger.debug("TimePeriodTrend aggregation for requestFilter : $requestFilter, entityType: $entityType, period: $period")
-        val clientID = AuthenticationUtils.clientID?: return emptyList()
+        val clientID = AuthenticationUtils.clientID ?: return emptyList()
 
         val tz = userSettingsService.getTimeZone()
         val filters = buildCommonfilters(requestFilter, entityType, clientID)
@@ -140,9 +132,9 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
         return buildTimePeriodTrend(resultList)
     }
 
-    override fun eventUserTrend(requestFilter: EventReport.EventReportFilter): List<EventReport.EventUserFrequency>{
+    override fun eventUserTrend(requestFilter: EventReport.EventReportFilter): List<EventReport.EventUserFrequency> {
         logger.debug("EventUserTrend aggregation for requestFilter : $requestFilter")
-        val clientID = AuthenticationUtils.clientID?: return emptyList()
+        val clientID = AuthenticationUtils.clientID ?: return emptyList()
 
         val tz = userSettingsService.getTimeZone()
         val filters = buildCommonfilters(requestFilter, EventReport.EntityType.event, clientID)
@@ -156,9 +148,9 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
         return buildEventUserTrend(resultList)
     }
 
-    override fun eventTimeTrend(requestFilter: EventReport.EventReportFilter): List<EventReport.EventTimeFrequency>{
+    override fun eventTimeTrend(requestFilter: EventReport.EventReportFilter): List<EventReport.EventTimeFrequency> {
         logger.debug("EventTimeTrend aggregation for requestFilter : $requestFilter")
-        val clientID = AuthenticationUtils.clientID?: return emptyList()
+        val clientID = AuthenticationUtils.clientID ?: return emptyList()
 
         val tz = userSettingsService.getTimeZone()
         val filters = buildCommonfilters(requestFilter, EventReport.EntityType.event, clientID)
@@ -169,9 +161,9 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
         return buildEventTimeTrend(resultList)
     }
 
-    override fun aggregateTrend(requestFilter: EventReport.EventReportFilter, period: EventReport.PERIOD, aggregateBy: AggregateBy): List<EventReport.Aggregate>{
+    override fun aggregateTrend(requestFilter: EventReport.EventReportFilter, period: EventReport.PERIOD, aggregateBy: AggregateBy): List<EventReport.Aggregate> {
         logger.debug("AggregateTrend aggregation for requestFilter : $requestFilter, period: $period, aggregateBy: $aggregateBy")
-        val clientID = AuthenticationUtils.clientID?: return emptyList()
+        val clientID = AuthenticationUtils.clientID ?: return emptyList()
 
         val tz = userSettingsService.getTimeZone()
         val filters = buildCommonfilters(requestFilter, EventReport.EntityType.event, clientID)
@@ -183,14 +175,14 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
     }
 
     private fun buildTimePeriodGroupBy(period: EventReport.PERIOD): List<GroupBy> {
-        when(period){
+        when (period) {
             EventReport.PERIOD.daily -> {
                 //TODO correct for daily
-                return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties),buildGroupBy("dayOfMonth", GlobalFilterType.EventTimeProperties))
+                return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties), buildGroupBy("dayOfMonth", GlobalFilterType.EventTimeProperties))
             }
             EventReport.PERIOD.weekly -> {
                 //TODO correct for weekly
-                return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties),buildGroupBy("dayOfWeek", GlobalFilterType.EventTimeProperties))
+                return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties), buildGroupBy("dayOfWeek", GlobalFilterType.EventTimeProperties))
             }
             EventReport.PERIOD.monthly -> {
                 return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties))
@@ -198,7 +190,7 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
         }
     }
 
-    private fun buildGroupBy(name: String, globalFilterType: GlobalFilterType): GroupBy{
+    private fun buildGroupBy(name: String, globalFilterType: GlobalFilterType): GroupBy {
         val groupBy = GroupBy()
         groupBy.groupName = name
         groupBy.groupFilterType = globalFilterType
@@ -207,23 +199,24 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
 
 
     private fun buildCommonfilters(requestFilter: EventReport.EventReportFilter, entityType: EventReport.EntityType, clientID: Long): List<GlobalFilter> {
-        val segmentUserIds = segmentService.segmentUserIds(requestFilter.segmentid, clientID)
-        val filters = mutableListOf<GlobalFilter>()
-        filters.add(ReportUtil.buildFilter(GlobalFilterType.EventProperties, Field.EventName.fName, DataType.string, StringOperator.Equals.name,
+
+        val commonFilters = mutableListOf<GlobalFilter>()
+
+        commonFilters.add(ReportUtil.buildFilter(GlobalFilterType.EventProperties, Field.EventName.fName, DataType.string, StringOperator.Equals.name,
                 listOf(requestFilter.eventName), null))
-        filters.add(ReportUtil.buildFilter(GlobalFilterType.EventProperties, Field.UserId.fName, DataType.string, StringOperator.Contains.name,
-                segmentUserIds, null))
-        filters.add(ReportUtil.buildFilter(GlobalFilterType.EventProperties, Field.CreationTime.fName, DataType.date, DateOperator.Between.name,
+
+        val otherFilters = listOf(ReportUtil.buildFilter(GlobalFilterType.EventProperties, Field.CreationTime.fName, DataType.date, DateOperator.Between.name,
                 listOf(requestFilter.fromDate, requestFilter.toDate), null))
+        val filters = createFilterList(requestFilter.segmentid, clientID, otherFilters)
 
+        commonFilters.addAll(filters)
+        commonFilters.addAll(requestFilter.propFilter)
 
-        filters.addAll(requestFilter.propFilter)
-
-        return filters
+        return commonFilters
     }
 
 
-    private fun     buildLiveUserResult(aggregate: List<AggregateOutput>): List<UserCountForProperty>{
+    private fun buildLiveUserResult(aggregate: List<AggregateOutput>): List<UserCountForProperty> {
         return aggregate.map { UserCountForProperty(it.aggregateVal.toInt(), it.groupByInfo) }
     }
 
@@ -231,29 +224,33 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
      * Converting list of items like [{"_id" : {"dateVal" : "2018-08-20", "timePeriod" : 88.0}, "uniqueUserCount" : "4"}, {"_id" : {"dateVal" : "2018-08-20", "timePeriod" : 92.0}, "uniqueUserCount" : "6"}]
      * into list of {"dateVal" : "2018-08-20", [{"timePeriod" : 88.0, "uniqueUserCount" : "4"}, {"timePeriod" : 92.0, "uniqueUserCount" : "6"}]}
      */
-    private fun buildLiveUserTrendResult(aggregate: List<AggregateOutput>): List<UserCountTrendForDate>{
-         return aggregate.map{ UserCountTrendForDate(it.groupByInfo[Field.DateVal.fName].toString(),
-                            listOf(UserCountForTime(it.aggregateVal.toInt(), it.groupByInfo[Field.MinutesPeriod.fName].toString().toDouble().toInt()))) }
-                 .groupBy({it.date}, {it.trenddata.first()})
-                 .map { UserCountTrendForDate(it.key, it.value) }
+    private fun buildLiveUserTrendResult(aggregate: List<AggregateOutput>): List<UserCountTrendForDate> {
+        return aggregate.map {
+            UserCountTrendForDate(it.groupByInfo[Field.DateVal.fName].toString(),
+                    listOf(UserCountForTime(it.aggregateVal.toInt(), it.groupByInfo[Field.MinutesPeriod.fName].toString().toDouble().toInt())))
+        }
+                .groupBy({ it.date }, { it.trenddata.first() })
+                .map { UserCountTrendForDate(it.key, it.value) }
     }
 
-    private fun buildLiveUserByTypeTrendResult(aggregate: List<AggregateOutput>): List<UserTypeTrendForDate>{
-        val groupedByDate = aggregate.map { it -> mapOf(it.groupByInfo[Field.DateVal.fName] to mapOf(AGGREGATE_VALUE to it.aggregateVal.toInt(),
-                            Field.MinutesPeriod.fName to it.groupByInfo[Field.MinutesPeriod.fName], Field.UserType.fName to it.groupByInfo[Field.UserType.fName])) }
-                .groupBy({it.keys.toList().first()}, {it.values.toList().first()})
+    private fun buildLiveUserByTypeTrendResult(aggregate: List<AggregateOutput>): List<UserTypeTrendForDate> {
+        val groupedByDate = aggregate.map { it ->
+            mapOf(it.groupByInfo[Field.DateVal.fName] to mapOf(AGGREGATE_VALUE to it.aggregateVal.toInt(),
+                    Field.MinutesPeriod.fName to it.groupByInfo[Field.MinutesPeriod.fName], Field.UserType.fName to it.groupByInfo[Field.UserType.fName]))
+        }
+                .groupBy({ it.keys.toList().first() }, { it.values.toList().first() })
 
         val result = mutableListOf<UserTypeTrendForDate>()
-        groupedByDate.forEach(){
+        groupedByDate.forEach() {
             val userCountDataList = mutableListOf<UserCountByTypeForTime>()
-            val groupedByTime = it.value.groupBy ({it[Field.MinutesPeriod.fName].toString().toDouble().toInt()}, {it})
+            val groupedByTime = it.value.groupBy({ it[Field.MinutesPeriod.fName].toString().toDouble().toInt() }, { it })
 
-            groupedByTime.forEach(){
+            groupedByTime.forEach() {
                 val newUserCountList = it.value.filter { it[Field.UserType.fName] == "new" }
                 val oldUserCountList = it.value.filter { it[Field.UserType.fName] == "old" }
 
-                val newUserCount = if(newUserCountList.isEmpty()) 0 else newUserCountList.first()[AGGREGATE_VALUE].toString().toDouble().toInt()
-                val oldUserCount = if(oldUserCountList.isEmpty()) 0 else oldUserCountList.first()[AGGREGATE_VALUE].toString().toDouble().toInt()
+                val newUserCount = if (newUserCountList.isEmpty()) 0 else newUserCountList.first()[AGGREGATE_VALUE].toString().toDouble().toInt()
+                val oldUserCount = if (oldUserCountList.isEmpty()) 0 else oldUserCountList.first()[AGGREGATE_VALUE].toString().toDouble().toInt()
                 val record = UserCountByTypeForTime(newUserCount, oldUserCount, it.key)
                 userCountDataList.add(record)
             }
@@ -264,32 +261,47 @@ class UserEventAnalyticsServiceImpl: UserEventAnalyticsService {
     }
 
 
-
-    private fun buildUserCountByEventResult(aggregate: List<AggregateOutput>): List<UserCountByEventForDate>{
-        return aggregate.map{ UserCountByEventForDate(it.groupByInfo[Field.DateVal.fName].toString(),
-                listOf(UserCountByEvent(it.aggregateVal.toInt(), it.groupByInfo[Field.EventName.fName].toString()))) }
-                .groupBy({it.date}, {it.userCountData.first()})
+    private fun buildUserCountByEventResult(aggregate: List<AggregateOutput>): List<UserCountByEventForDate> {
+        return aggregate.map {
+            UserCountByEventForDate(it.groupByInfo[Field.DateVal.fName].toString(),
+                    listOf(UserCountByEvent(it.aggregateVal.toInt(), it.groupByInfo[Field.EventName.fName].toString())))
+        }
+                .groupBy({ it.date }, { it.userCountData.first() })
                 .map { UserCountByEventForDate(it.key, it.value) }
     }
 
-    private fun buildCountTrend(aggregate: List<AggregateOutput>): List<EventReport.EventCount>{
-        return aggregate.map{ EventReport.EventCount(it.aggregateVal.toInt(), it.groupByInfo)}
+    private fun buildCountTrend(aggregate: List<AggregateOutput>): List<EventReport.EventCount> {
+        return aggregate.map { EventReport.EventCount(it.aggregateVal.toInt(), it.groupByInfo) }
     }
 
-    private fun buildTimePeriodTrend(aggregate: List<AggregateOutput>): List<EventReport.EventPeriodCount>{
-        return aggregate.map{ EventReport.EventPeriodCount(it.aggregateVal.toInt(), it.groupByInfo)}
+    private fun buildTimePeriodTrend(aggregate: List<AggregateOutput>): List<EventReport.EventPeriodCount> {
+        return aggregate.map { EventReport.EventPeriodCount(it.aggregateVal.toInt(), it.groupByInfo) }
     }
 
-    private fun buildEventUserTrend(aggregate: List<AggregateOutput>): List<EventReport.EventUserFrequency>{
-        return aggregate.map{ EventReport.EventUserFrequency(it.aggregateVal.toInt(), it.groupByInfo["_id"].toString().toDouble().toInt())}
+    private fun buildEventUserTrend(aggregate: List<AggregateOutput>): List<EventReport.EventUserFrequency> {
+        return aggregate.map { EventReport.EventUserFrequency(it.aggregateVal.toInt(), it.groupByInfo["_id"].toString().toDouble().toInt()) }
     }
 
-    private fun buildEventTimeTrend(aggregate: List<AggregateOutput>): List<EventReport.EventTimeFrequency>{
-        return aggregate.map{ EventReport.EventTimeFrequency(it.aggregateVal.toInt(), it.groupByInfo["_id"].toString().toDouble().toInt())}
+    private fun buildEventTimeTrend(aggregate: List<AggregateOutput>): List<EventReport.EventTimeFrequency> {
+        return aggregate.map { EventReport.EventTimeFrequency(it.aggregateVal.toInt(), it.groupByInfo["_id"].toString().toDouble().toInt()) }
     }
 
-    private fun buildAggregateTrend(aggregate: List<AggregateOutput>): List<EventReport.Aggregate>{
-        return aggregate.map{ EventReport.Aggregate(it.aggregateVal.toLong(), it.groupByInfo)}
+    private fun buildAggregateTrend(aggregate: List<AggregateOutput>): List<EventReport.Aggregate> {
+        return aggregate.map { EventReport.Aggregate(it.aggregateVal.toLong(), it.groupByInfo) }
+    }
+
+    private fun createFilterList(segmentId: Long, clientID: Long, otherFilters: List<GlobalFilter>): List<GlobalFilter> {
+        val filters = mutableListOf<GlobalFilter>()
+        if (segmentId != allUser) {
+            val segmentUserIds = segmentService.segmentUserIds(segmentId, clientID)
+            val segmentFilter = ReportUtil.buildFilter(GlobalFilterType.EventProperties, Field.UserId.fName, DataType.string, StringOperator.Contains.name, segmentUserIds, null)
+            filters.add(segmentFilter)
+
+        }
+        if (otherFilters.isNotEmpty())
+            filters.addAll(otherFilters)
+        return filters.toList()
+
     }
 
 

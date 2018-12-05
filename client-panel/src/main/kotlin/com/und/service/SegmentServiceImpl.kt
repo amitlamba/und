@@ -73,7 +73,7 @@ class SegmentServiceImpl : SegmentService {
         return buildWebSegment(this.persistedSegmentById(id))
     }
 
-    override fun persistedSegmentById(id:Long): Segment {
+    override fun persistedSegmentById(id: Long): Segment {
         val clientID = AuthenticationUtils.clientID
         if (clientID != null) {
             val segmentOption = segmentRepository.findByIdAndClientID(id, clientID)
@@ -96,6 +96,9 @@ class SegmentServiceImpl : SegmentService {
     }
 
     override fun segmentUsers(segmentId: Long, clientId: Long): List<EventUser> {
+        if(segmentId == -2L) {
+            return getTestSEgmentUsers(clientId)
+        }
         val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
         return if (segmentOption.isPresent) {
             val segment = segmentOption.get()
@@ -121,13 +124,13 @@ class SegmentServiceImpl : SegmentService {
         val (didQueries, joincondition) = queries.didq
         if (didQueries.isNotEmpty()) {
             val userDidList = retrieveUsers(didQueries, joincondition, clientId)
-            if(!userDidList.toSet().contains(userId)){
+            if (!userDidList.toSet().contains(userId)) {
                 return false
             }
-        }else if (queries.query!=null){
-            var query= Query().addCriteria(queries.query)
-            val userList=eventRepository.usersFromEvent(query,clientId)
-            if(!userList.toSet().contains(userId)){
+        } else if (queries.query != null) {
+            var query = Query().addCriteria(queries.query)
+            val userList = eventRepository.usersFromEvent(query, clientId)
+            if (!userList.toSet().contains(userId)) {
                 return false
             }
         }
@@ -135,7 +138,7 @@ class SegmentServiceImpl : SegmentService {
         val (didNotQueries, joinconditionfornot) = queries.didntq
         if (didNotQueries.isNotEmpty()) {
             val userWhoDidIt = retrieveUsers(didNotQueries, joinconditionfornot, clientId)
-            if(userWhoDidIt.toSet().contains(userId)){
+            if (userWhoDidIt.toSet().contains(userId)) {
                 return false
             }
         }
@@ -143,7 +146,7 @@ class SegmentServiceImpl : SegmentService {
         val userQuery = queries.userQuery
         if (userQuery != null) {
             val userProfiles = eventUserRepository.usersFromUserProfile(userQuery, clientId)
-            if(!userProfiles.toSet().contains(userId)){
+            if (!userProfiles.toSet().contains(userId)) {
                 return false
             }
         }
@@ -153,6 +156,11 @@ class SegmentServiceImpl : SegmentService {
 
     private fun getSegmentUsersList(segment: Segment, clientId: Long): List<EventUser> {
         val userIds = getSegmentUserIds(segment, clientId)
+        return eventUserRepository.findUserByIds(userIds.toSet(), clientId)
+    }
+
+    private fun getTestSEgmentUsers(clientId: Long): List<EventUser> {
+        val userIds = eventUserRepository.testSegmentUsers(clientId)
         return eventUserRepository.findUserByIds(userIds.toSet(), clientId)
     }
 
@@ -167,9 +175,9 @@ class SegmentServiceImpl : SegmentService {
         if (didQueries.isNotEmpty()) {
             val userDidList = retrieveUsers(didQueries, joincondition, clientId)
             allResult.add(userDidList.toSet())
-        }else if (queries.query!=null){
-            var query= Query().addCriteria(queries.query)
-            val userList=eventRepository.usersFromEvent(query, clientId)
+        } else if (queries.query != null) {
+            var query = Query().addCriteria(queries.query)
+            val userList = eventRepository.usersFromEvent(query, clientId)
             allResult.add(userList.toSet())
         }
 

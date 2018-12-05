@@ -1,25 +1,30 @@
 package com.und.report.repository.mongo
 
-import com.und.report.web.model.Reachability
+import com.und.common.utils.loggerFor
+import com.und.report.service.ReportUtil
 import com.und.report.web.model.ReachabilityResult
 import org.bson.types.ObjectId
+import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
-import org.springframework.data.mongodb.core.aggregation.FacetOperation
-import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.stereotype.Repository
 
 @Repository
 class ReachabilityRepositoryImpl :ReachabilityRepository{
 
+    companion object {
+        val logger: Logger = loggerFor(ReachabilityRepositoryImpl::class.java)
+        const val allUser = ReportUtil.ALL_USER_SEGMENT
+    }
+
     @Autowired
     private lateinit var mongoTemplate:MongoTemplate
 
     override fun getReachabilityOfSegment(clientId:Long,segmentId: Long, segmentUsers: List<ObjectId>):ReachabilityResult {
 
-        var matchOperation=Aggregation.match(Criteria("_id").`in`(segmentUsers))
+
 
         var facetOperation=Aggregation.facet()
                 .and(
@@ -45,7 +50,12 @@ class ReachabilityRepositoryImpl :ReachabilityRepository{
                 .and("ios.count").`as`("iosCount")
                 .and("webpush.count").`as`("webCount")
 
-        var aggregation:Aggregation= Aggregation.newAggregation(matchOperation,facetOperation,projectionOperation)
-       return mongoTemplate.aggregate(aggregation,"${clientId}_eventUser", ReachabilityResult::class.java).mappedResults[0]
+        val aggregation:Aggregation = if(segmentId != allUser) {
+            val matchOperation = Aggregation.match(Criteria("_id").`in`(segmentUsers))
+            Aggregation.newAggregation(matchOperation,facetOperation,projectionOperation)
+        } else {
+            Aggregation.newAggregation(facetOperation,projectionOperation)
+        }
+        return mongoTemplate.aggregate(aggregation,"${clientId}_eventUser", ReachabilityResult::class.java).mappedResults[0]
     }
 }

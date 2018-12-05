@@ -6,7 +6,6 @@ import com.und.model.mongo.eventapi.EventUser
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.EventMetadataService
 import com.und.service.SegmentService
-import com.und.web.controller.exception.SegmentNotFoundException
 import com.und.web.model.Segment
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus

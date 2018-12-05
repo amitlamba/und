@@ -72,6 +72,24 @@ class EventUserService {
         return mongoEventUser
     }
 
+    fun getEventUserByUid(uid: String): MongoEventUser? {
+        var mongoEventUser: MongoEventUser? = null
+        eventUserRepository.findByIdentityUid(uid).ifPresent({eu -> mongoEventUser = eu})
+        return mongoEventUser
+    }
+
+    fun getEventUserByEventUserIdOrUid(id: String, uid:String): MongoEventUser? {
+        var mongoEventUser: MongoEventUser? = null
+        eventUserRepository.findByIdOrIdentityUid(id, uid).ifPresent({eu -> mongoEventUser = eu})
+        return mongoEventUser
+    }
+
+    fun getEventUserByEventUserIdAndUid(id: String, uid:String): MongoEventUser? {
+        var mongoEventUser: MongoEventUser? = null
+        eventUserRepository.findByIdAndIdentityUid(id, uid).ifPresent({eu -> mongoEventUser = eu})
+        return mongoEventUser
+    }
+
     @StreamListener("inEventUser")
     @SendTo("outProcessEventUserProfile")
     fun processIdentity(eventUser: EventUser): Identity {
@@ -129,6 +147,7 @@ class EventUserService {
         //TODO verify old data exists if device id, session id is not null
         return identityCopy
     }
+
 
 
     fun logout(identity: Identity?): Identity {

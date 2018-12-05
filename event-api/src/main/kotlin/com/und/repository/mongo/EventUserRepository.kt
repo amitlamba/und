@@ -7,7 +7,8 @@ import java.util.*
 interface EventUserRepository : MongoRepository<EventUser, String> {
 
 
-    fun findByIdOrIdentityUid(id: String, uid:String): Optional<EventUser>
-    fun findByIdentityUid(uid:String):Optional<EventUser>
+    fun findByIdOrIdentityUid(id: String, uid: String): Optional<EventUser>
+    fun findByIdAndIdentityUid(id: String, uid: String): Optional<EventUser>
+    fun findByIdentityUid(uid: String): Optional<EventUser>
 
 }

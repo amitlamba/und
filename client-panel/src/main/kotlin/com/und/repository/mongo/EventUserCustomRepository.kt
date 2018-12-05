@@ -16,7 +16,7 @@ interface EventUserCustomRepository {
     fun testUserProfile(id: String, clientId: Long, isTestUser: Boolean)
 
     fun findUsersNotIn(ids: Set<String>, clientId: Long): List<String>
-
+    fun testSegmentUsers( clientId: Long): List<String>
     fun usersFromUserProfile(query: Aggregation, clientId: Long): List<String>
 
 

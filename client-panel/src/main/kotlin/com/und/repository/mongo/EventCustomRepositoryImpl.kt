@@ -26,6 +26,8 @@ class EventCustomRepositoryImpl : EventCustomRepository {
 
     }
 
+
+
     override fun usersFromEvent(query: Query, clientId: Long): List<String> {
         val output = mongoTemplate.find(query, Event::class.java,"${clientId}_event")
         return output?.let { aggResult ->
