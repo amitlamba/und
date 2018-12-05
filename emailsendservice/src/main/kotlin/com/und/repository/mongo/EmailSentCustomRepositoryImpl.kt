@@ -27,8 +27,8 @@ class EmailSentCustomRepositoryImpl : EmailSentCustomRepository {
 
     override fun updateStatus(emailId: String, emailStatus: EmailStatus, clientId: Long, clickTrackEventId: String?) {
 
-        val query = Query(Criteria.where("clientId").`is`(clientId).and("_id").`is`(ObjectId(emailId)))
-            val statusupdate = EmailStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), emailStatus, clickTrackEventId)
+        val query = Query(Criteria.where("clientID").`is`(clientId).and("_id").`is`(ObjectId(emailId)))
+            val statusupdate = EmailStatusUpdate(LocalDateTime.now(), emailStatus, clickTrackEventId)
             val update = Update().push("statusUpdates", statusupdate).set("emailStatus", emailStatus)
             mongoTemplate.updateFirst(query, update, Email::class.java, "${clientId}_email")
     }

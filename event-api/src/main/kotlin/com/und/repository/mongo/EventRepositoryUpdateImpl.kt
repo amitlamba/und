@@ -28,7 +28,7 @@ class EventRepositoryUpdateImpl : EventRepositoryUpdate {
         )
 
         if(userId!= null) {
-            val update = Update.update("userId", userId)
+            val update = Update.update("userId", userId).set("userIdentified",true)
             mongoTemplate.updateMulti(query, update, Event::class.java)
         }
 

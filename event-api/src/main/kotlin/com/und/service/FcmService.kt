@@ -36,7 +36,7 @@ class FcmService {
     @StreamListener("inNotificationRead")
     fun listeningWebpushNotification(message: NotificationRead){
         var query= Query.query(Criteria("_id").`is`(ObjectId(message.mongoId)))
-        var update= Update().push("statusUpdates", FcmMessageUpdates(LocalDateTime.now(ZoneId.of("UTC")), FcmMessageStatus.READ))
+        var update= Update().push("statusUpdates", FcmMessageUpdates(LocalDateTime.now(), FcmMessageStatus.READ))
                 .set("status", FcmMessageStatus.READ)
         mongoTemplate.updateFirst(query,update,resolveFcmCollectionName(message.clientId,message.type))
     }

@@ -26,7 +26,7 @@ class FcmCustomRepositoryImpl : FcmCustomRepository {
 
     override fun updateStatus(mongoId: String, status: FcmMessageStatus, clientId: Long, clickTrackEventId: String?,type: String) {
         val query = Query(Criteria.where("clientId").`is`(clientId).and("_id").`is`(ObjectId(mongoId)))
-        val statusupdate = FcmMessageUpdates(LocalDateTime.now(ZoneId.of("UTC")), status, clickTrackEventId)
+        val statusupdate = FcmMessageUpdates(LocalDateTime.now(), status, clickTrackEventId)
         val update = Update().push("statusUpdates", statusupdate).set("status", status)
         mongoTemplate.updateFirst(query, update, AnalyticFcmMessage::class.java, resolveCollectionName(type,clientId))
     }

@@ -29,10 +29,9 @@ class RestAuthenticationTokenFilter : OncePerRequestFilter() {
     @Throws(ServletException::class, IOException::class)
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {
         val authToken = request.getHeader(this.tokenHeader)
-
         if (SecurityContextHolder.getContext().authentication == null && authToken != null) {
             logger.info("checking authentication for token $authToken ")
-            val auth = authenticationService.validateToken(authToken)
+//            val auth = authenticationService.validateToken(authToken)
             val validationResponse: Response<UndUserDetails> = authenticationService.validateToken(authToken)
             if (validationResponse.status == ResponseStatus.SUCCESS) {
                 val userDetails = validationResponse.data.value

@@ -356,20 +356,24 @@ class UserSettingsService {
     fun sendVerificationEmail(emailAddress: EmailAddress, clientID: Long) {
 
         var data= mutableMapOf<String,Any>()
-        var client = clientRepository.findById(clientID) as Client
-        var toEmailAddress = InternetAddress(client.email)
-        var fromEmailAddress = InternetAddress(emailAddress.address)
-        var timeStamp = System.currentTimeMillis() / 1000
-        var verificationCode = encrypt("$timeStamp||${emailAddress.address}||$clientID")
-        var emailVerificationLink = "emailVerificationLink" to "${clientUrl}/setting/verifyemail/"+URLEncoder.encode(verificationCode,"UTF-8")
-        var name = emailAddress.personal
-        var emailSubject = "Verify from email Address"
-        var emailBody="Hi ${name} \n Please verify your email by clicking on below link\n $emailVerificationLink"
+        var client = clientRepository.findById(clientID)
+        if(client.isPresent){
+            var client=client.get()
+            var toEmailAddress = InternetAddress(client.email)
+            var fromEmailAddress = InternetAddress(emailAddress.address)
+            var timeStamp = System.currentTimeMillis() / 1000
+            var verificationCode = encrypt("$timeStamp||${emailAddress.address}||$clientID")
+            var emailVerificationLink = "emailVerificationLink" to "${clientUrl}/setting/verifyemail/"+URLEncoder.encode(verificationCode,"UTF-8")
+            var name = emailAddress.personal
+            var emailSubject = "Verify from email Address"
+            var emailBody="Hi ${name} \n Please verify your email by clicking on below link\n $emailVerificationLink"
 //        data.put("name",name)
 //        data.put("verificationLink",emailVerificationLink)
-        var email = Email(clientID, fromEmailAddress, arrayOf(toEmailAddress), emailBody = emailBody,emailSubject = emailSubject,emailTemplateId = templateId,emailTemplateName = templateName)
+            var email = Email(clientID, fromEmailAddress, arrayOf(toEmailAddress), emailBody = emailBody,emailSubject = emailSubject,emailTemplateId = templateId,emailTemplateName = templateName)
 
-        toVerificationKafka(email)
+            toVerificationKafka(email)
+        }
+
     }
 
     private fun toKafka(email: Email) {

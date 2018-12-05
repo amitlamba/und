@@ -13,7 +13,9 @@ import com.und.web.model.UnSubscribeLink
 import org.apache.kafka.common.errors.InvalidRequestException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.EmptyResultDataAccessException
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.*
 import java.net.URLDecoder
 import javax.servlet.http.HttpServletResponse
@@ -157,8 +159,8 @@ class UserSettingsController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/senders-email/add"])
     fun addSendersEmail(@RequestBody email: EmailAddress) {
-        val clientID = AuthenticationUtils.clientID
-        userSettingsService.addSenderEmailAddress(email, clientID!!)
+        val clientID = AuthenticationUtils.clientID?: throw AccessDeniedException("")
+        userSettingsService.addSenderEmailAddress(email, clientID)
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
