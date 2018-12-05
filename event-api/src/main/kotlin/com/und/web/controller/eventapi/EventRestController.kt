@@ -25,7 +25,7 @@ import javax.validation.Valid
 class EventRestController {
 
     @Autowired
-    private lateinit var eventService: EventService
+    private lateinit  var eventService: EventService
 
     @Autowired
     private lateinit var eventUserService: EventUserService
@@ -33,8 +33,10 @@ class EventRestController {
     @Autowired
     private lateinit var tenantProvider: TenantProvider
 
+
+
     @PreAuthorize("hasRole('ROLE_EVENT')")
-    @PostMapping(value = ["/event/initialize"], produces = ["application/json"], consumes = ["application/json"])
+    @PostMapping(value = ["/event/initialize"], produces = ["application/json"], consumes =["application/json"])
     fun initialize(@Valid @RequestBody identity: Identity?): ResponseEntity<Response<Identity>> {
 
         return ResponseEntity.ok(Response(

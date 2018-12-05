@@ -43,8 +43,8 @@ class FcmService {
 
     private fun resolveFcmCollectionName(clientId: Long,type: String):String{
         when(type){
-            "web" -> return "${clientId}_fcmMessage"
-            "android" -> return "${clientId}_webFcmMessage"
+            "android" -> return "${clientId}_fcmMessage"
+            "web" -> return "${clientId}_webFcmMessage"
             "ios" -> return "${clientId}_iosFcmMessage"
             else -> return ""
         }
