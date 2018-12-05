@@ -3,9 +3,8 @@ package com.und.service
 //import com.und.model.jpa.Segment
 import com.und.model.jpa.Segment
 import com.und.model.mongo.eventapi.EventUser
-import com.und.web.model.EventUser as EventUserWeb
 import org.springframework.stereotype.Service
-import java.util.*
+import com.und.web.model.EventUser as EventUserWeb
 import com.und.web.model.Segment as WebSegment
 
 @Service

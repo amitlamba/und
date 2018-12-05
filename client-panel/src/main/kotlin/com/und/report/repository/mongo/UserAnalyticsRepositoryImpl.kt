@@ -30,7 +30,7 @@ class UserAnalyticsRepositoryImpl: UserAnalyticsRepository{
 
         if(aggregate.mappedResults.size == 0) return emptyList()
 
-        val firstDocument = aggregate.mappedResults.get(0)
+        val firstDocument = aggregate.mappedResults[0]
 
         if(firstDocument["_id"] is String)
             return aggregate.mappedResults.map { document -> AggregateOutput(mapOf("name" to document["_id"].toString()), document[AGGREGATE_VALUE].toString().toDouble()) }

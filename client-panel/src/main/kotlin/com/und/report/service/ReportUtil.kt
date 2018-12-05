@@ -8,7 +8,7 @@ import com.und.web.model.Unit
 class ReportUtil {
 
     companion object {
-
+        const val ALL_USER_SEGMENT = -1L
         fun buildFilter(globalFilterType: GlobalFilterType, name: String, type: DataType, operator: String, values: List<String>, valueUnit: Unit?): GlobalFilter {
             var filter = GlobalFilter()
             if(globalFilterType != null) filter.globalFilterType = globalFilterType

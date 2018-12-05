@@ -10,7 +10,7 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 
 @Service
-class CampaignReachedServiceImp :CampaignReachedService{
+class CampaignReachedServiceImpl :CampaignReachedService{
 
     @Autowired
     private lateinit var campaignReachabilityRepository:CampaignReachabilityRepository

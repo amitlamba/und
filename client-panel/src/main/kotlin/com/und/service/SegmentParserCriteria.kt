@@ -539,7 +539,6 @@ class SegmentParserCriteria {
         else (if (userPropertyMatchCriteria.isNotEmpty()) Criteria().andOperator(*userPropertyMatchCriteria.toTypedArray()) else null)
         //val userMatch = Aggregation.match(userCriteria)
 
-        println()
         return Pair(eventCriteria, userCriteria)
     }
 

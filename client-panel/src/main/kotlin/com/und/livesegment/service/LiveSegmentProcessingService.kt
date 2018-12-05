@@ -79,7 +79,7 @@ class LiveSegmentProcessingService {
             */
     @StreamListener("inJobForLiveSegmentCheck")
     fun processJobForLiveSegmentCheck(params: LiveSegmentUserCheck){
-        logger.info("Processing live segment checks: " + params)
+        logger.info("Processing live segment checks:  $params")
         val possibleLiveSegments = this.liveSegmentService.findByClientIDAndEndEvent(params.clientId.toLong(), params.startEventName)
 
         possibleLiveSegments.forEach {
@@ -139,7 +139,7 @@ class LiveSegmentProcessingService {
                 return@forEach
             }
 
-            if(liveSegment.endEvent == null || liveSegment.endEvent == "")
+            if(liveSegment.endEvent.isNullOrBlank())
                 sendToLiveSegmentQueue(event, liveSegment.id)
             else
                 sendToScheduleJob(event, liveSegment)
