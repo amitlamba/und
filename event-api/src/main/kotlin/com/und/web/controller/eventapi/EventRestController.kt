@@ -25,7 +25,7 @@ import javax.validation.Valid
 class EventRestController {
 
     @Autowired
-    private lateinit  var eventService: EventService
+    private lateinit var eventService: EventService
 
     @Autowired
     private lateinit var eventUserService: EventUserService
@@ -34,7 +34,7 @@ class EventRestController {
     private lateinit var tenantProvider: TenantProvider
 
     @PreAuthorize("hasRole('ROLE_EVENT')")
-    @PostMapping(value = ["/event/initialize"], produces = ["application/json"], consumes =["application/json"])
+    @PostMapping(value = ["/event/initialize"], produces = ["application/json"], consumes = ["application/json"])
     fun initialize(@Valid @RequestBody identity: Identity?): ResponseEntity<Response<Identity>> {
 
         return ResponseEntity.ok(Response(
@@ -44,7 +44,7 @@ class EventRestController {
     }
 
     @PreAuthorize("hasRole('ROLE_EVENT')")
-    @PostMapping(value = ["/push/event"], produces = ["application/json"], consumes =["application/json"])
+    @PostMapping(value = ["/push/event"], produces = ["application/json"], consumes = ["application/json"])
     fun saveEvent(@Valid @RequestBody event: Event, request: HttpServletRequest): ResponseEntity<Response<String>> {
         val toEvent = eventService.buildEvent(event, request)
         eventService.toKafka(toEvent)
@@ -52,12 +52,41 @@ class EventRestController {
     }
 
     @PreAuthorize("hasRole('ROLE_EVENT')")
-    @PostMapping(value = ["/push/profile"], produces = ["application/json"], consumes =["application/json"])
-    fun profile(@Valid @RequestBody eventUser : EventUser): ResponseEntity<Response<Identity>> {
+    @PostMapping(value = ["/push/profile"], produces = ["application/json"], consumes = ["application/json"])
+    fun profile(@Valid @RequestBody eventUser: EventUser): ResponseEntity<Response<Identity>> {
 
         //this method can't be called before identity has been initialized
         val identityInit = eventUserService.initialiseIdentity(eventUser.identity)
-        identityInit.userId = identityInit.userId ?: ObjectId.get().toString()
+
+        //if only uid or userid present find if it exists
+        //if exists do below
+        val userId = eventUser.identity.userId
+        val uid = eventUser.uid
+        val mongoUser = when {
+            userId != null && uid == null -> {
+                eventUserService.getEventUserByEventUserId(userId)
+            }
+            userId == null && uid != null -> {
+                eventUserService.getEventUserByUid(uid)
+            }
+            userId != null && uid != null -> {
+
+                eventUserService.getEventUserByEventUserIdAndUid(userId, uid)
+            }
+            else -> null
+
+        }
+
+        if (mongoUser != null) {
+            identityInit.userId = mongoUser.identity.undId
+            eventUser.uid = mongoUser.identity.uid
+        } else {
+
+            identityInit.userId = identityInit.userId ?: ObjectId.get().toString()
+        }
+
+
+
         identityInit.clientId = tenantProvider.tenant.toInt()
         eventUser.identity = identityInit
         eventUserService.toKafka(eventUser)
@@ -70,7 +99,7 @@ class EventRestController {
 
     @PreAuthorize("hasRole('ROLE_EVENT')")
     @GetMapping("/check")
-    fun checkConnection():ResponseEntity<Response<String>>{
+    fun checkConnection(): ResponseEntity<Response<String>> {
         return ResponseEntity.ok(Response(status = ResponseStatus.SUCCESS))
     }
 
