@@ -15,7 +15,7 @@ interface UserEventAnalyticsService {
 
     fun userCountByEvent(segmentId: Long, dates: List<String>):List<UserCountByEventForDate>
 
-
+    fun eventReachability(requestFilter: EventReport.EventReportFilter, entityType: EventReport.EntityType, groupBy: GroupBy):Reachability
 
     fun countTrend(requestFilter: EventReport.EventReportFilter, entityType: EventReport.EntityType, groupBy: GroupBy): List<EventReport.EventCount>
 

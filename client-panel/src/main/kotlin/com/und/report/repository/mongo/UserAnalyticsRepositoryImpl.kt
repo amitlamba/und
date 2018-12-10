@@ -3,6 +3,7 @@ package com.und.report.repository.mongo
 import com.und.common.utils.loggerFor
 import com.und.report.model.AggregateOutput
 import com.und.report.model.UserData
+import com.und.report.web.model.Reachability
 import com.und.service.AGGREGATE_VALUE
 import com.und.service.SegmentParserCriteria
 import org.bson.Document
@@ -38,6 +39,10 @@ class UserAnalyticsRepositoryImpl: UserAnalyticsRepository{
             return aggregate.mappedResults.map { document -> AggregateOutput(document.filter {it.key != AGGREGATE_VALUE}, document[AGGREGATE_VALUE].toString().toDouble()) }
     }
 
+    override fun getReachability(query: Aggregation, clientId: Long): Reachability {
+        var result= mongoTemplate.aggregate(query,"${clientId}_event",Reachability::class.java)
+        return result.mappedResults[0]
+    }
 
     override fun funnelData(query: Aggregation, clientId: Long): List<UserData> {
         logger.debug("Fetching funnelData results for query : $query, clientId: $clientId")

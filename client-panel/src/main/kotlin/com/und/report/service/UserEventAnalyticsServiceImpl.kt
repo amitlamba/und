@@ -114,9 +114,20 @@ class UserEventAnalyticsServiceImpl : UserEventAnalyticsService {
         val tz = userSettingsService.getTimeZone()
         val filters = buildCommonfilters(requestFilter, entityType, clientID)
         val aggregation = aggregationQuerybuilder.buildAggregation(filters, listOf(groupBy), null, emptyMap(), entityType, tz, clientID)
+
         val resultList = userAnalyticsRepository.aggregate(aggregation, clientID)
 
         return buildCountTrend(resultList)
+    }
+
+    override fun eventReachability(requestFilter: EventReport.EventReportFilter, entityType: EventReport.EntityType, groupBy: GroupBy): Reachability {
+//        logger.debug("CountTrend aggregation for requestFilter : $requestFilter, entityType: $entityType, groupBy: $groupBy")
+        val clientID = AuthenticationUtils.clientID ?: return Reachability()
+
+        val tz = userSettingsService.getTimeZone()
+        val filters = buildCommonfilters(requestFilter, entityType, clientID)
+        val aggregation = aggregationQuerybuilder.buildAggregation(filters, listOf(groupBy), null, emptyMap(), entityType, tz, clientID)
+        return userAnalyticsRepository.getReachability(aggregation,clientID)
     }
 
     override fun timePeriodTrend(requestFilter: EventReport.EventReportFilter, entityType: EventReport.EntityType, period: EventReport.PERIOD): List<EventReport.EventPeriodCount> {

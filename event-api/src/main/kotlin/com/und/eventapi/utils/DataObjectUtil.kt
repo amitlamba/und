@@ -9,6 +9,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
+import java.util.regex.Pattern
 import com.und.model.mongo.eventapi.Event as MongoEvent
 
 fun Event.copyToMongo(): MongoEvent {
@@ -18,7 +19,9 @@ fun Event.copyToMongo(): MongoEvent {
     mongoEvent.clientTime = ClientTimeNow(LocalDateTime.now(mongoEvent.timeZoneId))
     //copying system info
     val agentString = event.agentString
-    if (agentString != null) {
+    var pattern = Pattern.compile("^(Mobile-Agent).*")
+    var matcher=pattern.matcher(agentString)
+    if (!matcher.matches() && agentString!=null) {
         mongoEvent.agentString = agentString
         val sysDetail = systemDetails(agentString)
         val system = System()

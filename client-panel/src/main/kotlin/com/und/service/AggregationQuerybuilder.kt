@@ -201,9 +201,8 @@ class AggregationQuerybuilder {
 
             val unwindOperation = Aggregation.unwind(USER_DOC)
 
-            if(!groupBys[0].groupFilterType.type.equals("Reachability")) {
-                aggregationPipeline.add(unwindOperation)
-            }
+            aggregationPipeline.add(unwindOperation)
+
 
 
             if(userFilterPresent){
@@ -274,32 +273,67 @@ class AggregationQuerybuilder {
 
             if (groupBys[0].groupFilterType.type.equals("Reachability")) {
 
-                if (entityType == EventReport.EntityType.user && (userFilterPresent || userGroupByPresent)) {
-                    val unwindOperation = Aggregation.unwind(Field.UserId.fName)
-                    aggregationPipeline.add(unwindOperation)
-                }
+//                if (entityType == EventReport.EntityType.user && (userFilterPresent || userGroupByPresent)) {
+//                    val unwindOperation = Aggregation.unwind(Field.UserId.fName)
+//                    aggregationPipeline.add(unwindOperation)
+//                }
 
                 var project1 = Aggregation.project()
                         .and("userDoc.communication.email.dnd").`as`("email")
                         .and("userDoc.communication.mobile.dnd").`as`("mobile")
+                        .and("userDoc.communication.android.dnd").`as`("android")
+                        .and("userDoc.communication.ios.dnd").`as`("ios")
+                        .and("userDoc.communication.webpush.dnd").`as`("webpush")
 
 
                 var facet = Aggregation.facet()
-                        .and(Aggregation.match(Criteria("email").`is`(false)), Aggregation.count().`as`("count")).`as`("email")
-                        .and(Aggregation.match(Criteria("mobile").`is`(false)), Aggregation.count().`as`("count")).`as`("mobile")
+                        .and(Aggregation.match(Criteria().andOperator(
+                                Criteria("email").`is`(false),
+                                Criteria("email").ne(null))
+                        ), Aggregation.count().`as`("count")).`as`("email")
+
+                        .and(Aggregation.match(Criteria().andOperator(
+                                Criteria("mobile").`is`(false),
+                                Criteria("mobile").ne(null))
+                        ), Aggregation.count().`as`("count")).`as`("mobile")
+                        .and(Aggregation.match(Criteria().andOperator(
+                                Criteria("android").`is`(false),
+                                Criteria("android").ne(null))
+                        ), Aggregation.count().`as`("count")).`as`("android")
+                        .and(Aggregation.match(Criteria().andOperator(
+                                Criteria("ios").`is`(false),
+                                Criteria("ios").ne(null))
+                        ), Aggregation.count().`as`("count")).`as`("ios")
+                        .and(Aggregation.match(Criteria().andOperator(
+                                Criteria("webpush").`is`(false),
+                                Criteria("webpush").ne(null))
+                        ), Aggregation.count().`as`("count")).`as`("webpush")
+
 
                 var project2 = Aggregation.project()
                         .and("email").arrayElementAt(0).`as`("email")
                         .and("mobile").arrayElementAt(0).`as`("mobile")
+                        .and("android").arrayElementAt(0).`as`("android")
+                        .and("ios").arrayElementAt(0).`as`("ios")
+                        .and("webpush").arrayElementAt(0).`as`("webpush")
 
                 var project3 = Aggregation.project()
-                        .and("email.count").`as`("emailCount")
-                        .and("mobile.count").`as`("mobileCount")
+                        .and("email.count").`as`("email")
+                        .and("mobile.count").`as`("sms")
+                        .and("android.count").`as`("android")
+                        .and("ios.count").`as`("ios")
+                        .and("webpush.count").`as`("webpush")
                 aggregationPipeline.add(project1)
                 aggregationPipeline.add(facet)
                 aggregationPipeline.add(project2)
                 aggregationPipeline.add(project3)
             } else {
+
+//                if (entityType == EventReport.EntityType.user && (userFilterPresent || userGroupByPresent)) {
+//                    val unwindOperation = Aggregation.unwind(Field.UserId.fName)
+//                    aggregationPipeline.add(unwindOperation)
+//                }
+
                 aggregationPipeline.add(userGroupOperation)
             }
         }

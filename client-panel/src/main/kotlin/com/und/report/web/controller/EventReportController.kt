@@ -7,6 +7,7 @@ import com.und.report.web.model.AggregateBy
 import com.und.report.web.model.EventReport
 import com.und.report.web.model.EventReport.EventCount
 import com.und.report.web.model.GroupBy
+import com.und.report.web.model.Reachability
 import com.und.web.model.EventUser
 import com.und.web.model.GlobalFilter
 import org.springframework.beans.factory.annotation.Autowired
@@ -48,6 +49,18 @@ class EventReportController {
         return userAnalyticsService.countTrend(requestFilter, entityType, groupBy)
     }
 
+
+    @PostMapping("/eventReachability")
+    fun eventReachability(@RequestParam(name = "entityType") entityType: EventReport.EntityType,
+                   @RequestBody propFilter: List<GlobalFilter>,
+                   requestFilter: EventReport.EventReportFilter ,
+                   groupBy: GroupBy): Reachability {
+
+        requestFilter.propFilter=propFilter
+//        return userAnalyticsService.countTrend(requestFilter, entityType, groupBy)
+        return userAnalyticsService.eventReachability(requestFilter,entityType,groupBy)
+
+    }
 
     //count of events/users on date, week, months (count, 28-aug-2018), (count, week(25-31 august 2018), (count, month(1-31 august 2018))
     @PostMapping("/trendBytimePeriod")

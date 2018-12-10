@@ -51,7 +51,8 @@ class RegistrationService {
      * validation should be part of transaction different from commit as it will
      * acquire lock on all table, even after this check non unique may exist, if database constraint is not followed.
      */
-    fun validate(registrationRequest: RegistrationRequest) {
+    @Throws(UserAlreadyRegistered::class)
+    fun validate(registrationRequest: RegistrationRequest){
         val client = clientService.findByEmail(registrationRequest.email)
         val error = ValidationError()
         if (client != null) {
