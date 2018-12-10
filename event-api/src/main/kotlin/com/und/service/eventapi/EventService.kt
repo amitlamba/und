@@ -5,6 +5,8 @@ import com.und.eventapi.utils.copyToMongo
 import com.und.eventapi.utils.ipAddr
 import com.und.config.EventStream
 import com.und.model.mongo.eventapi.EventMetadata
+import com.und.model.mongo.eventapi.System
+import com.und.model.mongo.eventapi.SystemDetails
 import com.und.repository.mongo.EventMetadataRepository
 import com.und.repository.mongo.EventRepository
 import com.und.repository.mongo.EventUserRepository
@@ -19,6 +21,7 @@ import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
+import java.util.regex.Pattern
 import javax.servlet.http.HttpServletRequest
 import com.und.model.mongo.eventapi.Event as MongoEvent
 
@@ -59,6 +62,22 @@ class EventService {
         tenantProvider.setTenat(clientId.toString())
         val mongoEvent = event.copyToMongo()
         mongoEvent.clientTime.hour
+        var agentString=event.agentString
+        var pattern = Pattern.compile("^(Mobile-Agent).*")
+        var matcher=pattern.matcher(agentString)
+        if(matcher.matches() && agentString!=null) {
+            val system = System()
+            mongoEvent.system = system
+            var agent=agentString.split("/")
+            with(system) {
+                os = SystemDetails(name = agent[1], version = agent[2])
+                browser = SystemDetails(name = agent[3], version = agent[4])
+                device = SystemDetails(name = agent[5], version = agent[6])
+                application = SystemDetails(name = agent[7], version = agent[8])
+            }
+
+            mongoEvent.system=system
+        }
         val eventMetadata = buildMetadata(mongoEvent)
         eventMetadataRepository.save(eventMetadata)
         //FIXME add to metadata
@@ -91,7 +110,7 @@ class EventService {
             ipAddress = request.ipAddr()
             timeZone = AuthenticationUtils.principal.timeZoneId
             var agent=request.getHeader("User-Agent")
-            agentString = if(agent!="mobile") agent else null
+            agentString = if(agent!="mobile") agent else request.getHeader("Mobile-Agent")
         }
         return fromEvent
     }

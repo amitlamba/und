@@ -8,6 +8,7 @@ import com.und.service.EmailService
 import com.und.service.RegistrationService
 import com.und.service.security.UserService
 import com.und.service.security.captcha.CaptchaService
+import com.und.web.controller.exception.UserAlreadyRegistered
 import com.und.web.model.*
 import com.und.web.model.ResponseStatus
 import org.springframework.beans.factory.annotation.Autowired
@@ -52,10 +53,13 @@ class RegisterController {
 
         val response = request.getParameter("recaptchaToken")
         captchaService.processResponse(response)
-        registrationService.validate(registrationRequest)
-
-        val client = registrationService.register(registrationRequest)
-        registrationService.sendVerificationEmail(client)
+        try {
+            registrationService.validate(registrationRequest)
+            val client = registrationService.register(registrationRequest)
+            registrationService.sendVerificationEmail(client)
+        }catch (ex:UserAlreadyRegistered){
+            throw ex
+        }
     }
 
     @GetMapping(value = ["/verifyemail/{email:.+}/{code}"])
