@@ -7,6 +7,7 @@ import com.und.web.model.*
 import com.und.web.model.Unit
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.aggregation.*
+import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.stereotype.Component
 import java.time.ZoneId
 
@@ -199,7 +200,11 @@ class AggregationQuerybuilder {
             aggregationPipeline.add(lookupOperation)
 
             val unwindOperation = Aggregation.unwind(USER_DOC)
-            aggregationPipeline.add(unwindOperation)
+
+            if(!groupBys[0].groupFilterType.type.equals("Reachability")) {
+                aggregationPipeline.add(unwindOperation)
+            }
+
 
             if(userFilterPresent){
                 //TODO handling for computed user filters
@@ -210,6 +215,7 @@ class AggregationQuerybuilder {
 
             if(eventGroupByPresent || userGroupByPresent){
                 //TODO handling for computed user group by
+                //check here
                 userGroupFields.putAll(allGroupBys.userSimpleGroupBys.map { it.groupName to getCompleteScopedName(it.groupName, it.groupFilterType)}.toMap())
                 val allGroupByFields = mutableListOf<String>()
                 allGroupByFields.addAll(eventGroupFields.values)
@@ -238,7 +244,9 @@ class AggregationQuerybuilder {
                 }
                 else
                     userGroupOperation = userGroupOperation.count().`as`(AGGREGATE_VALUE)
-                aggregationPipeline.add(userGroupOperation)
+
+                specialAggStageForReachability(groupBys, entityType, userFilterPresent, userGroupByPresent, aggregationPipeline, userGroupOperation)
+
             }
         }
 
@@ -258,6 +266,43 @@ class AggregationQuerybuilder {
         }
 
         return aggregationPipeline
+    }
+
+    private fun specialAggStageForReachability(groupBys: List<GroupBy>, entityType: EventReport.EntityType, userFilterPresent: Boolean, userGroupByPresent: Boolean, aggregationPipeline: MutableList<AggregationOperation>, userGroupOperation: GroupOperation) {
+
+        if(!groupBys.isEmpty()) {
+
+            if (groupBys[0].groupFilterType.type.equals("Reachability")) {
+
+                if (entityType == EventReport.EntityType.user && (userFilterPresent || userGroupByPresent)) {
+                    val unwindOperation = Aggregation.unwind(Field.UserId.fName)
+                    aggregationPipeline.add(unwindOperation)
+                }
+
+                var project1 = Aggregation.project()
+                        .and("userDoc.communication.email.dnd").`as`("email")
+                        .and("userDoc.communication.mobile.dnd").`as`("mobile")
+
+
+                var facet = Aggregation.facet()
+                        .and(Aggregation.match(Criteria("email").`is`(false)), Aggregation.count().`as`("count")).`as`("email")
+                        .and(Aggregation.match(Criteria("mobile").`is`(false)), Aggregation.count().`as`("count")).`as`("mobile")
+
+                var project2 = Aggregation.project()
+                        .and("email").arrayElementAt(0).`as`("email")
+                        .and("mobile").arrayElementAt(0).`as`("mobile")
+
+                var project3 = Aggregation.project()
+                        .and("email.count").`as`("emailCount")
+                        .and("mobile.count").`as`("mobileCount")
+                aggregationPipeline.add(project1)
+                aggregationPipeline.add(facet)
+                aggregationPipeline.add(project2)
+                aggregationPipeline.add(project3)
+            } else {
+                aggregationPipeline.add(userGroupOperation)
+            }
+        }
     }
 
     fun buildAggregation(filters: List<GlobalFilter>, groupBys: List<GroupBy>, aggregateBy: AggregateBy?, paramValues: Map<String, Any> = emptyMap(), entityType: EventReport.EntityType, tz: ZoneId, clientId: Long): Aggregation {

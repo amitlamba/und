@@ -20,8 +20,8 @@ class CampaignReachedServiceImpl :CampaignReachedService{
 
     override fun getCampaignReachability(campaignId: Long): CampaignReached {
         var clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
-        //here campaign used for finding in which collection we are going to search
-        // like email analytics present in email collection,android present in fcm collection
+        //here we are finding campaign only to know the type of campaign like android or email
+        // if all analytics related info store in one collection then we remove one hit from mongo
         var campaign=campaignService.getCampaignById(campaignId)
         var result = campaignReachabilityRepository.getCampaignReachability(clientId, campaignId, campaign.campaignType.toString())
 
