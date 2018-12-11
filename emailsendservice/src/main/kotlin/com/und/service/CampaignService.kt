@@ -57,14 +57,22 @@ class CampaignService {
                 }
 //                check mode of communication is mobile push
                 if (campaign?.campaignType=="PUSH_ANDROID"){
+                    if (user.communication?.android?.dnd == true)
+                        return@forEach //Local lambda return
                     val notification=fcmAndroidMessage(clientId,campaign,user)
                     toKafka(notification)
                 }
                 if(campaign?.campaignType=="PUSH_WEB"){
-                    val notification=fcmWebMessage(clientId,campaign,user)
-                    toKafka(notification)
+                    if (user.communication?.webpush?.dnd == true)
+                        return@forEach //Local lambda return
+                    user.identity.webFcmToken?.forEach {
+                        val notification=fcmWebMessage(clientId,campaign,user,it)
+                        toKafka(notification)
+                    }
                 }
                 if(campaign?.campaignType=="PUSH_IOS"){
+                    if (user.communication?.ios?.dnd == true)
+                        return@forEach //Local lambda return
                     val notification=fcmIosMessage(clientId,campaign,user)
                     toKafka(notification)
                 }
@@ -115,11 +123,11 @@ class CampaignService {
         )
     }
 
-    private fun fcmWebMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
+    private fun fcmWebMessage(clientId: Long,campaign: Campaign,user: EventUser,token:String):FcmMessage{
         return FcmMessage(
                 clientId = clientId,
                 templateId = campaign.webTemplateId?:0L,
-                to = user.identity.webFcmToken?:"",
+                to = token,
                 type = "web",
                 campaignId = campaign.campaignId,
                 userId = user.id,

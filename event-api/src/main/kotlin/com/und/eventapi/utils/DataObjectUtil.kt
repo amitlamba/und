@@ -5,6 +5,7 @@ import com.und.model.mongo.eventapi.*
 import com.und.model.mongo.eventapi.SystemDetails
 import com.und.web.model.eventapi.Event
 import com.und.web.model.eventapi.EventUser
+import com.und.model.mongo.eventapi.EventUser as MongoEventUser
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -104,7 +105,8 @@ fun com.und.model.mongo.eventapi.EventUser.copyNonNull(eventUser: EventUser): co
     copyEventUser.identity.email = unchanged(eventUser.email, identity.email)
     copyEventUser.identity.undId = unchanged(eventUser.undId, identity.undId)
     copyEventUser.identity.androidFcmToken=unchanged(eventUser.androidFcmToken,identity.androidFcmToken)
-    copyEventUser.identity.webFcmToken=unchanged(eventUser.webFcmToken,identity.webFcmToken)
+//    copyEventUser.identity.webFcmToken=unchanged(eventUser.webFcmToken,identity.webFcmToken)
+    copyEventUser.identity.webFcmToken= addWebFcmToken(this,eventUser)
     copyEventUser.identity.iosFcmToken=unchanged(eventUser.iosFcmToken,identity.iosFcmToken)
 
     copyEventUser.standardInfo = StandardInfo()
@@ -116,5 +118,67 @@ fun com.und.model.mongo.eventapi.EventUser.copyNonNull(eventUser: EventUser): co
     copyEventUser.standardInfo.City = unchanged(eventUser.city, standardInfo.City)
     copyEventUser.standardInfo.Address = unchanged(eventUser.address, standardInfo.Address)
     copyEventUser.standardInfo.countryCode = unchanged(eventUser.countryCode, standardInfo.countryCode)
+    copyEventUser.communication=getCommunication(this,eventUser)
     return copyEventUser
+}
+/*
+* here we adding the webFcmToken into list of webFcmToken
+* */
+private fun addWebFcmToken(existingEventUser:MongoEventUser,newEventUser:EventUser):ArrayList<String>?{
+    if(existingEventUser.identity.webFcmToken==null&&newEventUser.webFcmToken!=null){
+        existingEventUser.identity.webFcmToken = ArrayList()
+    }
+    newEventUser.webFcmToken?.let {
+        existingEventUser.identity.webFcmToken?.add(it)
+    }
+    return existingEventUser.identity.webFcmToken
+}
+
+private fun getCommunication(existingEventUser: MongoEventUser,newEventUser: EventUser):Communication{
+    var communication = Communication()
+    var existingCommunication=existingEventUser.communication
+    if(existingCommunication==null){
+        newEventUser.email?.let {
+            communication.email= CommunicationDetails(value = it,dnd = false)
+        }
+        newEventUser.mobile?.let {
+            communication.mobile= CommunicationDetails(value = it,dnd = false)
+        }
+        newEventUser.androidFcmToken?.let {
+            communication.android= CommunicationDetails(value = it,dnd = false)
+        }
+        newEventUser.webFcmToken?.let {
+            communication.webpush= CommunicationDetails(value = it,dnd = false)
+        }
+        newEventUser.iosFcmToken?.let {
+            communication.ios= CommunicationDetails(value = it,dnd = false)
+        }
+    }else{
+        if(existingCommunication.email!=null){
+            newEventUser.email?.let {
+                communication.email= CommunicationDetails(value = it,dnd = false)
+            }
+        }
+        if (existingCommunication.mobile!=null){
+            newEventUser.mobile?.let {
+                communication.mobile= CommunicationDetails(value = it,dnd = false)
+            }
+        }
+        if (existingCommunication.android!=null){
+            newEventUser.androidFcmToken?.let {
+                communication.android= CommunicationDetails(value = it,dnd = false)
+            }
+        }
+        if (existingCommunication.webpush!=null){
+            newEventUser.webFcmToken?.let {
+                communication.webpush= CommunicationDetails(value = it,dnd = false)
+            }
+        }
+        if (existingCommunication.ios!=null){
+            newEventUser.iosFcmToken?.let {
+                communication.ios= CommunicationDetails(value = it,dnd = false)
+            }
+        }
+    }
+    return communication
 }

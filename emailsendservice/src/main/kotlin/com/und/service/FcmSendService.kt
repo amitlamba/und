@@ -108,11 +108,11 @@ class FcmSendService {
         var outputstream = conn.outputStream
         var mapper = ObjectMapper()
         var out = mapper.writeValueAsString(message.message)
-        println("message is $out")
+//        print("message is $out")
         outputstream.write(out.toByteArray())
         outputstream.flush()
         outputstream.close()
-        print(conn.responseMessage)
+//        print(conn.responseMessage)
         return conn.responseCode
 
     }
@@ -227,6 +227,9 @@ class FcmSendService {
                 clientId = message.clientId
                 this.message = "Android service provider not found.First add a service provider"
                 errorCode = 400
+                campaignType=message.type
+                userId=message.userId
+
             }
             toFcmFailureKafka(notificationError)
         } else {
@@ -258,6 +261,8 @@ class FcmSendService {
                     clientId = message.clientId
                     status = ex.toString()
                     errorCode = ex.status().toLong()
+                    campaignType=message.type
+                    userId=message.userId
                 }
                 toFcmFailureKafka(notificationError)
             } catch (ex: FcmFailureException) {
@@ -270,6 +275,8 @@ class FcmSendService {
                     clientId = message.clientId
                     status = ex.toString()
                     errorCode = statusCode?.toLong()
+                    campaignType=message.type
+                    userId=message.userId
                 }
                 toFcmFailureKafka(notificationError)
 
@@ -283,6 +290,8 @@ class FcmSendService {
                     clientId = message.clientId
                     status = ex.toString()
                     errorCode = statusCode?.toLong()
+                    campaignType=message.type
+                    userId=message.userId
                 }
                 toFcmFailureKafka(notificationError)
             }
@@ -329,6 +338,8 @@ class NotificationError {
     var message: String? = null
     var clientId: Long? = null
     var errorCode: Long? = null
+    var campaignType:String?=null
+    var userId:String?=null
 }
 
 class TestMessage {

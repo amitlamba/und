@@ -26,8 +26,9 @@ class WebPushController {
             var isExists=webPushService.isTemplateExists(clientId, template.name)
             if(isExists){
                 throw CustomException("Template with name ${template.name} already exists")
+            }else{
+                return ResponseEntity(webPushService.saveTemplate(template), HttpStatus.CREATED)
             }
-        return ResponseEntity(webPushService.saveTemplate(template), HttpStatus.CREATED)
     }
     @PreAuthorize(value="hasRole('ROLE_ADMIN')")
     @GetMapping("/template/{id}")

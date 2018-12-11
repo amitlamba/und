@@ -103,6 +103,7 @@ client_id bigint not null,
 message VARCHAR(1024) not NULL ,
 status VARCHAR (1024) not NULL ,
 error_code bigint,
+type VARCHAR(50) NOT NULL ,
 date_created TIMESTAMP WITH time ZONE DEFAULT now()
 );
 

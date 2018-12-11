@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.query.Criteria
+import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -40,7 +41,7 @@ class ReachabilityRepositoryImpl :ReachabilityRepository{
                         Aggregation.match(Criteria().norOperator(Criteria("identity.iosFcmToken").`is`(null),Criteria("communication.ios.dnd").`in`(true,null))),
                         Aggregation.count().`as`("count")).`as`("ios")
                 .and(
-                        Aggregation.match(Criteria().norOperator(Criteria("identity.webFcmToken").`is`(null),Criteria("communication.webpush.dnd").`in`(true,null))),
+                        Aggregation.match(Criteria().norOperator(Criteria("identity.webFcmToken").`is`(null),Criteria.where("this.identity.webFcmToken").lt(1),Criteria("communication.webpush.dnd").`in`(true,null))),
                         Aggregation.count().`as`("count")).`as`("webpush")
 
         var projectionOperation=Aggregation.project()

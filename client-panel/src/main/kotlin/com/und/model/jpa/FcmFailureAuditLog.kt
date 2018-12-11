@@ -30,6 +30,9 @@ class FcmFailureAuditLog {
     @Column(name="error_code")
     var errorCode:Long?=null
 
+    @Column(name="type")
+    var type:String? = ""
+
     @field:CreationTimestamp
     @Column(name = "date_created", updatable = false)
     lateinit var dateCreated: LocalDateTime

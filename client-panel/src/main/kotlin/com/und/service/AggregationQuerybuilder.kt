@@ -268,15 +268,11 @@ class AggregationQuerybuilder {
     }
 
     private fun specialAggStageForReachability(groupBys: List<GroupBy>, entityType: EventReport.EntityType, userFilterPresent: Boolean, userGroupByPresent: Boolean, aggregationPipeline: MutableList<AggregationOperation>, userGroupOperation: GroupOperation) {
-
+        //here we adding some extra stage for handling reachability case only when group by is reachability.
         if(!groupBys.isEmpty()) {
 
             if (groupBys[0].groupFilterType.type.equals("Reachability")) {
 
-//                if (entityType == EventReport.EntityType.user && (userFilterPresent || userGroupByPresent)) {
-//                    val unwindOperation = Aggregation.unwind(Field.UserId.fName)
-//                    aggregationPipeline.add(unwindOperation)
-//                }
 
                 var project1 = Aggregation.project()
                         .and("userDoc.communication.email.dnd").`as`("email")

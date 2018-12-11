@@ -27,7 +27,7 @@ class Identity {
         var mobile: String? = null
         var androidFcmToken:String?=null
         var iosFcmToken:String?=null
-        var webFcmToken:String?=null
+        var webFcmToken:ArrayList<String>?=null
 
 }
 
@@ -35,7 +35,11 @@ data class CommunicationDetails(val value: String, var dnd: Boolean = false)
 class Communication {
         var email: CommunicationDetails? = null
         var mobile: CommunicationDetails? = null
+        var android:CommunicationDetails?=null
+        var ios:CommunicationDetails?=null
+        var webpush:CommunicationDetails?= null
 }
+
 
 class StandardInfo {
         var firstname: String? = null
