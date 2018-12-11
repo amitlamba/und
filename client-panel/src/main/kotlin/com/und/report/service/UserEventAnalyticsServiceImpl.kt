@@ -121,7 +121,7 @@ class UserEventAnalyticsServiceImpl : UserEventAnalyticsService {
     }
 
     override fun eventReachability(requestFilter: EventReport.EventReportFilter, entityType: EventReport.EntityType, groupBy: GroupBy): Reachability {
-//        logger.debug("CountTrend aggregation for requestFilter : $requestFilter, entityType: $entityType, groupBy: $groupBy")
+        logger.debug("EventReachability aggregation for requestFilter : $requestFilter, entityType: $entityType, groupBy: $groupBy")
         val clientID = AuthenticationUtils.clientID ?: return Reachability()
 
         val tz = userSettingsService.getTimeZone()

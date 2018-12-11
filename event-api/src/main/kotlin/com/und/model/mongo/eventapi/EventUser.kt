@@ -40,7 +40,7 @@ class Communication {
     var mobile: CommunicationDetails? = null
     var android:CommunicationDetails?=null
     var ios:CommunicationDetails?=null
-    var webpush:CommunicationDetails?=null
+    var webpush:CommunicationDetails?= null
 }
 
 class StandardInfo {

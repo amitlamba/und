@@ -329,11 +329,6 @@ class AggregationQuerybuilder {
                 aggregationPipeline.add(project3)
             } else {
 
-//                if (entityType == EventReport.EntityType.user && (userFilterPresent || userGroupByPresent)) {
-//                    val unwindOperation = Aggregation.unwind(Field.UserId.fName)
-//                    aggregationPipeline.add(unwindOperation)
-//                }
-
                 aggregationPipeline.add(userGroupOperation)
             }
         }
