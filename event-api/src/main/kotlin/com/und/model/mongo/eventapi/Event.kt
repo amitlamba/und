@@ -51,7 +51,7 @@ class ClientTimeNow(val time: LocalDateTime) {
 
 }
 
-data class Coordinate(val latitude: Float, val longitude: Float)
+data class Coordinate(val latitude: Double, val longitude: Double)
 data class GeoLocation(val type: String = "Point", val coordinate: Coordinate)
 class GeoDetails {
     var ip: String? = null

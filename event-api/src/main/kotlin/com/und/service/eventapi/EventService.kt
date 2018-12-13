@@ -60,13 +60,13 @@ class EventService {
         tenantProvider.setTenat(clientId.toString())
         val mongoEvent = event.copyToMongo()
         mongoEvent.clientTime.hour
-        var agentString=event.agentString
+        var agentString = event.agentString
         var pattern = Pattern.compile("^(Mobile-Agent).*")
-        var matcher=pattern.matcher(agentString)
-        if(matcher.matches() && agentString!=null) {
+        var matcher = pattern.matcher(agentString)
+        if (matcher.matches() && agentString != null) {
             val system = System()
             mongoEvent.system = system
-            var agent=agentString.split("/")
+            var agent = agentString.split("/")
             with(system) {
                 os = SystemDetails(name = agent[1], version = agent[2])
                 browser = SystemDetails(name = agent[3], version = agent[4])
@@ -74,14 +74,11 @@ class EventService {
                 application = SystemDetails(name = agent[7], version = agent[8])
             }
 
-            mongoEvent.system=system
+            mongoEvent.system = system
         }
         val eventMetadata = buildMetadata(mongoEvent)
         eventMetadataRepository.save(eventMetadata)
         //FIXME add to metadata
-
-        mongoEvent.geogrophy=getGeography(event.ipAddress)
-        mongoEvent.geoDetails.geolocation= GeoLocation("Point", Coordinate(event.latitude?.toFloat()?:0f,event.longitude?.toFloat()?:0f))
         val saved = eventRepository.insert(mongoEvent)
 
         eventStream.outEventForLiveSegment().send(MessageBuilder.withPayload(buildEventForLiveSegment(saved)).build())
@@ -98,7 +95,6 @@ class EventService {
     }
 
 
-
     fun updateEventWithUser(identity: Identity) {
         tenantProvider.setTenat(identity.clientId.toString())
         eventRepository.updateEventsWithIdentityMatching(identity)
@@ -110,27 +106,20 @@ class EventService {
             clientId = tenantProvider.tenant.toLong()
             ipAddress = request.ipAddr()
             timeZone = AuthenticationUtils.principal.timeZoneId
-            var agent=request.getHeader("User-Agent")
-            agentString = if(agent!="mobile") agent else request.getHeader("Mobile-Agent")
+            var agent = request.getHeader("User-Agent")
+            agentString = if (agent != "mobile") agent else request.getHeader("Mobile-Agent")
         }
         return fromEvent
     }
 
-    fun buildEventForLiveSegment(fromEvent: com.und.model.mongo.eventapi.Event): EventMessage{
+    fun buildEventForLiveSegment(fromEvent: com.und.model.mongo.eventapi.Event): EventMessage {
         val eventId = fromEvent.id
-        if(eventId != null){
+        if (eventId != null) {
             return EventMessage(eventId, fromEvent.clientId, fromEvent.userId, fromEvent.name, fromEvent.creationTime)
         } else {
             throw EventNotFoundException("Event with null id")
         }
 
-    }
-    //fixme after getting ip address database
-    private fun getGeography(ipAddress:String?):Geogrophy{
-        if(ipAddress!=null){
-
-        }
-        return Geogrophy(country = "",state = "",city = "" )
     }
 
 }

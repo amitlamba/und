@@ -39,6 +39,9 @@ fun Event.copyToMongo(): MongoEvent {
     }
 
     mongoEvent.geogrophy = Geogrophy(event.country, event.state, event.city)
+    //fixme we can make it better eg if country present then found only state and city.
+    if(event.country==null&&event.state==null&&event.city==null)
+    mongoEvent.geogrophy= getGeography(event.ipAddress)
     //TODO fix null values or empty strings not allowed
     mongoEvent.userId = event.identity.userId
     mongoEvent.sessionId = event.identity.sessionId
@@ -49,13 +52,18 @@ fun Event.copyToMongo(): MongoEvent {
     with(mongoEvent.geoDetails) {
         ip = event.ipAddress
         //FIXME find a way to update coordinates
-        val latitude = if (event.latitude != null) event.latitude?.toFloat() else 0.0f
-        val longitude = if (event.longitude != null) event.longitude?.toFloat() else 0.0f
-        if ((latitude != null && longitude != null) && (latitude != 0.0f && longitude != 0.0f)) {
-            geolocation = GeoLocation(coordinate = Coordinate(latitude = latitude, longitude = longitude))
-        }
+//        val latitude = if (event.latitude != null) event.latitude?.toDouble() else 0.0F
+//        val longitude = if (event.longitude != null) event.longitude?.toDouble() else 0.0F
+//        if ((latitude != null && longitude != null) && (latitude != 0.0F && longitude != 0.0F)) {
+//            geolocation = GeoLocation(coordinate = Coordinate(latitude = latitude, longitude = longitude))
+//        }
 
+        var lat = event.latitude
+        var long = event.longitude
+        if (lat != null && long != null)
+            mongoEvent.geoDetails.geolocation = GeoLocation("Point", Coordinate(lat.toDouble(), long.toDouble()))
     }
+
     //FIXME hard coded charged
     if ("charged".equals(event.name, ignoreCase = false)) {
         mongoEvent.lineItem = event.lineItem
@@ -180,4 +188,12 @@ private fun getCommunication(existingEventUser: MongoEventUser,newEventUser: Eve
             }
     }
     return communication
+}
+
+//fixme after getting ip address database
+private fun getGeography(ipAddress: String?): Geogrophy? {
+    if (ipAddress != null) {
+        return Geogrophy(country = "", state = "", city = "")
+    }
+    return null
 }
