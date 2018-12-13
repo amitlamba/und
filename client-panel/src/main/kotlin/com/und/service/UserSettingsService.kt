@@ -28,6 +28,7 @@ import com.und.model.jpa.ClientSettingsEmail
 import com.und.repository.jpa.ClientRepository
 import com.und.repository.jpa.ClientSettingsEmailRepository
 import com.und.security.utils.AuthenticationUtils
+import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.WrongCredentialException
 import com.und.web.model.ValidationError
 import org.springframework.beans.factory.annotation.Value
@@ -220,9 +221,10 @@ class UserSettingsService {
     fun addSenderEmailAddress(emailAddress: EmailAddress, clientID: Long) {
         val emailExists = emailExists(emailAddress, clientID)
         if (emailExists) {
-            val error = ValidationError()
-            error.addFieldError("email", "Email : $emailAddress.personal already exist")
-            throw UndBusinessValidationException(error)
+//            val error = ValidationError()
+//            error.addFieldError("email", "Email : $emailAddress.personal already exist")
+//            throw UndBusinessValidationException(error)
+            throw CustomException("Email : $emailAddress.personal already exist")
         } else {
             val clientSettingEmail = ClientSettingsEmail()
             clientSettingEmail.email = emailAddress.address
@@ -230,11 +232,12 @@ class UserSettingsService {
             clientSettingEmail.verified = emailAddress.status
             clientSettingEmail.clientId = clientID
             clientSettingsEmailRepository.save(clientSettingEmail)
+            //send verification link
+            sendVerificationEmail(emailAddress, clientID)
 
         }
 
-        //send verification link
-        sendVerificationEmail(emailAddress, clientID)
+
 
     }
 

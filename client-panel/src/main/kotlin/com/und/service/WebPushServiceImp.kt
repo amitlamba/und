@@ -10,7 +10,9 @@ import com.und.web.model.WebPushTemplate as WebTemplate
 import com.und.repository.jpa.WebPushRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.CustomException
+import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Component
 
@@ -27,7 +29,13 @@ class WebPushServiceImp : WebPushService {
     }
     override fun saveTemplate(template: WebTemplate): WebTemplate {
         var jpaWebPushTemplate = buildJpaWebPushTemplate(template)
-        return buildWebWebPushTempalte(webPushRepository.save(jpaWebPushTemplate))
+        try{
+            return buildWebWebPushTempalte(webPushRepository.save(jpaWebPushTemplate))
+        }catch(ex:ConstraintViolationException){
+            throw CustomException("Template with name already exists.")
+        }catch (ex:DataIntegrityViolationException){
+            throw CustomException("Template with name already exists.")
+        }
     }
 
     override fun getTemplate(id: Long): WebTemplate {

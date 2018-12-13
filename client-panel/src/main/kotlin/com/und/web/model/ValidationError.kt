@@ -16,4 +16,8 @@ class ValidationError {
     fun getFieldErrors(): List<FieldError> {
         return fieldErrors
     }
+
+    override fun toString(): String {
+        return getFieldErrors().toString()
+    }
 }

@@ -3,7 +3,10 @@ package com.und.service
 import com.und.model.jpa.SmsTemplate
 import com.und.model.Status
 import com.und.repository.jpa.SmsTemplateRepository
+import com.und.web.controller.exception.CustomException
+import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 
 @Service
@@ -25,8 +28,14 @@ class SmsTemplateService {
 
     fun saveSmsTemplate(smsTemplate: SmsTemplate): Long {
         smsTemplate.status = Status.ACTIVE
-        val save = smsTemplateRepository.save(smsTemplate)
-        return save.id!!
+        try{
+            val save = smsTemplateRepository.save(smsTemplate)
+            return save.id!!
+        }catch (ex: ConstraintViolationException){
+            throw CustomException("Template with this name already exists.")
+        }catch (ex: DataIntegrityViolationException){
+            throw CustomException("Template with this name already exists.")
+        }
     }
 
     fun getUserEventAttributes() {

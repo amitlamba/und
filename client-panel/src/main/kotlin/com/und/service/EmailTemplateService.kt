@@ -7,10 +7,12 @@ import com.und.repository.jpa.EmailTemplateRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.EmailTemplateDuplicateNameException
 import com.und.web.controller.exception.EmailTemplateNotFoundException
+import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CacheEvict
 import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import com.und.web.model.EmailTemplate as WebEmailTemplate
 
@@ -66,9 +68,14 @@ class EmailTemplateService {
             }
         }
         val emailTemplate = buildEmailTemplate(webEmailTemplate)
-
-        val persistedemailTemplate = emailTemplateRepository.save(emailTemplate)
-        return persistedemailTemplate.id ?: -1
+        try{
+            val persistedemailTemplate = emailTemplateRepository.save(emailTemplate)
+            return persistedemailTemplate.id ?: -1
+        }catch (ex: ConstraintViolationException){
+            throw EmailTemplateDuplicateNameException("Template with name : ${webEmailTemplate.name} already exists")
+        }catch (ex: DataIntegrityViolationException){
+            throw EmailTemplateDuplicateNameException("Template with name : ${webEmailTemplate.name} already exists")
+        }
     }
 
     fun getEmailTemplateById(id: Long): WebEmailTemplate {

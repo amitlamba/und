@@ -8,11 +8,14 @@ import com.und.model.jpa.*
 import com.und.repository.jpa.CampaignAuditLogRepository
 import com.und.repository.jpa.CampaignRepository
 import com.und.security.utils.AuthenticationUtils
+import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.ScheduleUpdateException
 import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.web.model.ValidationError
+import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
@@ -75,13 +78,20 @@ class CampaignService {
     @Transactional
     protected fun saveCampaign(webCampaign: com.und.web.model.Campaign): Campaign? {
         val campaign = buildCampaign(webCampaign)
-        val persistedCampaign = campaignRepository.save(campaign)
+        try{
+            val persistedCampaign = campaignRepository.save(campaign)
 
-        webCampaign.id = persistedCampaign.id
-        logger.info("sending request to scheduler ${campaign.name}")
-        val jobDescriptor = buildJobDescriptor(webCampaign, JobDescriptor.Action.CREATE)
-        val sendToKafka = sendToKafka(jobDescriptor)
-        return persistedCampaign
+            webCampaign.id = persistedCampaign.id
+            logger.info("sending request to scheduler ${campaign.name}")
+            val jobDescriptor = buildJobDescriptor(webCampaign, JobDescriptor.Action.CREATE)
+            val sendToKafka = sendToKafka(jobDescriptor)
+            return persistedCampaign
+        }catch (ex:ConstraintViolationException){
+            throw CustomException("Template with this name already exists.")
+        }catch (ex:DataIntegrityViolationException){
+
+        }
+        return null
     }
 
     @Transactional

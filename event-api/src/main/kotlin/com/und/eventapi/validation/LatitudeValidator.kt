@@ -12,7 +12,10 @@ class LatitudeValidator : ConstraintValidator<ValidateLatitude, String> {
 
         val result: Boolean
         result = if (latitude != null) {
-            val pattern = Pattern.compile("^-?([1-8]?[0-9][.]\\d{1,2}$|90[.]0{1,2}$)")
+            var regex="^-?([1-8]?[0-9][.]\\d{1,2}$|90[.]0{1,2}$)"
+//            regex="^[1-9][0-9]\\.\\d+"
+            val pattern = Pattern.compile(regex)
+
             val matcher = pattern.matcher(latitude)
             matcher.matches()
         } else true

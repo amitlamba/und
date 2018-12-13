@@ -38,6 +38,7 @@ class SmsTemplateController {
     fun saveSmsTemplate(@RequestBody smsTemplate: SmsTemplate): Long {
         smsTemplate.clientID = AuthenticationUtils.clientID
         smsTemplate.appuserID=AuthenticationUtils.principal.id
+        //todo check template with name exist or not.
         return smsTemplateService.saveSmsTemplate(smsTemplate)
     }
 

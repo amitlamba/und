@@ -125,13 +125,22 @@ fun com.und.model.mongo.eventapi.EventUser.copyNonNull(eventUser: EventUser): co
 * here we adding the webFcmToken into list of webFcmToken
 * */
 private fun addWebFcmToken(existingEventUser:MongoEventUser,newEventUser:EventUser):ArrayList<String>?{
-    if(existingEventUser.identity.webFcmToken==null&&newEventUser.webFcmToken!=null){
-        existingEventUser.identity.webFcmToken = ArrayList()
+    var webtoken=existingEventUser.identity.webFcmToken
+    var newwebtoken=newEventUser.webFcmToken
+    if(webtoken==null && newwebtoken!=null){
+        webtoken = ArrayList()
     }
-    newEventUser.webFcmToken?.let {
-        existingEventUser.identity.webFcmToken?.add(it)
+    newwebtoken?.let {
+        if(webtoken!=null && webtoken.isNotEmpty()){
+            var result=webtoken.find { it.equals(newwebtoken) }
+            if(result==null) {webtoken.add(newwebtoken)}else{
+                return webtoken
+            }
+        }else{
+            webtoken?.add(it)
+        }
     }
-    return existingEventUser.identity.webFcmToken
+    return webtoken
 }
 
 private fun getCommunication(existingEventUser: MongoEventUser,newEventUser: EventUser):Communication{
@@ -154,31 +163,21 @@ private fun getCommunication(existingEventUser: MongoEventUser,newEventUser: Eve
             communication.ios= CommunicationDetails(value = it,dnd = false)
         }
     }else{
-        if(existingCommunication.email!=null){
             newEventUser.email?.let {
                 communication.email= CommunicationDetails(value = it,dnd = false)
             }
-        }
-        if (existingCommunication.mobile!=null){
             newEventUser.mobile?.let {
                 communication.mobile= CommunicationDetails(value = it,dnd = false)
             }
-        }
-        if (existingCommunication.android!=null){
             newEventUser.androidFcmToken?.let {
                 communication.android= CommunicationDetails(value = it,dnd = false)
             }
-        }
-        if (existingCommunication.webpush!=null){
             newEventUser.webFcmToken?.let {
                 communication.webpush= CommunicationDetails(value = it,dnd = false)
             }
-        }
-        if (existingCommunication.ios!=null){
             newEventUser.iosFcmToken?.let {
                 communication.ios= CommunicationDetails(value = it,dnd = false)
             }
-        }
     }
     return communication
 }

@@ -8,10 +8,13 @@ import com.und.repository.jpa.SegmentRepository
 import com.und.repository.mongo.EventRepository
 import com.und.repository.mongo.EventUserRepository
 import com.und.security.utils.AuthenticationUtils
+import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.SegmentNotFoundException
 import com.und.web.model.ConditionType
+import org.hibernate.exception.ConstraintViolationException
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
@@ -49,10 +52,16 @@ class SegmentServiceImpl : SegmentService {
     override fun createSegment(websegment: WebSegment): WebSegment {
         logger.debug("Saving segment: ${websegment.name}")
         val segment = buildSegment(websegment)
-        segmentRepository.save(segment)
-        websegment.id = segment.id
-        return websegment
-
+        try{
+            segmentRepository.save(segment)
+            logger.debug("Segment with name: ${websegment.name} is saved successfully.")
+            websegment.id = segment.id
+            return websegment
+        }catch (ex: ConstraintViolationException){
+            throw CustomException("Template with this name already exists.")
+        }catch (ex: DataIntegrityViolationException){
+            throw CustomException("Template with this name already exists.")
+        }
     }
 
     //@Cacheable(cacheNames = ["segmentlist"], key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_segment_'" )

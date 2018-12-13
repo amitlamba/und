@@ -13,7 +13,9 @@ import com.und.repository.jpa.AndroidActionRepository
 import com.und.repository.jpa.AndroidRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.CustomException
+import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Component
 import com.und.web.model.AndroidTemplate as WebAndroidTemplate
 
@@ -30,7 +32,15 @@ class AndroidServiceImp : AndroidService {
     override fun save(template: com.und.web.model.AndroidTemplate): WebAndroidTemplate {
         var jpaAndroidTemplate = buildJpaAndroidTemplate(template)
         jpaAndroidTemplate.addActionGroups(jpaAndroidTemplate.actionGroup)
-        return buildWebAndroidTemplate(androidRepository.save(jpaAndroidTemplate))
+        var persistedTemplate=AndroidTemplate()
+        try{
+            persistedTemplate=androidRepository.save(jpaAndroidTemplate)
+        }catch(ex: ConstraintViolationException){
+            throw CustomException("Template with this name already exists.")
+        }catch(ex: DataIntegrityViolationException){
+            throw CustomException("Template with this name already exists.")
+        }
+        return buildWebAndroidTemplate(persistedTemplate)
     }
 
     override fun getAllAndroidTemplate(clientId: Long): List<WebAndroidTemplate> {

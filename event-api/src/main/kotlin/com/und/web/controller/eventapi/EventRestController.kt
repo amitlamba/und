@@ -48,6 +48,8 @@ class EventRestController {
     @PreAuthorize("hasRole('ROLE_EVENT')")
     @PostMapping(value = ["/push/event"], produces = ["application/json"], consumes = ["application/json"])
     fun saveEvent(@Valid @RequestBody event: Event, request: HttpServletRequest): ResponseEntity<Response<String>> {
+        println(event.latitude)
+        print(event.longitude)
         val toEvent = eventService.buildEvent(event, request)
         eventService.toKafka(toEvent)
         return ResponseEntity.ok(Response(status = ResponseStatus.SUCCESS))
@@ -80,11 +82,11 @@ class EventRestController {
         }
 
         if (mongoUser != null) {
-            identityInit.userId = mongoUser.identity.undId
+            identityInit.userId = mongoUser.id
             eventUser.uid = mongoUser.identity.uid
         } else {
-
             identityInit.userId = identityInit.userId ?: ObjectId.get().toString()
+            eventUser.undId=identityInit.userId
         }
 
 

@@ -12,7 +12,10 @@ class LongitudeValidator : ConstraintValidator<ValidateLongitude, String> {
 
         val result: Boolean
         result = if (longitude != null) {
-            val pattern= Pattern.compile ("^-?([1]?[1-7][1-9]|[1]?[1-8][0]|[1-9]?[0-9])[.]\\d{2}")
+            var regex="^-?([1]?[1-7][1-9]|[1]?[1-8][0]|[1-9]?[0-9])[.]\\d{2}"
+//            regex="^[1-9][0-9]\\.\\d+"
+            val pattern= Pattern.compile (regex)
+
             val matcher = pattern.matcher(longitude)
             matcher.matches()
         } else true

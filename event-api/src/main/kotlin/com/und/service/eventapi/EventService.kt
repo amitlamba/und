@@ -4,9 +4,7 @@ import com.und.common.utils.MetadataUtil
 import com.und.eventapi.utils.copyToMongo
 import com.und.eventapi.utils.ipAddr
 import com.und.config.EventStream
-import com.und.model.mongo.eventapi.EventMetadata
-import com.und.model.mongo.eventapi.System
-import com.und.model.mongo.eventapi.SystemDetails
+import com.und.model.mongo.eventapi.*
 import com.und.repository.mongo.EventMetadataRepository
 import com.und.repository.mongo.EventRepository
 import com.und.repository.mongo.EventUserRepository
@@ -81,6 +79,9 @@ class EventService {
         val eventMetadata = buildMetadata(mongoEvent)
         eventMetadataRepository.save(eventMetadata)
         //FIXME add to metadata
+
+        mongoEvent.geogrophy=getGeography(event.ipAddress)
+        mongoEvent.geoDetails.geolocation= GeoLocation("Point", Coordinate(event.latitude?.toFloat()?:0f,event.longitude?.toFloat()?:0f))
         val saved = eventRepository.insert(mongoEvent)
 
         eventStream.outEventForLiveSegment().send(MessageBuilder.withPayload(buildEventForLiveSegment(saved)).build())
@@ -123,6 +124,13 @@ class EventService {
             throw EventNotFoundException("Event with null id")
         }
 
+    }
+    //fixme after getting ip address database
+    private fun getGeography(ipAddress:String?):Geogrophy{
+        if(ipAddress!=null){
+
+        }
+        return Geogrophy(country = "",state = "",city = "" )
     }
 
 }

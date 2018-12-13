@@ -114,7 +114,7 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
     @ResponseBody
     fun businessValidationError(ex: UndBusinessValidationException, request: WebRequest): ResponseEntity<Any> {
         logger.error("400 Status Code", ex)
-        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.error", null, request.locale), ex.localizedMessage)
+        val bodyOfResponse = GenericResponse(messageSource.getMessage("message.error", null, request.locale), ex.error.toString())
         return ResponseEntity(bodyOfResponse, HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
