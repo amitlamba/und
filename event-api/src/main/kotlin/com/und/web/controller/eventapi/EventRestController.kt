@@ -49,6 +49,10 @@ class EventRestController {
     @PostMapping(value = ["/push/event"], produces = ["application/json"], consumes = ["application/json"])
     fun saveEvent(@Valid @RequestBody event: Event, request: HttpServletRequest): ResponseEntity<Response<String>> {
         var headers=request.headerNames
+       println( request.remoteHost)
+        println(request.remoteUser)
+        println(request.serverName)
+        println(request.serverPort)
         if(headers.hasMoreElements()){
             print(headers.nextElement())
         }
