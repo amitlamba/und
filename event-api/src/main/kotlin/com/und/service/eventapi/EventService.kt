@@ -8,6 +8,7 @@ import com.und.model.mongo.eventapi.*
 import com.und.repository.mongo.EventMetadataRepository
 import com.und.repository.mongo.EventRepository
 import com.und.repository.mongo.EventUserRepository
+import com.und.repository.mongo.IpLocationRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.security.utils.TenantProvider
 import com.und.web.exception.EventNotFoundException
@@ -32,6 +33,9 @@ class EventService {
 
     @Autowired
     private lateinit var eventRepository: EventRepository
+
+    @Autowired
+    private lateinit var ipLocationRepository: IpLocationRepository
 
     @Autowired
     private lateinit var eventMetadataRepository: EventMetadataRepository
@@ -76,6 +80,13 @@ class EventService {
 
             mongoEvent.system = system
         }
+        //fixme we can make it better eg if country present then found only state and city.
+        if (event.country == null || event.state == null || event.city == null){
+            var geogrophy = getGeography(event.ipAddress)
+            geogrophy?.let { mongoEvent.geogrophy=geogrophy }
+        }
+
+
         val eventMetadata = buildMetadata(mongoEvent)
         eventMetadataRepository.save(eventMetadata)
         //FIXME add to metadata
@@ -120,6 +131,13 @@ class EventService {
             throw EventNotFoundException("Event with null id")
         }
 
+    }
+
+    private fun getGeography(ipAddress: String?): Geogrophy? {
+        if (ipAddress != null) {
+            return ipLocationRepository.getGeographyByIpAddress(ipAddress)
+        }
+        return null
     }
 
 }

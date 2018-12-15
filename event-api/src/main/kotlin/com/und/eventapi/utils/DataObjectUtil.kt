@@ -39,9 +39,6 @@ fun Event.copyToMongo(): MongoEvent {
     }
 
     mongoEvent.geogrophy = Geogrophy(event.country, event.state, event.city)
-    //fixme we can make it better eg if country present then found only state and city.
-    if(event.country==null&&event.state==null&&event.city==null)
-    mongoEvent.geogrophy= getGeography(event.ipAddress)
     //TODO fix null values or empty strings not allowed
     mongoEvent.userId = event.identity.userId
     mongoEvent.sessionId = event.identity.sessionId
@@ -188,12 +185,4 @@ private fun getCommunication(existingEventUser: MongoEventUser,newEventUser: Eve
             }
     }
     return communication
-}
-
-//fixme after getting ip address database
-private fun getGeography(ipAddress: String?): Geogrophy? {
-    if (ipAddress != null) {
-        return Geogrophy(country = "", state = "", city = "")
-    }
-    return null
 }
