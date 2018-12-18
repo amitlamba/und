@@ -48,14 +48,6 @@ class EventRestController {
     @PreAuthorize("hasRole('ROLE_EVENT')")
     @PostMapping(value = ["/push/event"], produces = ["application/json"], consumes = ["application/json"])
     fun saveEvent(@Valid @RequestBody event: Event, request: HttpServletRequest): ResponseEntity<Response<String>> {
-        var headers=request.headerNames
-       println( request.remoteHost)
-        println(request.remoteUser)
-        println(request.serverName)
-        println(request.serverPort)
-        if(headers.hasMoreElements()){
-            print(headers.nextElement())
-        }
         val toEvent = eventService.buildEvent(event, request)
         eventService.toKafka(toEvent)
         return ResponseEntity.ok(Response(status = ResponseStatus.SUCCESS))
