@@ -102,7 +102,6 @@ class EmailService {
         val dataMap = mutableMapOf<String, Any>(
                 "name" to "${client.firstname} ${client.lastname}",
                 "emailVerificationLink" to "${clientPanelUrl}/verifyemail/${client.email}/${client.clientVerification.emailCode}",
-                "companyname" to "userndot"
         )
 
         val email = Email(
