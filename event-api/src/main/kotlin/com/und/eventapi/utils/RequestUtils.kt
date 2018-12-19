@@ -41,7 +41,7 @@ fun systemDetails(agentString: String): SystemDetails {
     val deviceType = operatingSystem.deviceType
     val osName = operatingSystem.getName()
     systemDetails.browser = browser.getName()
-    systemDetails.browserVersion = userAgent.browserVersion.version
+    systemDetails.browserVersion = userAgent.browserVersion?.version
     systemDetails.OS = osName
     systemDetails.deviceType = deviceType.getName()
 
