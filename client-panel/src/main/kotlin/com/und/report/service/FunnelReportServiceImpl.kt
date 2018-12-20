@@ -102,13 +102,14 @@ class FunnelReportServiceImpl : FunnelReportService {
         groupBys.add(Fields.field(AggregationQuerybuilder.Field.UserId.fName, AggregationQuerybuilder.Field.UserId.fName))
         groupBys.add(Fields.field(AggregationQuerybuilder.Field.EventName.fName, AggregationQuerybuilder.Field.EventName.fName))
         val split = funnelFilter.splitProprty
-        if (split != null && !funnelFilter.splitProprty.isNullOrBlank()) {
-            val propertyPath = segmentParserCriteria.getFieldPath(funnelFilter.splitProprtyType, split)
-            groupBys.add(Fields.field("attribute", propertyPath))
-        }
-
         var c=ConvertOperators.ConvertOperatorFactory("creationTime").convertToLong()
         var projectionOperation= Aggregation.project("userId","name").and(c).`as`("creationTime")
+        var propertyPath:String
+        if (split != null && !funnelFilter.splitProprty.isNullOrBlank()) {
+            propertyPath = segmentParserCriteria.getFieldPath(funnelFilter.splitProprtyType, split)
+            groupBys.add(Fields.field("attribute", "splitproperty"))
+            projectionOperation=projectionOperation.and(propertyPath).`as`("splitproperty")
+        }
 
         val groupByOperation1 = Aggregation.group(Fields.from(*groupBys.toTypedArray())).push("creationTime").`as`("chronology")
 
@@ -123,7 +124,6 @@ class FunnelReportServiceImpl : FunnelReportService {
 
         val groupByOperation2 = Aggregation.group("\$${AggregationQuerybuilder.Field.UserId.fName}").push(pushObject).`as`("chronologies")
         aggregationOperations.add(groupByOperation2)
-
         return Aggregation.newAggregation(*aggregationOperations.toTypedArray())
     }
 }
