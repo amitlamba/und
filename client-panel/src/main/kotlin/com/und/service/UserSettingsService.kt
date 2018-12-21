@@ -31,6 +31,7 @@ import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.WrongCredentialException
 import com.und.web.model.ValidationError
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.messaging.support.MessageBuilder
 import java.net.URLEncoder
@@ -72,6 +73,9 @@ class UserSettingsService {
     private var templateName="fromEmailVerification"
     private var expiration=24*60*60
 
+    companion object {
+        var logger=LoggerFactory.getLogger(UserSettingsService::class.java)
+    }
     @PostConstruct
     fun setUp() {
         emptyArrayJson = objectMapper.writeValueAsString(emptyArray<String>())//"[]"//objectMapper.
@@ -357,7 +361,7 @@ class UserSettingsService {
     }
 
     fun sendVerificationEmail(emailAddress: EmailAddress, clientID: Long) {
-
+        logger.info("Sending from email address varification to ${emailAddress.address}")
         var data= mutableMapOf<String,Any>()
         var client = clientRepository.findById(clientID)
         if(client.isPresent){

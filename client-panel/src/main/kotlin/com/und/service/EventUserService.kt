@@ -2,7 +2,6 @@ package com.und.service
 
 import com.und.common.utils.DateUtils
 import com.und.repository.mongo.EventRepository
-import com.und.repository.mongo.EventUserCustomRepository
 import com.und.repository.mongo.EventUserRepo
 import com.und.repository.mongo.EventUserRepository
 import com.und.security.utils.AuthenticationUtils
@@ -13,7 +12,6 @@ import com.und.web.controller.exception.EventsListNotFoundException
 import com.und.web.model.EventUser
 import com.und.web.model.event.Event
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Service
 import java.util.*
 import com.und.model.mongo.eventapi.Event as EventMongo
@@ -118,7 +116,7 @@ class EventUserService {
         eventUser.address = eventUserMongo.standardInfo.address
         eventUser.clientId = eventUserMongo.clientId
         eventUser.additionalInfo = eventUserMongo.additionalInfo
-        eventUser.clientUserId = eventUserMongo.identity.clientUserId
+        eventUser.uid = eventUserMongo.identity.uid
         eventUser.dob = eventUserMongo.standardInfo.dob
         eventUser.creationDate = DateUtils().convertDateToDateTime(eventUserMongo.creationTime)
         eventUser.email = eventUserMongo.identity.email

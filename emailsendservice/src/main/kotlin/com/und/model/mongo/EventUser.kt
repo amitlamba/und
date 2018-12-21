@@ -20,7 +20,7 @@ class EventUser {
 
 class Identity {
         var email: String? = null
-        var clientUserId: String? = null
+        var uid: String? = null
         var undId: String? = null
         var fbId: String? = null
         var googleId: String? = null
