@@ -47,4 +47,11 @@ class SmsTemplateController {
     fun getUserEventAttributes() {
         smsTemplateService.getUserEventAttributes()
     }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = ["/template/{id}"])
+    fun getSmsTemplateById(@PathVariable(required = true) id:Long):SmsTemplate {
+       return smsTemplateService.getSmsTemplateById(id)
+    }
+
 }
