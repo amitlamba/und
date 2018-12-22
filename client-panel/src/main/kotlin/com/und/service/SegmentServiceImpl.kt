@@ -15,9 +15,12 @@ import org.hibernate.exception.ConstraintViolationException
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
+import kotlin.reflect.KClass
+import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 import com.und.web.model.EventUser as EventUserWeb
 import com.und.web.model.Segment as WebSegment
 
@@ -46,6 +49,9 @@ class SegmentServiceImpl : SegmentService {
 
     @Autowired
     private lateinit var segmentParserCriteria: SegmentParserCriteria
+
+    @Autowired
+    lateinit var mongoTemplate:MongoTemplate
 
 
     //@CacheEvict("segmentlist", key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_segment_'" )
@@ -98,8 +104,7 @@ class SegmentServiceImpl : SegmentService {
         val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
         return if (segmentOption.isPresent) {
             val segment = segmentOption.get()
-            getSegmentUserIds(segment, clientId)
-
+            getSegmentUserIds(segment, clientId,"userId").second
         } else emptyList()
         //return listOf("5b1f5b080be60f4cc2942875", "5b49c41c00156a1860d1f82d", "5b49d11400156a1860d1f83a")
     }
@@ -164,8 +169,9 @@ class SegmentServiceImpl : SegmentService {
     }
 
     private fun getSegmentUsersList(segment: Segment, clientId: Long): List<EventUser> {
-        val userIds = getSegmentUserIds(segment, clientId)
-        return eventUserRepository.findUserByIds(userIds.toSet(), clientId)
+//        val userIds = getSegmentUserIds(segment, clientId)
+//        return eventUserRepository.findUserByIds(userIds.toSet(), clientId)
+        return getSegmentUserIds(segment,clientId).first
     }
 
     private fun getTestSEgmentUsers(clientId: Long): List<EventUser> {
@@ -173,39 +179,52 @@ class SegmentServiceImpl : SegmentService {
         return eventUserRepository.findUserByIds(userIds.toSet(), clientId)
     }
 
-    private fun getSegmentUserIds(segment: Segment, clientId: Long): List<String> {
+    private fun getSegmentUserIds(segment: Segment, clientId: Long,type:String="eventuser"): Pair<List<EventUser>,List<String>> {
 
         val tz = userSettingsService.getTimeZone()
         val allResult = mutableListOf<Set<String>>()
         val websegment = buildWebSegment(segment)
-        val queries = segmentParserCriteria.segmentQueries(websegment, tz)
+//        val queries = segmentParserCriteria.segmentQueries(websegment, tz)
+//
+//        val (didQueries, joincondition) = queries.didq
+//        if (didQueries.isNotEmpty()) {
+//            val userDidList = retrieveUsers(didQueries, joincondition, clientId)
+//            allResult.add(userDidList.toSet())
+//        } else if (queries.query != null) {
+//            var query = Query().addCriteria(queries.query)
+//            val userList = eventRepository.usersFromEvent(query, clientId)
+//            allResult.add(userList.toSet())
+//        }
+//
+//        val (didNotQueries, joinconditionfornot) = queries.didntq
+//        if (didNotQueries.isNotEmpty()) {
+//            val userDidNotDid = retrieveUsers(didNotQueries, joinconditionfornot, clientId)
+//
+//            val userDidNotList = eventUserRepository.findUsersNotIn(userDidNotDid.toSet(), clientId)
+//            allResult.add(userDidNotList.toSet())
+//        }
+//
+//        val userQuery = queries.userQuery
+//        if (userQuery != null) {
+//            val userProfiles = eventUserRepository.usersFromUserProfile(userQuery, clientId)
+//            allResult.add(userProfiles.toSet())
+//        }
+//
+//        val userList = allResult.reduce { f, s -> f.intersect(s) }
+        var agg=segmentParserCriteria.segmentQuery1(websegment,tz,type)
+        var finalAgg=Aggregation.newAggregation(agg)
 
-        val (didQueries, joincondition) = queries.didq
-        if (didQueries.isNotEmpty()) {
-            val userDidList = retrieveUsers(didQueries, joincondition, clientId)
-            allResult.add(userDidList.toSet())
-        } else if (queries.query != null) {
-            var query = Query().addCriteria(queries.query)
-            val userList = eventRepository.usersFromEvent(query, clientId)
-            allResult.add(userList.toSet())
+        data class Result(var userId:List<String> = emptyList())
+        if(type.equals("userId")) {
+            var allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_event",Result::class.java).mappedResults
+            if(allResult.isNotEmpty())
+                return Pair(emptyList(), allResult[0].userId)
+            else
+                return Pair(emptyList(),emptyList())
         }
+        else
+            return Pair(mongoTemplate.aggregate(finalAgg,"${clientId}_event",EventUser::class.java).mappedResults, emptyList())
 
-        val (didNotQueries, joinconditionfornot) = queries.didntq
-        if (didNotQueries.isNotEmpty()) {
-            val userDidNotDid = retrieveUsers(didNotQueries, joinconditionfornot, clientId)
-
-            val userDidNotList = eventUserRepository.findUsersNotIn(userDidNotDid.toSet(), clientId)
-            allResult.add(userDidNotList.toSet())
-        }
-
-        val userQuery = queries.userQuery
-        if (userQuery != null) {
-            val userProfiles = eventUserRepository.usersFromUserProfile(userQuery, clientId)
-            allResult.add(userProfiles.toSet())
-        }
-
-        val userList = allResult.reduce { f, s -> f.intersect(s) }
-        return userList.toList()
     }
 
     private fun retrieveUsers(queries: List<Aggregation>, conditionType: ConditionType, clientId: Long): MutableSet<String> {

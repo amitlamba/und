@@ -6,9 +6,8 @@ import com.und.web.model.*
 import com.und.web.model.Unit
 import org.slf4j.Logger
 import org.springframework.cache.annotation.Cacheable
-import org.springframework.data.mongodb.core.aggregation.Aggregation
-import org.springframework.data.mongodb.core.aggregation.GroupOperation
-import org.springframework.data.mongodb.core.aggregation.MatchOperation
+import org.springframework.data.domain.Sort
+import org.springframework.data.mongodb.core.aggregation.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Component
@@ -41,38 +40,40 @@ class SegmentParserCriteria {
         val logger: Logger = loggerFor(SegmentParserCriteria::class.java)
     }
 
-    var userMap:HashMap<String,String>;
-    var eventMap:HashMap<String,String>;
-    constructor(){
-        userMap=HashMap();
-        userMap.put("gender","standardInfo.gender")
-        userMap.put("dob","standardInfo.dob")
-        userMap.put("country","standardInfo.country")
-        userMap.put("state","standardInfo.state")
-        userMap.put("countryCode","standardInfo.countryCode")
-        userMap.put("City","standardInfo.City")
-        userMap.put("emailIdentity","identity.email")
-        userMap.put("mobileIdentity","identity.mobile")
-        userMap.put("emailReach","communication.email.dnd")
-        userMap.put("mobileReach","communication.mobile.dnd")
-        userMap.put("creationTime","creationTime")
-        userMap.put("os","system.os.name")
-        userMap.put("browser","system.browser.name")
-        userMap.put("device","system.device.name")
+    var userMap: HashMap<String, String>;
+    var eventMap: HashMap<String, String>;
 
-        eventMap=HashMap();
-        eventMap.put("country","geogrophy.country")
-        eventMap.put("state","geogrophy.state")
-        eventMap.put("city","geogrophy.city")
-        eventMap.put("clientTime","clientTime")
-        eventMap.put("name","name")
-        eventMap.put("os","system.os.name")
-        eventMap.put("browser","system.browser.name")
-        eventMap.put("device","system.device.name")
-        eventMap.put("creationTime","creationTime")
+    constructor() {
+        userMap = HashMap();
+        userMap.put("gender", "standardInfo.gender")
+        userMap.put("dob", "standardInfo.dob")
+        userMap.put("country", "standardInfo.country")
+        userMap.put("state", "standardInfo.state")
+        userMap.put("countryCode", "standardInfo.countryCode")
+        userMap.put("City", "standardInfo.City")
+        userMap.put("emailIdentity", "identity.email")
+        userMap.put("mobileIdentity", "identity.mobile")
+        userMap.put("emailReach", "communication.email.dnd")
+        userMap.put("mobileReach", "communication.mobile.dnd")
+        userMap.put("creationTime", "creationTime")
+        userMap.put("os", "system.os.name")
+        userMap.put("browser", "system.browser.name")
+        userMap.put("device", "system.device.name")
+
+        eventMap = HashMap();
+        eventMap.put("country", "geogrophy.country")
+        eventMap.put("state", "geogrophy.state")
+        eventMap.put("city", "geogrophy.city")
+        eventMap.put("clientTime", "clientTime")
+        eventMap.put("name", "name")
+        eventMap.put("os", "system.os.name")
+        eventMap.put("browser", "system.browser.name")
+        eventMap.put("device", "system.device.name")
+        eventMap.put("creationTime", "creationTime")
 
 
     }
+
     private val dateUtils = DateUtils()
 
     enum class Field(val fName: String = "") {
@@ -116,19 +117,179 @@ class SegmentParserCriteria {
         val didnotq = didnot?.let { Pair(parseEvents(it.events, tz, false, null, null, userCriteria), ConditionType.AnyOf) }
                 ?: Pair(emptyList(), ConditionType.AnyOf)
 
-        if(didq.first.isEmpty()){
-            return SegmentQuery(didq, didnotq, userQuery,geoCriteria)
-        }else {
+        if (didq.first.isEmpty()) {
+            return SegmentQuery(didq, didnotq, userQuery, geoCriteria)
+        } else {
             return SegmentQuery(didq, didnotq, userQuery)
         }
     }
 
 
+    fun segmentQuery1(segment: Segment, tz: ZoneId,type:String): List<AggregationOperation> {
+        var listOfAggregation = mutableListOf<AggregationOperation>()
+        /*
+        * Geography based aggregation
+        * */
+        val geoCriteria = if (segment.geographyFilters.isNotEmpty()) segment.geographyFilters.let { geoFilter -> filterGeography(geoFilter, segment.userId) } else null
+        geoCriteria?.let {
+            var geoCriteriaAgg = Aggregation.match(it)
+            listOfAggregation.add(geoCriteriaAgg)
+        }
+
+
+        /*
+        * divide globalfilter into event and user and find criteria
+        * */
+        val gFilters = segment.globalFilters
+        val (eventPropertyMatch, userPropertyMatch) = filterGlobalQWithUserId(gFilters, tz, segment.userId)
+        //adding event globalCriteria aggregation
+        if (eventPropertyMatch != null)
+            listOfAggregation.add(Aggregation.match(eventPropertyMatch))
+
+        //add didnot
+        addDidNotAggregation(segment, listOfAggregation, tz)
+        //add did
+        addDidAggregation(segment, listOfAggregation, tz)
+        //common to all after did
+        var group = Aggregation.group("userId")
+        var convertToOBjectId = ConvertOperators.ConvertOperatorFactory("_id").convertToObjectId()
+        var project = Aggregation.project().and(convertToOBjectId).`as`("_id")
+        var sort = Aggregation.sort(Sort.Direction.ASC, "_id")
+        var lookup = Aggregation.lookup("3_eventUser", "_id", "_id", "user")
+        var unwindOperation = Aggregation.unwind("user")
+        var replaceRootOperation = Aggregation.replaceRoot("user")
+
+        listOfAggregation.add(group)
+        listOfAggregation.add(project)
+        listOfAggregation.add(sort)
+        listOfAggregation.add(lookup)
+        listOfAggregation.add(unwindOperation)
+        listOfAggregation.add(replaceRootOperation)
+        //adding user globalcriteria aggregation
+        if (userPropertyMatch != null) {
+            listOfAggregation.add(Aggregation.match(userPropertyMatch))
+        }
+        if(type.equals("userId")){
+            var convertor=ConvertOperators.ConvertOperatorFactory("_id").convertToString()
+            listOfAggregation.add(Aggregation.project().and(convertor).`as`("_id"))
+            listOfAggregation.add(Aggregation.group().push("_id").`as`("userId"))
+        }
+        return listOfAggregation
+    }
+
+    private fun addDidNotAggregation(segment: Segment, listOfAggregation: MutableList<AggregationOperation>, tz: ZoneId) {
+        var didnot = segment.didNotEvents?.events
+        var listOfDidNotCriteria = mutableListOf<Criteria>()
+        didnot?.forEachIndexed { index, event ->
+            listOfDidNotCriteria.add(parseEvents2(event, tz, false))
+        }
+        if(listOfDidNotCriteria.isNotEmpty()){
+            var matchOperation = Aggregation.match(Criteria().norOperator(Criteria().orOperator(*listOfDidNotCriteria.toTypedArray())))
+            listOfAggregation.add(matchOperation)
+        }
+
+    }
+
+    private fun addDidAggregation(segment: Segment, listOfAggregation: MutableList<AggregationOperation>, tz: ZoneId) {
+        var did = segment.didEvents?.events
+        var didAgg = Aggregation.facet()
+        did?.forEachIndexed { index, event ->
+            var a = parseEvents1(event, tz, true)
+            var aggregationMatchOperation = a.get(0)
+            var aggGroupOperation = a.get(1)
+            var aggMatchOperation = a.get(2)
+            didAgg = didAgg.and(aggregationMatchOperation, aggGroupOperation, aggMatchOperation).`as`("pipe" + index)
+        }
+        var setIntersection: SetOperators.SetIntersection
+
+        did?.let{
+            if (it.size >= 2) {
+            setIntersection = SetOperators.SetOperatorFactory("pipe0._id").intersects("pipe1._id")
+
+            did?.forEachIndexed { index, event ->
+                if (index > 1) {
+                    setIntersection = setIntersection.intersects("pipe" + index + "._id")
+                }
+            }
+
+            var afterFacetStage = Aggregation.project().and(setIntersection).`as`("userId")
+            var unwindAfterFacetStage = Aggregation.unwind("userId")
+
+            listOfAggregation.add(didAgg)
+            listOfAggregation.add(afterFacetStage)
+            listOfAggregation.add(unwindAfterFacetStage)
+
+        } else if (it.size == 1) {
+            var project = Aggregation.project().and("pipe0._id").`as`("userId")
+            var unwindAfterFacetStage = Aggregation.unwind("userId")
+            listOfAggregation.add(didAgg)
+            listOfAggregation.add(project)
+            listOfAggregation.add(unwindAfterFacetStage)
+        } else{
+
+            }
+
+        }
+    }
+
+    private fun parseEvents1(event: Event, tz: ZoneId, did: Boolean): List<AggregationOperation> {
+
+        var listOfAggregationOperation = mutableListOf<AggregationOperation>()
+        var matches = mutableListOf<Criteria>()
+        matches.addAll(parsePropertyFilters(event, tz))
+        matches.add(Criteria.where(Field.eventName.fName).`is`(event.name))
+        matches.add(Criteria.where("userId").exists(true))
+        matches.add(parseDateFilter(event.dateFilter, tz))
+
+        var fields = Aggregation.fields(Field.userId.name, Field.creationTime.name, Field.clientId.name)
+        matches.forEach { criteria ->
+            val name = criteria.key
+            if (name != null) {
+                fields = fields.and(name, name)
+            }
+        }
+        val matchOps = Aggregation.match(Criteria().andOperator(*matches.toTypedArray()))
+        listOfAggregationOperation.add(matchOps)
+        val whereCond = if (did) {
+            event.whereFilter?.let { whereFilter -> whereFilterParse(whereFilter, tz) } ?: Optional.empty()
+        } else Optional.empty()
+
+        if (whereCond.isPresent) {
+            val group = whereCond.get().first
+            val matchOnGroup = whereCond.get().second
+            listOfAggregationOperation.add(group)
+            listOfAggregationOperation.add(matchOnGroup)
+        } else {
+            val group = Aggregation.group(Aggregation.fields().and(Field.userId.name, Field.userId.name))
+            listOfAggregationOperation.add(group)
+        }
+        return listOfAggregationOperation
+    }
+
+    private fun parseEvents2(event: Event, tz: ZoneId, did: Boolean): Criteria {
+
+        var matches = mutableListOf<Criteria>()
+        matches.addAll(parsePropertyFilters(event, tz))
+        matches.add(Criteria.where(Field.eventName.fName).`is`(event.name))
+        matches.add(Criteria.where("userId").exists(true))
+        matches.add(parseDateFilter(event.dateFilter, tz))
+
+        var fields = Aggregation.fields(Field.userId.name, Field.creationTime.name, Field.clientId.name)
+        matches.forEach { criteria ->
+            val name = criteria.key
+            if (name != null) {
+                fields = fields.and(name, name)
+            }
+        }
+
+        return Criteria().andOperator(*matches.toTypedArray())
+    }
+
     private fun parseUsers(criteria: Criteria): Aggregation {
         //val project = Aggregation.project(Aggregation.fields("_id"))
         val matchOps = Aggregation.match(criteria)
         val group = Aggregation.group(Aggregation.fields().and("_id", "_id"))
-        return Aggregation.newAggregation( matchOps, group)
+        return Aggregation.newAggregation(matchOps, group)
     }
 
     private fun parseEvents(events: List<Event>, tz: ZoneId, did: Boolean, eventPropertyMatch: Criteria?, geoCriteria: Criteria?, userCriteria: Criteria?): List<Aggregation> {
@@ -166,7 +327,7 @@ class SegmentParserCriteria {
                 Aggregation.newAggregation(/*project,*/ matchOps, group, matchOnGroup)
             } else {
                 val group = Aggregation.group(Aggregation.fields().and(Field.userId.name, Field.userId.name))
-                 Aggregation.newAggregation(/*project,*/ matchOps, group)
+                Aggregation.newAggregation(/*project,*/ matchOps, group)
             }
 
 
@@ -235,7 +396,7 @@ class SegmentParserCriteria {
     private fun whereFilterParse(whereFilter: WhereFilter, tz: ZoneId): Optional<Pair<GroupOperation, MatchOperation>> {
         val values = whereFilter.values
         return if ((values != null && values.isNotEmpty())) {
-            val filter = when  {
+            val filter = when {
                 whereFilter.whereFilterName == WhereFilterName.Count -> {
 
                     val group = Aggregation.group(Aggregation.fields().and(Field.userId.name, Field.userId.name)).count().`as`(Field.count.name)
@@ -449,34 +610,34 @@ class SegmentParserCriteria {
         }
     }
 
-    fun getFieldPath(filterType:GlobalFilterType,name:String):String{
-        when(filterType){
-            GlobalFilterType.Demographics->return "standardInfo.${name}"
-            GlobalFilterType.UserProperties-> return "additionalInfo.${name}"
-            GlobalFilterType.Reachability->return  "communication.${name}.dnd"
-            GlobalFilterType.UserComputedProperties-> return "${name}"
-            GlobalFilterType.UserIdentity->return "identity.${name}"
-            GlobalFilterType.UserTechnographics->return return "system.${name}.name"
+    fun getFieldPath(filterType: GlobalFilterType, name: String): String {
+        when (filterType) {
+            GlobalFilterType.Demographics -> return "standardInfo.${name}"
+            GlobalFilterType.UserProperties -> return "additionalInfo.${name}"
+            GlobalFilterType.Reachability -> return "communication.${name}.dnd"
+            GlobalFilterType.UserComputedProperties -> return "${name}"
+            GlobalFilterType.UserIdentity -> return "identity.${name}"
+            GlobalFilterType.UserTechnographics -> return return "system.${name}.name"
 
-            GlobalFilterType.Geogrophy->return "geogrophy.${name}"
-            GlobalFilterType.Technographics->return "system.${name}.name"
-            GlobalFilterType.EventProperties->return "${name}"
-            GlobalFilterType.EventAttributeProperties-> return "attributes.${name}"
-            GlobalFilterType.EventTimeProperties-> return "clientTime.${name}"
-            GlobalFilterType.EventComputedProperties->return "${name}"
-            else-> return ""
+            GlobalFilterType.Geogrophy -> return "geogrophy.${name}"
+            GlobalFilterType.Technographics -> return "system.${name}.name"
+            GlobalFilterType.EventProperties -> return "${name}"
+            GlobalFilterType.EventAttributeProperties -> return "attributes.${name}"
+            GlobalFilterType.EventTimeProperties -> return "clientTime.${name}"
+            GlobalFilterType.EventComputedProperties -> return "${name}"
+            else -> return ""
         }
     }
 
-    private fun isUserCollection(globalFilterType: GlobalFilterType): Boolean{
+    private fun isUserCollection(globalFilterType: GlobalFilterType): Boolean {
         //TODO, move it to the enum so in case of a new entry in enum it doesn't get missed
         return globalFilterType in listOf(GlobalFilterType.UserProperties, GlobalFilterType.Demographics, GlobalFilterType.Reachability, GlobalFilterType.UserComputedProperties)
     }
 
-    fun joinAwareFilterGlobalQ(globalFilters: List<GlobalFilter>, tz: ZoneId, userId: String?, joinWithUser: Boolean): Pair<Criteria?, Criteria?>{
-        fun parseGlobalFilter(filter: GlobalFilter,filterType:GlobalFilterType): Criteria {
-            var fieldPath= getFieldPath(filterType,filter.name)
-            val fieldName = if(joinWithUser &&  isUserCollection(filterType)) "$USER_DOC.$fieldPath" else "$fieldPath"
+    fun joinAwareFilterGlobalQ(globalFilters: List<GlobalFilter>, tz: ZoneId, userId: String?, joinWithUser: Boolean): Pair<Criteria?, Criteria?> {
+        fun parseGlobalFilter(filter: GlobalFilter, filterType: GlobalFilterType): Criteria {
+            var fieldPath = getFieldPath(filterType, filter.name)
+            val fieldName = if (joinWithUser && isUserCollection(filterType)) "$USER_DOC.$fieldPath" else "$fieldPath"
 
 
             val type = filter.type
@@ -490,14 +651,14 @@ class SegmentParserCriteria {
 
             val criteriaList = filters.map { filterList ->
                 val sameNameCriteria = filterList.value.map { filter ->
-                    var filterType=filter.globalFilterType
-                    parseGlobalFilter(filter,filterType)
+                    var filterType = filter.globalFilterType
+                    parseGlobalFilter(filter, filterType)
 
                 }
-                if(sameNameCriteria.size == 1) sameNameCriteria.get(0) else Criteria().orOperator(*sameNameCriteria.toTypedArray())
+                if (sameNameCriteria.size == 1) sameNameCriteria.get(0) else Criteria().orOperator(*sameNameCriteria.toTypedArray())
             }
 
-            return if(criteriaList.size == 1) criteriaList.get(0) else Criteria().andOperator(*criteriaList.toTypedArray())
+            return if (criteriaList.size == 1) criteriaList.get(0) else Criteria().andOperator(*criteriaList.toTypedArray())
         }
 
         val eventPropertyMatchCriteria = mutableListOf<Criteria>()
@@ -509,33 +670,33 @@ class SegmentParserCriteria {
                     val filter = gFilterList.groupBy { it.name }
                     val criteria = parse(filter)
                     when (gFilterType) {
-                        //GlobalFilterType.AppFields -> eventPropertyMatchCriteria.add(criteria)
+                    //GlobalFilterType.AppFields -> eventPropertyMatchCriteria.add(criteria)
                         GlobalFilterType.Demographics -> userPropertyMatchCriteria.add(criteria)
                         GlobalFilterType.Reachability -> userPropertyMatchCriteria.add(criteria)
                         GlobalFilterType.UserProperties -> userPropertyMatchCriteria.add(criteria)
-                        GlobalFilterType.UserComputedProperties->userPropertyMatchCriteria.add(criteria)
-                        GlobalFilterType.UserIdentity->userPropertyMatchCriteria.add(criteria)
-                        GlobalFilterType.UserTechnographics->userPropertyMatchCriteria.add(criteria)
+                        GlobalFilterType.UserComputedProperties -> userPropertyMatchCriteria.add(criteria)
+                        GlobalFilterType.UserIdentity -> userPropertyMatchCriteria.add(criteria)
+                        GlobalFilterType.UserTechnographics -> userPropertyMatchCriteria.add(criteria)
 
                         GlobalFilterType.EventProperties -> eventPropertyMatchCriteria.add(criteria)
                         GlobalFilterType.EventAttributeProperties -> eventPropertyMatchCriteria.add(criteria)
                         GlobalFilterType.EventComputedProperties -> eventPropertyMatchCriteria.add(criteria)
-                        GlobalFilterType.EventTimeProperties->eventPropertyMatchCriteria.add(criteria)
+                        GlobalFilterType.EventTimeProperties -> eventPropertyMatchCriteria.add(criteria)
                         GlobalFilterType.Technographics -> eventPropertyMatchCriteria.add(criteria)
-                        GlobalFilterType.Geogrophy->eventPropertyMatchCriteria.add(criteria)
+                        GlobalFilterType.Geogrophy -> eventPropertyMatchCriteria.add(criteria)
                     }
                 }
 
-        if(userId != null){
+        if (userId != null) {
             if (eventPropertyMatchCriteria.isNotEmpty()) eventPropertyMatchCriteria.add(Criteria.where("userId").`is`(userId))
             if (userPropertyMatchCriteria.isNotEmpty()) userPropertyMatchCriteria.add(Criteria.where("id").`is`(userId))
         }
 
-        val eventCriteria = if(eventPropertyMatchCriteria.size == 1) eventPropertyMatchCriteria.get(0)
+        val eventCriteria = if (eventPropertyMatchCriteria.size == 1) eventPropertyMatchCriteria.get(0)
         else (if (eventPropertyMatchCriteria.isNotEmpty()) Criteria().andOperator(*eventPropertyMatchCriteria.toTypedArray()) else null)
         //val eventMatch = Aggregation.match(eventCriteria)
 
-        val userCriteria = if(userPropertyMatchCriteria.size == 1) userPropertyMatchCriteria.get(0)
+        val userCriteria = if (userPropertyMatchCriteria.size == 1) userPropertyMatchCriteria.get(0)
         else (if (userPropertyMatchCriteria.isNotEmpty()) Criteria().andOperator(*userPropertyMatchCriteria.toTypedArray()) else null)
         //val userMatch = Aggregation.match(userCriteria)
 
@@ -559,7 +720,7 @@ class SegmentParserCriteria {
             val city = geo.city?.name?.let { name -> Criteria.where("geogrophy.city").`is`(name) }
             var geoCriteria = listOfNotNull(country, state, city)
             if (geoCriteria.isNotEmpty()) {
-                if(userId != null){
+                if (userId != null) {
                     geoCriteria = listOfNotNull(Criteria.where("userId").`is`(userId), *geoCriteria.toTypedArray())
                 }
                 Criteria().andOperator(*geoCriteria.toTypedArray())
@@ -579,6 +740,6 @@ class SegmentQuery(
         val didq: Pair<List<Aggregation>, ConditionType>,
         val didntq: Pair<List<Aggregation>, ConditionType>,
         val userQuery: Aggregation?,
-        val query:Criteria?=null) : Serializable
+        val query: Criteria? = null) : Serializable
 
 
