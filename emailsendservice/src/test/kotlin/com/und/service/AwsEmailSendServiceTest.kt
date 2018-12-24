@@ -29,7 +29,7 @@ class Email(var from: InternetAddress, var to: List<InternetAddress>) {
 class AwsEmailSendServiceTest {
 
     //access denied if not available permission
-    lateinit var emailSESConfig: EmailSESConfig;
+    lateinit var emailSESConfig: EmailSESConfig
     var from = InternetAddress("jogende.live@gmail.com");
 //    error code MessageRejected
 //    error message Email address is not verified. The following identities failed the check in region US-EAST-1: joederr@gmail.com
