@@ -228,7 +228,7 @@ class UserSettingsService {
 //            val error = ValidationError()
 //            error.addFieldError("email", "Email : $emailAddress.personal already exist")
 //            throw UndBusinessValidationException(error)
-            throw CustomException("Email : $emailAddress.personal already exist")
+            throw CustomException("Email : ${emailAddress.personal} already exist")
         } else {
             val clientSettingEmail = ClientSettingsEmail()
             clientSettingEmail.email = emailAddress.address
