@@ -189,6 +189,8 @@ class CampaignService {
             appuserID = AuthenticationUtils.principal.id
             campaignType = webCampaign.campaignType
             segmentationID = webCampaign.segmentationID
+            serviceProviderId=webCampaign.serviceProviderId
+            conversionEvent=webCampaign.conversionEvent
 
             webCampaign.schedule?.oneTime?.let { whenTo ->
                 if (whenTo.nowOrLater == Now.Now) {
@@ -257,6 +259,8 @@ class CampaignService {
             dateCreated = campaign.dateCreated
             dateModified = campaign.dateModified
             status = campaign.status
+            conversionEvent=campaign.conversionEvent
+            serviceProviderId=campaign.serviceProviderId
 
 
 

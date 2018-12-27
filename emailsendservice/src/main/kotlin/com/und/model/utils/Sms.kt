@@ -11,7 +11,8 @@ data class Sms(
     var smsTemplateId: Long,
     var smsTemplateName: String?,
     var data: MutableMap<String, Any> = mutableMapOf(),
-    var eventUser: EventUser? = null
+    var eventUser: EventUser? = null,
+    var serviceProviderId:Long?=null
 
 )
 

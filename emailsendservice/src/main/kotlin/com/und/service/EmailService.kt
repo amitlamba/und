@@ -104,7 +104,7 @@ class EmailService {
                 throw  EmailFailureException("from email for template id ${email.emailTemplateId} is not present for system user", error)
             }
         }
-
+        //TODO save serviceprovider and conversion event in mongo
         emailHelperService.saveMailInMongo(emailToSend, NOT_SENT, mongoEmailId)
         sendEmailWithoutTracking(emailToSend)
         emailHelperService.updateEmailStatus(mongoEmailId, SENT, emailToSend.clientID)

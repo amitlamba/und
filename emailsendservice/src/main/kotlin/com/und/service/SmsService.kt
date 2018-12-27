@@ -65,7 +65,7 @@ class SmsService {
         synchronized(sms.clientID) {
             //TODO: This code can be cached in Redis
             if (!wspCredsMap.containsKey(sms.clientID)) {
-                val webServiceProviderCred = serviceProviderCredentialsService.getServiceProviderCredentials(sms.clientID)
+                val webServiceProviderCred = serviceProviderCredentialsService.getServiceProviderCredentials(sms.clientID,sms.serviceProviderId)
                 wspCredsMap[sms.clientID] = webServiceProviderCred
             }
         }
