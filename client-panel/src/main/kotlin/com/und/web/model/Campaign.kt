@@ -27,6 +27,7 @@ class Campaign {
     var dateCreated: LocalDateTime? = null
     var dateModified: LocalDateTime? = null
     var conversionEvent:String?=null
+    var serviceProviderId:Long?=null
 
 }
 

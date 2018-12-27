@@ -104,6 +104,8 @@ class Campaign {
     @Column(name="conversion_event")
     var conversionEvent:String?=null
 
+    @Column(name="service_proivder_id")
+    var serviceProviderId:Long?=null
     //TODO add sms, and push campaign later
 }
 

@@ -69,12 +69,14 @@ class ServiceProviderCredentialsService {
             return serviceCredOption.get()
         else ServiceProviderCredentials()
     }
-    fun findActiveAndroidServiceProvider(clientID: Long): ServiceProviderCredentials {
-        val serviceCredOption = serviceProviderCredentialsRepository.findTop1ByClientIDAndServiceProviderTypeAndStatus(
-                clientID, ServiceProviderType.Android_Service_Provider.desc, Status.ACTIVE)
-        return if (serviceCredOption.isPresent)
-            return serviceCredOption.get()
-        else ServiceProviderCredentials()
+    fun findActiveAndroidServiceProvider(clientID: Long,id: Long?): ServiceProviderCredentials {
+//        val serviceCredOption = serviceProviderCredentialsRepository.findTop1ByClientIDAndServiceProviderTypeAndStatus(
+//                clientID, ServiceProviderType.Android_Service_Provider.desc, Status.ACTIVE)
+//
+//        return if (serviceCredOption.isPresent)
+//            return serviceCredOption.get()
+//        else ServiceProviderCredentials()
+        return this.getServiceProviderCredential(id,clientID)
     }
 
 
@@ -177,12 +179,25 @@ class ServiceProviderCredentialsService {
     }
 
     fun getServiceProviderCredentials(email: Email): com.und.model.utils.ServiceProviderCredentials {
-        val serviceProviderCred = this.findActiveEmailServiceProvider(email.clientID)
+//        val serviceProviderCred = this.findActiveEmailServiceProvider(email.clientID)
+        val serviceProviderCred=this.getServiceProviderCredential(email.serviceProviderId,email.clientID)
         return this.buildWebServiceProviderCredentials(serviceProviderCred)
     }
 
-    fun getServiceProviderCredentials(clientId: Long): com.und.model.utils.ServiceProviderCredentials {
-        val serviceProviderCred = this.findActiveSMSServiceProvider(clientId)
+    private fun getServiceProviderCredential(id:Long?,clientId: Long):ServiceProviderCredentials{
+        var serviceProviderCred=ServiceProviderCredentials()
+        if(id==null){
+           var result= serviceProviderCredentialsRepository.findByIsDefaultTrue("Email Service Provider",clientId)
+            if(result.isPresent) serviceProviderCred=result.get()
+        }else{
+            var result=serviceProviderCredentialsRepository.findById(id)
+            if(result.isPresent) serviceProviderCred= result.get()
+        }
+        return serviceProviderCred
+    }
+    fun getServiceProviderCredentials(clientId: Long,id: Long?): com.und.model.utils.ServiceProviderCredentials {
+//        val serviceProviderCred = this.findActiveSMSServiceProvider(clientId)
+        val serviceProviderCred=this.getServiceProviderCredential(id, clientId)
         return this.buildWebServiceProviderCredentials(serviceProviderCred)
     }
 }

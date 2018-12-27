@@ -219,13 +219,13 @@ class FcmSendService {
 
     fun sendMessage(message: com.und.model.utils.FcmMessage) {
         var fcmMessageToSend = buildFcmMessage(message)
-        var credential = service.getCredentials(message.clientId)
+        var credential = service.getCredentials(message.clientId,message.serviceProviderId)
         if (credential == null) {
-            logger.info("Android Credential does not exists for clientId ${message.clientId}")
+            logger.info("Credential does not exists for clientId ${message.clientId}")
             var notificationError = NotificationError()
             with(notificationError) {
                 clientId = message.clientId
-                this.message = "Android service provider not found.First add a service provider"
+                this.message = "Service provider not found.First add a service provider"
                 errorCode = 400
                 campaignType=message.type
                 userId=message.userId

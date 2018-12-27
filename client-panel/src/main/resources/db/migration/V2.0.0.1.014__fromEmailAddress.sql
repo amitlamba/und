@@ -39,3 +39,4 @@ update email_template set from_user = 'admin@userndot.com' where client_id=1 and
 
 ALTER TABLE campaign ADD COLUMN if NOT EXISTS conversion_event VARCHAR (255) DEFAULT NULL ;
 ALTER TABLE service_provider_credentials ADD COLUMN if NOT EXISTS isDefault boolean not NULL DEFAULT FALSE ;
+ALTER TABLE campaign ADD COLUMN if NOT EXISTS service_provider_id bigint;

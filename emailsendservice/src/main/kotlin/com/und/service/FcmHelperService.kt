@@ -38,8 +38,8 @@ class FcmHelperService {
     @Autowired
     private lateinit var webpushRepository: WebPushRepository
 
-    fun getCredentials(clientId: Long): ServiceProviderCredentials? {
-        var credential = service.findActiveAndroidServiceProvider(clientId)
+    fun getCredentials(clientId: Long,id:Long?): ServiceProviderCredentials? {
+        var credential = service.findActiveAndroidServiceProvider(clientId,id)
         if (credential.id != null) return credential else return null
     }
 

@@ -95,7 +95,8 @@ class CampaignService {
                 smsTemplateId = campaign?.smsTemplateId ?: 0L,
                 //assign name also
                 smsTemplateName = null,
-                eventUser = user
+                eventUser = user,
+                serviceProviderId = campaign?.serviceProviderId
         )
     }
 
@@ -107,7 +108,8 @@ class CampaignService {
                 emailTemplateId = campaign.emailTemplateId ?: 0L,
                 emailTemplateName = campaign.emailTemplateName ?: "",
                 campaignId = campaign.campaignId,
-                eventUser = user
+                eventUser = user,
+                serviceProviderId = campaign?.serviceProviderId
         )
     }
     private fun fcmAndroidMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
@@ -119,7 +121,8 @@ class CampaignService {
                 type = "android",
                 campaignId = campaign.campaignId,
                 userId = user.id,
-                eventUser = user
+                eventUser = user,
+                serviceProviderId = campaign?.serviceProviderId
         )
     }
 
@@ -131,7 +134,8 @@ class CampaignService {
                 type = "web",
                 campaignId = campaign.campaignId,
                 userId = user.id,
-                eventUser = user
+                eventUser = user,
+                serviceProviderId = campaign?.serviceProviderId
         )
     }
     private fun fcmIosMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
@@ -143,7 +147,8 @@ class CampaignService {
                 type = "ios",
                 campaignId = campaign.campaignId,
                 userId = user.id,
-                eventUser = user
+                eventUser = user,
+                serviceProviderId = campaign?.serviceProviderId
         )
     }
 
