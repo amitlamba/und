@@ -31,6 +31,8 @@ class Campaign {
     var androidTemplateId:Long?=null
     @Column(name = "web_template_id")
     var webTemplateId:Long?=null
+    @Column(name="service_provider_id")
+    var serviceProviderId:Long?=null
 //    @Column(name = "ios_template_id")
 //    var iosTemplateId:Long?=null
 }

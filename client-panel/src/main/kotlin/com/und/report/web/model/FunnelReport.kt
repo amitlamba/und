@@ -9,8 +9,8 @@ class FunnelReport {
             var steps: List<Step> = emptyList(),
             var funnelOrder: FunnelOrder,
             var conversionTime: Int,
-            var splitProprty: String?,
-            var splitProprtyType: GlobalFilterType = GlobalFilterType.EventAttributeProperties
+            var splitProperty: String?,
+            var splitPropertyType: GlobalFilterType = GlobalFilterType.EventAttributeProperties
     )
 
 
