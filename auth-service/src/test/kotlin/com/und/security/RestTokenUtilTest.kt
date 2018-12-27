@@ -39,7 +39,7 @@ class RestTokenUtilTest {
     @InjectMocks
     private lateinit var keyResolverMock: KeyResolver
 
-    @InjectMocks
+//    @InjectMocks
     private lateinit var restTokenUtil: RestTokenUtil
 
     @Mock
