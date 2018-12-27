@@ -126,7 +126,8 @@ class SegmentParserCriteria {
     }
 
 
-    fun segmentQuery1(segment: Segment, tz: ZoneId,type:String): List<AggregationOperation> {
+    fun segmentQuery1(segment: Segment, tz: ZoneId,type:String): Pair<List<AggregationOperation>,Boolean>{
+        var onlyEventUser=false
         var listOfAggregation = mutableListOf<AggregationOperation>()
         /*
         * Geography based aggregation
@@ -150,22 +151,30 @@ class SegmentParserCriteria {
         //add didnot
         addDidNotAggregation(segment, listOfAggregation, tz)
         //add did
-        addDidAggregation(segment, listOfAggregation, tz)
-        //common to all after did
-        var group = Aggregation.group("userId")
-        var convertToOBjectId = ConvertOperators.ConvertOperatorFactory("_id").convertToObjectId()
-        var project = Aggregation.project().and(convertToOBjectId).`as`("_id")
-        var sort = Aggregation.sort(Sort.Direction.ASC, "_id")
-        var lookup = Aggregation.lookup("3_eventUser", "_id", "_id", "user")
-        var unwindOperation = Aggregation.unwind("user")
-        var replaceRootOperation = Aggregation.replaceRoot("user")
+        if(geoCriteria==null&&eventPropertyMatch==null && listOfAggregation.isEmpty()){
+            addDidAggregationWithoutFacet(segment,listOfAggregation,tz)
+        }else{
+            addDidAggregation(segment, listOfAggregation, tz)
+        }
+        if(!listOfAggregation.isEmpty()){
+            //common to all after did
+            var group = Aggregation.group("userId")
+            var convertToOBjectId = ConvertOperators.ConvertOperatorFactory("_id").convertToObjectId()
+            var project = Aggregation.project().and(convertToOBjectId).`as`("_id")
+            var sort = Aggregation.sort(Sort.Direction.ASC, "_id")
+            var lookup = Aggregation.lookup("3_eventUser", "_id", "_id", "user")
+            var unwindOperation = Aggregation.unwind("user")
+            var replaceRootOperation = Aggregation.replaceRoot("user")
 
-        listOfAggregation.add(group)
-        listOfAggregation.add(project)
-        listOfAggregation.add(sort)
-        listOfAggregation.add(lookup)
-        listOfAggregation.add(unwindOperation)
-        listOfAggregation.add(replaceRootOperation)
+            listOfAggregation.add(group)
+            listOfAggregation.add(project)
+            listOfAggregation.add(sort)
+            listOfAggregation.add(lookup)
+            listOfAggregation.add(unwindOperation)
+            listOfAggregation.add(replaceRootOperation)
+        }else{
+            onlyEventUser=true
+        }
         //adding user globalcriteria aggregation
         if (userPropertyMatch != null) {
             listOfAggregation.add(Aggregation.match(userPropertyMatch))
@@ -175,7 +184,8 @@ class SegmentParserCriteria {
             listOfAggregation.add(Aggregation.project().and(convertor).`as`("_id"))
             listOfAggregation.add(Aggregation.group().push("_id").`as`("userId"))
         }
-        return listOfAggregation
+
+        return Pair(listOfAggregation,onlyEventUser)
     }
 
     private fun addDidNotAggregation(segment: Segment, listOfAggregation: MutableList<AggregationOperation>, tz: ZoneId) {
@@ -202,18 +212,31 @@ class SegmentParserCriteria {
             didAgg = didAgg.and(aggregationMatchOperation, aggGroupOperation, aggMatchOperation).`as`("pipe" + index)
         }
         var setIntersection: SetOperators.SetIntersection
-
+        var setUnion:SetOperators.SetUnion
         did?.let{
             if (it.size >= 2) {
-            setIntersection = SetOperators.SetOperatorFactory("pipe0._id").intersects("pipe1._id")
+                var afterFacetStage:ProjectionOperation
+                if(segment.didEvents!!.joinCondition.conditionType.equals("AllOf")) {
+                    setIntersection = SetOperators.SetOperatorFactory("pipe0._id").intersects("pipe1._id")
 
-            did?.forEachIndexed { index, event ->
-                if (index > 1) {
-                    setIntersection = setIntersection.intersects("pipe" + index + "._id")
+                    did?.forEachIndexed { index, event ->
+                        if (index > 1) {
+                            setIntersection = setIntersection.intersects("pipe" + index + "._id")
+                        }
+                    }
+
+                    afterFacetStage = Aggregation.project().and(setIntersection).`as`("userId")
+                }else{
+                    setUnion = SetOperators.SetOperatorFactory("pipe0._id").union("pipe1._id")
+
+                    did?.forEachIndexed { index, event ->
+                        if (index > 1) {
+                            setUnion = setUnion.union("pipe" + index + "._id")
+                        }
+                    }
+                    afterFacetStage=Aggregation.project().and(setUnion).`as`("userId")
                 }
-            }
-
-            var afterFacetStage = Aggregation.project().and(setIntersection).`as`("userId")
+            
             var unwindAfterFacetStage = Aggregation.unwind("userId")
 
             listOfAggregation.add(didAgg)
@@ -233,15 +256,33 @@ class SegmentParserCriteria {
         }
     }
 
-    private fun parseEvents1(event: Event, tz: ZoneId, did: Boolean): List<AggregationOperation> {
+    private fun addDidAggregationWithoutFacet(segment: Segment, listOfAggregation: MutableList<AggregationOperation>, tz: ZoneId){
+        var did = segment.didEvents?.events
+        var listOfCriteria= mutableListOf<Criteria>()
+        did?.forEachIndexed{index, event ->
+             var matches=getListOfCriteria(event,tz)
+            var criteria=Criteria().andOperator(*matches.toTypedArray())
+            listOfCriteria.add(criteria)
+        }
 
-        var listOfAggregationOperation = mutableListOf<AggregationOperation>()
+        listOfAggregation.add(Aggregation.match(Criteria().orOperator(*listOfCriteria.toTypedArray())))
+        //add facet
+
+
+    }
+    private fun getListOfCriteria(event: Event,tz: ZoneId):MutableList<Criteria>{
         var matches = mutableListOf<Criteria>()
         matches.addAll(parsePropertyFilters(event, tz))
         matches.add(Criteria.where(Field.eventName.fName).`is`(event.name))
         matches.add(Criteria.where("userId").exists(true))
         matches.add(parseDateFilter(event.dateFilter, tz))
+        return matches
+    }
+    private fun parseEvents1(event: Event, tz: ZoneId, did: Boolean): List<AggregationOperation> {
 
+        var listOfAggregationOperation = mutableListOf<AggregationOperation>()
+        var matches = mutableListOf<Criteria>()
+        matches=getListOfCriteria(event,tz)
         var fields = Aggregation.fields(Field.userId.name, Field.creationTime.name, Field.clientId.name)
         matches.forEach { criteria ->
             val name = criteria.key

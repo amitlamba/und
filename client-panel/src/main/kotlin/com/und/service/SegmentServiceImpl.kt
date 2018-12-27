@@ -211,19 +211,33 @@ class SegmentServiceImpl : SegmentService {
 //        }
 //
 //        val userList = allResult.reduce { f, s -> f.intersect(s) }
-        var agg=segmentParserCriteria.segmentQuery1(websegment,tz,type)
+        var query=segmentParserCriteria.segmentQuery1(websegment,tz,type)
+        var agg=query.first
         var finalAgg=Aggregation.newAggregation(agg)
 
         data class Result(var userId:List<String> = emptyList())
         if(type.equals("userId")) {
-            var allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_event",Result::class.java).mappedResults
+            var allResult= mutableListOf<Result>()
+            if(query.second){
+                 allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_eventUser",Result::class.java).mappedResults
+            }else{
+                 allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_event",Result::class.java).mappedResults
+            }
+
             if(allResult.isNotEmpty())
                 return Pair(emptyList(), allResult[0].userId)
             else
                 return Pair(emptyList(),emptyList())
+        }else{
+            var allResult= mutableListOf<EventUser>()
+            if(query.second){
+                allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_eventUser",EventUser::class.java).mappedResults
+            }else{
+                allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_event",EventUser::class.java).mappedResults
+            }
+            return Pair(allResult, emptyList())
         }
-        else
-            return Pair(mongoTemplate.aggregate(finalAgg,"${clientId}_event",EventUser::class.java).mappedResults, emptyList())
+
 
     }
 
