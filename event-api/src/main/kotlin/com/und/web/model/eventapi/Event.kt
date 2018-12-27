@@ -55,7 +55,7 @@ open class Event {
     var timeZone:String? = null
 
     var notificationId:String? = null
-
+    var creationDate:Long?=null
 
 
 }

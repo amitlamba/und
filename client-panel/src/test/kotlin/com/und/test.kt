@@ -1,6 +1,11 @@
 package com.und
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.und.web.model.Segment
+import org.junit.Test
+import org.springframework.data.mongodb.core.aggregation.Aggregation
+import org.springframework.data.mongodb.core.aggregation.FacetOperation
+import org.springframework.data.mongodb.core.query.Criteria
 import java.io.BufferedWriter
 import java.io.FileWriter
 import java.io.PrintWriter
@@ -17,7 +22,7 @@ object test {
         for (j in 0..2 step 1) {
             val data = Data()
             data.date = dates.get(2)
-            data.userCountData = ArrayList()
+            data.userCountData = ArrayList<UserCountData>()
             var lsit=ArrayList<UserCountData>()
             var i = 0
             while (i <= 288) {

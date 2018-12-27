@@ -1,18 +1,19 @@
 package com.und.web.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.common.utils.decrypt
 import com.und.model.Status
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.CampaignService
 import com.und.service.ServiceProviderType
 import com.und.service.UserSettingsService
-import com.und.web.model.AccountSettings
-import com.und.web.model.EmailAddress
-import com.und.web.model.ServiceProviderCredentials
-import com.und.web.model.UnSubscribeLink
+import com.und.web.controller.exception.CustomException
+import com.und.web.model.*
 import org.apache.kafka.common.errors.InvalidRequestException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.EmptyResultDataAccessException
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.AuthenticationException
@@ -57,7 +58,7 @@ class UserSettingsController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/email-service-provider/save"])
     fun saveEmailServiceProvider(@Valid @RequestBody serviceProviderCredentials: ServiceProviderCredentials): Long? {
-        val clientID = AuthenticationUtils.clientID
+        val clientID = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
         val userID = AuthenticationUtils.principal.id
         serviceProviderCredentials.appuserID = userID
         serviceProviderCredentials.clientID = clientID
@@ -89,7 +90,7 @@ class UserSettingsController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/sms-service-provider/save"])
     fun saveSmsServiceProvider(@Valid @RequestBody serviceProviderCredentials: ServiceProviderCredentials): Long? {
-        val clientID = AuthenticationUtils.clientID
+        val clientID = AuthenticationUtils.clientID?: throw AccessDeniedException("")
         val userID = AuthenticationUtils.principal.id
         serviceProviderCredentials.appuserID = userID
         serviceProviderCredentials.clientID = clientID
@@ -215,9 +216,8 @@ class UserSettingsController {
         return if (linkOptional.isPresent) linkOptional.get() else null
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping(value = ["/verifyemail/{link}"])
-    fun verifyEmail(@PathVariable(value = "link") link: String) {
+    @GetMapping(value = ["/verifyemail"])
+    fun verifyEmail(@RequestParam(value = "c") link: String) {
 
         var decodeString = URLDecoder.decode(link, "UTF-8")
         var decryptString = decrypt(decodeString)
@@ -229,6 +229,19 @@ class UserSettingsController {
         userSettingsService.updateStatusOfEmailSetting(timeStamp, mail, clientId)
 
 
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = arrayOf("/mark/default"))
+    fun markDefault(@RequestParam(required = true,name = "default") default:Boolean,
+                    @RequestParam(required = true,name = "type") type:String,
+                    @RequestParam(required = true,name = "id") id:Long):ResponseEntity<String>{
+        try {
+            userSettingsService.markDefault(type,id,default)
+            return ResponseEntity(HttpStatus.OK)
+        }catch (ex:CustomException){
+            return ResponseEntity(ex.message?:"",HttpStatus.BAD_REQUEST)
+        }
     }
 
 }

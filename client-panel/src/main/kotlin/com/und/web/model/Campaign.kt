@@ -26,6 +26,7 @@ class Campaign {
     var status: CampaignStatus? = null
     var dateCreated: LocalDateTime? = null
     var dateModified: LocalDateTime? = null
+    var conversionEvent:String?=null
 
 }
 

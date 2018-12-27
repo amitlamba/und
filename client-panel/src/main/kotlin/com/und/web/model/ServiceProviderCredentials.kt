@@ -1,5 +1,6 @@
 package com.und.web.model
 
+import com.fasterxml.jackson.annotation.JsonSetter
 import com.und.model.Status
 import java.util.*
 import javax.validation.constraints.NotNull
@@ -19,4 +20,8 @@ class ServiceProviderCredentials {
     var status: Status = Status.ACTIVE
 
     var credentialsMap: HashMap<String, String> = HashMap()
+
+    @JsonSetter("isDefault")
+    var isDefault:Boolean=false
+
 }

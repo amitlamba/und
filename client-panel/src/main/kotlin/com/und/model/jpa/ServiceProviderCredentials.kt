@@ -1,5 +1,6 @@
 package com.und.model.jpa
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import com.und.model.Status
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
@@ -45,6 +46,9 @@ class ServiceProviderCredentials {
     @NotNull
     @Enumerated(EnumType.STRING)
     lateinit var status: Status
+
+    @Column(name="isdefault")
+    var isDefault:Boolean=false
 
     @Column(name = "credentials")
     @NotNull
