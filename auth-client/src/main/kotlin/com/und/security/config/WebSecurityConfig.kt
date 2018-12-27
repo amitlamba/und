@@ -87,6 +87,7 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
                 .antMatchers("/auth/**").permitAll()
                 .antMatchers("/register/**").permitAll()
                 .antMatchers("/contactUs/**").permitAll()
+                .antMatchers("/setting/verifyemail").permitAll()
                 .anyRequest().authenticated()
 
         // Custom JWT based security filter

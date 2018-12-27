@@ -5,6 +5,7 @@ import com.und.model.mongo.eventapi.*
 import com.und.model.mongo.eventapi.SystemDetails
 import com.und.web.model.eventapi.Event
 import com.und.web.model.eventapi.EventUser
+import java.time.Instant
 import com.und.model.mongo.eventapi.EventUser as MongoEventUser
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -17,7 +18,15 @@ fun Event.copyToMongo(): MongoEvent {
     val event = this
     val mongoEvent = MongoEvent(clientId = event.clientId, name = event.name)
     mongoEvent.timeZoneId = ZoneId.of(event.timeZone)
+    //
     mongoEvent.clientTime = ClientTimeNow(LocalDateTime.now(mongoEvent.timeZoneId))
+
+    event.creationDate?.let {
+//        mongoEvent.creationTime=Date.from(Instant.ofEpochSecond(it).atZone(ZoneId.of("UTC")).toInstant())
+        //if we store date object in mongo it will convert in utc automatically
+        mongoEvent.creationTime=Date.from(Instant.ofEpochMilli(it))
+    }
+
     //copying system info
     val agentString = event.agentString
     var pattern = Pattern.compile("^(Mobile-Agent).*")
@@ -110,7 +119,6 @@ fun com.und.model.mongo.eventapi.EventUser.copyNonNull(eventUser: EventUser): co
     copyEventUser.identity.email = unchanged(eventUser.email, identity.email)
     copyEventUser.identity.undId = unchanged(eventUser.undId, identity.undId)
     copyEventUser.identity.androidFcmToken=unchanged(eventUser.androidFcmToken,identity.androidFcmToken)
-//    copyEventUser.identity.webFcmToken=unchanged(eventUser.webFcmToken,identity.webFcmToken)
     copyEventUser.identity.webFcmToken= addWebFcmToken(this,eventUser)
     copyEventUser.identity.iosFcmToken=unchanged(eventUser.iosFcmToken,identity.iosFcmToken)
 

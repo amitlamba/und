@@ -121,14 +121,17 @@ class TriggerDescriptor {
             val db = DateBuilder.newDateInTimezone(TimeZone.getTimeZone(timeZone))
             db.inYear(startDate.year).inMonthOnDay(startDate.monthValue, startDate.dayOfMonth).atHourMinuteAndSecond(0,0,0)
             triggerBuilder.startAt(db.build())
+            //start time not resolve correctly from one point of view its correct if user select the start data > today if user select today then its not
+            //correct make restriction on ui that in case of multiple date he/she not able to select today as start date.instead use other option.
         }
         if (endDate != null) {
 
             val endDate:LocalDate = endDate!!
             val db = DateBuilder.newDateInTimezone(TimeZone.getTimeZone(timeZone))
             db.inYear(endDate.year).inMonthOnDay(endDate.monthValue, endDate.dayOfMonth).atHourMinuteAndSecond(23,59,59)
-            triggerBuilder.startAt(db.build())
-            triggerBuilder.endAt(java.sql.Date.valueOf(endDate))
+//            triggerBuilder.startAt(db.build())
+//            triggerBuilder.endAt(java.sql.Date.valueOf(endDate))
+            triggerBuilder.endAt(db.build())
         }
         if (endDate == null && countTimes > 0) {
             val trigger = triggerBuilder.build()

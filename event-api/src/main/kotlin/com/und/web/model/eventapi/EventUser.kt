@@ -67,6 +67,7 @@ class EventUser {
 
     //FIXME creation date can't keep changing
     var creationDate: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
+    var creationTime:Long?=null
 
 
 }

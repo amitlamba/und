@@ -31,8 +31,10 @@ import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.WrongCredentialException
 import com.und.web.model.ValidationError
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.messaging.support.MessageBuilder
+import org.springframework.security.access.AccessDeniedException
 import java.net.URLEncoder
 import java.sql.Timestamp
 import java.time.LocalDateTime
@@ -68,10 +70,13 @@ class UserSettingsService {
 
     private var emptyArrayJson: String = "[]"
 
-    private var templateId=1L
+    private var templateId=6L
     private var templateName="fromEmailVerification"
     private var expiration=24*60*60
 
+    companion object {
+        var logger=LoggerFactory.getLogger(UserSettingsService::class.java)
+    }
     @PostConstruct
     fun setUp() {
         emptyArrayJson = objectMapper.writeValueAsString(emptyArray<String>())//"[]"//objectMapper.
@@ -88,10 +93,12 @@ class UserSettingsService {
         val spCreds = serviceProviderCredentialsRepository.findAllByClientIDAndIdAndServiceProviderType(clientID, id, ServiceProviderType.EMAIL_SERVICE_PROVIDER.desc)
         return buildWebServiceProviderCredentials(spCreds!!)
     }
-
+    //make transactional
+    @Transactional
     fun saveEmailServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials, status:Status): Long? {
         webServiceProviderCredentials.status = status
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
+        unMarkDefaultSp(webServiceProviderCredentials.serviceProviderType,webServiceProviderCredentials.isDefault,webServiceProviderCredentials.clientID!!)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
     }
@@ -108,9 +115,11 @@ class UserSettingsService {
         return buildWebServiceProviderCredentials(spCreds!!)
     }
 
+    @Transactional
     fun saveSmsServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
         webServiceProviderCredentials.status = Status.ACTIVE
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
+        unMarkDefaultSp(webServiceProviderCredentials.serviceProviderType,webServiceProviderCredentials.isDefault,webServiceProviderCredentials.clientID!!)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
     }
@@ -130,6 +139,7 @@ class UserSettingsService {
     fun saveNotificationServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
         webServiceProviderCredentials.status = Status.ACTIVE
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
+        unMarkDefaultSp(webServiceProviderCredentials.serviceProviderType,webServiceProviderCredentials.isDefault,webServiceProviderCredentials.clientID!!)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
     }
@@ -137,6 +147,7 @@ class UserSettingsService {
     fun saveAndroidPushServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
         webServiceProviderCredentials.status = Status.ACTIVE
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
+        unMarkDefaultSp(webServiceProviderCredentials.serviceProviderType,webServiceProviderCredentials.isDefault,webServiceProviderCredentials.clientID!!)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
     }
@@ -144,6 +155,7 @@ class UserSettingsService {
     fun saveWebPushServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
         webServiceProviderCredentials.status = Status.ACTIVE
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
+        unMarkDefaultSp(webServiceProviderCredentials.serviceProviderType,webServiceProviderCredentials.isDefault,webServiceProviderCredentials.clientID!!)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
     }
@@ -151,6 +163,7 @@ class UserSettingsService {
     fun saveIOSPushServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
         webServiceProviderCredentials.status = Status.ACTIVE
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
+        unMarkDefaultSp(webServiceProviderCredentials.serviceProviderType,webServiceProviderCredentials.isDefault,webServiceProviderCredentials.clientID!!)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
     }
@@ -169,6 +182,7 @@ class UserSettingsService {
             spCreds.serviceProviderType = webServiceProviderCredentials.serviceProviderType
             spCreds.status = webServiceProviderCredentials.status
             spCreds.credentialsMap = objectMapper.writeValueAsString(webServiceProviderCredentials.credentialsMap)
+            spCreds.isDefault=webServiceProviderCredentials.isDefault
         }
         return spCreds
     }
@@ -184,6 +198,7 @@ class UserSettingsService {
             wspCreds.serviceProviderType = serviceProviderCredentials.serviceProviderType
             wspCreds.status = serviceProviderCredentials.status
             wspCreds.credentialsMap = objectMapper.readValue(serviceProviderCredentials.credentialsMap)
+            wspCreds.isDefault=serviceProviderCredentials.isDefault
         }
         return wspCreds
     }
@@ -224,7 +239,7 @@ class UserSettingsService {
 //            val error = ValidationError()
 //            error.addFieldError("email", "Email : $emailAddress.personal already exist")
 //            throw UndBusinessValidationException(error)
-            throw CustomException("Email : $emailAddress.personal already exist")
+            throw CustomException("Email : ${emailAddress.personal} already exist")
         } else {
             val clientSettingEmail = ClientSettingsEmail()
             clientSettingEmail.email = emailAddress.address
@@ -357,7 +372,7 @@ class UserSettingsService {
     }
 
     fun sendVerificationEmail(emailAddress: EmailAddress, clientID: Long) {
-
+        logger.info("Sending from email address varification to ${emailAddress.address}")
         var data= mutableMapOf<String,Any>()
         var client = clientRepository.findById(clientID)
         if(client.isPresent){
@@ -366,15 +381,15 @@ class UserSettingsService {
             var fromEmailAddress = InternetAddress(emailAddress.address)
             var timeStamp = System.currentTimeMillis() / 1000
             var verificationCode = encrypt("$timeStamp||${emailAddress.address}||$clientID")
-            var emailVerificationLink = "emailVerificationLink" to "${clientUrl}/setting/verifyemail/"+URLEncoder.encode(verificationCode,"UTF-8")
+            var emailVerificationLink =  "${clientUrl}/setting/verifyemail?c="+URLEncoder.encode(verificationCode,"UTF-8")
             var name = emailAddress.personal
-            var emailSubject = "Verify from email Address"
-            var emailBody="Hi ${name} \n Please verify your email by clicking on below link\n $emailVerificationLink"
-//        data.put("name",name)
-//        data.put("verificationLink",emailVerificationLink)
-            var email = Email(clientID, fromEmailAddress, arrayOf(toEmailAddress), emailBody = emailBody,emailSubject = emailSubject,emailTemplateId = templateId,emailTemplateName = templateName)
+//            var emailSubject = "Verify from email Address"
+//            var emailBody="Hi ${name} \n Please verify your email by clicking on below link\n $emailVerificationLink"
+            data.put("name",name)
+            data.put("emailVerificationLink",emailVerificationLink)
+            var email = Email(clientID, fromEmailAddress, arrayOf(toEmailAddress), emailTemplateId = templateId,emailTemplateName = templateName,data = data)
 
-            toVerificationKafka(email)
+            toKafka(email)
         }
 
     }
@@ -404,11 +419,36 @@ class UserSettingsService {
         }
     }
 
-    private fun toVerificationKafka(email:Email){
-        eventStream.verificationEmailReceive().send(MessageBuilder.withPayload(email).build())
+    @Transactional
+    fun markDefault(type:String,id:Long,default:Boolean){
+        var clientID=AuthenticationUtils.clientID?: throw AccessDeniedException("")
+        try {
+            if(default) {
+                serviceProviderCredentialsRepository.unMarkDefaultSp(type, clientID)
+                serviceProviderCredentialsRepository.markSPDefault(id)
+            }else{
+                //This step is ui dependent how the default action is implemented.
+                // if we give only check box then no need but if we give drop down with true false it needed.
+                var result=serviceProviderCredentialsRepository.findById(id)
+                result.ifPresent {
+                    if(it.isDefault){
+                        throw CustomException("Choose a default service provider.")
+                    }
+                }
+            }
+
+        }catch(ex:Exception){
+            throw CustomException("Error occur during persisting your change. Try again. ${ex.message}")
+        }
     }
 
-
+    //call this method from save service provider in a transaction.
+    fun unMarkDefaultSp(type:String,isDefault:Boolean,clientID: Long){
+        if(isDefault){
+            //unmark other default service provider of this type for this client
+            serviceProviderCredentialsRepository.unMarkDefaultSp(type,clientID)
+        }
+    }
 
 }
 

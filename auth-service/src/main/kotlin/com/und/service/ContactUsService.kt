@@ -51,7 +51,7 @@ class ContactUsService {
         contactUS.name = webContactUs.name
         contactUS.email = webContactUs.email
         contactUS.mobileNo = webContactUs.mobileNo
-        contactUS.message = webContactUs.message
+        contactUS.message = if(webContactUs.message.isEmpty()) "Schedule Demo" else webContactUs.message
         contactUS.companyName = webContactUs.companyName
 
         return contactUS
