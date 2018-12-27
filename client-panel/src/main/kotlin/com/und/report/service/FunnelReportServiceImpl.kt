@@ -101,12 +101,12 @@ class FunnelReportServiceImpl : FunnelReportService {
         val groupBys = mutableListOf<Field>()
         groupBys.add(Fields.field(AggregationQuerybuilder.Field.UserId.fName, AggregationQuerybuilder.Field.UserId.fName))
         groupBys.add(Fields.field(AggregationQuerybuilder.Field.EventName.fName, AggregationQuerybuilder.Field.EventName.fName))
-        val split = funnelFilter.splitProprty
+        val split = funnelFilter.splitProperty
         var c=ConvertOperators.ConvertOperatorFactory("creationTime").convertToLong()
         var projectionOperation= Aggregation.project("userId","name").and(c).`as`("creationTime")
         var propertyPath:String
-        if (split != null && !funnelFilter.splitProprty.isNullOrBlank()) {
-            propertyPath = segmentParserCriteria.getFieldPath(funnelFilter.splitProprtyType, split)
+        if (split != null && !funnelFilter.splitProperty.isNullOrBlank()) {
+            propertyPath = segmentParserCriteria.getFieldPath(funnelFilter.splitPropertyType, split)
             groupBys.add(Fields.field("attribute", "splitproperty"))
             projectionOperation=projectionOperation.and(propertyPath).`as`("splitproperty")
         }
@@ -120,7 +120,7 @@ class FunnelReportServiceImpl : FunnelReportService {
         aggregationOperations.add(groupByOperation1)
 
         var pushObject = BasicDBObject("Event", "\$_id.${AggregationQuerybuilder.Field.EventName.fName}").append("chronology", "\$chronology" )
-        if(!funnelFilter.splitProprty.isNullOrBlank()) pushObject = pushObject.append("attribute", "\$_id.attribute")
+        if(!funnelFilter.splitProperty.isNullOrBlank()) pushObject = pushObject.append("attribute", "\$_id.attribute")
 
         val groupByOperation2 = Aggregation.group("\$${AggregationQuerybuilder.Field.UserId.fName}").push(pushObject).`as`("chronologies")
         aggregationOperations.add(groupByOperation2)
