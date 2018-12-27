@@ -101,6 +101,9 @@ class Campaign {
     @Column(name = "date_modified")
     lateinit var dateModified: LocalDateTime
 
+    @Column(name="conversion_event")
+    var conversionEvent:String?=null
+
     //TODO add sms, and push campaign later
 }
 
