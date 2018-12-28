@@ -97,8 +97,8 @@ class UserSettingsService {
     @Transactional
     fun saveEmailServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials, status:Status): Long? {
         webServiceProviderCredentials.status = status
-        val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
         performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials)
+        val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
     }
@@ -127,8 +127,8 @@ class UserSettingsService {
     @Transactional
     fun saveSmsServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
         webServiceProviderCredentials.status = Status.ACTIVE
-        val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
         performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials)
+        val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
     }
@@ -156,8 +156,8 @@ class UserSettingsService {
     @Transactional
     fun saveAndroidPushServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
         webServiceProviderCredentials.status = Status.ACTIVE
-        val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
         performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials)
+        val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
     }
@@ -165,8 +165,8 @@ class UserSettingsService {
     @Transactional
     fun saveWebPushServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
         webServiceProviderCredentials.status = Status.ACTIVE
-        val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
         performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials)
+        val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
     }
@@ -174,8 +174,8 @@ class UserSettingsService {
     @Transactional
     fun saveIOSPushServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
         webServiceProviderCredentials.status = Status.ACTIVE
-        val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
         performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials)
+        val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
     }
