@@ -1,12 +1,13 @@
 package com.und.web.model.eventapi
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.und.eventapi.validation.*
 import com.und.model.mongo.eventapi.LineItem
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
+import java.time.*
 import java.util.*
 import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
@@ -23,6 +24,8 @@ open class Event {
 
     var clientId: Long = -1L
     var identity: Identity = Identity()
+
+    @JsonDeserialize(using=CustomLongToLocalDateTimeDeserializer::class)
     var creationTime: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
 
     @Pattern(regexp="(([0-9]|[1][0-9]{1,2}|2[0-4][0-9]|25[0-5])[.]){3}([0-9]|[1][0-9]{1,2}|2[0-4][0-9]|25[0-5])",message="{event.ip.invalid}")
@@ -55,8 +58,6 @@ open class Event {
     var timeZone:String? = null
 
     var notificationId:String? = null
-    var creationDate:Long?=null
-
 
 }
 
@@ -86,5 +87,22 @@ data class EventMessage(
     var eventUser: EventUser = EventUser()
 }
 */
+
+class CustomLongToLocalDateTimeDeserializer:StdDeserializer<LocalDateTime>{
+
+    constructor():this(null)
+
+    constructor(vc: Class<*>?) : super(vc)
+
+
+    override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): LocalDateTime {
+
+        p?.let {
+            var value=it.longValue
+            return LocalDateTime.from(Instant.ofEpochMilli(value).atZone(ZoneId.of("UTC")))
+        }
+        return LocalDateTime.now(ZoneId.of("UTC"))
+    }
+}
 
 

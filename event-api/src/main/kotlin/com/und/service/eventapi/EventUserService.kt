@@ -16,10 +16,7 @@ import com.und.eventapi.utils.copyNonNull
 import com.und.model.mongo.eventapi.*
 import com.und.repository.mongo.CommonMetadataRepository
 import com.und.repository.mongo.EventMetadataRepository
-import java.time.Instant
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.*
 import java.util.*
 
 @Service
@@ -107,10 +104,11 @@ class EventUserService {
                 eventUserRepository.findById(userId)
             }
             val existingUser = if (existingEventUser.isPresent) existingEventUser.get() else MongoEventUser()
-            eventUser.creationTime?.let {
-//                existingUser.creationTime=Date.from(Instant.ofEpochSecond(it).atZone(ZoneId.of("UTC")).toInstant())
-                existingUser.creationTime=Date.from(Instant.ofEpochMilli(it))
-            }
+//            eventUser.creationTime?.let {
+////                existingUser.creationTime=Date.from(Instant.ofEpochSecond(it).atZone(ZoneId.of("UTC")).toInstant())
+//                existingUser.creationTime=Date.from(Instant.ofEpochMilli(it))
+//            }
+            existingUser.creationTime=Date.from(eventUser.creationDate.toInstant(ZoneOffset.UTC))
             return existingUser.copyNonNull(eventUser)
         }
 
