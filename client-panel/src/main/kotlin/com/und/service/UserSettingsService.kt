@@ -436,8 +436,14 @@ class UserSettingsService {
         var clientID=AuthenticationUtils.clientID?: throw AccessDeniedException("")
         try {
             if(default) {
-                serviceProviderCredentialsRepository.unMarkDefaultSp(type, clientID)
-                serviceProviderCredentialsRepository.markSPDefault(id)
+                //check sp with this id present or not
+                var result=serviceProviderCredentialsRepository.findById(id)
+                if(result.isPresent) {
+                    serviceProviderCredentialsRepository.unMarkDefaultSp(type, clientID)
+                    serviceProviderCredentialsRepository.markSPDefault(id)
+                }else{
+                    throw CustomException("Service provider with ${id} not exists.")
+                }
             }else{
                 //This step is ui dependent how the default action is implemented.
                 // if we give only check box then no need but if we give drop down with true false it needed.
