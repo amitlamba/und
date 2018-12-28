@@ -1,5 +1,6 @@
 package com.und.web.model.eventapi
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
@@ -66,8 +67,8 @@ class EventUser {
     var additionalInfo: HashMap<String, Any> = hashMapOf()
 
     //FIXME creation date can't keep changing
+    @JsonDeserialize(using=CustomLongToLocalDateTimeDeserializer::class)
     var creationDate: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
-    var creationTime:Long?=null
 
 
 }

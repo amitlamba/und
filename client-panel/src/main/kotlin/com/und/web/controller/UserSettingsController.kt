@@ -232,7 +232,7 @@ class UserSettingsController {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping(value = arrayOf("/mark/default"))
+    @PostMapping(value = arrayOf("/mark/default"))
     fun markDefault(@RequestParam(required = true,name = "default") default:Boolean,
                     @RequestParam(required = true,name = "type") type:String,
                     @RequestParam(required = true,name = "id") id:Long):ResponseEntity<String>{

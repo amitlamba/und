@@ -93,14 +93,23 @@ class UserSettingsService {
         val spCreds = serviceProviderCredentialsRepository.findAllByClientIDAndIdAndServiceProviderType(clientID, id, ServiceProviderType.EMAIL_SERVICE_PROVIDER.desc)
         return buildWebServiceProviderCredentials(spCreds!!)
     }
-    //make transactional
+
     @Transactional
     fun saveEmailServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials, status:Status): Long? {
         webServiceProviderCredentials.status = status
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
-        unMarkDefaultSp(webServiceProviderCredentials.serviceProviderType,webServiceProviderCredentials.isDefault,webServiceProviderCredentials.clientID!!)
+        performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
+    }
+
+    private fun performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials: com.und.web.model.ServiceProviderCredentials) {
+        if (webServiceProviderCredentials.isDefault) {
+            unMarkDefaultSp(webServiceProviderCredentials.serviceProviderType, webServiceProviderCredentials.isDefault, webServiceProviderCredentials.clientID!!)
+        } else {
+            var spList = serviceProviderCredentialsRepository.findAllByClientIDAndServiceProviderType(webServiceProviderCredentials.clientID!!, webServiceProviderCredentials.serviceProviderType)
+            if (spList.isEmpty()) webServiceProviderCredentials.isDefault = true
+        }
     }
 
     fun getSmsServiceProvider(clientID: Long): List<WebServiceProviderCredentials> {
@@ -119,7 +128,7 @@ class UserSettingsService {
     fun saveSmsServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
         webServiceProviderCredentials.status = Status.ACTIVE
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
-        unMarkDefaultSp(webServiceProviderCredentials.serviceProviderType,webServiceProviderCredentials.isDefault,webServiceProviderCredentials.clientID!!)
+        performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
     }
@@ -144,26 +153,29 @@ class UserSettingsService {
         return saved.id!!
     }
 
+    @Transactional
     fun saveAndroidPushServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
         webServiceProviderCredentials.status = Status.ACTIVE
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
-        unMarkDefaultSp(webServiceProviderCredentials.serviceProviderType,webServiceProviderCredentials.isDefault,webServiceProviderCredentials.clientID!!)
+        performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
     }
 
+    @Transactional
     fun saveWebPushServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
         webServiceProviderCredentials.status = Status.ACTIVE
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
-        unMarkDefaultSp(webServiceProviderCredentials.serviceProviderType,webServiceProviderCredentials.isDefault,webServiceProviderCredentials.clientID!!)
+        performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
     }
 
+    @Transactional
     fun saveIOSPushServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
         webServiceProviderCredentials.status = Status.ACTIVE
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
-        unMarkDefaultSp(webServiceProviderCredentials.serviceProviderType,webServiceProviderCredentials.isDefault,webServiceProviderCredentials.clientID!!)
+        performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
     }

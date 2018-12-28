@@ -9,6 +9,7 @@ import java.time.Instant
 import com.und.model.mongo.eventapi.EventUser as MongoEventUser
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.regex.Pattern
@@ -19,14 +20,16 @@ fun Event.copyToMongo(): MongoEvent {
     val mongoEvent = MongoEvent(clientId = event.clientId, name = event.name)
     mongoEvent.timeZoneId = ZoneId.of(event.timeZone)
     //
-    mongoEvent.clientTime = ClientTimeNow(LocalDateTime.now(mongoEvent.timeZoneId))
+//    mongoEvent.clientTime = ClientTimeNow(LocalDateTime.now(mongoEvent.timeZoneId))
+    var time=event.creationTime.atZone(ZoneId.of("UTC"))
+    mongoEvent.clientTime = ClientTimeNow(LocalDateTime.ofInstant(time.toInstant(), mongoEvent.timeZoneId))
 
-    event.creationDate?.let {
-//        mongoEvent.creationTime=Date.from(Instant.ofEpochSecond(it).atZone(ZoneId.of("UTC")).toInstant())
-        //if we store date object in mongo it will convert in utc automatically
-        mongoEvent.creationTime=Date.from(Instant.ofEpochMilli(it))
-    }
-
+//    event.creationTime?.let {
+////        mongoEvent.creationTime=Date.from(Instant.ofEpochSecond(it).atZone(ZoneId.of("UTC")).toInstant())
+//        //if we store date object in mongo it will convert in utc automatically
+//        mongoEvent.creationTime=Date.from(Instant.ofEpochMilli(it))
+//    }
+    mongoEvent.creationTime=Date.from(event.creationTime.toInstant(ZoneOffset.UTC))
     //copying system info
     val agentString = event.agentString
     var pattern = Pattern.compile("^(Mobile-Agent).*")
