@@ -219,7 +219,7 @@ class FcmSendService {
 
     fun sendMessage(message: com.und.model.utils.FcmMessage) {
         var fcmMessageToSend = buildFcmMessage(message)
-        var credential = service.getCredentials(message.clientId,message.serviceProviderId)
+        var credential = service.getCredentials(message.clientId,message.serviceProviderId,message.type)
         if (credential == null) {
             logger.info("Credential does not exists for clientId ${message.clientId}")
             var notificationError = NotificationError()
