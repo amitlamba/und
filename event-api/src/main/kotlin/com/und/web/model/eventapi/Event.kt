@@ -9,6 +9,7 @@ import com.und.eventapi.validation.*
 import com.und.model.mongo.eventapi.LineItem
 import java.time.*
 import java.util.*
+import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
 
@@ -25,8 +26,10 @@ open class Event {
     var clientId: Long = -1L
     var identity: Identity = Identity()
 
-    @JsonDeserialize(using=CustomLongToLocalDateTimeDeserializer::class)
-    var creationTime: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
+//    @JsonDeserialize(using=CustomLongToLocalDateTimeDeserializer::class)
+//    var creationTime: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
+    @NotNull
+    var creationTime:Long=System.currentTimeMillis()
 
     @Pattern(regexp="(([0-9]|[1][0-9]{1,2}|2[0-4][0-9]|25[0-5])[.]){3}([0-9]|[1][0-9]{1,2}|2[0-4][0-9]|25[0-5])",message="{event.ip.invalid}")
     var ipAddress: String? = null
@@ -98,8 +101,7 @@ class CustomLongToLocalDateTimeDeserializer:StdDeserializer<LocalDateTime>{
     override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): LocalDateTime {
 
         p?.let {
-            var value=it.longValue
-            return LocalDateTime.from(Instant.ofEpochMilli(value).atZone(ZoneId.of("UTC")))
+            return LocalDateTime.from(Instant.ofEpochMilli(p.text.toLong()).atZone(ZoneId.of("UTC")))
         }
         return LocalDateTime.now(ZoneId.of("UTC"))
     }

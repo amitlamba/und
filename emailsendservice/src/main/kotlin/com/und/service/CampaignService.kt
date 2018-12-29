@@ -96,7 +96,8 @@ class CampaignService {
                 //assign name also
                 smsTemplateName = null,
                 eventUser = user,
-                serviceProviderId = campaign?.serviceProviderId
+                serviceProviderId = campaign?.serviceProviderId,
+                campaignId = campaign?.campaignId
         )
     }
 

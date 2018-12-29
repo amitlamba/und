@@ -9,6 +9,9 @@ import com.und.config.EventStream
 import com.und.exception.FcmFailureException
 import com.und.model.mongo.FcmMessage
 import com.und.model.mongo.FcmMessageStatus
+import com.und.model.utils.eventapi.Event
+import com.und.model.utils.eventapi.Identity
+import com.und.repository.jpa.security.UserRepository
 import com.und.utils.loggerFor
 import feign.FeignException
 import org.bson.types.ObjectId
@@ -36,6 +39,10 @@ class FcmSendService {
     private lateinit var objectMapper: ObjectMapper
     @Autowired
     private lateinit var eventStream: EventStream
+    @Autowired
+    private lateinit var eventApiFeignClient: EventApiFeignClient
+    @Autowired
+    private lateinit var userRepository:UserRepository
 
     fun sendMessage(clientId: Long, authKey: String, message: FcmMessage): ResponseEntity<Any?>? {
         try {
@@ -247,6 +254,20 @@ class FcmSendService {
                 if (statusCode == 200) {
                     service.updateStatus(mongoFcmId, FcmMessageStatus.SENT, message.clientId,message.type)
                     logger.info("Fcm Send message successfuly for token= ${message.to}")
+
+                    val token = userRepository.findSystemUser().key
+                    var event= Event()
+                    with(event) {
+                        name = "Notification Sent"
+                        clientId=message.clientId
+                        notificationId=mongoFcmId
+                        attributes.put("campaign_id",message.campaignId)
+                        userIdentified=true
+                        identity= Identity(userId = message.userId,clientId = message.clientId.toInt())
+
+                    }
+                    eventApiFeignClient.pushEvent(token,event)
+
                 } else {
                     throw FcmFailureException("Sending to fcm fail with status $statusCode")
                 }

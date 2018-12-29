@@ -6,6 +6,7 @@ import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.*
 import javax.validation.constraints.Email
+import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
 
@@ -67,8 +68,10 @@ class EventUser {
     var additionalInfo: HashMap<String, Any> = hashMapOf()
 
     //FIXME creation date can't keep changing
-    @JsonDeserialize(using=CustomLongToLocalDateTimeDeserializer::class)
-    var creationDate: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
+//    @JsonDeserialize(using=CustomLongToLocalDateTimeDeserializer::class)
+//    var creationDate: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
+    @NotNull
+    var creationDate:Long=System.currentTimeMillis()
 
 
 }

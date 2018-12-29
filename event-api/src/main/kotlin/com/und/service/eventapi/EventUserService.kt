@@ -108,7 +108,7 @@ class EventUserService {
 ////                existingUser.creationTime=Date.from(Instant.ofEpochSecond(it).atZone(ZoneId.of("UTC")).toInstant())
 //                existingUser.creationTime=Date.from(Instant.ofEpochMilli(it))
 //            }
-            existingUser.creationTime=Date.from(eventUser.creationDate.toInstant(ZoneOffset.UTC))
+            existingUser.creationTime=Date.from(Instant.ofEpochMilli(eventUser.creationDate).atZone(ZoneId.of("UTC")).toInstant())
             return existingUser.copyNonNull(eventUser)
         }
 

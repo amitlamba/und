@@ -53,10 +53,10 @@ class EventService {
 
 
     @StreamListener("inEvent")
-    @SendTo("outEvent")
-    fun save(event: Event):String? {
+//    @SendTo("outEvent")
+    fun save(event: Event) {
 
-        return saveEvent(event)
+        saveEvent(event)
 
     }
 
