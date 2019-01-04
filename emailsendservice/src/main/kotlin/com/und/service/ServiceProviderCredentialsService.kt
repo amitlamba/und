@@ -193,7 +193,7 @@ class ServiceProviderCredentialsService {
     private fun getServiceProviderCredential(id:Long?,clientId: Long,type:String):ServiceProviderCredentials{
         var serviceProviderCred=ServiceProviderCredentials()
         if(id==null){
-           var result= serviceProviderCredentialsRepository.findByIsDefaultTrue(type,clientId)
+           var result= serviceProviderCredentialsRepository.findByIsdefaultTrue(type,clientId)
             if(result.isPresent) serviceProviderCred=result.get()
         }else{
             var result=serviceProviderCredentialsRepository.findById(id)
