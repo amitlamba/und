@@ -35,6 +35,8 @@ class Event(
 
     var clientTime = ClientTimeNow(LocalDateTime.now(timeZoneId))
     var notificationId: String? = null
+
+    var appfield: AppField? = null
 }
 
 class ClientTimeNow(val time: LocalDateTime) {
@@ -48,6 +50,14 @@ class ClientTimeNow(val time: LocalDateTime) {
     var dayOfWeek: Int = time.dayOfWeek.value
     var year: Int = time.year
 
+
+}
+
+class AppField {
+    var appversion: String? = null
+    var make: String? = null
+    var model: String? = null
+    var sdkversion: String? = null
 
 }
 
