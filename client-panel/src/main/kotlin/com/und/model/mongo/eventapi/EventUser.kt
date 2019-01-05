@@ -32,7 +32,7 @@ class Identity {
     var mobile: String? = null
     var androidFcmToken:String?=null
     var iosFcmToken:String?=null
-    var webFcmToken:String?=null
+    var webFcmToken:Array<String>?=null
 
 }
 
