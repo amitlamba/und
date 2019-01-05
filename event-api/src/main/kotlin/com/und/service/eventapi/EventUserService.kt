@@ -15,6 +15,7 @@ import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import java.time.Instant
+import java.time.ZoneId
 import java.util.*
 import com.und.model.mongo.eventapi.EventUser as MongoEventUser
 
