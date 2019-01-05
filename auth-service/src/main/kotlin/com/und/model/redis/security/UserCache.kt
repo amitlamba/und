@@ -38,6 +38,14 @@ class UserCache {
 
     var loginKey: String? = null
 
+    var androidKey:String?=null
+
+    var iosKey:String?=null
+
+    var identified:Boolean=false
+
+    var tokenKeyType:String?=null
+
     var pswrdRstKey: String? = null
 
     var emailRgstnKey: String? = null

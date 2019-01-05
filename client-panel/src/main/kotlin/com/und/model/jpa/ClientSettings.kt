@@ -27,6 +27,12 @@ class ClientSettings {
     @Column(name = "authorized_urls")
     var authorizedUrls: String? = null
 
+    @Column(name="android_app_ids")
+    var androidAppIds: String?=null
+
+    @Column(name = "ios_app_ids")
+    var iosAppIds:String?=null
+
     @Column(name = "timezone")
     var timezone: String = "UTC"
 

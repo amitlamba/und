@@ -15,8 +15,16 @@ interface UserRepository : JpaRepository<User, Long> {
     fun findByUsername(username: String): User?
 
     @Modifying(clearAutomatically = true)
+    @Query("UPDATE User u SET u.androidKey = :jwt WHERE u.username = :username")
+    fun updateJwtOfEventUserAndroid(@Param("jwt") jwt: String, @Param("username") username: String):Int
+
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE User u SET u.key = :jwt WHERE u.username = :username")
     fun updateJwtOfEventUser(@Param("jwt") jwt: String, @Param("username") username: String):Int
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE User u SET u.iosKey = :jwt WHERE u.username = :username")
+    fun updateJwtOfEventUserIos(@Param("jwt") jwt: String, @Param("username") username: String):Int
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE User u SET u.password = :password WHERE u.username = :username")

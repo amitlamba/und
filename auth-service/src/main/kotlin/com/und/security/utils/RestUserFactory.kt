@@ -24,7 +24,9 @@ class RestUserFactory {
                         enabled = user.enabled,
                         secret = user.clientSecret,
                         key = user.key,
-                        userType = user.userType
+                        userType = user.userType,
+                        androidkey = user.androidKey,
+                        ioskey = user.iosKey
                 )
 
         private fun mapToGrantedAuthorities(authorities: List<Authority>): List<GrantedAuthority> {

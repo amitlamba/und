@@ -1,10 +1,17 @@
 package com.und.security.utils
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.und.common.utils.DateUtils
 import com.und.common.utils.loggerFor
+import com.und.model.jpa.security.ClientSettings
 import com.und.model.jpa.security.UndUserDetails
 import com.und.model.jpa.security.User
+import com.und.model.redis.security.TokenIdentity
 import com.und.model.redis.security.UserCache
+import com.und.repository.jpa.security.ClientSettingsRepository
+import com.und.repository.jpa.security.UserRepository
+import com.und.repository.redis.TokenIdentityRespository
 import com.und.service.security.JWTKeyService
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.Jwts
@@ -30,6 +37,15 @@ class RestTokenUtil {
     @Autowired
     private lateinit var jwtKeyService: JWTKeyService
 
+    @Autowired
+    lateinit var clientSettingsRepository: ClientSettingsRepository
+
+    @Autowired
+    lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    lateinit var tokenIdentityRepository: TokenIdentityRespository
+
     @Value("\${security.expiration}")
     private var expiration: Long = 0
 
@@ -37,13 +53,15 @@ class RestTokenUtil {
     /**
      * use this method when you just need to validate that token is valid, even if it has been removed from database
      */
-    fun validateToken(token: String): Pair<UndUserDetails?, UserCache> {
-        fun getClaimsFromToken(token: String): Claims {
-            return Jwts.parser()
+    fun validateToken(token: String,value:String?=null): Pair<UndUserDetails?, UserCache> {
+        fun getClaimsFromToken(token: String): Pair<Claims,String> {
+
+            var jwt=Jwts.parser()
                     .setSigningKeyResolver(keyResolver)
                     .parseClaimsJws(token)
-                    .body
-
+            var body=jwt.body
+            var header=jwt.header["TOKEN_ROLE"].toString()
+            return Pair(body,header)
         }
 
         fun buildUserDetails(claims: Claims, jwtDetails: UserCache): UndUserDetails? {
@@ -61,11 +79,56 @@ class RestTokenUtil {
         }
 
         val claims = getClaimsFromToken(token)
-        val userId = claims.userId
+        val userId = claims.first.userId
+
+        var identified=false
+        value?.let {
+            var idenity=getUniqueIdentityFromRedis(token)
+            if(idenity.isEmpty()){
+                var user=clientSettingsRepository.findByclientID(claims.first.clientId?.toLong()?:-1)
+                if(user.isPresent){
+                    when (claims.second) {
+                        "EVENT_ANDROID" -> {
+                            var appId = user.get().androidAppIds
+                            if (appId != null){
+                                val v=objectMapper.readValue(appId, Array<String>::class.java)
+                                if (v.indexOf(it) >= 0) identified = true
+                                tokenIdentityRepository.save(TokenIdentity(token,v))
+                            }
+                        }
+
+                        "EVENT_IOS" -> {
+                            var appId = user.get().iosAppIds
+                            if (appId != null){
+                                val v=objectMapper.readValue(appId, Array<String>::class.java)
+                                if (v.indexOf(it) >= 0) identified = true
+                                tokenIdentityRepository.save(TokenIdentity(token,v))
+                            }
+                        }
+
+                        "EVENT_WEB" -> {
+                            var appId = user.get().authorizedUrls
+                            if (appId != null){
+                                val v=objectMapper.readValue(appId, Array<String>::class.java)
+                                if (v.indexOf(it) >= 0) identified = true
+                                tokenIdentityRepository.save(TokenIdentity(token,v))
+                            }
+
+                        }
+                    }
+                }
+
+            }else{
+                if(idenity.indexOf(it)>=0) identified=true
+            }
+        }
+
         return if (userId != null) {
             val jwtDetails = getJwtIfExists(userId.toLong())
-            val userDetails = buildUserDetails(claims, jwtDetails)
-            if (!claims.isTokenExpired) Pair(userDetails, jwtDetails) else Pair(null, jwtDetails)
+            jwtDetails.identified=identified
+            jwtDetails.tokenKeyType=claims.second
+            val userDetails = buildUserDetails(claims.first, jwtDetails)
+            if (!claims.first.isTokenExpired) Pair(userDetails, jwtDetails) else Pair(null, jwtDetails)
         } else Pair(null, UserCache())
 
     }
@@ -74,17 +137,28 @@ class RestTokenUtil {
     /**
      * use this method when you need to validate that token is valid as well as exists in database
      */
-    fun validateTokenForKeyType(token: String, keyType: KEYTYPE): Pair<UndUserDetails?, UserCache> {
-        val (user, jwtDetails) = validateToken(token)
-        val matches: Boolean = when (keyType) {
-            KEYTYPE.LOGIN -> jwtDetails.loginKey == token
+    fun validateTokenForKeyType(token: String, keyType: KEYTYPE,value:String?=null): Pair<UndUserDetails?, UserCache> {
+        val (user, jwtDetails) = validateToken(token,value)
+        var ktype=keyType
+        if(jwtDetails.tokenKeyType!=null) ktype=KEYTYPE.valueOf(jwtDetails.tokenKeyType!!)
+        val matches: Boolean = when (ktype) {
+            KEYTYPE.ADMIN_LOGIN -> jwtDetails.loginKey == token
+            KEYTYPE.EVENT_WEB -> jwtDetails.loginKey ==token && jwtDetails.identified
+            KEYTYPE.EVENT_IOS -> jwtDetails.iosKey ==token && jwtDetails.identified
+            KEYTYPE.EVENT_ANDROID -> jwtDetails.androidKey ==token && jwtDetails.identified
             KEYTYPE.PASSWORD_RESET -> jwtDetails.pswrdRstKey == token
             KEYTYPE.REGISTRATION -> jwtDetails.emailRgstnKey == token
+            else -> false
         }
         return if (user != null && matches) Pair(user, jwtDetails) else Pair(null, jwtDetails)
 
     }
 
+    fun getUniqueIdentityFromRedis(token:String):Array<String>{
+        val r=tokenIdentityRepository.findById(token)
+        if(r.isPresent) return r.get().identity
+        else return emptyArray()
+    }
     fun getJwtIfExists(userId: Long): UserCache {
         return jwtKeyService.getKeyIfExists(userId)
     }
@@ -99,7 +173,7 @@ class RestTokenUtil {
      * used to generate a token for keytype options,
      * user object should have, id, secret, username and password present
      */
-    fun retrieveJwtByUser(user: User, keyType: KEYTYPE): UserCache? {
+    fun retrieveJwtByUser(user: User): UserCache? {
         val userDetails = RestUserFactory.create(user)
         return if (userDetails.id != null) getJwtIfExists(userDetails.id) else null
     }
@@ -122,13 +196,14 @@ class RestTokenUtil {
      */
     fun generateJwtByUser(user: UndUserDetails, keyType: KEYTYPE): UserCache {
         val cachedJwt = user.id?.let{uid-> getJwtIfExists(uid)}?:UserCache()
+        //TODO here event user token is generated.
         val jwt = if(user.userType == AuthenticationUtils.USER_TYPE_EVENT ) {
             val expirationDate = Date(Long.MAX_VALUE )
             JWTGenerator(expirationDate, cachedJwt, user).generateJwtByUserDetails(keyType)
         } else if(user.userType == AuthenticationUtils.USER_TYPE_SYSTEM) {
 
             val expirationDate = Date(Long.MAX_VALUE )
-            JWTGenerator(expirationDate, cachedJwt, user).generateJwtForSystemUser(KEYTYPE.LOGIN)
+            JWTGenerator(expirationDate, cachedJwt, user).generateJwtForSystemUser(KEYTYPE.PASSWORD_RESET)
         }
         else {
             val expirationDate = Date(dateUtils.now().time + expiration*1000 )
@@ -160,5 +235,9 @@ class RestTokenUtil {
 }
 
 enum class KEYTYPE {
-    LOGIN, PASSWORD_RESET, REGISTRATION
+    ADMIN_LOGIN,
+    EVENT_ANDROID,
+    EVENT_IOS,
+    EVENT_WEB,PASSWORD_RESET,
+    REGISTRATION;
 }

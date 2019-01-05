@@ -32,23 +32,31 @@ class UserService {
 
     }
 
-    fun updateJwtOfEventUser( adminUser: UndUserDetails): UserCache {
+    fun updateJwtOfEventUser( adminUser: UndUserDetails,type: KEYTYPE): UserCache {
         //FIXME usernameFromEmailAndType method need fix and not required here
         val username = usernameFromEmailAndType(adminUser.username, AuthenticationUtils.USER_TYPE_EVENT)
-        val jwt = generateJwtLogin(username)
-        val updatedCount = userRepository.updateJwtOfEventUser(jwt.loginKey?:"", username)
+        val jwt = generateJwtLogin(username,type)
+        when(type){
+            KEYTYPE.EVENT_ANDROID -> userRepository.updateJwtOfEventUserAndroid(jwt.androidKey?:"", username)
+            KEYTYPE.EVENT_IOS -> userRepository.updateJwtOfEventUserIos(jwt.iosKey?:"", username)
+            KEYTYPE.EVENT_WEB -> userRepository.updateJwtOfEventUser(jwt.loginKey?:"", username)
+        }
         restTokenUtil.updateJwt(jwt)
         return jwt
 
     }
 
 
-    fun retrieveJwtOfEventUser( adminUser: UndUserDetails): UserCache {
+    fun retrieveJwtOfEventUser( adminUser: UndUserDetails,type:KEYTYPE): UserCache {
         //FIXME usernameFromEmailAndType method need fix and not required here
         val username = usernameFromEmailAndType(adminUser.username, AuthenticationUtils.USER_TYPE_EVENT)
-        val jwt = retrieveJwtLogin(username, KEYTYPE.LOGIN)
-        return if(jwt?.loginKey != null) jwt else updateJwtOfEventUser(adminUser)
-
+        val jwt = retrieveJwtLogin(username)
+        when(type){
+            KEYTYPE.EVENT_ANDROID -> return if(jwt?.androidKey != null) jwt else updateJwtOfEventUser(adminUser,type)
+            KEYTYPE.EVENT_IOS -> return if(jwt?.iosKey != null) jwt else updateJwtOfEventUser(adminUser,type)
+            KEYTYPE.EVENT_WEB -> return if(jwt?.loginKey != null) jwt else updateJwtOfEventUser(adminUser,type)
+        }
+        return UserCache()
     }
 
     fun resetPassword(userDetails: UndUserDetails, password:String) {
@@ -73,7 +81,7 @@ class UserService {
     }
 
     private fun generateJwtLogin(username: String): UserCache {
-        return generateJwtLogin(username, KEYTYPE.LOGIN)
+        return generateJwtLogin(username, KEYTYPE.ADMIN_LOGIN)
     }
 
     private fun generateJwtLogin(username: String, keytype: KEYTYPE): UserCache {
@@ -84,11 +92,11 @@ class UserService {
         } else UserCache()
     }
 
-    private fun retrieveJwtLogin(username: String, keytype: KEYTYPE): UserCache? {
+    private fun retrieveJwtLogin(username: String): UserCache? {
         // Reload password post-security so we can generate token
         val user = findByUsername(username)
         return if (user != null) {
-            restTokenUtil.retrieveJwtByUser(user, keytype)
+            restTokenUtil.retrieveJwtByUser(user)
         } else UserCache()
     }
 }

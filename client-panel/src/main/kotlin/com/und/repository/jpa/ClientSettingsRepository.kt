@@ -19,6 +19,6 @@ interface ClientSettingsRepository : JpaRepository<ClientSettings, Int> {
     fun findByClientID(clientId: Long): ClientSettings?
 
     @Modifying
-    @Query(value = "Update client_settings set authorized_urls = :authorizedUrls, timezone = :timezone where client_id = :clientId", nativeQuery = true)
-    fun updateAccountSettings(authorizedUrls: String?, timezone: String, clientId: Long)
+    @Query(value = "Update client_settings set authorized_urls = :authorizedUrls,android_app_ids= :andAppId,ios_app_ids= :iosAppId, timezone = :timezone where client_id = :clientId", nativeQuery = true)
+    fun updateAccountSettings(authorizedUrls: String?,andAppId:String?,iosAppId:String?, timezone: String, clientId: Long)
 }

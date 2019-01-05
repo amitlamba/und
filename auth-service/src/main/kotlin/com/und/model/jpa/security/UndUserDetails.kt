@@ -31,6 +31,10 @@ class UndUserDetails(
 
         val key: String? = null,
 
+        val androidkey:String?=null,
+
+        val ioskey:String?=null,
+
         val userType: Int? = null,
 
         var timeZoneId: String = ZoneId.of("UTC").id

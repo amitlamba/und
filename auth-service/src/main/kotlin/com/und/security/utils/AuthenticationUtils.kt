@@ -10,6 +10,9 @@ object AuthenticationUtils {
     const val USER_TYPE_ADMIN: Int = 1
     const val USER_TYPE_EVENT: Int = 2
     const val USER_TYPE_SYSTEM: Int = 3
+    const val USER_TYPE_EVENT_WEB: Int = 4
+    const val USER_TYPE_EVENT_ANDROID: Int = 5
+    const val USER_TYPE_EVENT_IOS: Int = 6
 
     val isUserLoggedIn: Boolean
         get() {
