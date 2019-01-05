@@ -2,22 +2,22 @@ package com.und.service.eventapi
 
 import com.und.common.utils.MetadataUtil
 import com.und.config.EventStream
-import com.und.web.model.eventapi.EventUser
-import com.und.model.mongo.eventapi.EventUser as MongoEventUser
-import com.und.web.model.eventapi.Identity
+import com.und.eventapi.utils.copyNonNull
+import com.und.model.mongo.eventapi.*
+import com.und.repository.mongo.CommonMetadataRepository
 import com.und.repository.mongo.EventUserRepository
 import com.und.security.utils.TenantProvider
+import com.und.web.model.eventapi.EventUser
+import com.und.web.model.eventapi.Identity
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
-import com.und.eventapi.utils.copyNonNull
-import com.und.model.mongo.eventapi.*
-import com.und.repository.mongo.CommonMetadataRepository
-import com.und.repository.mongo.EventMetadataRepository
-import java.time.*
+import java.time.Instant
+import java.time.ZoneId
 import java.util.*
+import com.und.model.mongo.eventapi.EventUser as MongoEventUser
 
 @Service
 class EventUserService {
@@ -67,25 +67,25 @@ class EventUserService {
 
     fun getEventUserByEventUserId(id: String): MongoEventUser? {
         var mongoEventUser: MongoEventUser? = null
-        eventUserRepository.findById(id).ifPresent({eu -> mongoEventUser = eu})
+        eventUserRepository.findById(id).ifPresent{eu -> mongoEventUser = eu}
         return mongoEventUser
     }
 
     fun getEventUserByUid(uid: String): MongoEventUser? {
         var mongoEventUser: MongoEventUser? = null
-        eventUserRepository.findByIdentityUid(uid).ifPresent({eu -> mongoEventUser = eu})
+        eventUserRepository.findByIdentityUid(uid).ifPresent{eu -> mongoEventUser = eu}
         return mongoEventUser
     }
 
     fun getEventUserByEventUserIdOrUid(id: String, uid:String): MongoEventUser? {
         var mongoEventUser: MongoEventUser? = null
-        eventUserRepository.findByIdOrIdentityUid(id, uid).ifPresent({eu -> mongoEventUser = eu})
+        eventUserRepository.findByIdOrIdentityUid(id, uid).ifPresent{eu -> mongoEventUser = eu}
         return mongoEventUser
     }
 
     fun getEventUserByEventUserIdAndUid(id: String, uid:String): MongoEventUser? {
         var mongoEventUser: MongoEventUser? = null
-        eventUserRepository.findByIdAndIdentityUid(id, uid).ifPresent({eu -> mongoEventUser = eu})
+        eventUserRepository.findByIdAndIdentityUid(id, uid).ifPresent{eu -> mongoEventUser = eu}
         return mongoEventUser
     }
 

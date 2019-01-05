@@ -152,6 +152,7 @@ class RegistrationService {
         client.emailVerified = true
         client.users.forEach { user -> user.enabled = true }
         clientService.save(client)
+        client.id?.let { clientId->clientService.insertMetadata(clientId)}
     }
 
 

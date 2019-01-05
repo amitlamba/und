@@ -144,6 +144,7 @@ class EventUserService {
         event.agentString = eventMongo.agentString
         event.clientId = eventMongo.clientId
         event.creationTime = DateUtils().convertDateToDateTime(eventMongo.creationTime)
+        event.appfield = eventMongo.appfield
         event.userIdentified = eventMongo.userIdentified
         return event
     }

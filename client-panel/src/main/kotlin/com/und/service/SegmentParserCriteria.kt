@@ -42,8 +42,9 @@ class SegmentParserCriteria {
         val logger: Logger = loggerFor(SegmentParserCriteria::class.java)
     }
 
-    var userMap:HashMap<String,String>;
-    var eventMap:HashMap<String,String>;
+    var userMap:HashMap<String,String>
+    var eventMap:HashMap<String,String>
+
     constructor(){
         userMap=HashMap();
         userMap.put("gender","standardInfo.gender")
@@ -458,6 +459,7 @@ class SegmentParserCriteria {
             GlobalFilterType.UserComputedProperties-> return "${name}"
             GlobalFilterType.UserIdentity->return "identity.${name}"
             GlobalFilterType.UserTechnographics->return return "system.${name}.name"
+            GlobalFilterType.AppFields->return return "appfield.${name}.name"
 
             GlobalFilterType.Geogrophy->return "geogrophy.${name}"
             GlobalFilterType.Technographics->return "system.${name}.name"
