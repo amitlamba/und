@@ -27,6 +27,16 @@ class Event(
     var sessionId: String = ""
 
     var geogrophy: Geogrophy? = null
+
+    var appfield: AppField? = null
+}
+
+class AppField {
+    var appversion: String? = null
+    var make: String? = null
+    var model: String? = null
+    var sdkversion: String? = null
+
 }
 
 data class Coordinate(val latitude: Float, val longitude: Float)

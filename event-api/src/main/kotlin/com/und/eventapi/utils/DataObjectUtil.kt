@@ -44,6 +44,7 @@ fun Event.copyToMongo(): MongoEvent {
     mongoEvent.sessionId = event.identity.sessionId
     mongoEvent.deviceId = event.identity.deviceId
     mongoEvent.notificationId = event.notificationId
+    mongoEvent.appfield = event.appField
 
     //copy geo details
     with(mongoEvent.geoDetails) {
@@ -120,8 +121,8 @@ fun com.und.model.mongo.eventapi.EventUser.copyNonNull(eventUser: EventUser): co
     copyEventUser.standardInfo.gender = unchanged(eventUser.gender, standardInfo.gender)
     copyEventUser.standardInfo.dob = unchanged(eventUser.dob, standardInfo.dob)
     copyEventUser.standardInfo.country = unchanged(eventUser.country, standardInfo.country)
-    copyEventUser.standardInfo.City = unchanged(eventUser.city, standardInfo.City)
-    copyEventUser.standardInfo.Address = unchanged(eventUser.address, standardInfo.Address)
+    copyEventUser.standardInfo.city = unchanged(eventUser.city, standardInfo.city)
+    copyEventUser.standardInfo.address = unchanged(eventUser.address, standardInfo.address)
     copyEventUser.standardInfo.countryCode = unchanged(eventUser.countryCode, standardInfo.countryCode)
     copyEventUser.communication=getCommunication(this,eventUser)
     return copyEventUser

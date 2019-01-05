@@ -1,5 +1,6 @@
 package com.und.report.web.model
 
+import com.und.web.model.GlobalFilter
 import com.und.web.model.GlobalFilterType
 
 class FunnelReport {
@@ -9,6 +10,7 @@ class FunnelReport {
             var steps: List<Step> = emptyList(),
             var funnelOrder: FunnelOrder,
             var conversionTime: Int,
+            var filters: List<GlobalFilter> = arrayListOf(),
             var splitProprty: String?,
             var splitProprtyType: GlobalFilterType = GlobalFilterType.EventAttributeProperties
     )

@@ -94,8 +94,12 @@ class FunnelReportServiceImpl : FunnelReportService {
 
     private fun buildAggregation(funnelFilter: FunnelReport.FunnelReportFilter, filters: List<GlobalFilter>, tz: ZoneId): Aggregation {
 
+        val allfilters :MutableList<GlobalFilter> = mutableListOf()
 
-        val filterGlobalQ = segmentParserCriteria.filterGlobalQ(filters, tz)
+        allfilters.addAll(filters)
+        allfilters.addAll(funnelFilter.filters)
+        val filterGlobalQ = segmentParserCriteria.filterGlobalQ(allfilters, tz)
+
         val matchOperation = Aggregation.match(filterGlobalQ.first)
         val sortOperation = Aggregation.sort(Sort.by("creationTime").ascending())
         val groupBys = mutableListOf<Field>()

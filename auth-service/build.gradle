@@ -24,11 +24,15 @@ dependencies {
         exclude group: 'org.apache.tomcat' , module: 'tomcat-jdbc'
         exclude group: 'com.mchange' , module: 'c3p0'
     }
+
+
     compile('org.springframework.boot:spring-boot-starter-data-rest')
     compile("org.springframework.boot:spring-boot-starter-mobile:1.5.9.RELEASE")
     compile('org.springframework.boot:spring-boot-starter-mail')
     compile('org.springframework.boot:spring-boot-starter-security')
     compile "org.springframework.boot:spring-boot-configuration-processor"
+    compile('org.springframework.boot:spring-boot-starter-data-mongodb')
+    compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: '2.9.4.1'
     runtime('org.postgresql:postgresql')
 
 
