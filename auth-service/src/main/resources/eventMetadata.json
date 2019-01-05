@@ -1,0 +1,34 @@
+{"eventMetadata":[
+  {
+    "name": "Charged",
+    "properties": [
+
+    ]
+  },
+  {
+    "name": "Add To Cart",
+    "properties": [
+
+    ]
+  },
+  {
+    "name": "Removed From Cart",
+    "properties": [
+
+    ]
+  },
+  {
+    "name": "Viewed",
+    "properties": [
+
+    ]
+  },
+  {
+    "name": "Searched",
+    "properties": [
+
+    ]
+  }
+]}
+
+

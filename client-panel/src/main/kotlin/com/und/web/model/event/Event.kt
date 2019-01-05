@@ -1,5 +1,6 @@
 package com.und.web.model.event
 
+import com.und.model.mongo.eventapi.AppField
 import com.und.model.mongo.eventapi.LineItem
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -22,5 +23,6 @@ open class Event {
     var userIdentified: Boolean = false
     var lineItem: MutableList<LineItem> = mutableListOf()
     var attributes: HashMap<String, Any> = hashMapOf()
+    var appfield: AppField? = null
 
 }
