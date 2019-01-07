@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.und.eventapi.validation.*
+import com.und.model.mongo.eventapi.AppField
 import com.und.model.mongo.eventapi.LineItem
 import java.time.*
 import java.util.*
@@ -20,7 +21,7 @@ import javax.validation.constraints.Size
 //FIXME handle validation for other fields and different types, e.g. @see
 open class Event {
 
-    @Size(min=2,max=40,message="{event.name.invalidSize}")
+    @Size(min = 2, max = 40, message = "{event.name.invalidSize}")
     lateinit var name: String
 
     var clientId: Long = -1L
@@ -31,7 +32,7 @@ open class Event {
     @NotNull
     var creationTime:Long=System.currentTimeMillis()
 
-    @Pattern(regexp="(([0-9]|[1][0-9]{1,2}|2[0-4][0-9]|25[0-5])[.]){3}([0-9]|[1][0-9]{1,2}|2[0-4][0-9]|25[0-5])",message="{event.ip.invalid}")
+    @Pattern(regexp = "(([0-9]|[1][0-9]{1,2}|2[0-4][0-9]|25[0-5])[.]){3}([0-9]|[1][0-9]{1,2}|2[0-4][0-9]|25[0-5])", message = "{event.ip.invalid}")
     var ipAddress: String? = null
 
     @Size(min = 2, max = 40, message = "{event.city.invalidSize}")
@@ -46,10 +47,10 @@ open class Event {
     @Pattern(regexp = "[A-Za-z][a-zA-Z\\s]*", message = "{event.country.invalid}")
     var country: String? = null
 
-    @ValidateLatitude(message="{event.latitude.invalid}")
+    @ValidateLatitude(message = "{event.latitude.invalid}")
     var latitude: String? = null
 
-    @ValidateLongitude(message="{event.longitude.invalid}")
+    @ValidateLongitude(message = "{event.longitude.invalid}")
     var longitude: String? = null
 
     var agentString: String? = null
@@ -57,10 +58,12 @@ open class Event {
     var lineItem: MutableList<LineItem> = mutableListOf()
     var attributes: HashMap<String, Any> = hashMapOf()
 
-    //@get:JsonIgnore
-    var timeZone:String? = null
+    var appField: AppField? = null
 
-    var notificationId:String? = null
+    //@get:JsonIgnore
+    var timeZone: String? = null
+
+    var notificationId: String? = null
 
 }
 

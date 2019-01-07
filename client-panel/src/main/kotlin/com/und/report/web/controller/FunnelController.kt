@@ -41,7 +41,7 @@ class FunnelController {
     fun funnel(@RequestBody(required = true) steps:List<FunnelReport.Step>,
                funnelFilter: FunnelReport.FunnelReportFilter): List<FunnelReport.FunnelStep> {
 
-        funnelFilter.steps=steps;
+        funnelFilter.steps=steps
         return funnelReportService.funnel(funnelFilter)
     }
 }

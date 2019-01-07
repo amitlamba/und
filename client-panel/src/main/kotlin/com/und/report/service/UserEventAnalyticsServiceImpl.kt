@@ -191,11 +191,9 @@ class UserEventAnalyticsServiceImpl : UserEventAnalyticsService {
     private fun buildTimePeriodGroupBy(period: EventReport.PERIOD): List<GroupBy> {
         when (period) {
             EventReport.PERIOD.daily -> {
-                //TODO correct for daily
                 return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties), buildGroupBy("dayOfMonth", GlobalFilterType.EventTimeProperties))
             }
             EventReport.PERIOD.weekly -> {
-                //TODO correct for weekly
                 return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties), buildGroupBy("dayOfMonth", GlobalFilterType.EventTimeProperties))
             }
             EventReport.PERIOD.monthly -> {

@@ -14,6 +14,7 @@ interface CampaignRepository : JpaRepository<Campaign, Long> {
                       c.id,
                       c.segmentation_id,
                       c.campaign_type,
+                      c.service_provider_id,
                       ec.email_template_id,
                       et.name as email_template_name,
                       sc.sms_template_id,
