@@ -92,7 +92,7 @@ class UserProfileController {
     }
 
 
-    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_SYSTEM')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
     @PostMapping(value = ["/refreshToken/{new}/{type}"])
     fun generateToken(@PathVariable("new") new:Boolean ,@PathVariable("type" ,required = true) type:String): ResponseEntity<*> {
         //val device = DeviceUtils.getCurrentDevice(request)

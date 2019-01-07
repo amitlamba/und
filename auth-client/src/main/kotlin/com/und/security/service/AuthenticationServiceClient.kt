@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.*
 
 
-@FeignClient(name="localhost",url="http://127.0.0.1:9605")
+@FeignClient(name="auth-service")
 interface AuthenticationServiceClient {
 
     @GetMapping(value = ["/auth/validate/{token}"], consumes = ["application/json"])
