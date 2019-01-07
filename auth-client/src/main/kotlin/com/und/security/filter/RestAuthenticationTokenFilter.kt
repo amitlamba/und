@@ -25,14 +25,22 @@ class RestAuthenticationTokenFilter : OncePerRequestFilter() {
     @Value("\${security.header.token}")
     private lateinit var tokenHeader: String
 
-
     @Throws(ServletException::class, IOException::class)
     override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, chain: FilterChain) {
+        var type=request.getHeader("type")
+        var t="ADMIN_LOGIN"
+        var v:String=""
+        when(type){
+            "WEB"-> { t="EVENT_WEB" ; v="${request.getScheme()}://${request.getServerName()}"}
+            "ANDROID"->{ t="EVENT_ANDROID" ; v=request.getHeader("androidAppId")}
+            "IOS"->{ t="EVENT_IOS" ; v=request.getHeader("iosAppId")}
+        }
         val authToken = request.getHeader(this.tokenHeader)
         if (SecurityContextHolder.getContext().authentication == null && authToken != null) {
             logger.info("checking authentication for token $authToken ")
-//            val auth = authenticationService.validateToken(authToken)
-            val validationResponse: Response<UndUserDetails> = authenticationService.validateToken(authToken)
+            var validationResponse: Response<UndUserDetails>
+                    if(t.equals("ADMIN_LOGIN"))  validationResponse=authenticationService.validateToken(authToken,null,null)
+                    else validationResponse=authenticationService.validateToken(authToken,t,v)
             if (validationResponse.status == ResponseStatus.SUCCESS) {
                 val userDetails = validationResponse.data.value
                 if (userDetails != null) {
@@ -45,5 +53,16 @@ class RestAuthenticationTokenFilter : OncePerRequestFilter() {
         }
 
         chain.doFilter(request, response)
+    }
+}
+
+enum class KEYTYPE {
+    PASSWORD_RESET, REGISTRATION;
+    enum class LOGIN {
+        ADMIN_LOGIN,
+        EVENT_ANDROID,
+        EVENT_IOS,
+        EVENT_WEB
+
     }
 }

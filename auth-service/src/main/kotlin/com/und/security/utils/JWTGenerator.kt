@@ -16,9 +16,12 @@ class JWTGenerator(private val expirationDate: Date,
     fun generateJwtByUserDetails(keyType: KEYTYPE): UserCache {
         cachedJwt.userId = "${user.id}"
         when (keyType) {
-            KEYTYPE.LOGIN -> cachedJwt.loginKey = generateToken(user)
-            KEYTYPE.PASSWORD_RESET -> cachedJwt.pswrdRstKey = generateToken(user)
-            KEYTYPE.REGISTRATION -> cachedJwt.emailRgstnKey = generateToken(user)
+            KEYTYPE.ADMIN_LOGIN -> cachedJwt.loginKey = generateToken(user,keyType)
+            KEYTYPE.EVENT_WEB -> cachedJwt.loginKey = generateToken(user,keyType)
+            KEYTYPE.EVENT_IOS -> cachedJwt.iosKey = generateToken(user,keyType)
+            KEYTYPE.EVENT_ANDROID -> cachedJwt.androidKey = generateToken(user,keyType)
+            KEYTYPE.PASSWORD_RESET -> cachedJwt.pswrdRstKey = generateToken(user,keyType)
+            KEYTYPE.REGISTRATION -> cachedJwt.emailRgstnKey = generateToken(user,keyType)
         }
         cachedJwt.secret = user.secret
         cachedJwt.username = user.username
@@ -27,15 +30,16 @@ class JWTGenerator(private val expirationDate: Date,
         cachedJwt.password = user.password!!
         cachedJwt.email = user.email ?: "Notfound"
         cachedJwt.clientId = "${user.clientId}"
+        cachedJwt.identified=false
         return cachedJwt
     }
 
     fun generateJwtForSystemUser(keyType: KEYTYPE): UserCache {
         cachedJwt.userId = "${user.id}"
         when (keyType) {
-            KEYTYPE.LOGIN -> cachedJwt.loginKey = user.key
-            KEYTYPE.PASSWORD_RESET -> cachedJwt.pswrdRstKey = generateToken(user)
-            KEYTYPE.REGISTRATION -> cachedJwt.emailRgstnKey = generateToken(user)
+            KEYTYPE.ADMIN_LOGIN -> cachedJwt.loginKey = user.key
+            KEYTYPE.PASSWORD_RESET -> cachedJwt.pswrdRstKey = generateToken(user,keyType)
+            KEYTYPE.REGISTRATION -> cachedJwt.emailRgstnKey = generateToken(user,keyType)
         }
         cachedJwt.secret = user.secret
         cachedJwt.username = user.username
@@ -46,7 +50,7 @@ class JWTGenerator(private val expirationDate: Date,
     }
 
 
-    private fun generateToken(userDetails: UndUserDetails): String {
+    private fun generateToken(userDetails: UndUserDetails,keyType: KEYTYPE): String {
 
         val createdDate = dateUtils.now()
 
@@ -61,6 +65,7 @@ class JWTGenerator(private val expirationDate: Date,
 
 
         return Jwts.builder()
+                .setHeaderParam("TOKEN_ROLE",keyType.name)
                 .setClaims(claims)
                 .setExpiration(expirationDate)
                 .signWith(SignatureAlgorithm.HS512, userDetails.secret)

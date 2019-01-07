@@ -8,11 +8,13 @@ import org.springframework.stereotype.Component
 import org.springframework.web.bind.annotation.*
 
 
-@FeignClient("auth-service")
+@FeignClient(name="auth-service")
 interface AuthenticationServiceClient {
 
-    @GetMapping(value = ["/auth/validate/{token}/"], consumes = ["application/json"])
-    fun validateToken(@PathVariable("token") token: String): Response<UndUserDetails>
+    @GetMapping(value = ["/auth/validate/{token}"], consumes = ["application/json"])
+    fun validateToken(@PathVariable("token") token: String,
+                      @RequestParam("type",required=false)type:String?,
+                      @RequestParam("value",required=false)value:String?): Response<UndUserDetails>
 
 
 }

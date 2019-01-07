@@ -64,6 +64,12 @@ class User {
     @Column(name = "KEY", length = 255)
     var key: String? = null
 
+    @Column(name="ANDROIDKEY",length = 255)
+    var androidKey:String?=null
+
+    @Column(name = "IOSKEY",length = 255)
+    var iosKey:String?=null
+
     @Column(name = "PHONE", length = 15)
     var mobile: String? = null
 

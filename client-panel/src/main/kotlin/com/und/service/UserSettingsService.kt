@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.model.Status
 import com.und.model.jpa.ClientSettings
 import com.und.model.jpa.ServiceProviderCredentials
-import com.und.repository.jpa.ClientSettingsRepository
 import com.und.web.model.ServiceProviderCredentials as WebServiceProviderCredentials
-import com.und.repository.jpa.ServiceProviderCredentialsRepository
 import com.und.web.model.AccountSettings
 import com.und.web.model.EmailAddress
 import com.und.web.model.UnSubscribeLink
@@ -21,12 +19,13 @@ import com.und.common.utils.DateUtils
 import com.und.common.utils.encrypt
 import com.und.common.utils.loggerFor
 import com.und.config.EventStream
+import com.und.feign.FeignClientForAuthService
 import com.und.model.Email
 import com.und.model.jpa.Client
 import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.model.jpa.ClientSettingsEmail
-import com.und.repository.jpa.ClientRepository
-import com.und.repository.jpa.ClientSettingsEmailRepository
+import com.und.repository.jpa.*
+import com.und.repository.redis.UserCacheRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.WrongCredentialException
@@ -64,6 +63,15 @@ class UserSettingsService {
 
     @Autowired
     private lateinit var clientRepository: ClientRepository
+
+    @Autowired
+    private lateinit var userRepository:UserRepository
+
+    @Autowired
+    lateinit var feignClientForAuthService: FeignClientForAuthService
+
+    @Autowired
+    lateinit var userCacheRepository: UserCacheRepository
 
     @Value("\${und.url.client}")
     lateinit var clientUrl: String
@@ -223,12 +231,27 @@ class UserSettingsService {
             val clientSettingspersisted = clientSettingsRepository.findByClientID(clientID)
             clientSettings.id = clientSettingspersisted?.id
             clientSettings.clientID = clientID
-            clientSettings.authorizedUrls = objectMapper.writeValueAsString(accountSettings.urls)
+            clientSettings.authorizedUrls=clientSettingspersisted?.authorizedUrls
+            clientSettings.iosAppIds=clientSettingspersisted?.iosAppIds
+            clientSettings.androidAppIds=clientSettingspersisted?.androidAppIds
+            val token=userCacheRepository.findById(userID.toString()).get().loginKey
+            accountSettings.urls?.let {
+                clientSettings.authorizedUrls = objectMapper.writeValueAsString(it)
+                feignClientForAuthService.refreshToken(false,"EVENT_WEB",token)
+            }
+            accountSettings.andAppId?.let {
+                clientSettings.androidAppIds = objectMapper.writeValueAsString(it)
+                feignClientForAuthService.refreshToken(false,"EVENT_ANDROID",token)
+            }
+            accountSettings.iosAppId?.let {
+                clientSettings.iosAppIds = objectMapper.writeValueAsString(it)
+                feignClientForAuthService.refreshToken(false,"EVENT_IOS",token)
+            }
             clientSettings.timezone = accountSettings.timezone
             if (clientSettingspersisted == null) {
                 clientSettingsRepository.save(clientSettings)
             } else {
-                clientSettingsRepository.updateAccountSettings(clientSettings.authorizedUrls, clientSettings.timezone, clientID)
+                clientSettingsRepository.updateAccountSettings(clientSettings.authorizedUrls,clientSettings.androidAppIds,clientSettings.iosAppIds, clientSettings.timezone, clientID)
             }
         }
     }
@@ -238,8 +261,11 @@ class UserSettingsService {
 
         return if (clientSettings != null) {
             val setting =
-                    AccountSettings(clientSettings.id, objectMapper.readValue(clientSettings.authorizedUrls
-                            ?: emptyArrayJson), clientSettings.timezone)
+                    AccountSettings(clientSettings.id,
+                            objectMapper.readValue(clientSettings.authorizedUrls?: emptyArrayJson),
+                            clientSettings.timezone,
+                            objectMapper.readValue(clientSettings.androidAppIds?:emptyArrayJson),
+                            objectMapper.readValue(clientSettings.iosAppIds?:emptyArrayJson))
             Optional.of(setting)
         } else Optional.empty()
     }
@@ -478,4 +504,11 @@ enum class ServiceProviderType(val desc: String) {
     WEB_PUSH_SERVICE_PROVIDER("Web Push Service Provider"),
     IOS_PUSH_SERVICE_PROVIDER("iOS Push Service Provider")
 
+}
+
+enum class KEYTYPE {
+    ADMIN_LOGIN,
+    EVENT_ANDROID,
+    EVENT_IOS,
+    EVENT_WEB
 }

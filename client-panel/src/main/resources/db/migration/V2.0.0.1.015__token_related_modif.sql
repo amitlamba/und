@@ -1,0 +1,2 @@
+ALTER TABLE client_settings  ADD COLUMN android_app_ids VARCHAR(1024),ADD COLUMN ios_app_ids VARCHAR (1025);
+ALTER TABLE appuser  ADD COLUMN ioskey VARCHAR(2048),ADD COLUMN androidkey VARCHAR (2048);

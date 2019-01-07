@@ -30,8 +30,8 @@ class RestAuthenticationTokenFilter : OncePerRequestFilter() {
         if (SecurityContextHolder.getContext().authentication == null && authToken != null) {
             logger.info("checking authentication for token $authToken ")
 
-
-            val (userDetails, _) = restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.LOGIN)
+            //TODO need to handle diff diff keytype .In case of auth-client its never called.
+            val (userDetails, _) = restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.ADMIN_LOGIN)
             if (userDetails!=null) {
                 val authentication = UsernamePasswordAuthenticationToken(userDetails, null, userDetails.authorities)
                 authentication.details = WebAuthenticationDetailsSource().buildDetails(request)

@@ -45,7 +45,7 @@ class AuthenticationRestController {
             // Reload password post-security so we can generate token
             val user: UndUserDetails? = userDetailsService.loadUserByUsername(username) as UndUserDetails
             return if (user != null) {
-                restTokenUtil.generateJwtByUser(user, KEYTYPE.LOGIN).loginKey ?: ""
+                restTokenUtil.generateJwtByUser(user, KEYTYPE.ADMIN_LOGIN).loginKey ?: ""
             } else ""
         }
         val response = request.getParameter("recaptchaToken")
@@ -70,12 +70,23 @@ class AuthenticationRestController {
 
     @GetMapping(value = ["\${security.route.authentication.path}/validate/{authToken}"])
     @Throws(AuthenticationException::class)
-    fun authenticationToken(@PathVariable("authToken") authToken: String): ResponseEntity<*> {
-        val (userDetails, _) = restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.LOGIN)
-        return if (userDetails?.id != null) {
+    fun authenticationToken(@PathVariable("authToken",required = true) authToken: String, @RequestParam("type",required = false)type:String?=null, @RequestParam("value",required = false)value:String?=null): ResponseEntity<*> {
+
+        var result:Pair<com.und.model.jpa.security.UndUserDetails?,com.und.model.redis.security.UserCache>?=null
+
+        if(type!=null&&value!=null){
+            when(KEYTYPE.valueOf(type)){
+                KEYTYPE.EVENT_ANDROID-> result=restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.EVENT_ANDROID,value)
+                KEYTYPE.EVENT_IOS -> result=restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.EVENT_IOS,value)
+                KEYTYPE.EVENT_WEB -> result=restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.EVENT_WEB,value)
+            }
+        }else{
+                result=restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.ADMIN_LOGIN)
+        }
+        return if (result?.first?.id != null) {
             ResponseEntity.ok(Response(
                     status = ResponseStatus.SUCCESS,
-                    data = Data(userDetails)
+                    data = Data(result.first)
 
             ))
         } else {

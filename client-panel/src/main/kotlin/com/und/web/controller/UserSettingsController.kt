@@ -33,7 +33,6 @@ class UserSettingsController {
     @Autowired
     private lateinit var campaignService: CampaignService
 
-
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/service-providers"])
     fun getServiceProviders(): List<ServiceProviderCredentials> {
@@ -243,6 +242,12 @@ class UserSettingsController {
             return ResponseEntity(ex.message?:"",HttpStatus.BAD_REQUEST)
         }
     }
+
+//    @PreAuthorize("hasRole('ROLE_ADMIN')")
+//    @PostMapping("app/account-settings/save")
+//    fun saveAppAccountSettings(@Valid @RequestBody settings:AccountSettings){
+//
+//    }
 
 }
 
