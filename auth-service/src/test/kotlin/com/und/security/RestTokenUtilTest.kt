@@ -153,7 +153,7 @@ class RestTokenUtilTest {
         device.isNormal = true
         `when`(restTokenUtil.getJwtIfExists(user.id!!))
                 .thenReturn(jwtKey)
-        val jwtKeys = restTokenUtil.generateJwtByUser(user, KEYTYPE.LOGIN)
+        val jwtKeys = restTokenUtil.generateJwtByUser(user, KEYTYPE.ADMIN_LOGIN)
 
         return Pair(jwtKeys.loginKey ?: "", jwtKeys)
     }
@@ -178,7 +178,7 @@ class RestTokenUtilTest {
         )
 
 
-        val jwtKeys = restTokenUtil.generateJwtByUser(user, KEYTYPE.LOGIN)
+        val jwtKeys = restTokenUtil.generateJwtByUser(user, KEYTYPE.ADMIN_LOGIN)
         val crypter = BCryptPasswordEncoder()
         val encryptedPassword = crypter.encode(user.password)
         return Pair(jwtKeys.loginKey!!, encryptedPassword)
