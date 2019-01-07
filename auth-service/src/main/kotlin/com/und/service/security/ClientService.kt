@@ -66,6 +66,7 @@ class ClientService {
     }
 
 }
+/*
 
 fun main(args: Array<String>) {
 
@@ -241,4 +242,4 @@ fun main(args: Array<String>) {
     val template : MongoTemplate = MongoTemplate(client, "1_test")
     TenantProvider().setTenat("111")
     template.insert(parsed,  CommonMetadata::class.java)
-}
+}*/
