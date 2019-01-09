@@ -197,6 +197,9 @@ class AggregationQuerybuilder {
 
             aggregationPipeline.add(projectOperation)
 
+//            aggregationPipeline.add(Aggregation.group(Field.UserIdObject.fName))
+//            aggregationPipeline.add(Aggregation.project().and("_id").`as`(Field.UserIdObject.fName))
+
             val lookupOperation = Aggregation.lookup("${clientId}_eventUser", "${Field.UserIdObject.fName}", "_id", USER_DOC)
             aggregationPipeline.add(lookupOperation)
 

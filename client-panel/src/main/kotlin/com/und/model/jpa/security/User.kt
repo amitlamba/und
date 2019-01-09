@@ -1,10 +1,7 @@
 package com.und.model.jpa.security
 
 import org.hibernate.annotations.DynamicUpdate
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.Id
-import javax.persistence.Table
+import javax.persistence.*
 
 @Entity
 @Table(name = "APPUSER")
@@ -23,4 +20,10 @@ class User {
 
     @Column(name = "KEY", length = 255, updatable = false, insertable = false)
     var key: String? = null
+
+    @Column(name="ANDROIDKEY",length = 255)
+    var androidKey:String?=null
+
+    @Column(name = "IOSKEY",length = 255)
+    var iosKey:String?=null
 }

@@ -18,6 +18,7 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.util.*
+import javax.servlet.http.HttpServletRequest
 import javax.validation.Valid
 
 @CrossOrigin
@@ -49,7 +50,17 @@ class CampaignController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["list/all"])
-    fun getCampaigns(@RequestParam(value = "id", required = false) id: Long? = null): List<Campaign> {
+    fun getCampaigns(@RequestParam(value = "id", required = false) id: Long? = null,request:HttpServletRequest): List<Campaign> {
+        println(request)
+
+        var user=request.remoteUser
+        var uri=request.requestURI
+        var url=request.requestURL
+        var addr=request.remoteAddr
+        var localadr=request.localAddr
+
+        var host=request.remoteHost
+        var server=request.serverName
         return campaignService.getCampaigns()
     }
 
