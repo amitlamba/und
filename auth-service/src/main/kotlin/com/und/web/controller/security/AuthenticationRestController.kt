@@ -12,6 +12,7 @@ import com.und.service.security.captcha.CaptchaService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.client.AbstractClientHttpResponse
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -20,6 +21,7 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 @CrossOrigin
 @RestController
@@ -48,6 +50,7 @@ class AuthenticationRestController {
                 restTokenUtil.generateJwtByUser(user, KEYTYPE.ADMIN_LOGIN).loginKey ?: ""
             } else ""
         }
+
         val response = request.getParameter("recaptchaToken")
         captchaService.processResponse(response)
         val authentication = authenticationManager.authenticate(
@@ -68,20 +71,21 @@ class AuthenticationRestController {
 
     }
 
-    @GetMapping(value = ["\${security.route.authentication.path}/validate/{authToken}"])
+    @GetMapping(value = ["\${security.route.authentication.path}/xyz/validate/{authToken}"])
     @Throws(AuthenticationException::class)
-    fun authenticationToken(@PathVariable("authToken",required = true) authToken: String, @RequestParam("type",required = false)type:String?=null, @RequestParam("value",required = false)value:String?=null): ResponseEntity<*> {
+    fun authenticationToken(@PathVariable("authToken", required = true) authToken: String, request: HttpServletRequest): ResponseEntity<*> {
+        val type:String? = request.getParameter("type")
+        val value:String? = request.getParameter("value")
+        var result: Pair<com.und.model.jpa.security.UndUserDetails?, com.und.model.redis.security.UserCache>? = null
 
-        var result:Pair<com.und.model.jpa.security.UndUserDetails?,com.und.model.redis.security.UserCache>?=null
-
-        if(type!=null&&value!=null){
-            when(KEYTYPE.valueOf(type)){
-                KEYTYPE.EVENT_ANDROID-> result=restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.EVENT_ANDROID,value)
-                KEYTYPE.EVENT_IOS -> result=restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.EVENT_IOS,value)
-                KEYTYPE.EVENT_WEB -> result=restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.EVENT_WEB,value)
+        if (type != null && value != null) {
+            when (KEYTYPE.valueOf(type)) {
+                KEYTYPE.EVENT_ANDROID -> result = restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.EVENT_ANDROID, value)
+                KEYTYPE.EVENT_IOS -> result = restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.EVENT_IOS, value)
+                KEYTYPE.EVENT_WEB -> result = restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.EVENT_WEB, value)
             }
-        }else{
-                result=restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.ADMIN_LOGIN)
+        } else {
+            result = restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.ADMIN_LOGIN)
         }
         return if (result?.first?.id != null) {
             ResponseEntity.ok(Response(
@@ -99,7 +103,6 @@ class AuthenticationRestController {
     }
 
 
-    //FIXME these apis are open security threat
     @PreAuthorize("hasRole(ROLE_SYSTEM)")
     @GetMapping(value = ["\${security.route.authentication.path}/userdetail/{name}"])
     @Throws(AuthenticationException::class)
