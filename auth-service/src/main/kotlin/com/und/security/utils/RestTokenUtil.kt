@@ -54,13 +54,13 @@ class RestTokenUtil {
      * use this method when you just need to validate that token is valid, even if it has been removed from database
      */
     fun validateToken(token: String,value:String?=null): Pair<UndUserDetails?, UserCache> {
-        fun getClaimsFromToken(token: String): Pair<Claims,String> {
+        fun getClaimsFromToken(token: String): Pair<Claims,Any?> {
 
             var jwt=Jwts.parser()
                     .setSigningKeyResolver(keyResolver)
                     .parseClaimsJws(token)
             var body=jwt.body
-            var header=jwt.header["TOKEN_ROLE"].toString()
+            var header=jwt.header["TOKEN_ROLE"]
             return Pair(body,header)
         }
 
@@ -87,7 +87,7 @@ class RestTokenUtil {
             if(idenity.isEmpty()){
                 var user=clientSettingsRepository.findByclientID(claims.first.clientId?.toLong()?:-1)
                 if(user.isPresent){
-                    when (claims.second) {
+                    when (claims.second.toString()) {
                         "EVENT_ANDROID" -> {
                             var appId = user.get().androidAppIds
                             if (appId != null){
@@ -126,7 +126,7 @@ class RestTokenUtil {
         return if (userId != null) {
             val jwtDetails = getJwtIfExists(userId.toLong())
             jwtDetails.identified=identified
-            jwtDetails.tokenKeyType=claims.second
+            if(claims.second!=null) jwtDetails.tokenKeyType=claims.second.toString()
             val userDetails = buildUserDetails(claims.first, jwtDetails)
             if (!claims.first.isTokenExpired) Pair(userDetails, jwtDetails) else Pair(null, jwtDetails)
         } else Pair(null, UserCache())

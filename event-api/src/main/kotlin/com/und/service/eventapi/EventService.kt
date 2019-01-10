@@ -80,8 +80,17 @@ class EventService {
             }
 
             mongoEvent.system = system
+
+            var appFileds=AppField()
+            with(appFileds){
+                make=agent[9]
+                model=agent[6]
+                sdkversion=agent[10]
+                appversion=agent[8]
+            }
+            mongoEvent.appfield=appFileds
+
         }
-        //fixme we can make it better eg if country present then found only state and city.
         if (event.country == null || event.state == null || event.city == null){
             var geogrophy = getGeography(event.ipAddress)
             geogrophy?.let { mongoEvent.geogrophy=geogrophy }

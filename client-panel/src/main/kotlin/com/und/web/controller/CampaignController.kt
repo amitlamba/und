@@ -51,16 +51,6 @@ class CampaignController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["list/all"])
     fun getCampaigns(@RequestParam(value = "id", required = false) id: Long? = null,request:HttpServletRequest): List<Campaign> {
-        println(request)
-
-        var user=request.remoteUser
-        var uri=request.requestURI
-        var url=request.requestURL
-        var addr=request.remoteAddr
-        var localadr=request.localAddr
-
-        var host=request.remoteHost
-        var server=request.serverName
         return campaignService.getCampaigns()
     }
 

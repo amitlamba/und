@@ -15,6 +15,7 @@ import io.jsonwebtoken.impl.TextCodec
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.util.DateUtil
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.InjectMocks
@@ -29,6 +30,7 @@ import org.springframework.test.util.ReflectionTestUtils
 /**
  * Created by shiv on 21/07/17.
  */
+@Ignore
 @RunWith(MockitoJUnitRunner::class)
 class RestTokenUtilTest {
 
