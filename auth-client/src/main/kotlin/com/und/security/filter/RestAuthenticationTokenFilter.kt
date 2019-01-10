@@ -35,6 +35,7 @@ class RestAuthenticationTokenFilter : OncePerRequestFilter() {
             "ANDROID"->{ t="EVENT_ANDROID" ; v=request.getHeader("androidAppId")}
             "IOS"->{ t="EVENT_IOS" ; v=request.getHeader("iosAppId")}
         }
+        logger.info("Request from $t Identity is $v")
         val authToken = request.getHeader(this.tokenHeader)
         if (SecurityContextHolder.getContext().authentication == null && authToken != null) {
             logger.info("checking authentication for token $authToken ")

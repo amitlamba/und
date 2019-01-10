@@ -24,7 +24,9 @@ import com.und.model.Email
 import com.und.model.jpa.Client
 import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.model.jpa.ClientSettingsEmail
+import com.und.model.jpa.security.User
 import com.und.repository.jpa.*
+import com.und.repository.redis.TokenIdentityRepository
 import com.und.repository.redis.UserCacheRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.CustomException
@@ -32,6 +34,7 @@ import com.und.web.controller.exception.WrongCredentialException
 import com.und.web.model.ValidationError
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.ResponseEntity
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.security.access.AccessDeniedException
 import java.net.URLEncoder
@@ -72,6 +75,9 @@ class UserSettingsService {
 
     @Autowired
     lateinit var userCacheRepository: UserCacheRepository
+
+    @Autowired
+    lateinit var tokenIdentityRepository: TokenIdentityRepository
 
     @Value("\${und.url.client}")
     lateinit var clientUrl: String
@@ -224,7 +230,7 @@ class UserSettingsService {
     }
 
     @Transactional
-    fun saveAccountSettings(accountSettings: AccountSettings, clientID: Long?, userID: Long?) {
+    fun saveAccountSettings(accountSettings: AccountSettings, clientID: Long?, userID: Long?):Map<String,Any>? {
         //FIXME: Validate Timezone and Email Addresses
         if (clientID != null) {
             val clientSettings = ClientSettings()
@@ -235,23 +241,59 @@ class UserSettingsService {
             clientSettings.iosAppIds=clientSettingspersisted?.iosAppIds
             clientSettings.androidAppIds=clientSettingspersisted?.androidAppIds
             val token=userCacheRepository.findById(userID.toString()).get().loginKey
+            val user=userRepository.findUser(clientID)
+            var tokenList = mutableMapOf<String,Any>()
             accountSettings.urls?.let {
-                clientSettings.authorizedUrls = objectMapper.writeValueAsString(it)
-                feignClientForAuthService.refreshToken(false,"EVENT_WEB",token)
+                if (it.isNotEmpty()) {
+                    clientSettings.authorizedUrls = objectMapper.writeValueAsString(it)
+                    if (clientSettingspersisted?.authorizedUrls == null)
+                    tokenList.set("web",feignClientForAuthService.refreshToken(false, "EVENT_WEB", token).body)
+                    else updateTokenIdentity(user, accountSettings.urls, "WEB")
+                }
+
             }
             accountSettings.andAppId?.let {
-                clientSettings.androidAppIds = objectMapper.writeValueAsString(it)
-                feignClientForAuthService.refreshToken(false,"EVENT_ANDROID",token)
+                if (it.isNotEmpty()) {
+                    clientSettings.androidAppIds = objectMapper.writeValueAsString(it)
+                    if (clientSettingspersisted?.androidAppIds == null)
+                        tokenList.set("android",feignClientForAuthService.refreshToken(false, "EVENT_ANDROID", token).body)
+                    else updateTokenIdentity(user, accountSettings.andAppId, "ANDROID")
+                }
             }
             accountSettings.iosAppId?.let {
+                if (it.isNotEmpty()) {
                 clientSettings.iosAppIds = objectMapper.writeValueAsString(it)
-                feignClientForAuthService.refreshToken(false,"EVENT_IOS",token)
+                if(clientSettingspersisted?.iosAppIds==null)
+                tokenList.set("ios",feignClientForAuthService.refreshToken(false,"EVENT_IOS",token).body)
+                else updateTokenIdentity(user,accountSettings.iosAppId,"IOS")
+                }
             }
+
             clientSettings.timezone = accountSettings.timezone
             if (clientSettingspersisted == null) {
                 clientSettingsRepository.save(clientSettings)
             } else {
                 clientSettingsRepository.updateAccountSettings(clientSettings.authorizedUrls,clientSettings.androidAppIds,clientSettings.iosAppIds, clientSettings.timezone, clientID)
+            }
+            return tokenList
+        }
+        return null
+    }
+
+    private fun updateTokenIdentity(user:Optional<User>,idenity:Array<String>,type:String) {
+        user.ifPresent {
+            var key:String?=null
+            when(type){
+                "ANDROID"-> key=it.androidKey
+                "IOS"-> key=it.iosKey
+                "WEB" -> key=it.key
+            }
+            if (key != null) {
+                var user = tokenIdentityRepository.findById(key)
+                user.ifPresent {
+                    it.identity = idenity
+                    tokenIdentityRepository.save(it)
+                }
             }
         }
     }

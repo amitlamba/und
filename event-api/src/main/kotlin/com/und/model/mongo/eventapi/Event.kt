@@ -58,6 +58,7 @@ class AppField {
     var make: String? = null
     var model: String? = null
     var sdkversion: String? = null
+    var os:String? = null
 
 }
 

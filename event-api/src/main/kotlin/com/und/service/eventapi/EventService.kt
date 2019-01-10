@@ -5,10 +5,7 @@ import com.und.eventapi.utils.copyToMongo
 import com.und.eventapi.utils.ipAddr
 import com.und.config.EventStream
 import com.und.model.mongo.eventapi.*
-import com.und.repository.mongo.EventMetadataRepository
-import com.und.repository.mongo.EventRepository
-import com.und.repository.mongo.EventUserRepository
-import com.und.repository.mongo.IpLocationRepository
+import com.und.repository.mongo.*
 import com.und.security.utils.AuthenticationUtils
 import com.und.security.utils.TenantProvider
 import com.und.web.exception.EventNotFoundException
@@ -39,6 +36,9 @@ class EventService {
 
     @Autowired
     private lateinit var eventMetadataRepository: EventMetadataRepository
+
+    @Autowired
+    private lateinit var userMetadataRepository: CommonMetadataRepository
 
     @Autowired
     private lateinit var eventUserRepository: EventUserRepository
@@ -82,19 +82,56 @@ class EventService {
             mongoEvent.system = system
         }
         //fixme we can make it better eg if country present then found only state and city.
-        if (event.country == null || event.state == null || event.city == null){
+        if (event.country == null || event.state == null || event.city == null) {
             var geogrophy = getGeography(event.ipAddress)
-            geogrophy?.let { mongoEvent.geogrophy=geogrophy }
+            geogrophy?.let { mongoEvent.geogrophy = geogrophy }
         }
 
 
         val eventMetadata = buildMetadata(mongoEvent)
         eventMetadataRepository.save(eventMetadata)
+        val technographicsMetadata = buildTechnoGraphics(mongoEvent)
+        userMetadataRepository.updateTechnographics(clientId, technographicsMetadata)
+        val appFieldsMetadata = buildAppFields(mongoEvent)
+        userMetadataRepository.updateAppFields(clientId, appFieldsMetadata)
         //FIXME add to metadata
         val saved = eventRepository.insert(mongoEvent)
 
         eventStream.outEventForLiveSegment().send(MessageBuilder.withPayload(buildEventForLiveSegment(saved)).build())
         return saved.id
+    }
+
+    private inline fun addProperty(propertyName: String, optionName: String?, technographics: CommonMetadata) {
+        optionName?.let { option ->
+            val property = Property()
+            property.name = propertyName
+            property.options.add(option)
+            technographics.properties.add(property)
+        }
+    }
+
+    private fun buildTechnoGraphics(event: MongoEvent): CommonMetadata {
+
+        val technographics = CommonMetadata()
+        technographics.name = "Technographics"
+        addProperty("browser", event.system.browser?.name, technographics)
+        addProperty("os", event.system.os?.name, technographics)
+        addProperty("device", event.system.device?.name, technographics)
+
+        return technographics
+    }
+
+    private fun buildAppFields(event: MongoEvent): CommonMetadata {
+
+        val appFields = CommonMetadata()
+        appFields.name = "AppFields"
+        addProperty("appversion", event.appfield?.appversion, appFields)
+        addProperty("make", event.appfield?.make, appFields)
+        addProperty("model", event.appfield?.model, appFields)
+        addProperty("os", event.appfield?.os, appFields)
+        addProperty("sdkversion", event.appfield?.sdkversion, appFields)
+
+        return appFields
     }
 
     private fun buildMetadata(event: MongoEvent): EventMetadata {

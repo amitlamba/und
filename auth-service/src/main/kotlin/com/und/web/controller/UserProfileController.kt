@@ -102,11 +102,28 @@ class UserProfileController {
         } else {
             userService.retrieveJwtOfEventUser( user,KEYTYPE.valueOf(type))
         }
-        return  ResponseEntity.ok(
-                Response(
-                        status = ResponseStatus.SUCCESS,
-                        data = Data(SecurityAuthenticationResponse(jwt.loginKey))
-                )
-        )
+        when(KEYTYPE.valueOf(type)){
+
+            KEYTYPE.EVENT_WEB -> {return  ResponseEntity.ok(
+                    Response(
+                            status = ResponseStatus.SUCCESS,
+                            data = Data(SecurityAuthenticationResponse(jwt.loginKey))
+                    )
+            )}
+            KEYTYPE.EVENT_IOS -> {return  ResponseEntity.ok(
+                    Response(
+                            status = ResponseStatus.SUCCESS,
+                            data = Data(SecurityAuthenticationResponse(jwt.iosKey))
+                    )
+            )}
+            KEYTYPE.EVENT_ANDROID -> {return  ResponseEntity.ok(
+                    Response(
+                            status = ResponseStatus.SUCCESS,
+                            data = Data(SecurityAuthenticationResponse(jwt.androidKey))
+                    )
+            )}
+        }
+        return ResponseEntity.ok().body(Response(status = ResponseStatus.SUCCESS))
     }
+
 }

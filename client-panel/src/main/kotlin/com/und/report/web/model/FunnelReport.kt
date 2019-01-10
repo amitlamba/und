@@ -7,7 +7,7 @@ class FunnelReport {
     data class FunnelReportFilter(
             var segmentid: Long,
             var days: Long,
-            var steps: List<Step> = emptyList(),
+            var steps: List<FunnelReport.Step> = emptyList(),
             var funnelOrder: FunnelOrder,
             var conversionTime: Int,
             var filters: List<GlobalFilter> = arrayListOf(),
@@ -25,4 +25,9 @@ class FunnelReport {
 
     data class FunnelStep(var step: Step, var count: Long, var property: String)
 
+}
+
+class FunnelStepAndFilter{
+    var steps: List<FunnelReport.Step> = emptyList()
+    var filters: List<GlobalFilter> = arrayListOf()
 }

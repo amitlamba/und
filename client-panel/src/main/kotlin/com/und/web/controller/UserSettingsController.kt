@@ -181,7 +181,7 @@ class UserSettingsController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/account-settings/save"])
-    fun saveAccountSettings(@RequestBody accountSettings: AccountSettings) {
+    fun saveAccountSettings(@RequestBody accountSettings: AccountSettings):Map<String,Any>? {
         val clientID = AuthenticationUtils.clientID
         val userID = AuthenticationUtils.principal.id
         return userSettingsService.saveAccountSettings(accountSettings, clientID, userID)
