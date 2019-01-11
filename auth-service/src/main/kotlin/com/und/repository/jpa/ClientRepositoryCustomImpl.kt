@@ -17,14 +17,14 @@ class ClientRepositoryCustomImpl : ClientRepositoryCustom {
 
         val dbObject : DBObject = BasicDBObject.parse(metadataJson) as DBObject
         val parsed = dbObject.get("userProperties") as BasicDBList
-        mongoTemplate.insert(parsed,  CommonMetadata::class.java)
+        mongoTemplate.insert(parsed, "${clientId}_userproperties")
 
     }
 
     override fun saveEventMetadta(clientId: Long, metadataJson: String) {
         val dbObject : DBObject = BasicDBObject.parse(metadataJson) as DBObject
         val parsed = dbObject.get("eventMetadata") as BasicDBList
-        mongoTemplate.insert(parsed,  EventMetadata::class.java)
+        mongoTemplate.insert(parsed,  "${clientId}_eventmetadata")
 
     }
 }
