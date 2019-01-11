@@ -140,7 +140,7 @@ class RestTokenUtil {
     fun validateTokenForKeyType(token: String, keyType: KEYTYPE,value:String?=null): Pair<UndUserDetails?, UserCache> {
         val (user, jwtDetails) = validateToken(token,value)
         var ktype=keyType
-        if(jwtDetails.tokenKeyType!=null) ktype=KEYTYPE.valueOf(jwtDetails.tokenKeyType!!)
+        jwtDetails.tokenKeyType?.let { ktype=KEYTYPE.valueOf(it)}
         val matches: Boolean = when (ktype) {
             KEYTYPE.ADMIN_LOGIN -> jwtDetails.loginKey == token
             KEYTYPE.EVENT_WEB -> jwtDetails.loginKey ==token && jwtDetails.identified

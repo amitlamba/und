@@ -1,5 +1,6 @@
 package com.und.web.controller.security
 
+import com.und.common.utils.loggerFor
 import com.und.web.model.Data
 import com.und.web.model.Response
 import com.und.web.model.ResponseStatus
@@ -9,6 +10,7 @@ import com.und.service.security.SecurityAuthenticationResponse
 import com.und.security.utils.KEYTYPE
 import com.und.security.utils.RestTokenUtil
 import com.und.service.security.captcha.CaptchaService
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -40,6 +42,9 @@ class AuthenticationRestController {
     @Autowired
     private lateinit var captchaService: CaptchaService
 
+    companion object {
+        var logger=LoggerFactory.getLogger(AuthenticationRestController::class.java)
+    }
     @PostMapping(value = ["\${security.route.authentication.path}"])
     @Throws(AuthenticationException::class)
     fun createAuthenticationToken(@RequestBody authenticationRequest: RestAuthenticationRequest, request: HttpServletRequest): ResponseEntity<*> {
@@ -76,8 +81,8 @@ class AuthenticationRestController {
     fun authenticationToken(@PathVariable("authToken", required = true) authToken: String, request: HttpServletRequest): ResponseEntity<*> {
         val type:String? = request.getParameter("type")
         val value:String? = request.getParameter("value")
+        logger.info("Validating token type $type and value $value")
         var result: Pair<com.und.model.jpa.security.UndUserDetails?, com.und.model.redis.security.UserCache>? = null
-
         if (type != null && value != null) {
             when (KEYTYPE.valueOf(type)) {
                 KEYTYPE.EVENT_ANDROID -> result = restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.EVENT_ANDROID, value)
