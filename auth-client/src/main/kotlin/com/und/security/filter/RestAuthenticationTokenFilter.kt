@@ -35,6 +35,18 @@ class RestAuthenticationTokenFilter : OncePerRequestFilter() {
             "ANDROID"->{ t="EVENT_ANDROID" ; v=request.getHeader("androidAppId")}
             "IOS"->{ t="EVENT_IOS" ; v=request.getHeader("iosAppId")}
         }
+
+        logger.info("Remote Address ${request.getRemoteAddr()}")
+        logger.info("Remote Host ${request.getRemoteHost()}")
+        logger.info("Server Name ${request.getServerName()}")
+        logger.info("Request Url ${request.getRequestURL()}")
+        logger.info("Scheme ${request.getScheme()}")
+        var headers=request.headerNames
+        while (headers.hasMoreElements()){
+            var name=headers.nextElement()
+            println("$name ${request.getHeader(name)}")
+        }
+
         logger.info("Request for type $t Identity(Host/AppId) is $v")
         val authToken = request.getHeader(this.tokenHeader)
         if (SecurityContextHolder.getContext().authentication == null && authToken != null) {
