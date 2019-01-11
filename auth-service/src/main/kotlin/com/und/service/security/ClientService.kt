@@ -58,8 +58,10 @@ class ClientService {
     }
 
     fun insertMetadata(clientId:Long) {
-        val userProperties = File(userPropertiesFile).readText(Charsets.UTF_8)
-        clientRepository.saveUserProperties(clientId, userProperties)
+        if(!clientRepository.userpropertiesExists(clientId)) {
+            val userProperties = File(userPropertiesFile).readText(Charsets.UTF_8)
+            clientRepository.saveUserProperties(clientId, userProperties)
+        }
         //val eventMetadata = File(eventMetadataFile).readText(Charsets.UTF_8)
         //clientRepository.saveEventMetadta(clientId, eventMetadata)
 
