@@ -31,7 +31,18 @@ class RestAuthenticationTokenFilter : OncePerRequestFilter() {
         var t="ADMIN_LOGIN"
         var v:String=""
         when(type){
-            "WEB"-> { t="EVENT_WEB" ; v="${request.getScheme()}://${request.getServerName()}"}
+            "WEB"-> { t="EVENT_WEB" ;
+                v="${request.getHeader("referer")}"
+                var pattern= Pattern.compile("^(?<scheme>https?)(:\\/\\/)(?<host>\\w+(\\.\\w+)+\\/?)")
+                var matcher=pattern.matcher(v)
+                if(matcher.find()){
+                    var scheme=matcher.group("scheme")
+                    var host=matcher.group("host")
+                    v="$scheme://$host"
+                }else{
+                    logger.info("Referer format not match $v")
+                }
+            }
             "ANDROID"->{ t="EVENT_ANDROID" ; v=request.getHeader("androidAppId")}
             "IOS"->{ t="EVENT_IOS" ; v=request.getHeader("iosAppId")}
         }
