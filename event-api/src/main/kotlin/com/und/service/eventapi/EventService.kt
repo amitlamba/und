@@ -12,8 +12,11 @@ import com.und.web.exception.EventNotFoundException
 import com.und.web.model.eventapi.Event
 import com.und.web.model.eventapi.EventMessage
 import com.und.web.model.eventapi.Identity
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
+import org.springframework.data.mongodb.core.MongoOperations
+import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
@@ -24,6 +27,9 @@ import com.und.model.mongo.eventapi.Event as MongoEvent
 @Service
 class EventService {
 
+
+    @Autowired
+    private lateinit var mongoTemplate: MongoTemplate
 
     @Autowired
     private lateinit var tenantProvider: TenantProvider
@@ -105,8 +111,11 @@ class EventService {
         val appFieldsMetadata = buildAppFields(mongoEvent)
         userMetadataRepository.updateAppFields(clientId, appFieldsMetadata)
         //FIXME add to metadata
-        val saved = eventRepository.insert(mongoEvent)
-
+//        val saved = eventRepository.insert(mongoEvent)
+        val id=ObjectId()
+        mongoEvent.id=id.toString()
+        mongoTemplate.save(mongoEvent,"${mongoEvent.clientId}_event")
+        val saved=eventRepository.findById(id.toString()).get()
         eventStream.outEventForLiveSegment().send(MessageBuilder.withPayload(buildEventForLiveSegment(saved)).build())
         return saved.id
     }
@@ -162,7 +171,7 @@ class EventService {
 
     fun buildEvent(fromEvent: Event, request: HttpServletRequest): Event {
         with(fromEvent) {
-            clientId = tenantProvider.tenant.toLong()
+            if(fromEvent.clientId!=-1L) clientId =fromEvent.clientId else clientId =tenantProvider.tenant.toLong()
             ipAddress = request.ipAddr()
             timeZone = AuthenticationUtils.principal.timeZoneId
             var agent = request.getHeader("User-Agent")
