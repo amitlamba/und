@@ -53,7 +53,6 @@ class CampaignController {
     fun getCampaigns(@RequestParam(value = "id", required = false) id: Long? = null,request:HttpServletRequest): List<Campaign> {
         return campaignService.getCampaigns()
     }
-
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["error/{campaignId}"])
     fun scheduleError(@PathVariable("campaignId") campaignId: Long): ResponseEntity<String> {

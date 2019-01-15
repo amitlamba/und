@@ -248,7 +248,7 @@ class FcmSendService {
             var credentialMap = parseStringToMap(credential.credentialsMap)
             var serverKey = credentialMap.get("apiKey")!!
 
-            var statusCode: Int? = 400
+            var statusCode: Int? = 404
             try {
                 statusCode = sendMessageToFcm(fcmMessageToSend, serverKey)
                 if (statusCode == 200) {

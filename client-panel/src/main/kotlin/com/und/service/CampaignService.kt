@@ -87,7 +87,7 @@ class CampaignService {
             val sendToKafka = sendToKafka(jobDescriptor)
             return persistedCampaign
         }catch (ex:ConstraintViolationException){
-            throw CustomException("Template with this name already exists.")
+            throw CustomException("Campaign with this name already exists.")
         }catch (ex:DataIntegrityViolationException){
 
         }

@@ -56,7 +56,7 @@ class SmsService {
             val token = userRepository.findSystemUser().key
             var event= com.und.model.utils.eventapi.Event()
             with(event) {
-                name = "Notification Sent"
+                name = "Sms Notification Sent"
                 clientId=smsToSend.clientID
                 notificationId=mongoSmsId
                 attributes.put("campaign_id",sms.campaignId?:-1)
@@ -102,7 +102,7 @@ fun buildSmsData(sms: Sms, serviceProviderCredentials: ServiceProviderCredential
         ServiceProviderCredentialsService.ServiceProvider.Exotel.desc -> {
             //val serviceProviderType = credential.serviceProviderType
             val sid = credential.credentialsMap["sid"]
-            val accessToken = credential.credentialsMap["accessToken"]
+            val accessToken = credential.credentialsMap["token"]
 
             SmsData(
                     from = sms.fromSmsAddress!!,

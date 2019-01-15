@@ -37,8 +37,11 @@ class FcmFailureHandler {
         saveFcmFailure(notificationError)
         notificationError.clientId?.let {
             //pause all running campaign
-//            campaignService.pauseAllRunning(it)
+            campaignService.pauseAllRunning(it)
             //sending mail
+            //TODO handle multiple email send.Send Email just once not for all failure message add a flag
+            // TODO which we used to check is mai sent for this campaign errr or not once errr is solved reset fag..
+            if(notificationError.errorCode == 401L||notificationError.errorCode == 404L||notificationError.errorCode.toString().startsWith("5"))
             emailService.sendNotificationConnectionErrorEmail(notificationError)
 
             //if error is NotRegistered & InvalidRegistration then remove token from eventuser in mongo
