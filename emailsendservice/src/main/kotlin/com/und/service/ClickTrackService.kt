@@ -19,10 +19,10 @@ class ClickTrackService {
         val clickTrackEventId = saved.id
         if (clickTrackEvent.emailUid.isNotBlank()) {
             var email = emailSentRepository.findById(clickTrackEvent.emailUid).get()
-            when (email.emailStatus) {
+            when (email.status) {
                 EmailStatus.SENT, EmailStatus.READ -> {
                     email.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), EmailStatus.CTA_PERFORMED, clickTrackEventId))
-                    email.emailStatus = EmailStatus.CTA_PERFORMED
+                    email.status = EmailStatus.CTA_PERFORMED
                     emailSentRepository.save(email)
                 }
                 EmailStatus.CTA_PERFORMED -> {}

@@ -15,8 +15,8 @@ data class Email(
         var clientID: Long,
         var toEmailAddresses: Array<InternetAddress>,
         var emailSubject: String,
-        var campaignID: Long,
-        var emailStatus: EmailStatus,
+        var campaignId: Long,
+        var status: EmailStatus,
         var statusUpdates: MutableList<EmailStatusUpdate> = mutableListOf(),
         var emailTemplateId: Long,
         var fromEmailAddress: InternetAddress? = null,
@@ -35,7 +35,7 @@ data class Email(
 
 data class EmailStatusUpdate (
         val date: LocalDateTime,
-        val emailStatus: EmailStatus,
+        val status: EmailStatus,
         val clickTrackEventId: String? = null
 )
 

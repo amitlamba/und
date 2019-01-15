@@ -87,9 +87,12 @@ class CampaignController {
             }
 
             if (template.isNotEmpty()) {
+                //TODO we always return campaign here
                 val persistedCampaign = campaignService.save(campaign)
+                if(persistedCampaign.id!=null){
                 logger.info("campaign saved with name ${campaign.name}")
                 return ResponseEntity(persistedCampaign, HttpStatus.CREATED)
+                }
             }else{
                 logger.info("campaign not saved with name ${campaign.name}")
                 throw CustomException("template with id $templateId not exist")
