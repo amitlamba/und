@@ -56,11 +56,6 @@ class EmailService {
 
     fun sendEmail(email: Email) {
         logger.info("email being sent -------------")
-
-        logger.info("from ${email.fromEmailAddress}")
-        logger.info("to ${email.toEmailAddresses}")
-        logger.info("subject ${email.emailSubject}")
-        logger.info("body ${email.emailBody}")
         toKafka(email)
         logger.info("email sent -------------")
     }
@@ -69,21 +64,23 @@ class EmailService {
         emailError.clientid?.let {clientId->
             val client = clientService.getClientByClientId(clientId)
 
+            client?.let {
+                val dataMap = mutableMapOf<String, Any>(
+                        "name" to "${it.firstname} ${it.lastname}",
+                        "error" to "${emailError.causeMessage}"
 
-            val dataMap = mutableMapOf<String, Any>(
-                    "name" to "${client.firstname} ${client.lastname}",
-                    "error" to "${emailError.causeMessage}"
+                )
 
-            )
+                val email = Email(
+                        clientID = 1,
+                        toEmailAddresses = arrayOf(InternetAddress(it.email)),
+                        emailTemplateId = emailConnectionErrorTemplate,
+                        emailTemplateName = "emailConnectionError",
+                        data = dataMap
+                )
+                sendEmail(email)
+            }
 
-            val email = Email(
-                    clientID = 1,
-                    toEmailAddresses = arrayOf(InternetAddress(client.email)),
-                    emailTemplateId = emailConnectionErrorTemplate,
-                    emailTemplateName = "emailConnectionError",
-                    data = dataMap
-            )
-            sendEmail(email)
         }
     }
 
@@ -91,21 +88,24 @@ class EmailService {
         notificationError.clientId?.let {clientId->
             val client = clientService.getClientByClientId(clientId)
 
+            client?.let {
 
-            val dataMap = mutableMapOf<String, Any>(
-                    "name" to "${client.firstname} ${client.lastname}",
-                    "error" to "${notificationError.status}"
+                val dataMap = mutableMapOf<String, Any>(
+                        "name" to "${it.firstname} ${it.lastname}",
+                        "error" to "${notificationError.status}"
 
-            )
+                )
 
-            val email = Email(
-                    clientID = 1,
-                    toEmailAddresses = arrayOf(InternetAddress(client.email)),
-                    emailTemplateId = emailConnectionErrorTemplate,
-                    emailTemplateName = "emailConnectionError",
-                    data = dataMap
-            )
-            sendEmail(email)
+                val email = Email(
+                        clientID = 1,
+                        toEmailAddresses = arrayOf(InternetAddress(it.email)),
+                        emailTemplateId = emailConnectionErrorTemplate,
+                        emailTemplateName = "emailConnectionError",
+                        data = dataMap
+                )
+                sendEmail(email)
+            }
+
         }
     }
 
