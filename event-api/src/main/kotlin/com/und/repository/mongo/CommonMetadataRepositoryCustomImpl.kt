@@ -28,8 +28,8 @@ class CommonMetadataRepositoryCustomImpl : CommonMetadataRepositoryCustom {
 //        val query =  Query(Criteria.where("name").`is`(name))
 
         technograhics.properties.forEach{property ->
-            var n= property.name?.substring(0,1)?.toUpperCase()+property.name?.substring(1)
-            val query =  Query(Criteria.where("name").`is`(name).and("properties.name").`is`(n))
+//            var n= property.name?.substring(0,1)?.toUpperCase()+property.name?.substring(1)
+            val query =  Query(Criteria.where("name").`is`(name).and("properties.name").`is`(property.name))
 //            val update :Update = Update().addToSet("properties.${property.name}.options", property.options)
             val update :Update = Update().addToSet("properties.$.options").each(property.options)
             mongoOperations.updateFirst(query, update, "${clientId}_userproperties")
