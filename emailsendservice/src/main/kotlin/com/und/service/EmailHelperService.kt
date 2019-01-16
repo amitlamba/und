@@ -62,8 +62,8 @@ class EmailHelperService {
                 toEmailAddresses = email.toEmailAddresses,
                 emailTemplateId = email.emailTemplateId,
                 emailSubject = email.emailSubject ?: "NA",
-                campaignID = email.campaignId,
-                emailStatus = emailStatus,
+                campaignId = email.campaignId,
+                status = emailStatus,
                 userID = email.eventUser?.id
 
         )
