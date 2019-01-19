@@ -93,6 +93,7 @@ class EventService {
                 model=agent[6]
                 sdkversion=agent[10]
                 appversion=agent[8]
+                os=agent[1]
             }
             mongoEvent.appfield=appFileds
 

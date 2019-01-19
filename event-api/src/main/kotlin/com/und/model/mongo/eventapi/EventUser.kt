@@ -47,7 +47,8 @@ class StandardInfo {
     var firstname: String? = null
     var lastname: String? = null
     var gender: String? = null
-    var dob: String? = null
+    var dob: LocalDate? = null
+    var age:Int?=null
     var languages: MutableList<String> = mutableListOf()
     var country: String? = null
     var city: String? = null

@@ -4,14 +4,11 @@
     "properties": [
       {
         "name": "age",
-        "type": "string",
-        "options": [
-
-        ]
+        "dataType": "number"
       },
       {
         "name": "gender",
-        "type": "string",
+        "dataType": "string",
         "options": [
           "M",
           "F"
@@ -24,40 +21,43 @@
     "properties": [
       {
         "name": "browser",
-        "type": "string",
+        "dataType": "string",
         "options": [
           "Chrome",
           "Firefox",
           "Internet Explorer",
           "Mobile Application",
           "Opera",
+          "Microsoft Edge",
           "Others",
           "Safari",
-          "Sea Monkey",
+          "BlackBerry",
+          "SeaMonkey",
           "UC Browser"
         ]
       },
       {
         "name": "os",
-        "type": "string",
+        "dataType": "string",
         "options": [
           "Android",
-          "Blackberry",
-          "ios",
+          "BlackBerryOS",
+          "iOS",
           "Linux",
-          "Mac",
+          "Mac OS",
           "Others",
           "Windows"
         ]
       },
       {
         "name": "device",
-        "type": "string",
+        "dataType": "string",
         "options": [
           "Desktop",
           "Mobile",
           "Tablet",
-          "TV"
+          "TV",
+          "Computer"
         ]
       }
     ]
@@ -67,7 +67,7 @@
     "properties": [
       {
         "name": "hasDeviceToken",
-        "type": "boolean",
+        "dataType": "boolean",
         "options": [
           "Yes",
           "No"
@@ -75,7 +75,7 @@
       },
       {
         "name": "hasEmailAddress",
-        "type": "Boolean",
+        "dataType": "Boolean",
         "options": [
           "Yes",
           "No"
@@ -83,7 +83,7 @@
       },
       {
         "name": "hasPhoneNumber",
-        "type": "boolean",
+        "dataType": "boolean",
         "options": [
           "Yes",
           "No"
@@ -91,7 +91,7 @@
       },
       {
         "name": "unsubscribedPush",
-        "type": "boolean",
+        "dataType": "boolean",
         "options": [
           "Yes",
           "No"
@@ -99,7 +99,7 @@
       },
       {
         "name": "unsubscribedEmail",
-        "type": "Boolean",
+        "dataType": "Boolean",
         "options": [
           "Yes",
           "No"
@@ -107,7 +107,7 @@
       },
       {
         "name": "unsubscribedSMS",
-        "type": "Boolean",
+        "dataType": "Boolean",
         "options": [
           "Yes",
           "No"
@@ -120,35 +120,35 @@
     "properties": [
       {
         "name": "appversion",
-        "type": "string",
+        "dataType": "string",
         "options": [
 
         ]
       },
       {
         "name": "make",
-        "type": "string",
+        "dataType": "string",
         "options": [
 
         ]
       },
       {
         "name": "model",
-        "type": "string",
+        "dataType": "string",
         "options": [
 
         ]
       },
       {
         "name": "os",
-        "type": "string",
+        "dataType": "string",
         "options": [
 
         ]
       },
       {
         "name": "sdkversion",
-        "type": "string",
+        "dataType": "string",
         "options": [
 
         ]

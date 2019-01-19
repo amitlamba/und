@@ -13,6 +13,7 @@ import com.und.web.model.EventUser
 import com.und.web.model.event.Event
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.time.format.DateTimeFormatter
 import java.util.*
 import com.und.model.mongo.eventapi.Event as EventMongo
 import com.und.model.mongo.eventapi.EventUser as EventUserMongo
@@ -117,7 +118,7 @@ class EventUserService {
         eventUser.clientId = eventUserMongo.clientId
         eventUser.additionalInfo = eventUserMongo.additionalInfo
         eventUser.uid = eventUserMongo.identity.uid
-        eventUser.dob = eventUserMongo.standardInfo.dob
+        eventUser.dob = eventUserMongo.standardInfo.dob?.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
         eventUser.creationDate = DateUtils().convertDateToDateTime(eventUserMongo.creationTime)
         eventUser.email = eventUserMongo.identity.email
         eventUser.fbId = eventUserMongo.identity.fbId

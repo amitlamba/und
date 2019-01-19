@@ -480,11 +480,16 @@ class SegmentParserCriteria {
         fun parseGlobalFilter(filter: GlobalFilter,filterType:GlobalFilterType): Criteria {
             var fieldPath= getFieldPath(filterType,filter.name)
             val fieldName = if(joinWithUser &&  isUserCollection(filterType)) "$USER_DOC.$fieldPath" else "$fieldPath"
-
-
+            var values = filter.values
+            if(fieldPath.equals("standardInfo.age")){
+                var v:MutableList<String> = mutableListOf()
+                v.add(0,(LocalDateTime.now().year - Integer.parseInt(filter.values[1])).toString())
+                v.add(1,(LocalDateTime.now().year - Integer.parseInt(filter.values[0])).toString())
+                values=v
+            }
             val type = filter.type
             val unit = filter.valueUnit
-            val values = filter.values
+
             val operator = filter.operator
             return match(values, operator, fieldName, type, unit, tz)
         }

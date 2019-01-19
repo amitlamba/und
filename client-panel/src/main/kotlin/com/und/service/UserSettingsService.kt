@@ -246,26 +246,26 @@ class UserSettingsService {
             accountSettings.urls?.let {
                 if (it.isNotEmpty()) {
                     clientSettings.authorizedUrls = objectMapper.writeValueAsString(it)
-                    if (clientSettingspersisted?.authorizedUrls == null)
+//                    if (clientSettingspersisted?.authorizedUrls == null)
                     tokenList.set("web",feignClientForAuthService.refreshToken(false, "EVENT_WEB", token).body)
-                    else updateTokenIdentity(user, accountSettings.urls, "WEB")
+                    /*else*/ updateTokenIdentity(user, accountSettings.urls, "WEB")
                 }
 
             }
             accountSettings.andAppId?.let {
                 if (it.isNotEmpty()) {
                     clientSettings.androidAppIds = objectMapper.writeValueAsString(it)
-                    if (clientSettingspersisted?.androidAppIds == null)
+//                    if (clientSettingspersisted?.androidAppIds == null)
                         tokenList.set("android",feignClientForAuthService.refreshToken(false, "EVENT_ANDROID", token).body)
-                    else updateTokenIdentity(user, accountSettings.andAppId, "ANDROID")
+                    /*else*/ updateTokenIdentity(user, accountSettings.andAppId, "ANDROID")
                 }
             }
             accountSettings.iosAppId?.let {
                 if (it.isNotEmpty()) {
                 clientSettings.iosAppIds = objectMapper.writeValueAsString(it)
-                if(clientSettingspersisted?.iosAppIds==null)
+//                if(clientSettingspersisted?.iosAppIds==null)
                 tokenList.set("ios",feignClientForAuthService.refreshToken(false,"EVENT_IOS",token).body)
-                else updateTokenIdentity(user,accountSettings.iosAppId,"IOS")
+                /*else*/ updateTokenIdentity(user,accountSettings.iosAppId,"IOS")
                 }
             }
 
