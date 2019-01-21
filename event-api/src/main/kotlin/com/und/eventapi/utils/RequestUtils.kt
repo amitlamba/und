@@ -10,9 +10,11 @@ import com.und.model.mongo.eventapi.System
 import eu.bitwalker.useragentutils.Browser
 import eu.bitwalker.useragentutils.OperatingSystem
 import eu.bitwalker.useragentutils.UserAgent
+import org.slf4j.LoggerFactory
 import javax.servlet.http.HttpServletRequest
 
 //TODO write test cases for this class
+var logger = LoggerFactory.getLogger("EventApi Utility Logger.")
 
 fun HttpServletRequest.ipAddr(): String {
 
@@ -72,6 +74,7 @@ data class SystemDetails(
 private fun parseBrowser(userAgent: UserAgent):Pair<String,String?>{
      var browserName=userAgent.browser.name
     var browserVersion=userAgent.browserVersion?.version
+    logger.info("Browser Name  $browserName version $browserVersion")
      when{
          browserName.contains("CHROME") -> return Pair("Chrome",browserVersion?.replace(regex = Regex("\\..*"),replacement = ""))
          browserName.contains("FIREFOX") -> return Pair("Firefox",browserVersion?.replace(regex = Regex("\\..*"),replacement = ""))
@@ -86,6 +89,7 @@ private fun parseBrowser(userAgent: UserAgent):Pair<String,String?>{
 
 private fun parseOS(os:OperatingSystem):Pair<String,String?>{
     var osName=os.getName()
+    logger.info("Os name $osName")
     when{
         osName.contains("Windows") -> {
             var info=osName.split(" ")
@@ -102,6 +106,9 @@ private fun parseOS(os:OperatingSystem):Pair<String,String?>{
                 return Pair(info[0],null)
             }
         }
+        osName.contains("Mac OS X") -> {
+            return Pair("Mac OS","X")
+        }
         osName.contains("Android") -> {
             var info=osName.split(" ")
             if(info.size==1)
@@ -111,10 +118,10 @@ private fun parseOS(os:OperatingSystem):Pair<String,String?>{
         }
         osName.contains("iOS") -> {
             var info=osName.split(" ")
-            if(info.size==2) return Pair(info[0],info[1].replace(regex = Regex("\\..*"),replacement = ""))
+            if(info.size>=2) return Pair(info[0],info[1].replace(regex = Regex("\\..*"),replacement = ""))
         }
-        osName.contains("Mac OS X") -> {
-            return Pair("Mac OS","X")
+        osName.contains("Linux") ->{
+            return Pair("Linux",null)
         }
         osName.contains("Ubuntu") -> {
             return Pair("Ubuntu",null)
