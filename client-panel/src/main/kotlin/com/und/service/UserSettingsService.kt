@@ -416,23 +416,29 @@ class UserSettingsService {
         var host = serviceProviderCredential.credentialsMap.get("url")
         var username = serviceProviderCredential.credentialsMap.get("username")
         var password = serviceProviderCredential.credentialsMap.get("password")
-        //var ssl = serviceProviderCredential.credentialsMap.get("ssl") as Boolean
+        var ssl = serviceProviderCredential.credentialsMap.get("security")?:"NONE"
         var protocaol = serviceProviderCredential.serviceProvider.toLowerCase()
         if (protocaol.equals("smtp")) {
             var props = Properties()
             props["mail.smtp.host"] = host
             props["mail.smtp.port"] = port
-            props["mail.smtp.auth"] = "true"
-            props["mail.smtp.starttls.enable"] = "true"
+            props["mail.smtp.auth"] = true
             props.put("mail.smtp.socketFactory.class","javax.net.ssl.SSLSocketFactory")
-            props.put("mail.smtp.socketFactory.port",port)
-//            if (ssl) {
-//                props.put("mail.smtp.ssl.socketFactory.class","javax.net.ssl.SSLSocketFactory");
-//                props.put("mail.smtp.ssl.socketFactory.port",port)
-//                props["mail.smtp.ssl.enable"] = ssl
-//            }
 
-
+            when (Security.valueOf(ssl)) {
+                Security.SSL, Security.TLS -> {
+                    props["mail.smtp.ssl.enable"] = true
+                    props["mail.smtp.starttls.enable"] = false
+                }
+                Security.STARTTLS -> {
+                    props["mail.smtp.ssl.enable"] = false
+                    props["mail.smtp.starttls.enable"] = true
+                }
+                Security.NONE -> {
+                    props["mail.smtp.ssl.enable"] = false
+                    props["mail.smtp.starttls.enable"] = false
+                }
+            }
             try {
                 val session = Session.getDefaultInstance(props)
                 val transport = session.getTransport(protocaol)
@@ -553,4 +559,9 @@ enum class KEYTYPE {
     EVENT_ANDROID,
     EVENT_IOS,
     EVENT_WEB
+}
+
+
+enum class Security {
+    SSL, TLS, STARTTLS, NONE
 }
