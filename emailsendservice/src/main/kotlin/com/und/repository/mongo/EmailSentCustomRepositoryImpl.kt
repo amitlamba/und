@@ -29,7 +29,7 @@ class EmailSentCustomRepositoryImpl : EmailSentCustomRepository {
 
         val query = Query(Criteria.where("clientID").`is`(clientId).and("_id").`is`(ObjectId(emailId)))
             val statusupdate = EmailStatusUpdate(LocalDateTime.now(), emailStatus, clickTrackEventId)
-            val update = Update().push("statusUpdates", statusupdate).set("emailStatus", emailStatus)
+            val update = Update().push("statusUpdates", statusupdate).set("status", emailStatus)
             mongoTemplate.updateFirst(query, update, Email::class.java, "${clientId}_email")
     }
 

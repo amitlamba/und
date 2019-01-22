@@ -5,11 +5,8 @@ import com.und.model.mongo.eventapi.*
 import com.und.model.mongo.eventapi.SystemDetails
 import com.und.web.model.eventapi.Event
 import com.und.web.model.eventapi.EventUser
-import java.time.Instant
+import java.time.*
 import com.und.model.mongo.eventapi.EventUser as MongoEventUser
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.regex.Pattern
@@ -40,12 +37,12 @@ fun Event.copyToMongo(): MongoEvent {
         mongoEvent.system = system
         with(system) {
 
-            os = SystemDetails(name = sysDetail.OS ?: "", version = "")
+            os = SystemDetails(name = sysDetail.OS ?: "", version = sysDetail.osVersion?:"")
             if (sysDetail.browser != null && sysDetail.browserVersion != null) {
                 browser = SystemDetails(sysDetail.browser!!, sysDetail.browserVersion!!)
             }
             application = SystemDetails(name = "", version = "")
-            device = SystemDetails(name = sysDetail.deviceType ?: "", version = "")
+            device = SystemDetails(name = sysDetail.deviceType ?: "", version = sysDetail.deviceVersion?:"")
         }
     }
 
@@ -129,7 +126,16 @@ fun com.und.model.mongo.eventapi.EventUser.copyNonNull(eventUser: EventUser): co
     copyEventUser.standardInfo.firstname = unchanged(eventUser.firstName, standardInfo.firstname)
     copyEventUser.standardInfo.lastname = unchanged(eventUser.lastName, standardInfo.lastname)
     copyEventUser.standardInfo.gender = unchanged(eventUser.gender, standardInfo.gender)
-    copyEventUser.standardInfo.dob = unchanged(eventUser.dob, standardInfo.dob)
+//    copyEventUser.standardInfo.dob = unchanged(eventUser.dob, standardInfo.dob)
+    if(eventUser.dob!=null) {
+        var date= LocalDate.parse(eventUser.dob)
+        copyEventUser.standardInfo.dob=date
+        copyEventUser.standardInfo.age=date.year
+    }
+    else {
+        copyEventUser.standardInfo.dob= this.standardInfo.dob
+        copyEventUser.standardInfo.age= this.standardInfo.age
+    }
     copyEventUser.standardInfo.country = unchanged(eventUser.country, standardInfo.country)
     copyEventUser.standardInfo.city = unchanged(eventUser.city, standardInfo.city)
     copyEventUser.standardInfo.address = unchanged(eventUser.address, standardInfo.address)

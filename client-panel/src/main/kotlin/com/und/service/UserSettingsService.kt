@@ -246,26 +246,26 @@ class UserSettingsService {
             accountSettings.urls?.let {
                 if (it.isNotEmpty()) {
                     clientSettings.authorizedUrls = objectMapper.writeValueAsString(it)
-                    if (clientSettingspersisted?.authorizedUrls == null)
+//                    if (clientSettingspersisted?.authorizedUrls == null)
                     tokenList.set("web",feignClientForAuthService.refreshToken(false, "EVENT_WEB", token).body)
-                    else updateTokenIdentity(user, accountSettings.urls, "WEB")
+                    /*else*/ updateTokenIdentity(user, accountSettings.urls, "WEB")
                 }
 
             }
             accountSettings.andAppId?.let {
                 if (it.isNotEmpty()) {
                     clientSettings.androidAppIds = objectMapper.writeValueAsString(it)
-                    if (clientSettingspersisted?.androidAppIds == null)
+//                    if (clientSettingspersisted?.androidAppIds == null)
                         tokenList.set("android",feignClientForAuthService.refreshToken(false, "EVENT_ANDROID", token).body)
-                    else updateTokenIdentity(user, accountSettings.andAppId, "ANDROID")
+                    /*else*/ updateTokenIdentity(user, accountSettings.andAppId, "ANDROID")
                 }
             }
             accountSettings.iosAppId?.let {
                 if (it.isNotEmpty()) {
                 clientSettings.iosAppIds = objectMapper.writeValueAsString(it)
-                if(clientSettingspersisted?.iosAppIds==null)
+//                if(clientSettingspersisted?.iosAppIds==null)
                 tokenList.set("ios",feignClientForAuthService.refreshToken(false,"EVENT_IOS",token).body)
-                else updateTokenIdentity(user,accountSettings.iosAppId,"IOS")
+                /*else*/ updateTokenIdentity(user,accountSettings.iosAppId,"IOS")
                 }
             }
 
@@ -416,23 +416,29 @@ class UserSettingsService {
         var host = serviceProviderCredential.credentialsMap.get("url")
         var username = serviceProviderCredential.credentialsMap.get("username")
         var password = serviceProviderCredential.credentialsMap.get("password")
-        //var ssl = serviceProviderCredential.credentialsMap.get("ssl") as Boolean
+        var ssl = serviceProviderCredential.credentialsMap.get("security")?:"NONE"
         var protocaol = serviceProviderCredential.serviceProvider.toLowerCase()
         if (protocaol.equals("smtp")) {
             var props = Properties()
             props["mail.smtp.host"] = host
             props["mail.smtp.port"] = port
-            props["mail.smtp.auth"] = "true"
-            props["mail.smtp.starttls.enable"] = "true"
+            props["mail.smtp.auth"] = true
             props.put("mail.smtp.socketFactory.class","javax.net.ssl.SSLSocketFactory")
-            props.put("mail.smtp.socketFactory.port",port)
-//            if (ssl) {
-//                props.put("mail.smtp.ssl.socketFactory.class","javax.net.ssl.SSLSocketFactory");
-//                props.put("mail.smtp.ssl.socketFactory.port",port)
-//                props["mail.smtp.ssl.enable"] = ssl
-//            }
 
-
+            when (Security.valueOf(ssl)) {
+                Security.SSL, Security.TLS -> {
+                    props["mail.smtp.ssl.enable"] = true
+                    props["mail.smtp.starttls.enable"] = false
+                }
+                Security.STARTTLS -> {
+                    props["mail.smtp.ssl.enable"] = false
+                    props["mail.smtp.starttls.enable"] = true
+                }
+                Security.NONE -> {
+                    props["mail.smtp.ssl.enable"] = false
+                    props["mail.smtp.starttls.enable"] = false
+                }
+            }
             try {
                 val session = Session.getDefaultInstance(props)
                 val transport = session.getTransport(protocaol)
@@ -553,4 +559,9 @@ enum class KEYTYPE {
     EVENT_ANDROID,
     EVENT_IOS,
     EVENT_WEB
+}
+
+
+enum class Security {
+    SSL, TLS, STARTTLS, NONE
 }

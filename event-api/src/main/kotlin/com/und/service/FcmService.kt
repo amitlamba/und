@@ -48,19 +48,19 @@ class FcmService {
                 .set("status", FcmMessageStatus.READ)
         mongoTemplate.updateFirst(query,update,resolveFcmCollectionName(message.clientId,message.type))
 
-        var mongoMessage=mongoTemplate.findOne(query,AnalyticFcmMessage::class.java,resolveFcmCollectionName(message.clientId,message.type))
-
-        //FIXME user agent not set lat,long,identity not set neither in email,sms.
-        val event = Event()
-        with(event) {
-            name = "Notification Click"
-            clientId = message.clientId
-            notificationId = message.mongoId
-            //TODO we can pass campaign id from sdk
-            attributes["campaignId"] = mongoMessage.campaignId
-            timeZone=AuthenticationUtils.principal.timeZoneId
-        }
-        eventService.toKafka(event)
+//        var mongoMessage=mongoTemplate.findOne(query,AnalyticFcmMessage::class.java,resolveFcmCollectionName(message.clientId,message.type))
+//
+//        //FIXME user agent not set lat,long,identity not set neither in email,sms.
+//        val event = Event()
+//        with(event) {
+//            name = "Notification Click"
+//            clientId = message.clientId
+//            notificationId = message.mongoId
+//            //TODO we can pass campaign id from sdk
+//            attributes["campaignId"] = mongoMessage.campaignId
+//            timeZone=AuthenticationUtils.principal.timeZoneId
+//        }
+//        eventService.toKafka(event)
     }
 
     private fun resolveFcmCollectionName(clientId: Long,type: String):String{
