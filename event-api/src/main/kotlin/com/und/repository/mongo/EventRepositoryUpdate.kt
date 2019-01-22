@@ -8,4 +8,6 @@ interface EventRepositoryUpdate {
     fun findEventsMatchingIdentity(identity: Identity):List<Event>
 
     fun updateEventsWithIdentityMatching(identity: Identity)
+
+    fun save(event:Event)
 }

@@ -10,8 +10,8 @@
         "name": "gender",
         "dataType": "string",
         "options": [
-          "M",
-          "F"
+          "Male",
+          "Female"
         ]
       }
     ]

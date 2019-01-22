@@ -115,7 +115,7 @@ class EventService {
 //        val saved = eventRepository.insert(mongoEvent)
         val id=ObjectId()
         mongoEvent.id=id.toString()
-        mongoTemplate.save(mongoEvent,"${mongoEvent.clientId}_event")
+        eventRepository.save(mongoEvent)
         val saved=eventRepository.findById(id.toString()).get()
         eventStream.outEventForLiveSegment().send(MessageBuilder.withPayload(buildEventForLiveSegment(saved)).build())
         return saved.id
