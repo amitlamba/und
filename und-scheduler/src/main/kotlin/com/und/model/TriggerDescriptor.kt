@@ -149,7 +149,7 @@ class TriggerDescriptor {
             var firetimeatzone = time.atZone(timeZone)
             val now = ZonedDateTime.now(timeZone)
             val expired = firetimeatzone.isBefore(now)
-            if (expired) now.plusSeconds(5) else now
+            if (expired) now.plusSeconds(5) else firetimeatzone
 
         }
 
