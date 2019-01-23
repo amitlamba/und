@@ -69,7 +69,7 @@ class FcmFailureHandler {
         var log=FcmFailureAuditLog()
         with(log){
             clientID=notificationError.clientId
-            status=notificationError.status
+            status=notificationError.status?:""
             message=notificationError.message
             errorCode=notificationError.errorCode
             type=notificationError.campaignType

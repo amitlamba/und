@@ -63,13 +63,15 @@ class UserSettingsController {
         serviceProviderCredentials.clientID = clientID
         serviceProviderCredentials.serviceProviderType = ServiceProviderType.EMAIL_SERVICE_PROVIDER.desc
         //check credential are correct or not
-        //println("checking connection")
-        val success = userSettingsService.testConnection(serviceProviderCredentials)
-        //println(success)
-        return if (success) {
-            userSettingsService.saveEmailServiceProvider(serviceProviderCredentials, Status.ACTIVE)
-            //clientID?.let{ id->campaignService.resumeAllForcePaused(id)}
-        } else 0L
+        try {
+            val success = userSettingsService.testConnection(serviceProviderCredentials)
+            return if (success) {
+                userSettingsService.saveEmailServiceProvider(serviceProviderCredentials, Status.ACTIVE)
+                //clientID?.let{ id->campaignService.resumeAllForcePaused(id)}
+            } else -1L
+        }catch (ex:Exception){
+            throw CustomException("${ex.message}",ex)
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
