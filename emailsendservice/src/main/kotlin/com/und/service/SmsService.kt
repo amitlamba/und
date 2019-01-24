@@ -56,7 +56,7 @@ class SmsService {
             val token = userRepository.findSystemUser().key
             var event= com.und.model.utils.eventapi.Event()
             with(event) {
-                name = "Sms Notification Sent"
+                name = "Notification Sent"
                 clientId=smsToSend.clientID
                 notificationId=mongoSmsId
                 attributes.put("campaign_id",sms.campaignId?:-1)

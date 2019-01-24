@@ -1,0 +1,1 @@
+ALTER TABLE service_provider_credentials ADD COLUMN name VARCHAR(100) NOT NULL DEFAULT 'default';

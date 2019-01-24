@@ -113,8 +113,12 @@ class UserSettingsService {
         webServiceProviderCredentials.status = status
         performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials)
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
-        val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
-        return saved.id!!
+        try {
+            val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
+            return saved.id
+        }catch(ex:Throwable){
+            throw ex
+        }
     }
 
     private fun performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials: com.und.web.model.ServiceProviderCredentials) {
@@ -447,10 +451,8 @@ class UserSettingsService {
                 return true
             } catch (e: AuthenticationFailedException) {
                 throw WrongCredentialException("authentication failed")
-                return false
             } catch (e: MessagingException) {
                 throw WrongCredentialException(" Not valid credential")
-                return false
             }
 
         }

@@ -11,14 +11,23 @@ interface EventStream {
     @Output("emailEventSend")
     fun emailEventSend(): MessageChannel
 
+    @Input("emailEventReceive")
+    fun emailEventReceive(): SubscribableChannel
+
     @Output(value="smsEventSend")
     fun smsEventSend():MessageChannel
+
+    @Input(value="smsEventReceive")
+    fun smsEventReceive():SubscribableChannel
 
     @Output(value="emailFailureEventSend")
     fun emailFailureEventSend():MessageChannel
 
     @Output("fcmEventSend")
     fun fcmEventSend():MessageChannel
+
+    @Input(value="fcmEventReceive")
+    fun fcmEventReceive():SubscribableChannel
 
     @Output("fcmFailureEventSend")
     fun fcmFailureEventSend():MessageChannel

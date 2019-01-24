@@ -121,7 +121,7 @@ class EmailService {
         val token = userRepository.findSystemUser().key
         var event= Event()
         with(event) {
-            name = "Email Notification Sent"
+            name = "Notification Sent"
             clientId=emailToSend.clientID
             notificationId=mongoEmailId
             attributes.put("campaign_id",emailToSend.campaignId)

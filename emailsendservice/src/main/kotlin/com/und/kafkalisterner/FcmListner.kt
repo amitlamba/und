@@ -12,7 +12,7 @@ class FcmListner {
     @Autowired
     private lateinit var fcmSendService: FcmSendService
 
-    @StreamListener("fcmEventSend")
+    @StreamListener("fcmEventReceive")
     fun sendMessage(message: FcmMessage) {
         fcmSendService.sendMessage(message)
     }
