@@ -36,7 +36,7 @@ class ReachabilityServiceImpl : ReachabilityService {
     override fun getReachabilityBySegmentId(segmentId: Long): Reachability {
         val clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
         var sr= segmentReachabilityRepository.
-                findBySegmentIdAndDate(segmentId,LocalDate.now(ZoneId.of(AuthenticationUtils.principal.timeZoneId)))
+                findByClientIdAndSegmentIdAndDate(clientId,segmentId,LocalDate.now(ZoneId.of(AuthenticationUtils.principal.timeZoneId)))
         if(sr.isPresent) return buildReachability(sr.get())
         val objectIds = if (segmentId != allUser) {
             val segmentUsers = segmentService.segmentUserIds(segmentId, clientId)

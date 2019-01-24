@@ -7,5 +7,5 @@ import java.util.*
 
 interface SegmentReachabilityRepository:MongoRepository<SegmentReachability,String> {
 
-    fun findBySegmentIdAndDate(segmentId:Long,date: LocalDate):Optional<SegmentReachability>
+    fun findByClientIdAndSegmentIdAndDate(clientId:Long,segmentId:Long,date: LocalDate):Optional<SegmentReachability>
 }
