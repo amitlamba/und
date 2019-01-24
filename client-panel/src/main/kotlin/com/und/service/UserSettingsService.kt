@@ -207,6 +207,7 @@ class UserSettingsService {
         with(spCreds) {
             spCreds.appuserID = webServiceProviderCredentials.appuserID
             spCreds.clientID = webServiceProviderCredentials.clientID
+            spCreds.name=webServiceProviderCredentials.name
             spCreds.id = webServiceProviderCredentials.id
             spCreds.serviceProvider = webServiceProviderCredentials.serviceProvider
             spCreds.serviceProviderType = webServiceProviderCredentials.serviceProviderType
@@ -222,7 +223,7 @@ class UserSettingsService {
         with(wspCreds) {
             wspCreds.appuserID = serviceProviderCredentials.appuserID
             wspCreds.clientID = serviceProviderCredentials.clientID
-
+            wspCreds.name=serviceProviderCredentials.name
             wspCreds.id = serviceProviderCredentials.id
             wspCreds.serviceProvider = serviceProviderCredentials.serviceProvider
             wspCreds.serviceProviderType = serviceProviderCredentials.serviceProviderType

@@ -16,6 +16,7 @@ class ServiceProviderCredentials {
     lateinit var dateCreated: LocalDateTime
     lateinit var dateModified: LocalDateTime
     lateinit var status: Status
+    lateinit var name:String
     var credentialsMap: HashMap<String, String> = HashMap()
 
 /*    fun getServiceProvider(): Any? {

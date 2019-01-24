@@ -21,6 +21,9 @@ class ServiceProviderCredentials {
     lateinit var serviceProvider: String
 
     @NotNull
+    lateinit var name:String
+
+    @NotNull
     var status: Status = Status.ACTIVE
 
     var credentialsMap: HashMap<String, String> = HashMap()

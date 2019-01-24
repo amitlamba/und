@@ -28,7 +28,7 @@ class EmailListener {
         val logger = loggerFor(EmailListener::class.java)
     }
 
-    @StreamListener("emailEventSend")
+    @StreamListener("emailEventReceive")
     fun sendEmailCampaign(email: Email) {
         sendEmail(email)
     }
