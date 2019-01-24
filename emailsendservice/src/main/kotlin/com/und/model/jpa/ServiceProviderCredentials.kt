@@ -49,6 +49,10 @@ class ServiceProviderCredentials {
     @NotNull
     lateinit var credentialsMap: String
 
+    @Column(name="name")
+    @NotNull
+    lateinit var name:String
+
     @Column(name="isdefault")
     var isDefault:Boolean=false
 
