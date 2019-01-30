@@ -75,7 +75,7 @@
       },
       {
         "name": "hasEmailAddress",
-        "dataType": "Boolean",
+        "dataType": "boolean",
         "options": [
           "Yes",
           "No"
@@ -99,7 +99,7 @@
       },
       {
         "name": "unsubscribedEmail",
-        "dataType": "Boolean",
+        "dataType": "boolean",
         "options": [
           "Yes",
           "No"
@@ -107,7 +107,7 @@
       },
       {
         "name": "unsubscribedSMS",
-        "dataType": "Boolean",
+        "dataType": "boolean",
         "options": [
           "Yes",
           "No"

@@ -69,10 +69,27 @@ class FunnelReportServiceImpl : FunnelReportService {
             val computedFunnels = awsFunnelLambdaInvoker.computeFunnels(funnelData)
 
             logger.debug("Funnel data computed: $computedFunnels")
-            return computedFunnels
+            return orderFunnelByStep(computedFunnels)
         } ?: emptyList()
     }
+    private fun orderFunnelByStep(result:List<FunnelReport.FunnelStep>):List<FunnelReport.FunnelStep>{
+        var funnelResult=result.toMutableList()
+        for (i in 0..(funnelResult.size - 1) step 1) {
 
+            var min = funnelResult[i].step.order
+
+            for (j in (i + 1)..(funnelResult.size-1) step 1) {
+                if (min > funnelResult[j].step.order) {
+                    var temp = funnelResult[j]
+                    funnelResult[j] = funnelResult[i]
+                    funnelResult[i] = temp
+                    min = temp.step.order
+                }
+            }
+        }
+
+        return funnelResult
+    }
 
     fun buildAggregationAllUsers(funnelFilter: FunnelReport.FunnelReportFilter, clientID: Long, tz: ZoneId): Aggregation {
 

@@ -105,6 +105,7 @@ class SegmentParserCriteria {
 
         val userQuery = if (userPropertyMatch != null) parseUsers(userPropertyMatch) else null
 
+        //is this condition come true.
         val userCriteria = if (eventPropertyMatch == null && segment.userId != null) Criteria.where("userId").`is`(segment.userId) else null
 
         //did
@@ -135,19 +136,20 @@ class SegmentParserCriteria {
 
     private fun parseEvents(events: List<Event>, tz: ZoneId, did: Boolean, eventPropertyMatch: Criteria?, geoCriteria: Criteria?, userCriteria: Criteria?): List<Aggregation> {
 
-        return events.map { event ->
-            val matches = if (did) listOfNotNull(eventPropertyMatch, geoCriteria, userCriteria).toMutableList() else mutableListOf()
-            matches.addAll(parsePropertyFilters(event, tz))
-            matches.add(Criteria.where(Field.eventName.fName).`is`(event.name))
-            matches.add(Criteria.where("userId").exists(true))
-            matches.add(parseDateFilter(event.dateFilter, tz))
-            var fields = Aggregation.fields(Field.userId.name, Field.creationTime.name, Field.clientId.name)
-            matches.forEach { criteria ->
-                val name = criteria.key
-                if (name != null) {
-                    fields = fields.and(name, name)
+         if(events.isNotEmpty()) {
+            return events.map { event ->
+                val matches = if (did) listOfNotNull(eventPropertyMatch, geoCriteria, userCriteria).toMutableList() else mutableListOf()
+                matches.addAll(parsePropertyFilters(event, tz))
+                matches.add(Criteria.where(Field.eventName.fName).`is`(event.name))
+                matches.add(Criteria.where("userId").exists(true))
+                matches.add(parseDateFilter(event.dateFilter, tz))
+                var fields = Aggregation.fields(Field.userId.name, Field.creationTime.name, Field.clientId.name)
+                matches.forEach { criteria ->
+                    val name = criteria.key
+                    if (name != null) {
+                        fields = fields.and(name, name)
+                    }
                 }
-            }
 //            val project = Aggregation.project(fields)
 //                    .and("clientTime.month").`as`(Field.month.name)
 //                    .and("clientTime.dayOfMonth").`as`(Field.monthday.name)
@@ -157,22 +159,24 @@ class SegmentParserCriteria {
 //                    .and("clientTime.year").`as`(Field.year.name)
 
 
-            val matchOps = Aggregation.match(Criteria().andOperator(*matches.toTypedArray()))
-            val whereCond = if (did) {
-                event.whereFilter?.let { whereFilter -> whereFilterParse(whereFilter, tz) } ?: Optional.empty()
-            } else Optional.empty()
+                val matchOps = Aggregation.match(Criteria().andOperator(*matches.toTypedArray()))
+                val whereCond = if (did) {
+                    event.whereFilter?.let { whereFilter -> whereFilterParse(whereFilter, tz) } ?: Optional.empty()
+                } else Optional.empty()
 
-            if (whereCond.isPresent) {
-                val group = whereCond.get().first
-                val matchOnGroup = whereCond.get().second
-                Aggregation.newAggregation(/*project,*/ matchOps, group, matchOnGroup)
-            } else {
-                val group = Aggregation.group(Aggregation.fields().and(Field.userId.name, Field.userId.name))
-                 Aggregation.newAggregation(/*project,*/ matchOps, group)
+                if (whereCond.isPresent) {
+                    val group = whereCond.get().first
+                    val matchOnGroup = whereCond.get().second
+                    Aggregation.newAggregation(/*project,*/ matchOps, group, matchOnGroup)
+                } else {
+                    val group = Aggregation.group(Aggregation.fields().and(Field.userId.name, Field.userId.name))
+                    Aggregation.newAggregation(/*project,*/ matchOps, group)
+                }
+
+
             }
-
-
-        }
+        }else if(eventPropertyMatch !=null)  return listOf<Aggregation>(Aggregation.newAggregation(Aggregation.match(eventPropertyMatch)))
+        else return emptyList()
 
     }
 

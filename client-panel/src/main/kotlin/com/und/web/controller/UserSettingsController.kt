@@ -15,6 +15,7 @@ import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.*
@@ -245,11 +246,23 @@ class UserSettingsController {
         }
     }
 
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
-//    @PostMapping("app/account-settings/save")
-//    fun saveAppAccountSettings(@Valid @RequestBody settings:AccountSettings){
-//
-//    }
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = ["/android-service-providers"])
+    fun getAndroidServiceProviders(): List<ServiceProviderCredentials> {
+        val clientID = AuthenticationUtils.clientID?:throw AccessDeniedException("")
+        return userSettingsService.getAndroidServiceProviders(clientID!!)
+    }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = ["/web-service-providers"])
+    fun getWebServiceProviders(): List<ServiceProviderCredentials> {
+        val clientID = AuthenticationUtils.clientID?:throw AccessDeniedException("")
+        return userSettingsService.getWebServiceProviders(clientID!!)
+    }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = ["/ios-service-providers"])
+    fun getIosServiceProviders(): List<ServiceProviderCredentials> {
+        val clientID = AuthenticationUtils.clientID?:throw AccessDeniedException("")
+        return userSettingsService.getIosServiceProviders(clientID!!)
+    }
 }
 

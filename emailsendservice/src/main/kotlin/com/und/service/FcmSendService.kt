@@ -236,7 +236,8 @@ class FcmSendService {
                 errorCode = 400
                 campaignType=message.type
                 userId=message.userId
-
+                serviceProvider=null
+                serviceProviderId=null
             }
             toFcmFailureKafka(notificationError)
         } else {
@@ -284,6 +285,8 @@ class FcmSendService {
                     errorCode = ex.status().toLong()
                     campaignType=message.type
                     userId=message.userId
+                    serviceProviderId=credential.id
+                    serviceProvider=credential.name
                 }
                 toFcmFailureKafka(notificationError)
             } catch (ex: FcmFailureException) {
@@ -298,6 +301,8 @@ class FcmSendService {
                     errorCode = statusCode?.toLong()
                     campaignType=message.type
                     userId=message.userId
+                    serviceProviderId=credential.id
+                    serviceProvider=credential.name
                 }
                 toFcmFailureKafka(notificationError)
 
@@ -313,6 +318,8 @@ class FcmSendService {
                     errorCode = statusCode?.toLong()
                     campaignType=message.type
                     userId=message.userId
+                    serviceProviderId=credential.id
+                    serviceProvider=credential.name
                 }
                 toFcmFailureKafka(notificationError)
             }
@@ -361,6 +368,8 @@ class NotificationError {
     var errorCode: Long? = null
     var campaignType:String?=null
     var userId:String?=null
+    var serviceProvider:String?=null
+    var serviceProviderId:Long?=null
 }
 
 class TestMessage {

@@ -129,7 +129,8 @@ class RegistrationService {
 
     fun verifyEmail(email: String, code: String) {
         val client = clientService.findByEmail(email)
-        if (client != null) {
+
+        if (client != null && !client.emailVerified) {
             val codeMatch = client.clientVerification.emailCode == code
             val expired = DateUtils().now().time < client.clientVerification.emailCodeDate.time - expiration
             //FIXME convert exception to message wrapper
