@@ -11,6 +11,7 @@ import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.SegmentNotFoundException
 import com.und.web.model.ConditionType
+import org.bson.types.ObjectId
 import org.hibernate.exception.ConstraintViolationException
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
