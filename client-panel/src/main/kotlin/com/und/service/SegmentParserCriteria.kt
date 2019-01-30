@@ -7,6 +7,7 @@ import com.und.web.model.Unit
 import org.slf4j.Logger
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.mongodb.core.aggregation.Aggregation
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.aggregation.GroupOperation
 import org.springframework.data.mongodb.core.aggregation.MatchOperation
 import org.springframework.data.mongodb.core.query.Criteria
@@ -175,7 +176,15 @@ class SegmentParserCriteria {
 
 
             }
-        }else if(eventPropertyMatch !=null)  return listOf<Aggregation>(Aggregation.newAggregation(Aggregation.match(eventPropertyMatch)))
+        }else if(eventPropertyMatch !=null)  {
+             var stage= mutableListOf<AggregationOperation>()
+             stage.add(Aggregation.match(eventPropertyMatch))
+             if(geoCriteria !=null){
+                 stage.add(Aggregation.match(geoCriteria))
+             }
+             stage.add(Aggregation.project().and("userId").`as`("_id"))
+             return listOf<Aggregation>(Aggregation.newAggregation(*stage.toTypedArray()))
+         }
         else return emptyList()
 
     }

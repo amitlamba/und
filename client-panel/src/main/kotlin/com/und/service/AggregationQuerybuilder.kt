@@ -258,13 +258,11 @@ class AggregationQuerybuilder {
 //            val allGroupByFields = mutableMapOf<String, String>()
 //            allGroupByFields.putAll(eventGroupFields)
 //            allGroupByFields.putAll(userGroupFields)
-
             var resultProjectOperation = Aggregation.project().and(Field.UserId.fName).size().`as`(AGGREGATE_VALUE)
 //            if(allGroupByFields.size > 1) {
 //                allGroupByFields.forEach { t, u -> resultProjectOperation = resultProjectOperation.and(t).`as`(u) }
 //                resultProjectOperation = resultProjectOperation.and(Field.UserId.fName).size().`as`(AGGREGATE_VALUE)
 //            }
-
             aggregationPipeline.add(resultProjectOperation)
         }
 
