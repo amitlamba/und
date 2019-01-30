@@ -117,7 +117,7 @@ class UserSettingsService {
             val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
             return saved.id
         }catch(ex:Throwable){
-            throw ex
+            return -1
         }
     }
 
@@ -543,6 +543,27 @@ class UserSettingsService {
             //unmark other default service provider of this type for this client
             serviceProviderCredentialsRepository.unMarkDefaultSp(type,clientID)
         }
+    }
+
+    fun getIosServiceProviders(clientId:Long):List<WebServiceProviderCredentials>{
+        val spCredsList = serviceProviderCredentialsRepository.findAllByClientIDAndServiceProviderType(clientId, ServiceProviderType.IOS_PUSH_SERVICE_PROVIDER.desc)
+        val wspCreds = mutableListOf<WebServiceProviderCredentials>()
+        spCredsList.forEach { wspCreds.add(buildWebServiceProviderCredentials(it)) }
+        return wspCreds
+    }
+
+    fun getWebServiceProviders(clientId:Long):List<WebServiceProviderCredentials>{
+        val spCredsList = serviceProviderCredentialsRepository.findAllByClientIDAndServiceProviderType(clientId, ServiceProviderType.WEB_PUSH_SERVICE_PROVIDER.desc)
+        val wspCreds = mutableListOf<WebServiceProviderCredentials>()
+        spCredsList.forEach { wspCreds.add(buildWebServiceProviderCredentials(it)) }
+        return wspCreds
+    }
+
+    fun getAndroidServiceProviders(clientId:Long):List<WebServiceProviderCredentials>{
+        val spCredsList = serviceProviderCredentialsRepository.findAllByClientIDAndServiceProviderType(clientId, ServiceProviderType.ANDROID_PUSH_SERVICE_PROVIDER.desc)
+        val wspCreds = mutableListOf<WebServiceProviderCredentials>()
+        spCredsList.forEach { wspCreds.add(buildWebServiceProviderCredentials(it)) }
+        return wspCreds
     }
 
 }

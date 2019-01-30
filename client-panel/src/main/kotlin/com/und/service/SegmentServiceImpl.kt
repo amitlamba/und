@@ -204,7 +204,9 @@ class SegmentServiceImpl : SegmentService {
             allResult.add(userProfiles.toSet())
         }
 
-        val userList = allResult.reduce { f, s -> f.intersect(s) }
+        // reduce function call on empty collection throw exception
+        val userList:Set<String>
+        if(allResult.isNotEmpty()) userList= allResult.reduce { f, s -> f.intersect(s) } else userList = emptySet()
         return userList.toList()
     }
 
@@ -216,8 +218,8 @@ class SegmentServiceImpl : SegmentService {
         }
 
         val result = when (conditionType) {
-            ConditionType.AnyOf -> userDidList.reduce { f, s -> f.union(s) }
-            ConditionType.AllOf -> userDidList.reduce { f, s -> f.intersect(s) }
+            ConditionType.AnyOf -> if(userDidList.isNotEmpty()) userDidList.reduce { f, s -> f.union(s) } else emptySet()
+            ConditionType.AllOf -> if(userDidList.isNotEmpty()) userDidList.reduce { f, s -> f.intersect(s) } else emptySet()
         }
         val mutableResult = mutableSetOf<String>()
         mutableResult.addAll(result)

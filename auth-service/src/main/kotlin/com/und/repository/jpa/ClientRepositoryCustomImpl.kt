@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.MongoOperations
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.data.mongodb.core.query.isEqualTo
 
 class ClientRepositoryCustomImpl : ClientRepositoryCustom {
 
@@ -34,7 +35,10 @@ class ClientRepositoryCustomImpl : ClientRepositoryCustom {
     }
 
     override fun userpropertiesExists(clientId: Long): Boolean {
-        return mongoOperations.exists(Query(Criteria.where("name").`is`("Technographics").exists(true)), "${clientId}_userproperties")
+//        var query=Query(Criteria.where("name").exists(true).`is`("Technographics"))
+        return mongoOperations.collectionExists("${clientId}_userproperties")
+//        return mongoOperations.exists(query, "${clientId}_userproperties")
+
     }
 
     override fun eventMetadtaExists(clientId: Long): Boolean {

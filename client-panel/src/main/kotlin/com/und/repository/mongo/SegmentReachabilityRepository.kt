@@ -2,10 +2,11 @@ package com.und.repository.mongo
 
 import com.und.model.mongo.SegmentReachability
 import org.springframework.data.mongodb.repository.MongoRepository
-import java.time.LocalDate
+import org.springframework.stereotype.Repository
 import java.util.*
 
-interface SegmentReachabilityRepository:MongoRepository<SegmentReachability,String> {
+@Repository
+interface SegmentReachabilityRepository:MongoRepository<SegmentReachability,String>,CustomSegmentReachabilityRepository {
 
-    fun findByClientIdAndSegmentIdAndDate(clientId:Long,segmentId:Long,date: LocalDate):Optional<SegmentReachability>
+    fun findByClientIdAndId(clientId:Long,id:Long):Optional<SegmentReachability>
 }

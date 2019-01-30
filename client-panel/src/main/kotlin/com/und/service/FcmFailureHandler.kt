@@ -37,6 +37,7 @@ class FcmFailureHandler {
         saveFcmFailure(notificationError)
         notificationError.clientId?.let {
             //pause all running campaign
+            //TODO pause all running campaign for this service provider. take sp name in notification error
 //            campaignService.pauseAllRunning(it)
             //sending mail
             //TODO handle multiple email send.Send Email just once not for all failure message add a flag
@@ -86,4 +87,6 @@ class NotificationError{
     var errorCode:Long?=null
     var campaignType:String?=null
     var userId:String?=null
+    var serviceProviderId:Long?=null
+    var serviceProvider:String?=null
 }
