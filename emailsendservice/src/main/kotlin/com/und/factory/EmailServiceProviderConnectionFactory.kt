@@ -34,6 +34,7 @@ class EmailServiceProviderConnectionFactory {
             emailSMPTConfigs.containsKey(clientID) -> emailSMPTConfigs[clientID] as EmailSMTPConfig
             else -> {
                 synchronized(clientID) {
+//                    getServiceProviderCredential(id:Long?,clientId: Long,type:String) in serviceprovidercredservice
                     val serviceProviderCreds = serviceProviderCredentialsService.findActiveEmailServiceProvider(clientID)
                     val wspCreds = serviceProviderCredentialsService.buildWebServiceProviderCredentials(serviceProviderCreds)
                     val emailSMTPConfig = EmailSMTPConfig(

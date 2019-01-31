@@ -2,6 +2,7 @@ package com.und.web.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.common.utils.decrypt
+import com.und.common.utils.loggerFor
 import com.und.model.Status
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.CampaignService
@@ -219,18 +220,22 @@ class UserSettingsController {
     }
 
     @GetMapping(value = ["/verifyemail"])
-    fun verifyEmail(@RequestParam(value = "c") link: String) {
+    fun verifyEmail(@RequestParam(value = "c") link: String):ResponseEntity<Response> {
+    //mvc automatically decode urlencoded string in parameter.
+//        var decodeString = URLDecoder.decode(link, "UTF-8")
+        try {
+            var decryptString = decrypt(link)
+            var details = decryptString.split("||")
+            var timeStamp = details[0].toLong()
+            var mail = details[1]
+            var clientId = details[2].toLong()
 
-        var decodeString = URLDecoder.decode(link, "UTF-8")
-        var decryptString = decrypt(decodeString)
-        var details = decryptString.split("||")
-        var timeStamp = details[0].toLong()
-        var mail = details[1]
-        var clientId = details[2].toLong()
-
-        userSettingsService.updateStatusOfEmailSetting(timeStamp, mail, clientId)
-
-
+            userSettingsService.updateStatusOfEmailSetting(timeStamp, mail, clientId)
+        }catch (ex:Exception){
+            loggerFor(UserSettingsController::class.java).info("Verification for from email address fail with error ${ex.message}")
+            return ResponseEntity(Response(message = "${ex.message}"),HttpStatus.EXPECTATION_FAILED)
+        }
+        return ResponseEntity(Response(message = "Verified Successfully."),HttpStatus.OK)
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
