@@ -196,7 +196,7 @@ class EmailSendService {
             val msg = emailHelperService.createMimeMessage(session, email)
             //FIXME transport is single thread use thread safety synchronization
             transport.sendMessage(msg, msg.allRecipients)
-            logger.info("email sent to   ${email.toEmailAddresses} from  ${email.fromEmailAddress}} with msg ${email.emailBody}")
+            logger.info("email sent to   ${email.toEmailAddresses.get(0).address} from  ${email.fromEmailAddress}} with msg ${email.emailBody}")
         } catch (e: SendFailedException) {
 
             logger.error(e.message)

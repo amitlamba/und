@@ -324,7 +324,7 @@ class UserSettingsService {
 //            val error = ValidationError()
 //            error.addFieldError("email", "Email : $emailAddress.personal already exist")
 //            throw UndBusinessValidationException(error)
-            throw CustomException("Email : ${emailAddress.personal} already exist")
+            throw CustomException("Email : ${emailAddress.address} already exist")
         } else {
             val clientSettingEmail = ClientSettingsEmail()
             clientSettingEmail.email = emailAddress.address
@@ -461,7 +461,6 @@ class UserSettingsService {
     }
 
     fun sendVerificationEmail(emailAddress: EmailAddress, clientID: Long) {
-        logger.info("Sending from email address varification to ${emailAddress.address}")
         var data= mutableMapOf<String,Any>()
         var client = clientRepository.findById(clientID)
         if(client.isPresent){
@@ -475,11 +474,13 @@ class UserSettingsService {
 //            var emailSubject = "Verify from email Address"
 //            var emailBody="Hi ${name} \n Please verify your email by clicking on below link\n $emailVerificationLink"
             data.put("name",name)
+            data.put("address",fromEmailAddress.address)
             data.put("emailVerificationLink",emailVerificationLink)
-            var email = Email(clientID, fromEmailAddress, arrayOf(toEmailAddress), emailTemplateId = templateId,emailTemplateName = templateName,data = data)
-
+            var email = Email(clientID, fromEmailAddress=fromEmailAddress, toEmailAddresses = arrayOf(toEmailAddress), emailTemplateId = templateId,emailTemplateName = templateName,data = data)
+            logger.info("Sending from email address varification to ${client.email}")
             toKafka(email)
         }
+
 
     }
 
