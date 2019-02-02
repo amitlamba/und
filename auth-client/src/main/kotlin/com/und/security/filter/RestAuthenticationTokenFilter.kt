@@ -48,11 +48,11 @@ class RestAuthenticationTokenFilter : OncePerRequestFilter() {
             "IOS"->{ t="EVENT_IOS" ; v=request.getHeader("iosAppId")}
         }
 
-        logger.info("Remote Address ${request.getRemoteAddr()}")
-        logger.info("Remote Host ${request.getRemoteHost()}")
-        logger.info("Server Name ${request.getServerName()}")
-        logger.info("Request Url ${request.getRequestURL()}")
-        logger.info("Scheme ${request.getScheme()}")
+//        logger.info("Remote Address ${request.getRemoteAddr()}")
+//        logger.info("Remote Host ${request.getRemoteHost()}")
+//        logger.info("Server Name ${request.getServerName()}")
+//        logger.info("Request Url ${request.getRequestURL()}")
+//        logger.info("Scheme ${request.getScheme()}")
         var headers=request.headerNames
         while (headers.hasMoreElements()){
             var name=headers.nextElement()

@@ -43,5 +43,6 @@ enum class EmailStatus(val order: Int) {
     NOT_SENT(1),
     SENT(2),
     READ(3),
-    CTA_PERFORMED(4);
+    CTA_PERFORMED(4),
+    ERROR(5)
 }

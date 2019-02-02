@@ -71,10 +71,11 @@ class EventService {
         tenantProvider.setTenat(clientId.toString())
         val mongoEvent = event.copyToMongo()
         mongoEvent.clientTime.hour
-        var agentString = event.agentString
+        var agentString = event.agentString?:""
         var pattern = Pattern.compile("^(Mobile-Agent).*")
         var matcher = pattern.matcher(agentString)
-        if (matcher.matches() && agentString != null) {
+        //No need to check is empty
+        if (matcher.matches() && agentString.isNotEmpty()) {
             val system = System()
             mongoEvent.system = system
             var agent = agentString.split("/")

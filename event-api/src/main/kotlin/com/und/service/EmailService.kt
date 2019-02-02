@@ -53,18 +53,18 @@ class EmailService {
 
         val mongoEmail: com.und.model.mongo.Email? = emailSentRepository.findById(emailRead.mongoEmailId).get()
         if (mongoEmail != null) {
-            if (mongoEmail.emailStatus.order < EmailStatus.READ.order) {
-                mongoEmail.emailStatus = EmailStatus.READ
+            if (mongoEmail.status.order < EmailStatus.READ.order) {
+                mongoEmail.status = EmailStatus.READ
             }
             mongoEmail.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), EmailStatus.READ, null))
             emailSentRepository.save(mongoEmail)
             val event = Event()
             with(event) {
-                name = "Notification"
+                name = "Notification Read"
                 clientId = emailRead.clientID
                 notificationId = mongoEmail.id ?: "-1"
-                attributes["campaignId"] = mongoEmail.campaignID ?: -1L
-                attributes["status"] =  mongoEmail.emailStatus
+                attributes["campaign_id"] = mongoEmail.campaignId ?: -1L
+                attributes["status"] =  mongoEmail.status
             }
             eventService.toKafka(event)
 

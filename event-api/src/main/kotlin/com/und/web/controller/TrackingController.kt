@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
+import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 @CrossOrigin
@@ -18,16 +19,17 @@ class TrackingController {
 
     @GetMapping(value = ["/track"])
     fun trackUrlClick(@RequestParam("c") clientId: Long, @RequestParam("e") mongoEmailId: String,
-                      @RequestParam("u") redirectToUrl: String, httpServletResponse: HttpServletResponse) {
+                      @RequestParam("u") redirectToUrl: String, httpServletResponse: HttpServletResponse,request:HttpServletRequest) {
 
         val event = Event()
         event.clientId = clientId
-        event.name = "Notification"
+        event.name = "Notification Clicked"
         event.notificationId = mongoEmailId
+        //TODO put campaign id in attributes
         event.attributes = hashMapOf(
                 Pair("und_redirect_to_url", redirectToUrl)
         )
-
+        event.agentString=request.getHeader("User-Agent")
         eventTrackService.toKafka(event)
 
         httpServletResponse.setHeader("Location", redirectToUrl)

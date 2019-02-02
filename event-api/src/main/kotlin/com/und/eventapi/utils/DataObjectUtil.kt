@@ -27,10 +27,10 @@ fun Event.copyToMongo(): MongoEvent {
 //    }
     mongoEvent.creationTime=Date.from(Instant.ofEpochMilli(event.creationTime).atZone(ZoneId.of("UTC")).toInstant())
     //copying system info
-    val agentString = event.agentString
+    val agentString = event.agentString?:""
     var pattern = Pattern.compile("^(Mobile-Agent).*")
     var matcher=pattern.matcher(agentString)
-    if (!matcher.matches() && agentString!=null) {
+    if (!matcher.matches() && agentString.isNotEmpty()) {
         mongoEvent.agentString = agentString
         val sysDetail = systemDetails(agentString)
         val system = System()
@@ -38,8 +38,8 @@ fun Event.copyToMongo(): MongoEvent {
         with(system) {
 
             os = SystemDetails(name = sysDetail.OS ?: "", version = sysDetail.osVersion?:"")
-            if (sysDetail.browser != null && sysDetail.browserVersion != null) {
-                browser = SystemDetails(sysDetail.browser!!, sysDetail.browserVersion!!)
+            if (sysDetail.browser != null) {
+                browser = SystemDetails(sysDetail.browser!!, sysDetail.browserVersion?:"")
             }
             application = SystemDetails(name = "", version = "")
             device = SystemDetails(name = sysDetail.deviceType ?: "", version = sysDetail.deviceVersion?:"")
