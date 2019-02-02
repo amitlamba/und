@@ -1,8 +1,10 @@
 package com.und.web.controller
 
+import com.und.eventapi.utils.ipAddr
 import com.und.service.eventapi.EventTrackService
 import com.und.web.model.eventapi.Event
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.CrossOrigin
 import org.springframework.web.bind.annotation.GetMapping
@@ -30,8 +32,10 @@ class TrackingController {
                 Pair("und_redirect_to_url", redirectToUrl)
         )
         event.agentString=request.getHeader("User-Agent")
+        event.ipAddress=request.ipAddr()
         eventTrackService.toKafka(event)
 
         httpServletResponse.setHeader("Location", redirectToUrl)
+        httpServletResponse.status=HttpStatus.TEMPORARY_REDIRECT.value()
     }
 }

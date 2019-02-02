@@ -425,10 +425,10 @@ class UserSettingsService {
         var protocaol = serviceProviderCredential.serviceProvider.toLowerCase()
         if (protocaol.equals("smtp")) {
             var props = Properties()
+            props["mail.smtp.auth"] = true
             props["mail.smtp.host"] = host
             props["mail.smtp.port"] = port
-            props["mail.smtp.auth"] = true
-            props.put("mail.smtp.socketFactory.class","javax.net.ssl.SSLSocketFactory")
+            props["mail.smtp.socketFactory.class"] = "javax.net.ssl.SSLSocketFactory"
 
             when (Security.valueOf(ssl)) {
                 Security.SSL, Security.TLS -> {
@@ -456,8 +456,9 @@ class UserSettingsService {
                 throw WrongCredentialException(" Not valid credential")
             }
 
+        }else{
+            return true
         }
-        return true
     }
 
     fun sendVerificationEmail(emailAddress: EmailAddress, clientID: Long) {
