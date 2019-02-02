@@ -9,6 +9,7 @@ import com.amazonaws.services.sns.model.ThrottledException
 import com.und.exception.Connection
 import com.und.exception.EmailError
 import com.und.exception.EmailFailureException
+import com.und.model.mongo.EmailStatus
 import com.und.model.utils.Email
 import com.und.model.utils.EmailSESConfig
 import com.und.model.utils.EmailSMTPConfig
@@ -148,6 +149,11 @@ class EmailSendService {
 
             }
             throw  EmailFailureException("${e.message}", e, error)
+        } catch (ex:EmailFailureException){
+            email.mongoNotificationId?.let {
+                emailHelperService.updateEmailStatus(it,EmailStatus.ERROR,email.clientID)
+            }
+            throw ex
         } catch (e: Exception) {
             logger.error("The email was not sent. Error message: ${e.message}")
             val error = EmailError()
@@ -239,6 +245,11 @@ class EmailSendService {
             }
             throw  EmailFailureException("Unable to send email : ${e.message}", e, error)
 
+        } catch (ex:EmailFailureException){
+            email.mongoNotificationId?.let {
+                emailHelperService.updateEmailStatus(it,EmailStatus.ERROR,email.clientID)
+            }
+            throw ex
         } catch (e: Exception) {
             logger.error(e.message)
             val error = EmailError()
@@ -248,8 +259,11 @@ class EmailSendService {
                 causeMessage = "Unable to send email : ${e.message}"
                 failedSettingId = emailSMTPConfig.serviceProviderCredentialsId
             }
+            email.mongoNotificationId?.let {
+                emailHelperService.updateEmailStatus(it,EmailStatus.ERROR,email.clientID)
+            }
             throw  EmailFailureException("Unable to send email : ${e.message}", e, error)
-        } /*finally {
+        }  /*finally {
             //emailHelperService.closeTransport(email.clientID)
         }*/
 
