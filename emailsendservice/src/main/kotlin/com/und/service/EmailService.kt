@@ -81,6 +81,7 @@ class EmailService {
         //FIXME: cache the findByClientID clientSettings
         val clientSettings = clientSettingsRepository.findByClientID(emailToSend.clientID)
         val mongoEmailId = ObjectId().toString()
+        emailToSend.mongoNotificationId=mongoEmailId
         emailToSend.eventUser?.let {
             model["user"] = it
         }
