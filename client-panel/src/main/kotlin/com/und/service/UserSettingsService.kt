@@ -445,9 +445,10 @@ class UserSettingsService {
                 }
             }
             try {
-                val session = Session.getDefaultInstance(props)
+                val session = Session.getInstance(props)
                 val transport = session.getTransport(protocaol)
                 transport.connect(username, password)
+                logger.info("Added Email Sp connection successfuly.")
                 transport.close()
                 return true
             } catch (e: AuthenticationFailedException) {
