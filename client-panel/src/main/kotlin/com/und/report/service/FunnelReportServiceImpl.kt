@@ -69,9 +69,11 @@ class FunnelReportServiceImpl : FunnelReportService {
             val computedFunnels = awsFunnelLambdaInvoker.computeFunnels(funnelData)
 
             logger.debug("Funnel data computed: $computedFunnels")
-            return orderFunnelByStep(computedFunnels)
+            return if(funnelFilter.filters.isEmpty()) fillMissingSteps(orderFunnelByStep(computedFunnels),funnelFilter.steps)
+            else orderFunnelByStep(computedFunnels)
         } ?: emptyList()
     }
+    //This code should be synchronized its possible that two thread invoke that method at same time
     private fun orderFunnelByStep(result:List<FunnelReport.FunnelStep>):List<FunnelReport.FunnelStep>{
         var funnelResult=result.toMutableList()
         for (i in 0..(funnelResult.size - 1) step 1) {
@@ -89,6 +91,19 @@ class FunnelReportServiceImpl : FunnelReportService {
         }
 
         return funnelResult
+    }
+    // This code should be synchronized its possible that two thread invoke that method at same time
+    private fun fillMissingSteps(result:List<FunnelReport.FunnelStep>,funnelSteps:List<FunnelReport.Step>):List<FunnelReport.FunnelStep>{
+        val outputSize=result.size
+        val inputSize=funnelSteps.size
+        if(outputSize!=inputSize){
+            var rs=result.toMutableList()
+            for(i in outputSize..(inputSize-1) step 1){
+                rs.add(FunnelReport.FunnelStep(funnelSteps[outputSize],count = 0,property = "all"))
+            }
+            return rs
+        }
+        return result
     }
 
     fun buildAggregationAllUsers(funnelFilter: FunnelReport.FunnelReportFilter, clientID: Long, tz: ZoneId): Aggregation {

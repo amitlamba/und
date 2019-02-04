@@ -26,17 +26,28 @@ class UserAnalyticsRepositoryImpl: UserAnalyticsRepository{
         logger.debug("Fetching aggregation results for query : $query, clientId: $clientId")
 
         val aggregate = mongoTemplate.aggregate<Document>(query, "${clientId}_event", Document::class.java)
+        val result=aggregate.mappedResults.filter { it -> it["_id"] != null }
+//        logger.debug("Total ${aggregate.mappedResults.size} results found")
+//
+//        if(aggregate.mappedResults.size == 0) return emptyList()
+//
+//        val firstDocument = aggregate.mappedResults[0]
+//
+//        if(firstDocument["_id"] is String)
+//            return aggregate.mappedResults.map { document -> AggregateOutput(mapOf("name" to document["_id"].toString()), document[AGGREGATE_VALUE].toString().toDouble()) }
+//        else
+//            return aggregate.mappedResults.map { document -> AggregateOutput(document.filter {it.key != AGGREGATE_VALUE}, document[AGGREGATE_VALUE].toString().toDouble()) }
+        logger.debug("Total ${result.size} results found")
 
-        logger.debug("Total ${aggregate.mappedResults.size} results found")
+        if(result.isEmpty()) return emptyList()
 
-        if(aggregate.mappedResults.size == 0) return emptyList()
-
-        val firstDocument = aggregate.mappedResults[0]
+        val firstDocument = result[0]
 
         if(firstDocument["_id"] is String)
-            return aggregate.mappedResults.map { document -> AggregateOutput(mapOf("name" to document["_id"].toString()), document[AGGREGATE_VALUE].toString().toDouble()) }
+            return result.map { document -> AggregateOutput(mapOf("name" to document["_id"].toString()), document[AGGREGATE_VALUE].toString().toDouble()) }
         else
-            return aggregate.mappedResults.map { document -> AggregateOutput(document.filter {it.key != AGGREGATE_VALUE}, document[AGGREGATE_VALUE].toString().toDouble()) }
+            return result.map { document -> AggregateOutput(document.filter {it.key != AGGREGATE_VALUE}, document[AGGREGATE_VALUE].toString().toDouble()) }
+
     }
 
     override fun getReachability(query: Aggregation, clientId: Long): Reachability {
