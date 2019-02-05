@@ -234,7 +234,7 @@ class UserSettingsService {
         return wspCreds
     }
 
-    @Transactional
+//    @Transactional
     fun saveAccountSettings(accountSettings: AccountSettings, clientID: Long?, userID: Long?):Map<String,Any>? {
         //FIXME: Validate Timezone and Email Addresses
         if (clientID != null) {
@@ -252,6 +252,7 @@ class UserSettingsService {
                 if (it.isNotEmpty()) {
                     clientSettings.authorizedUrls = objectMapper.writeValueAsString(it)
 //                    if (clientSettingspersisted?.authorizedUrls == null)
+                    saveAccountSettings(clientSettings, accountSettings, clientSettingspersisted, clientID)
                     tokenList.set("web",feignClientForAuthService.refreshToken(false, "EVENT_WEB", token).body)
                     /*else*/ updateTokenIdentity(user, accountSettings.urls, "WEB")
                 }
@@ -261,6 +262,7 @@ class UserSettingsService {
                 if (it.isNotEmpty()) {
                     clientSettings.androidAppIds = objectMapper.writeValueAsString(it)
 //                    if (clientSettingspersisted?.androidAppIds == null)
+                    saveAccountSettings(clientSettings, accountSettings, clientSettingspersisted, clientID)
                         tokenList.set("android",feignClientForAuthService.refreshToken(false, "EVENT_ANDROID", token).body)
                     /*else*/ updateTokenIdentity(user, accountSettings.andAppId, "ANDROID")
                 }
@@ -269,20 +271,30 @@ class UserSettingsService {
                 if (it.isNotEmpty()) {
                 clientSettings.iosAppIds = objectMapper.writeValueAsString(it)
 //                if(clientSettingspersisted?.iosAppIds==null)
+                    saveAccountSettings(clientSettings, accountSettings, clientSettingspersisted, clientID)
                 tokenList.set("ios",feignClientForAuthService.refreshToken(false,"EVENT_IOS",token).body)
                 /*else*/ updateTokenIdentity(user,accountSettings.iosAppId,"IOS")
                 }
             }
 
-            clientSettings.timezone = accountSettings.timezone
-            if (clientSettingspersisted == null) {
-                clientSettingsRepository.save(clientSettings)
-            } else {
-                clientSettingsRepository.updateAccountSettings(clientSettings.authorizedUrls,clientSettings.androidAppIds,clientSettings.iosAppIds, clientSettings.timezone, clientID)
-            }
             return tokenList
         }
         return null
+    }
+
+    private fun saveAccountSettings(clientSettings: ClientSettings, accountSettings: AccountSettings, clientSettingspersisted: ClientSettings?, clientID: Long) {
+        clientSettings.timezone = accountSettings.timezone
+        if (clientSettingspersisted == null) {
+            clientSettingsRepository.save(clientSettings)
+            /**If we dont flush then client settings are not present at
+             * a time of token generation so timezone of client is set to default("UTC")
+             * clientSetting must be persisted before token generation.
+             * This is the case much more like distributed transaction.
+            */
+//            we can use try catch block if there is any error in token creation delete that record from db.
+        } else {
+            clientSettingsRepository.updateAccountSettings(clientSettings.authorizedUrls, clientSettings.androidAppIds, clientSettings.iosAppIds, clientSettings.timezone, clientID)
+        }
     }
 
     private fun updateTokenIdentity(user:Optional<User>,idenity:Array<String>,type:String) {
