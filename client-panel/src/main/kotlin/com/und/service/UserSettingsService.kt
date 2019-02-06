@@ -44,6 +44,7 @@ import java.time.ZoneId
 import javax.mail.AuthenticationFailedException
 import javax.mail.MessagingException
 import javax.mail.Session
+import javax.mail.Transport
 import javax.mail.internet.InternetAddress
 
 @Service
@@ -235,6 +236,9 @@ class UserSettingsService {
     }
 
 //    @Transactional
+    /*
+    * TODO if user update his timezone then we are not replacing it.
+    * */
     fun saveAccountSettings(accountSettings: AccountSettings, clientID: Long?, userID: Long?):Map<String,Any>? {
         //FIXME: Validate Timezone and Email Addresses
         if (clientID != null) {
@@ -252,9 +256,19 @@ class UserSettingsService {
                 if (it.isNotEmpty()) {
                     clientSettings.authorizedUrls = objectMapper.writeValueAsString(it)
 //                    if (clientSettingspersisted?.authorizedUrls == null)
-                    saveAccountSettings(clientSettings, accountSettings, clientSettingspersisted, clientID)
-                    tokenList.set("web",feignClientForAuthService.refreshToken(false, "EVENT_WEB", token).body)
-                    /*else*/ updateTokenIdentity(user, accountSettings.urls, "WEB")
+                    var id:Long?=null
+                    try{
+                        id=saveAccountSettings(clientSettings, accountSettings, clientSettingspersisted, clientID)
+                        tokenList.set("web",feignClientForAuthService.refreshToken(false, "EVENT_WEB", token).body)
+                        /*else*/ updateTokenIdentity(user, accountSettings.urls, "WEB")
+                    }catch (ex:Exception){
+                        if(id!=null){
+                            clientSettingsRepository.deleteById((id?:-1L).toInt())
+                        }else{
+                            clientSettingsRepository.save(clientSettingspersisted)
+                        }
+                        throw ex
+                    }
                 }
 
             }
@@ -262,18 +276,39 @@ class UserSettingsService {
                 if (it.isNotEmpty()) {
                     clientSettings.androidAppIds = objectMapper.writeValueAsString(it)
 //                    if (clientSettingspersisted?.androidAppIds == null)
-                    saveAccountSettings(clientSettings, accountSettings, clientSettingspersisted, clientID)
+                    var id:Long?=null
+                    try{
+                        id=saveAccountSettings(clientSettings, accountSettings, clientSettingspersisted, clientID)
                         tokenList.set("android",feignClientForAuthService.refreshToken(false, "EVENT_ANDROID", token).body)
-                    /*else*/ updateTokenIdentity(user, accountSettings.andAppId, "ANDROID")
+                        /*else*/ updateTokenIdentity(user, accountSettings.andAppId, "ANDROID")
+                    }catch (ex:Exception){
+                        if(id!=null){
+                            clientSettingsRepository.deleteById((id?:-1L).toInt())
+                        }else{
+                            clientSettingsRepository.save(clientSettingspersisted)
+                        }
+                        throw ex
+                    }
                 }
             }
             accountSettings.iosAppId?.let {
                 if (it.isNotEmpty()) {
                 clientSettings.iosAppIds = objectMapper.writeValueAsString(it)
 //                if(clientSettingspersisted?.iosAppIds==null)
-                    saveAccountSettings(clientSettings, accountSettings, clientSettingspersisted, clientID)
-                tokenList.set("ios",feignClientForAuthService.refreshToken(false,"EVENT_IOS",token).body)
-                /*else*/ updateTokenIdentity(user,accountSettings.iosAppId,"IOS")
+                    var id:Long?=null
+                    try{
+                        id=saveAccountSettings(clientSettings, accountSettings, clientSettingspersisted, clientID)
+                        tokenList.set("ios",feignClientForAuthService.refreshToken(false,"EVENT_IOS",token).body)
+                        /*else*/ updateTokenIdentity(user,accountSettings.iosAppId,"IOS")
+                    }catch (ex:Exception){
+                        if(id!=null){
+                            clientSettingsRepository.deleteById((id?:-1L).toInt())
+                        }else{
+                            clientSettingsRepository.save(clientSettingspersisted)
+                        }
+                        throw ex
+                    }
+
                 }
             }
 
@@ -282,18 +317,14 @@ class UserSettingsService {
         return null
     }
 
-    private fun saveAccountSettings(clientSettings: ClientSettings, accountSettings: AccountSettings, clientSettingspersisted: ClientSettings?, clientID: Long) {
+    private fun saveAccountSettings(clientSettings: ClientSettings, accountSettings: AccountSettings, clientSettingspersisted: ClientSettings?, clientID: Long):Long? {
         clientSettings.timezone = accountSettings.timezone
         if (clientSettingspersisted == null) {
-            clientSettingsRepository.save(clientSettings)
-            /**If we dont flush then client settings are not present at
-             * a time of token generation so timezone of client is set to default("UTC")
-             * clientSetting must be persisted before token generation.
-             * This is the case much more like distributed transaction.
-            */
-//            we can use try catch block if there is any error in token creation delete that record from db.
+            val clientSetting=clientSettingsRepository.save(clientSettings)
+            return clientSetting.id
         } else {
             clientSettingsRepository.updateAccountSettings(clientSettings.authorizedUrls, clientSettings.androidAppIds, clientSettings.iosAppIds, clientSettings.timezone, clientID)
+            return null
         }
     }
 
@@ -456,17 +487,20 @@ class UserSettingsService {
                     props["mail.smtp.starttls.enable"] = false
                 }
             }
+            var transport:Transport?=null
             try {
                 val session = Session.getInstance(props)
-                val transport = session.getTransport(protocaol)
+                // for debugging purpose session.debug=true
+                transport = session.getTransport(protocaol)
                 transport.connect(username, password)
                 logger.info("Added Email Sp connection successfuly.")
-                transport.close()
                 return true
             } catch (e: AuthenticationFailedException) {
                 throw WrongCredentialException("authentication failed")
             } catch (e: MessagingException) {
                 throw WrongCredentialException(" Not valid credential")
+            }finally {
+                transport?.close()
             }
 
         }else{
