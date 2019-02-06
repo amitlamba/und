@@ -49,12 +49,14 @@ class CampaignController {
     lateinit var campaignService: CampaignService
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping(value = ["list/all"])
+    @GetMapping(value = ["/list/all"])
     fun getCampaigns(@RequestParam(value = "id", required = false) id: Long? = null,request:HttpServletRequest): List<Campaign> {
         return campaignService.getCampaigns()
     }
+
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping(value = ["error/{campaignId}"])
+    @GetMapping(value = ["/error/{campaignId}"])
     fun scheduleError(@PathVariable("campaignId") campaignId: Long): ResponseEntity<String> {
 
         logger.info("campaign schedule error fetching for campaignId $campaignId")

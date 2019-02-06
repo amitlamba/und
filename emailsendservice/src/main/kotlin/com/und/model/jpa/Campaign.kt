@@ -11,6 +11,7 @@ class Campaign {
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "campaign_id_seq")
     @SequenceGenerator(name = "campaign_id_seq", sequenceName = "campaign_id_seq", allocationSize = 1)
     var campaignId: Long = 0
+
     @Column(name = "segmentation_id")
     var segmentId: Long = 0
     @Column(name = "campaign_type")
@@ -27,12 +28,12 @@ class Campaign {
     var fromSMSUser: String? = null
     @Column(name = "client_id")
     var clientId: Long = 0
-    @Column(name="android_template_id")
-    var androidTemplateId:Long?=null
+    @Column(name = "android_template_id")
+    var androidTemplateId: Long? = null
     @Column(name = "web_template_id")
-    var webTemplateId:Long?=null
-    @Column(name="service_provider_id")
-    var serviceProviderId:Long?=null
+    var webTemplateId: Long? = null
+    @Column(name = "service_provider_id")
+    var serviceProviderId: Long? = null
 //    @Column(name = "ios_template_id")
 //    var iosTemplateId:Long?=null
 }

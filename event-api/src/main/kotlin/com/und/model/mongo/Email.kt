@@ -24,7 +24,8 @@ data class Email(
         @Id
         var id: String? = null, //Mongo Auto-generated Document id
         var emailProviderMessageID: String? = null,
-        var emailServiceProvider: String? = null,
+        //var emailServiceProvider: String? = null,
+        var clientEmailSettingId:Long? = null,
         var emailStatus: EmailStatus,
         var statusUpdates: MutableList<EmailStatusUpdate> = mutableListOf()
 )

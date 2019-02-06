@@ -68,7 +68,7 @@ class UserSettingsService {
     private lateinit var clientRepository: ClientRepository
 
     @Autowired
-    private lateinit var userRepository:UserRepository
+    private lateinit var userRepository: UserRepository
 
     @Autowired
     lateinit var feignClientForAuthService: FeignClientForAuthService
@@ -84,13 +84,14 @@ class UserSettingsService {
 
     private var emptyArrayJson: String = "[]"
 
-    private var templateId=6L
-    private var templateName="fromEmailVerification"
-    private var expiration=24*60*60
+    private var templateId = 6L
+    private var templateName = "fromEmailVerification"
+    private var expiration = 24 * 60 * 60
 
     companion object {
-        var logger=LoggerFactory.getLogger(UserSettingsService::class.java)
+        var logger = LoggerFactory.getLogger(UserSettingsService::class.java)
     }
+
     @PostConstruct
     fun setUp() {
         emptyArrayJson = objectMapper.writeValueAsString(emptyArray<String>())//"[]"//objectMapper.
@@ -109,15 +110,15 @@ class UserSettingsService {
     }
 
     @Transactional
-    fun saveEmailServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials, status:Status): Long? {
+    fun saveEmailServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials, status: Status): Long? {
         webServiceProviderCredentials.status = status
         performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials)
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
-        try {
+        return try {
             val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
-            return saved.id
-        }catch(ex:Throwable){
-            return -1
+            saved.id
+        } catch (ex: Throwable) {
+            -1
         }
     }
 
@@ -166,7 +167,7 @@ class UserSettingsService {
     fun saveNotificationServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials): Long? {
         webServiceProviderCredentials.status = Status.ACTIVE
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
-        unMarkDefaultSp(webServiceProviderCredentials.serviceProviderType,webServiceProviderCredentials.isDefault,webServiceProviderCredentials.clientID!!)
+        unMarkDefaultSp(webServiceProviderCredentials.serviceProviderType, webServiceProviderCredentials.isDefault, webServiceProviderCredentials.clientID!!)
         val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         return saved.id!!
     }
@@ -207,13 +208,13 @@ class UserSettingsService {
         with(spCreds) {
             spCreds.appuserID = webServiceProviderCredentials.appuserID
             spCreds.clientID = webServiceProviderCredentials.clientID
-            spCreds.name=webServiceProviderCredentials.name
+            spCreds.name = webServiceProviderCredentials.name
             spCreds.id = webServiceProviderCredentials.id
             spCreds.serviceProvider = webServiceProviderCredentials.serviceProvider
             spCreds.serviceProviderType = webServiceProviderCredentials.serviceProviderType
             spCreds.status = webServiceProviderCredentials.status
             spCreds.credentialsMap = objectMapper.writeValueAsString(webServiceProviderCredentials.credentialsMap)
-            spCreds.isDefault=webServiceProviderCredentials.isDefault
+            spCreds.isDefault = webServiceProviderCredentials.isDefault
         }
         return spCreds
     }
@@ -223,36 +224,36 @@ class UserSettingsService {
         with(wspCreds) {
             wspCreds.appuserID = serviceProviderCredentials.appuserID
             wspCreds.clientID = serviceProviderCredentials.clientID
-            wspCreds.name=serviceProviderCredentials.name
+            wspCreds.name = serviceProviderCredentials.name
             wspCreds.id = serviceProviderCredentials.id
             wspCreds.serviceProvider = serviceProviderCredentials.serviceProvider
             wspCreds.serviceProviderType = serviceProviderCredentials.serviceProviderType
             wspCreds.status = serviceProviderCredentials.status
             wspCreds.credentialsMap = objectMapper.readValue(serviceProviderCredentials.credentialsMap)
-            wspCreds.isDefault=serviceProviderCredentials.isDefault
+            wspCreds.isDefault = serviceProviderCredentials.isDefault
         }
         return wspCreds
     }
 
     @Transactional
-    fun saveAccountSettings(accountSettings: AccountSettings, clientID: Long?, userID: Long?):Map<String,Any>? {
+    fun saveAccountSettings(accountSettings: AccountSettings, clientID: Long?, userID: Long?): Map<String, Any>? {
         //FIXME: Validate Timezone and Email Addresses
         if (clientID != null) {
             val clientSettings = ClientSettings()
             val clientSettingspersisted = clientSettingsRepository.findByClientID(clientID)
             clientSettings.id = clientSettingspersisted?.id
             clientSettings.clientID = clientID
-            clientSettings.authorizedUrls=clientSettingspersisted?.authorizedUrls
-            clientSettings.iosAppIds=clientSettingspersisted?.iosAppIds
-            clientSettings.androidAppIds=clientSettingspersisted?.androidAppIds
-            val token=userCacheRepository.findById(userID.toString()).get().loginKey
-            val user=userRepository.findUser(clientID)
-            var tokenList = mutableMapOf<String,Any>()
+            clientSettings.authorizedUrls = clientSettingspersisted?.authorizedUrls
+            clientSettings.iosAppIds = clientSettingspersisted?.iosAppIds
+            clientSettings.androidAppIds = clientSettingspersisted?.androidAppIds
+            val token = userCacheRepository.findById(userID.toString()).get().loginKey
+            val user = userRepository.findUser(clientID)
+            var tokenList = mutableMapOf<String, Any>()
             accountSettings.urls?.let {
                 if (it.isNotEmpty()) {
                     clientSettings.authorizedUrls = objectMapper.writeValueAsString(it)
 //                    if (clientSettingspersisted?.authorizedUrls == null)
-                    tokenList.set("web",feignClientForAuthService.refreshToken(false, "EVENT_WEB", token).body)
+                    tokenList.set("web", feignClientForAuthService.refreshToken(false, "EVENT_WEB", token).body)
                     /*else*/ updateTokenIdentity(user, accountSettings.urls, "WEB")
                 }
 
@@ -261,16 +262,16 @@ class UserSettingsService {
                 if (it.isNotEmpty()) {
                     clientSettings.androidAppIds = objectMapper.writeValueAsString(it)
 //                    if (clientSettingspersisted?.androidAppIds == null)
-                        tokenList.set("android",feignClientForAuthService.refreshToken(false, "EVENT_ANDROID", token).body)
+                    tokenList.set("android", feignClientForAuthService.refreshToken(false, "EVENT_ANDROID", token).body)
                     /*else*/ updateTokenIdentity(user, accountSettings.andAppId, "ANDROID")
                 }
             }
             accountSettings.iosAppId?.let {
                 if (it.isNotEmpty()) {
-                clientSettings.iosAppIds = objectMapper.writeValueAsString(it)
+                    clientSettings.iosAppIds = objectMapper.writeValueAsString(it)
 //                if(clientSettingspersisted?.iosAppIds==null)
-                tokenList.set("ios",feignClientForAuthService.refreshToken(false,"EVENT_IOS",token).body)
-                /*else*/ updateTokenIdentity(user,accountSettings.iosAppId,"IOS")
+                    tokenList.set("ios", feignClientForAuthService.refreshToken(false, "EVENT_IOS", token).body)
+                    /*else*/ updateTokenIdentity(user, accountSettings.iosAppId, "IOS")
                 }
             }
 
@@ -278,20 +279,20 @@ class UserSettingsService {
             if (clientSettingspersisted == null) {
                 clientSettingsRepository.save(clientSettings)
             } else {
-                clientSettingsRepository.updateAccountSettings(clientSettings.authorizedUrls,clientSettings.androidAppIds,clientSettings.iosAppIds, clientSettings.timezone, clientID)
+                clientSettingsRepository.updateAccountSettings(clientSettings.authorizedUrls, clientSettings.androidAppIds, clientSettings.iosAppIds, clientSettings.timezone, clientID)
             }
             return tokenList
         }
         return null
     }
 
-    private fun updateTokenIdentity(user:Optional<User>,idenity:Array<String>,type:String) {
+    private fun updateTokenIdentity(user: Optional<User>, idenity: Array<String>, type: String) {
         user.ifPresent {
-            var key:String?=null
-            when(type){
-                "ANDROID"-> key=it.androidKey
-                "IOS"-> key=it.iosKey
-                "WEB" -> key=it.key
+            var key: String? = null
+            when (type) {
+                "ANDROID" -> key = it.androidKey
+                "IOS" -> key = it.iosKey
+                "WEB" -> key = it.key
             }
             if (key != null) {
                 var user = tokenIdentityRepository.findById(key)
@@ -309,10 +310,10 @@ class UserSettingsService {
         return if (clientSettings != null) {
             val setting =
                     AccountSettings(clientSettings.id,
-                            objectMapper.readValue(clientSettings.authorizedUrls?: emptyArrayJson),
+                            objectMapper.readValue(clientSettings.authorizedUrls ?: emptyArrayJson),
                             clientSettings.timezone,
-                            objectMapper.readValue(clientSettings.androidAppIds?:emptyArrayJson),
-                            objectMapper.readValue(clientSettings.iosAppIds?:emptyArrayJson))
+                            objectMapper.readValue(clientSettings.androidAppIds ?: emptyArrayJson),
+                            objectMapper.readValue(clientSettings.iosAppIds ?: emptyArrayJson))
             Optional.of(setting)
         } else Optional.empty()
     }
@@ -326,17 +327,25 @@ class UserSettingsService {
 //            throw UndBusinessValidationException(error)
             throw CustomException("Email : ${emailAddress.address} already exist")
         } else {
-            val clientSettingEmail = ClientSettingsEmail()
-            clientSettingEmail.email = emailAddress.address
-            clientSettingEmail.address = emailAddress.personal
-            clientSettingEmail.verified = emailAddress.status
-            clientSettingEmail.clientId = clientID
-            clientSettingsEmailRepository.save(clientSettingEmail)
-            //send verification link
-            sendVerificationEmail(emailAddress, clientID)
+            val serviceProviderId = emailAddress.serviceProviderId
+            val serviceProvider = serviceProviderCredentialsRepository.findByIdAndClientID(serviceProviderId, clientID)
+            if (serviceProvider != null) {
+
+                val clientSettingEmail = ClientSettingsEmail()
+                clientSettingEmail.email = emailAddress.address
+                clientSettingEmail.address = emailAddress.personal
+                clientSettingEmail.verified = emailAddress.status
+                clientSettingEmail.clientId = clientID
+                clientSettingEmail.serviceProviderId = emailAddress.serviceProviderId
+                clientSettingsEmailRepository.save(clientSettingEmail)
+                //send verification link
+                sendVerificationEmail(emailAddress, clientID)
+            } else {
+                throw CustomException("Please choose correct settings")
+            }
+
 
         }
-
 
 
     }
@@ -397,11 +406,12 @@ class UserSettingsService {
 
     fun getSenderEmailAddresses(clientID: Long, onlyVerified: Boolean): List<EmailAddress> {
 
-        var emailAddresses=clientSettingsEmailRepository.findByClientIdAndDeleted(clientID, false)
-        return emailAddresses?.filter { address->address.verified==onlyVerified }?.let {
-            it.map { address ->EmailAddress(address.email ?: "", address.address ?: "",address.verified!!)
+        var emailAddresses = clientSettingsEmailRepository.findByClientIdAndDeleted(clientID, false)
+        return emailAddresses?.filter { address -> address.verified == onlyVerified }?.let {
+            it.map { address ->
+                EmailAddress(address.email ?: "", address.address ?: "", address.serviceProviderId!!, address.verified!!)
             }
-        }?: emptyList()
+        } ?: emptyList()
 
     }
 
@@ -421,14 +431,14 @@ class UserSettingsService {
         var host = serviceProviderCredential.credentialsMap.get("url")
         var username = serviceProviderCredential.credentialsMap.get("username")
         var password = serviceProviderCredential.credentialsMap.get("password")
-        var ssl = serviceProviderCredential.credentialsMap.get("security")?:"NONE"
+        var ssl = serviceProviderCredential.credentialsMap.get("security") ?: "NONE"
         var protocaol = serviceProviderCredential.serviceProvider.toLowerCase()
         if (protocaol.equals("smtp")) {
             var props = Properties()
             props["mail.smtp.host"] = host
             props["mail.smtp.port"] = port
             props["mail.smtp.auth"] = true
-            props.put("mail.smtp.socketFactory.class","javax.net.ssl.SSLSocketFactory")
+            props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory")
 
             when (Security.valueOf(ssl)) {
                 Security.SSL, Security.TLS -> {
@@ -461,22 +471,22 @@ class UserSettingsService {
     }
 
     fun sendVerificationEmail(emailAddress: EmailAddress, clientID: Long) {
-        var data= mutableMapOf<String,Any>()
+        var data = mutableMapOf<String, Any>()
         var client = clientRepository.findById(clientID)
-        if(client.isPresent){
-            var client=client.get()
+        if (client.isPresent) {
+            var client = client.get()
             var toEmailAddress = InternetAddress(client.email)
             var fromEmailAddress = InternetAddress(emailAddress.address)
             var timeStamp = System.currentTimeMillis() / 1000
             var verificationCode = encrypt("$timeStamp||${emailAddress.address}||$clientID")
-            var emailVerificationLink =  "${clientUrl}/setting/verifyemail?c="+URLEncoder.encode(verificationCode,"UTF-8")
+            var emailVerificationLink = "${clientUrl}/setting/verifyemail?c=" + URLEncoder.encode(verificationCode, "UTF-8")
             var name = emailAddress.personal
 //            var emailSubject = "Verify from email Address"
 //            var emailBody="Hi ${name} \n Please verify your email by clicking on below link\n $emailVerificationLink"
-            data.put("name",name)
-            data.put("address",fromEmailAddress.address)
-            data.put("emailVerificationLink",emailVerificationLink)
-            var email = Email(clientID, fromEmailAddress=fromEmailAddress, toEmailAddresses = arrayOf(toEmailAddress), emailTemplateId = templateId,emailTemplateName = templateName,data = data)
+            data.put("name", name)
+            data.put("address", fromEmailAddress.address)
+            data.put("emailVerificationLink", emailVerificationLink)
+            var email = Email(clientID, fromEmailAddress = fromEmailAddress, toEmailAddresses = arrayOf(toEmailAddress), emailTemplateId = templateId, emailTemplateName = templateName, data = data)
             logger.info("Sending from email address varification to ${client.email}")
             toKafka(email)
         }
@@ -488,79 +498,79 @@ class UserSettingsService {
         eventStream.clientEmailSend().send(MessageBuilder.withPayload(email).build())
     }
 
-    fun updateStatusOfEmailSetting(timestamp:Long,mail:String,clientID: Long) {
+    fun updateStatusOfEmailSetting(timestamp: Long, mail: String, clientID: Long) {
 
-        var emailSetting=clientSettingsEmailRepository.findByEmailAndClientId(mail,clientID)
+        var emailSetting = clientSettingsEmailRepository.findByEmailAndClientId(mail, clientID)
 
         //check verification link is clik before 24 hour
-        var currentTimeStamp=System.currentTimeMillis()/1000
+        var currentTimeStamp = System.currentTimeMillis() / 1000
         val expired = currentTimeStamp < timestamp + expiration
-        if(!expired){
+        if (!expired) {
             //here we give an option in ui to resend verification link
             val validationError = ValidationError()
             validationError.addFieldError("emailVerification",
                     "Invalid Link, link has expired please request for new email")
             throw UndBusinessValidationException(validationError)
-        }else{
+        } else {
             //update setting
-            emailSetting.verified=true
+            emailSetting.verified = true
             clientSettingsEmailRepository.save(emailSetting)
             //give a successfull message
         }
     }
 
     @Transactional
-    fun markDefault(type:String,id:Long,default:Boolean){
-        var clientID=AuthenticationUtils.clientID?: throw AccessDeniedException("")
+    fun markDefault(type: String, id: Long, default: Boolean) {
+        var clientID = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
         try {
-            if(default) {
+            if (default) {
                 //check sp with this id present or not
-                var result=serviceProviderCredentialsRepository.findById(id)
-                if(result.isPresent) {
+                var result = serviceProviderCredentialsRepository.findById(id)
+                if (result.isPresent) {
                     serviceProviderCredentialsRepository.unMarkDefaultSp(type, clientID)
                     serviceProviderCredentialsRepository.markSPDefault(id)
-                }else{
+                } else {
                     throw CustomException("Service provider with ${id} not exists.")
                 }
-            }else{
+            } else {
                 //This step is ui dependent how the default action is implemented.
                 // if we give only check box then no need but if we give drop down with true false it needed.
-                var result=serviceProviderCredentialsRepository.findById(id)
+                var result = serviceProviderCredentialsRepository.findById(id)
                 result.ifPresent {
-                    if(it.isDefault){
+                    if (it.isDefault) {
                         throw CustomException("Choose a default service provider.")
                     }
                 }
             }
 
-        }catch(ex:Exception){
+        } catch (ex: Exception) {
             throw CustomException("Error occur during persisting your change. Try again. ${ex.message}")
         }
     }
 
     //call this method from save service provider in a transaction.
-    fun unMarkDefaultSp(type:String,isDefault:Boolean,clientID: Long){
-        if(isDefault){
+    fun unMarkDefaultSp(type: String, isDefault: Boolean, clientID: Long) {
+        if (isDefault) {
             //unmark other default service provider of this type for this client
-            serviceProviderCredentialsRepository.unMarkDefaultSp(type,clientID)
+            serviceProviderCredentialsRepository.unMarkDefaultSp(type, clientID)
         }
     }
 
-    fun getIosServiceProviders(clientId:Long):List<WebServiceProviderCredentials>{
+    fun getIosServiceProviders(clientId: Long): List<WebServiceProviderCredentials> {
         val spCredsList = serviceProviderCredentialsRepository.findAllByClientIDAndServiceProviderType(clientId, ServiceProviderType.IOS_PUSH_SERVICE_PROVIDER.desc)
         val wspCreds = mutableListOf<WebServiceProviderCredentials>()
         spCredsList.forEach { wspCreds.add(buildWebServiceProviderCredentials(it)) }
         return wspCreds
     }
 
-    fun getWebServiceProviders(clientId:Long):List<WebServiceProviderCredentials>{
+    fun getWebServiceProviders(clientId: Long): List<WebServiceProviderCredentials> {
         val spCredsList = serviceProviderCredentialsRepository.findAllByClientIDAndServiceProviderType(clientId, ServiceProviderType.WEB_PUSH_SERVICE_PROVIDER.desc)
         val wspCreds = mutableListOf<WebServiceProviderCredentials>()
         spCredsList.forEach { wspCreds.add(buildWebServiceProviderCredentials(it)) }
         return wspCreds
     }
 
-    fun getAndroidServiceProviders(clientId:Long):List<WebServiceProviderCredentials>{
+    fun getAndroidServiceProviders(clientId: Long): List<WebServiceProviderCredentials> {
         val spCredsList = serviceProviderCredentialsRepository.findAllByClientIDAndServiceProviderType(clientId, ServiceProviderType.ANDROID_PUSH_SERVICE_PROVIDER.desc)
         val wspCreds = mutableListOf<WebServiceProviderCredentials>()
         spCredsList.forEach { wspCreds.add(buildWebServiceProviderCredentials(it)) }
