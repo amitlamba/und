@@ -28,9 +28,9 @@ class EmailTemplate : Serializable{
 
     var parentID: Long? = null
 
-    @NotNull
-    @Email
-    lateinit var from: String
+//    @NotNull
+//    @Email
+//    lateinit var from: String
 
     @NotNull
     var messageType: MessageType? = null

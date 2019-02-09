@@ -41,9 +41,9 @@ class EmailTemplateController {
     fun saveEmailTemplate(@Valid @RequestBody emailTemplate: EmailTemplate): Long {
         var clientId=AuthenticationUtils.clientID
         if(clientId!=null) {
-            var exist = emailTemplateService.checkFromUserExistOrNot(clientId, emailTemplate.from)
+//            var exist = emailTemplateService.checkFromUserExistOrNot(clientId, emailTemplate.from)
 
-            if (exist) {
+            if (true) {
                 return emailTemplateService.saveEmailTemplate(emailTemplate)
             }
         }

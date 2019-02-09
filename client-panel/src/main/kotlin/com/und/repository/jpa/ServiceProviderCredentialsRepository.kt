@@ -17,10 +17,12 @@ interface ServiceProviderCredentialsRepository : JpaRepository<ServiceProviderCr
     fun findAllByClientID(clientID: Long): List<ServiceProviderCredentials>
     @Modifying
     @Query("update ServiceProviderCredentials set isDefault=true where id=?1")
-    fun markSPDefault(id:Long)
+    fun markSPDefault(id: Long)
+
     @Modifying
     @Query("update ServiceProviderCredentials set isDefault=false where serviceProviderType=?1 AND clientID=?2 AND isDefault=true")
-    fun unMarkDefaultSp(serviceProviderType:String,clientID: Long)
+    fun unMarkDefaultSp(serviceProviderType: String, clientID: Long)
 
+    fun findByIdAndClientID(id: Long, clientID: Long): ServiceProviderCredentials?
 //    fun findAllByClientIDAndServiceProviderType(clientID: Long,serviceProviderType: String):List<ServiceProviderCredentials>
 }

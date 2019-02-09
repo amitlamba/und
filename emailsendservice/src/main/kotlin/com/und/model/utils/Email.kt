@@ -22,8 +22,10 @@ data class Email(
         var campaignId:Long,
         var creationTime: Date = DateUtils.nowInUTC(),
         var retries:Int = 0,
-        var serviceProviderId:Long?=null,
-        var mongoNotificationId:String?=null
+        var mongoNotificationId:String?=null,
+        var clientEmailSettingId:Long? = null,
+        var tmpltVisiability:Boolean=false
+        //var serviceProviderId:Long?=null
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

@@ -28,6 +28,8 @@ class Campaign {
     var dateModified: LocalDateTime? = null
     var conversionEvent:String?=null
     var serviceProviderId:Long?=null
+    var fromUser:String?=null
+    var clientEmailSettingId:Long?=null
 
 }
 
