@@ -176,7 +176,7 @@ class EmailSendService {
         try {
             val session = emailHelperService.session(email.clientID, emailSMTPConfig)
 
-            val transport = emailHelperService.transport(email.clientID)
+            val transport = emailHelperService.transport(email.clientID,email.clientEmailSettingId!!)
             transport.removeTransportListener(messageTransPortListener)
             //transport.addTransportListener(messageTransPortListener)
             //transport.

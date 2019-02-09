@@ -79,7 +79,7 @@ class DatabaseTemplateLoader : TemplateLoader {
         webTemplate.name = emailTemplate.name
         webTemplate.emailTemplateBody = emailTemplate.emailTemplateBody?.template ?: ""
         webTemplate.emailTemplateSubject = emailTemplate.emailTemplateSubject?.template ?: ""
-        webTemplate.from = emailTemplate.from
+//        webTemplate.from = emailTemplate.from
         webTemplate.messageType = emailTemplate.messageType
         webTemplate.parentID = emailTemplate.parentID
         webTemplate.tags = emailTemplate.tags

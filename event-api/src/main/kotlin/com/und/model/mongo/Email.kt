@@ -1,18 +1,8 @@
 package com.und.model.mongo
 
-import com.fasterxml.jackson.annotation.JsonGetter
-import com.fasterxml.jackson.annotation.JsonIgnore
-import com.fasterxml.jackson.annotation.JsonProperty
-import com.fasterxml.jackson.annotation.JsonSetter
-import com.fasterxml.jackson.core.JsonParser
-import com.fasterxml.jackson.databind.DeserializationContext
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import org.springframework.data.annotation.Id
-import org.springframework.data.annotation.Transient
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
-import java.util.*
 import javax.mail.internet.InternetAddress
 
 @Document(collection = "#{tenantProvider.getTenant()}_email")
@@ -33,8 +23,9 @@ data class Email(
         @Id
         var id: String? = null, //Mongo Auto-generated Document id
         var emailProviderMessageID: String? = null,
-        var emailServiceProvider: String? = null,
         var status: EmailStatus,
+        //var emailServiceProvider: String? = null,
+        var clientEmailSettingId:Long? = null,
         var statusUpdates: MutableList<EmailStatusUpdate> = mutableListOf()
 )
 data class EmailStatusUpdate (

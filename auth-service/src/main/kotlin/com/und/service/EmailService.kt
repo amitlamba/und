@@ -31,6 +31,12 @@ class EmailService {
     @Value("\${und.url.clientpanelui}")
     lateinit var clientPanelUrl: String
 
+    @Value(value = "\${und.system.email.setting.id}")
+    var clientEmailSettingId:Long?=null
+
+    @Value(value = "\${und.system.from.address}")
+    lateinit var systemFromAddress:String
+
     @Autowired
     private lateinit var eventStream: EventStream
 
@@ -38,7 +44,7 @@ class EmailService {
         logger.info("email being sent -------------")
 
         logger.info("from ${email.fromEmailAddress}")
-        logger.info("to ${email.toEmailAddresses}")
+        logger.info("to ${email.toEmailAddresses.get(0).address}")
         logger.info("subject ${email.emailSubject}")
         logger.info("body ${email.emailBody}")
         toKafka(email)
@@ -54,10 +60,12 @@ class EmailService {
 
         val email = Email(
                 clientID = 1,
+                fromEmailAddress = InternetAddress(systemFromAddress),
                 toEmailAddresses = arrayOf(InternetAddress(email)),
                 emailTemplateId = EmailService.forgotPasswordTemplate,
                 emailTemplateName = "forgotpassword",
-                data = dataMap
+                data = dataMap,
+                clientEmailSettingId = clientEmailSettingId
 
         )
         sendEmail(email)
@@ -74,10 +82,12 @@ class EmailService {
 
         val email = Email(
                 clientID = 1,
+                fromEmailAddress = InternetAddress(systemFromAddress),
                 toEmailAddresses = arrayOf(InternetAddress("support@userndot.com")),
                 emailTemplateId = EmailService.supportTemplate,
                 emailTemplateName = "support",
-                data = dataMap
+                data = dataMap,
+                clientEmailSettingId = clientEmailSettingId
 
         )
         sendEmail(email)
@@ -90,10 +100,12 @@ class EmailService {
 
         val email = Email(
                 clientID = 1,
+                fromEmailAddress = InternetAddress(systemFromAddress),
                 toEmailAddresses = arrayOf(InternetAddress(contactInfo.email)),
                 emailTemplateId = EmailService.contactusTemplate,
                 emailTemplateName = "contactus",
-                data = dataMap
+                data = dataMap,
+                clientEmailSettingId = clientEmailSettingId
 
         )
         sendEmail(email)
@@ -107,10 +119,11 @@ class EmailService {
 
         val email = Email(
                 clientID = 1,
+                fromEmailAddress = InternetAddress(systemFromAddress),
                 toEmailAddresses = arrayOf(InternetAddress(client.email)),
                 emailTemplateId = EmailService.verificationTemplate,
                 emailTemplateName = "verificationemail",
-
+                clientEmailSettingId = clientEmailSettingId,
                 data = dataMap
 
         )

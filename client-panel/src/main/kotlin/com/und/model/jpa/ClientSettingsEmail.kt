@@ -31,6 +31,9 @@ class ClientSettingsEmail {
     @Column(name = "email")
     var email: String? = null
 
+    @Column(name = "service_provider_id", nullable = false)
+    var serviceProviderId: Long? = null
+
     @NotNull
     var deleted: Boolean = false
 

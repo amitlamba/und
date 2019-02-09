@@ -35,8 +35,8 @@ class EmailListener {
 
     @StreamListener("clientEmailReceive")
     fun sendClientEmail(email: Email) {
-        email.clientID = 1
-
+//        email.clientID = 1
+        email.tmpltVisiability=true;
         sendEmail(email)
     }
 

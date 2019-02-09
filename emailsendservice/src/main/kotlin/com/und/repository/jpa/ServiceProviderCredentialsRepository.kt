@@ -19,4 +19,5 @@ interface ServiceProviderCredentialsRepository : JpaRepository<ServiceProviderCr
     @Query("select sp from ServiceProviderCredentials sp where sp.clientID= :clientId And sp.serviceProviderType= :type And sp.isDefault=true")
     fun findByIsdefaultTrue(@Param("type")type:String,@Param("clientId")clientID: Long):Optional<ServiceProviderCredentials>
 
+    fun findByClientIDAndId(clientID: Long,id:Long):Optional<ServiceProviderCredentials>
 }

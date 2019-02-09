@@ -42,4 +42,7 @@ class EmailCampaign {
     @Column(name = "date_modified")
     lateinit var dateModified: LocalDateTime
 
+    @Column(name="client_setting_email_id")
+    @NotNull
+    var clientSettingEmailId:Long?=null
 }

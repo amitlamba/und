@@ -15,5 +15,6 @@ data class Email(
         var emailTemplateId: Long,
         var emailTemplateName: String,
         var data: MutableMap<String, Any> = mutableMapOf(),
-        var eventUser: EventUser? = null
+        var eventUser: EventUser? = null,
+        var clientEmailSettingId:Long? = null
 )

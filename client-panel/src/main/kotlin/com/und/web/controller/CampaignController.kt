@@ -10,6 +10,8 @@ import com.und.service.*
 import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.web.model.Campaign
+import com.und.web.model.ClientEmailSettIdFromAddrSrp
+import com.und.web.model.ClientFromAddressAndSrp
 import com.und.web.model.EmailTemplate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -49,12 +51,14 @@ class CampaignController {
     lateinit var campaignService: CampaignService
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping(value = ["list/all"])
+    @GetMapping(value = ["/list/all"])
     fun getCampaigns(@RequestParam(value = "id", required = false) id: Long? = null,request:HttpServletRequest): List<Campaign> {
         return campaignService.getCampaigns()
     }
+
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping(value = ["error/{campaignId}"])
+    @GetMapping(value = ["/error/{campaignId}"])
     fun scheduleError(@PathVariable("campaignId") campaignId: Long): ResponseEntity<String> {
 
         logger.info("campaign schedule error fetching for campaignId $campaignId")
@@ -163,5 +167,16 @@ class CampaignController {
         return ResponseEntity(campaignId, HttpStatus.EXPECTATION_FAILED)
     }
 
+//    @GetMapping(value = ["/email/faddrandsrp"])
+//    fun getClientFromAddressAndSrp1():ClientFromAddressAndSrp{
+//        val clientId=AuthenticationUtils.clientID?:throw AccessDeniedException("Access denied")
+//        return campaignService.getClientFromAddressAndSrp(clientId)
+//    }
+
+    @GetMapping(value = ["/email/faddrandsrp"])
+    fun getClientFromAddressAndSrp(): List<ClientEmailSettIdFromAddrSrp> {
+        val clientId=AuthenticationUtils.clientID?:throw AccessDeniedException("Access denied")
+        return campaignService.getClientFromAddressAndSrp(clientId)
+    }
 
 }

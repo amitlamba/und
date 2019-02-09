@@ -7,7 +7,7 @@ import com.und.model.mongo.EventUser
 import com.und.model.utils.Email
 import com.und.model.utils.FcmMessage
 import com.und.model.utils.Sms
-import com.und.repository.jpa.CampaignRepository
+import com.und.repository.jpa.*
 import com.und.utils.loggerFor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.support.MessageBuilder
@@ -27,14 +27,26 @@ class CampaignService {
     private lateinit var objectMapper: ObjectMapper
     @Autowired
     private lateinit var segmentService: SegmentService
-
+    @Autowired
+    private lateinit var emailCampaignRepository: EmailCampaignRepository
+    @Autowired
+    private lateinit var androidCampaignRepository: AndroidCampaignRepository
+    @Autowired
+    private lateinit var webCampaignRepository: WebPushCampaignRepository
+    @Autowired
+    private lateinit var smsCampaignRepository: SmsCampaignRepository
+    @Autowired
+    private lateinit var clientEmailSettingsRepository: ClientEmailSettingsRepository
+    @Autowired
+    private lateinit var emailTemplateRepository: EmailTemplateRepository
     @Autowired
     private lateinit var eventStream: EventStream
 
     fun executeCampaign(campaignId: Long, clientId: Long) {
-        val campaignOption = campaignRepository.getCampaignByCampaignId(campaignId, clientId)
+//        val campaignOption = campaignRepository.getCampaignByCampaignId(campaignId, clientId)
+        val campaignOption=campaignRepository.findById(campaignId)
         val campaign = campaignOption.orElseThrow({ IllegalStateException("campaign not found for campaign id $campaignId and client $clientId") })
-        val usersData = getUsersData(campaign.segmentId, clientId)
+        val usersData = getUsersData(campaign.segmentationID!!, clientId)
         usersData.forEach { user ->
             try {
                 //TODO: filter out unsubscribed and blacklisted users
@@ -86,41 +98,57 @@ class CampaignService {
     }
 
 
-    private fun sms(clientId: Long, campaign: Campaign?, user: EventUser): Sms {
+    private fun sms(clientId: Long, campaign: Campaign, user: EventUser): Sms {
+        val smsCampaign=smsCampaignRepository.findByCampaignId(campaign.id!!)
+        if (!smsCampaign.isPresent) throw Exception("Sms Campaign not exist for clientId ${clientId} and campaignId ${campaign.id}")
+        val smsTemplate=emailTemplateRepository.findByIdAndClientID(smsCampaign.get().templateId!!,clientId)
+        if(!smsTemplate.isPresent) throw Exception("Sms Template for clientId ${clientId} , templateId ${smsCampaign.get().templateId} not exists.")
         return Sms(
                 clientId,
-                campaign?.fromSMSUser,
+                campaign.fromUser,
                 user.identity.mobile,
                 smsBody = null,
-                smsTemplateId = campaign?.smsTemplateId ?: 0L,
-                //assign name also
-                smsTemplateName = null,
+                smsTemplateId = smsCampaign.get().templateId ?: 0L,
+                smsTemplateName = smsTemplate.get().name,
                 eventUser = user,
-                serviceProviderId = campaign?.serviceProviderId,
-                campaignId = campaign?.campaignId
+                serviceProviderId = campaign.serviceProviderId,
+                campaignId = campaign.id
         )
     }
 
     private fun email(clientId: Long, campaign: Campaign, user: EventUser): Email {
-        return Email(
-                clientID = clientId,
-                fromEmailAddress = InternetAddress.parse(campaign.fromEmailAddress, false)[0],
-                toEmailAddresses = InternetAddress.parse(user.identity.email, false),
-                emailTemplateId = campaign.emailTemplateId ?: 0L,
-                emailTemplateName = campaign.emailTemplateName ?: "",
-                campaignId = campaign.campaignId,
-                eventUser = user,
-                serviceProviderId = campaign?.serviceProviderId
-        )
+        try {
+            val emailCampaign = emailCampaignRepository.findByCampaignId(campaign.id!!)
+            if (!emailCampaign.isPresent) throw Exception("Email Campaign not exist for clientId ${clientId} and campaignId ${campaign.id}")
+            val emailTemplate = emailTemplateRepository.findByIdAndClientID(emailCampaign.get().templateId!!, clientId)
+            if (!emailTemplate.isPresent) throw Exception("Email Template for clientId ${clientId} , templateId ${emailCampaign.get().templateId} not exists.")
+//        val clientEmailSettings= clientEmailSettingsRepository.
+//                findByClientIdAndEmailAndServiceProviderId(clientId,campaign.fromUser!!,campaign.serviceProviderId!!)
+//        if (!clientEmailSettings.isPresent) throw Exception("Client Email Settings not present for client ${clientId} fromAddress ${campaign.fromUser} sp ${campaign.serviceProviderId}")
+            return Email(
+                    clientID = clientId,
+                    fromEmailAddress = InternetAddress.parse(campaign.fromUser, false)[0],
+                    toEmailAddresses = InternetAddress.parse(user.identity.email, false),
+                    emailTemplateId = emailCampaign.get().templateId ?: 0L,
+                    emailTemplateName = emailTemplate.get().name,
+                    campaignId = campaign.id!!,
+                    eventUser = user,
+                    clientEmailSettingId = emailCampaign.get().clientSettingEmailId
+            )
+        }catch (ex:Exception){
+            throw ex
+        }
     }
     private fun fcmAndroidMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
         //Todo passing data model
+        val androidCampaign =androidCampaignRepository.findByCampaignId(campaign.id!!)
+        if (!androidCampaign.isPresent) throw Exception("Android Campaign not exist for clientId ${clientId} and campaignId ${campaign.id}")
         return FcmMessage(
                 clientId=clientId,
-                templateId = campaign.androidTemplateId?:0L,
+                templateId = androidCampaign.get().templateId?:0L,
                 to = user.identity.androidFcmToken?:"",
                 type = "android",
-                campaignId = campaign.campaignId,
+                campaignId = campaign.id!!,
                 userId = user.id,
                 eventUser = user,
                 serviceProviderId = campaign?.serviceProviderId
@@ -128,25 +156,28 @@ class CampaignService {
     }
 
     private fun fcmWebMessage(clientId: Long,campaign: Campaign,user: EventUser,token:String):FcmMessage{
+        val webPushCampaign =webCampaignRepository.findByCampaignId(campaign.id!!)
+        if (!webPushCampaign.isPresent) throw Exception("Web Campaign not exist for clientId ${clientId} and campaignId ${campaign.id}")
         return FcmMessage(
                 clientId = clientId,
-                templateId = campaign.webTemplateId?:0L,
+                templateId = webPushCampaign.get().templateId?:0L,
                 to = token,
                 type = "web",
-                campaignId = campaign.campaignId,
+                campaignId = campaign.id!!,
                 userId = user.id,
                 eventUser = user,
                 serviceProviderId = campaign?.serviceProviderId
         )
     }
     private fun fcmIosMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
+//        val iosCampaign =iosCampaignRepository.findByCampaignId(campaign.id!!)
         return FcmMessage(
                 clientId = clientId,
-//                templateId = campaign.iosTemplateId?:0L,
+//                templateId = iosCampaign.get().templateId?:0L,
                 templateId = 0L,
                 to = user.identity.iosFcmToken?:"",
                 type = "ios",
-                campaignId = campaign.campaignId,
+                campaignId = campaign.id!!,
                 userId = user.id,
                 eventUser = user,
                 serviceProviderId = campaign?.serviceProviderId

@@ -18,6 +18,9 @@ class ServiceProviderCredentialsService {
     private lateinit var serviceProviderCredentialsRepository: ServiceProviderCredentialsRepository
 
     @Autowired
+    private lateinit var emailHelperService: EmailHelperService
+
+    @Autowired
     private lateinit var objectMapper: ObjectMapper
 
     fun getEmailProviderCredentials(clientId: Long): Any {
@@ -186,7 +189,8 @@ class ServiceProviderCredentialsService {
 
     fun getServiceProviderCredentials(email: Email): com.und.model.utils.ServiceProviderCredentials {
 //        val serviceProviderCred = this.findActiveEmailServiceProvider(email.clientID)
-        val serviceProviderCred=this.getServiceProviderCredential(email.serviceProviderId,email.clientID,"Email Service Provider")
+//        val serviceProviderCred=this.getServiceProviderCredential(email.serviceProviderId,email.clientID,"Email Service Provider")
+        val serviceProviderCred=emailHelperService.getEmailServiceProviderCredentials(email.clientID,email.clientEmailSettingId!!)
         return this.buildWebServiceProviderCredentials(serviceProviderCred)
     }
 
