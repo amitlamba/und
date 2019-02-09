@@ -9,7 +9,9 @@ import com.und.model.jpa.ServiceProviderCredentials
 import com.und.repository.jpa.ClientEmailSettingsRepository
 import com.und.repository.jpa.ServiceProviderCredentialsRepository
 import com.und.repository.mongo.EmailSentRepository
+import com.und.utils.loggerFor
 import org.jsoup.Jsoup
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
@@ -43,6 +45,10 @@ class EmailHelperService {
 
     @Value("\${und.url.event}")
     private lateinit var eventApiUrl: String
+
+    companion object {
+        var logger=LoggerFactory.getLogger(EmailHelperService::class.java)
+    }
 
 
     fun createMimeMessage(session: Session, email: Email): MimeMessage {
@@ -167,6 +173,7 @@ class EmailHelperService {
     //TODO jedis connection error.
 //    @Cacheable(key = "'client_'+#clientId+'setting_id_'+#clientEmailSettingId",cacheNames = ["serviceProviderCredentials"])
     fun getEmailServiceProviderCredentials(clientId: Long, clientEmailSettingId: Long): ServiceProviderCredentials {
+        logger.info("Getting service provider for client ${clientId} and clientEmailSetting ${clientEmailSettingId}")
         val clientEmailSetting = clientEmailSettingsRepository.findById(clientEmailSettingId)
         if (!clientEmailSetting.isPresent) throw Exception("Client Email Setting not exists for id ${clientEmailSettingId} client ${clientId}")
         else {
