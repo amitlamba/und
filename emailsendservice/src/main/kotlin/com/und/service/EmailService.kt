@@ -96,29 +96,30 @@ class EmailService {
         emailToSend.emailBody = body.addUrlTracking(mongoEmailId).addPixelTracking(mongoEmailId)
         emailToSend.emailSubject = subject
 
-        if (isSystemClient(email)) {
-            val template = emailTemplateRepository.findByIdAndClientID(email.emailTemplateId, email.clientID)
-            val from = template.map { it.from }
-            if (from.isPresent) {
-                emailToSend.fromEmailAddress = InternetAddress(from.get())
-            } else {
-
-                logger.error("from email for template id ${email.emailTemplateId} is not present for system user")
-                val error = EmailError()
-                with(error) {
-                    clientid = email.clientID
-                    failureType = EmailError.FailureType.CONNECTION
-                    causeMessage = "from email for template id ${email.emailTemplateId} is not present for system user"
-                    failedSettingId = clientSettings?.id
-
-                }
-                throw  EmailFailureException("from email for template id ${email.emailTemplateId} is not present for system user", error)
-            }
-        }
+//        if (isSystemClient(email)) {
+//            val template = emailTemplateRepository.findByIdAndClientID(email.emailTemplateId, email.clientID)
+//            val from = template.map { it.from }
+//            if (from.isPresent) {
+//                emailToSend.fromEmailAddress = InternetAddress(from.get())
+//            } else {
+//
+//                logger.error("from email for template id ${email.emailTemplateId} is not present for system user")
+//                val error = EmailError()
+//                with(error) {
+//                    clientid = email.clientID
+//                    failureType = EmailError.FailureType.CONNECTION
+//                    causeMessage = "from email for template id ${email.emailTemplateId} is not present for system user"
+//                    failedSettingId = clientSettings?.id
+//
+//                }
+//                throw  EmailFailureException("from email for template id ${email.emailTemplateId} is not present for system user", error)
+//            }
+//        }
         emailHelperService.saveMailInMongo(emailToSend, NOT_SENT, mongoEmailId)
         sendEmailWithoutTracking(emailToSend)
         emailHelperService.updateEmailStatus(mongoEmailId, SENT, emailToSend.clientID)
 
+        //TODO this event is track only for campaign not for system emails
         val token = userRepository.findSystemUser().key
         var event= Event()
         with(event) {
@@ -137,6 +138,8 @@ class EmailService {
 
     fun sendEmailWithoutTracking(email: Email) {
         val serviceProviderCredential = serviceProviderCredentials(email = email)
+//        val serviceProviderCredential= emailHelperService.getEmailServiceProviderCredentials(email.clientID,email.clientEmailSettingId!!)
+//        val spcrd=serviceProviderCredentialsService.buildWebServiceProviderCredentials(serviceProviderCredential)
         sendEmail(serviceProviderCredential, email)
     }
 

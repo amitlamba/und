@@ -47,9 +47,9 @@ class EmailTemplate {
     @Null
     var parentID: Long? = null
 
-    @Column(name = "from_user")
-    @NotNull
-    lateinit var from: String
+//    @Column(name = "from_user")
+//    @NotNull
+//    lateinit var from: String
 
     @Column(name = "message_type") //Promotional or Transactional
     @NotNull

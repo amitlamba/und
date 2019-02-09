@@ -2,6 +2,7 @@ package com.und.factory
 
 import com.und.exception.EmailFailureException
 import com.und.model.utils.EmailSMTPConfig
+import com.und.service.EmailHelperService
 import com.und.service.ServiceProviderCredentialsService
 import com.und.utils.loggerFor
 import org.slf4j.Logger
@@ -25,17 +26,19 @@ class EmailServiceProviderConnectionFactory {
     @Autowired
     lateinit var serviceProviderCredentialsService: ServiceProviderCredentialsService
 
+    @Autowired
+    private lateinit var emailHelperService: EmailHelperService
+
     var emailSMPTConfigs: ConcurrentHashMap<Long, EmailSMTPConfig> = ConcurrentHashMap()
     var emailSMTPSessions: ConcurrentHashMap<Long, Session> = ConcurrentHashMap()
     var emailSMTPTransportConnections: ConcurrentHashMap<Long, Transport> = ConcurrentHashMap()
 
-    fun getEmailServiceProvider(clientID: Long): EmailSMTPConfig {
+    fun getEmailServiceProvider(clientID: Long,clientEmailSettingId: Long): EmailSMTPConfig {
         return when {
             emailSMPTConfigs.containsKey(clientID) -> emailSMPTConfigs[clientID] as EmailSMTPConfig
             else -> {
                 synchronized(clientID) {
-//                    getServiceProviderCredential(id:Long?,clientId: Long,type:String) in serviceprovidercredservice
-                    val serviceProviderCreds = serviceProviderCredentialsService.findActiveEmailServiceProvider(clientID)
+                    val serviceProviderCreds = emailHelperService.getEmailServiceProviderCredentials(clientID,clientEmailSettingId)
                     val wspCreds = serviceProviderCredentialsService.buildWebServiceProviderCredentials(serviceProviderCreds)
                     val emailSMTPConfig = EmailSMTPConfig(
                             serviceProviderCredentialsId = wspCreds.id,
@@ -77,15 +80,15 @@ class EmailServiceProviderConnectionFactory {
         }
     }
 
-    fun getSMTPTransportConnection(clientID: Long): Transport {
+    fun getSMTPTransportConnection(clientID: Long,clientEmailSettingId:Long): Transport {
 
         return when {
             emailSMTPTransportConnections.containsKey(clientID) -> emailSMTPTransportConnections[clientID] as Transport
             else -> {
                 synchronized(clientID) {
-                    val emailSMTPConfig = getEmailServiceProvider(clientID)
+                    val emailSMTPConfig = getEmailServiceProvider(clientID,clientEmailSettingId)
                     val transport = getSMTPSession(clientID, emailSMTPConfig).transport
-                    val esp = getEmailServiceProvider(clientID)
+                    val esp = getEmailServiceProvider(clientID,clientEmailSettingId)
                     logger.debug("Email Service Provider: $esp")
                     emailSMTPTransportConnections[clientID] = transport
                     transport
