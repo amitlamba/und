@@ -273,7 +273,7 @@ class UserEventAnalyticsServiceImpl : UserEventAnalyticsService {
     }
 
 
-    private fun buildUserCountByEventResult(aggregate: List<AggregateOutput>): List<UserCountByEventForDate> {
+    private fun      buildUserCountByEventResult(aggregate: List<AggregateOutput>): List<UserCountByEventForDate> {
         return aggregate.map {
             UserCountByEventForDate(it.groupByInfo[Field.DateVal.fName].toString(),
                     listOf(UserCountByEvent(it.aggregateVal.toInt(), it.groupByInfo[Field.EventName.fName].toString())))

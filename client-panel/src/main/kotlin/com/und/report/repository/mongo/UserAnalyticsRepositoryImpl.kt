@@ -26,7 +26,8 @@ class UserAnalyticsRepositoryImpl: UserAnalyticsRepository{
         logger.debug("Fetching aggregation results for query : $query, clientId: $clientId")
 
         val aggregate = mongoTemplate.aggregate<Document>(query, "${clientId}_event", Document::class.java)
-        val result=aggregate.mappedResults.filter { it -> it["_id"] != null }
+        val result=if(aggregate.mappedResults.isNotEmpty() && aggregate.mappedResults[0]["_id"] !=null) aggregate.mappedResults.filter { it -> it["_id"] != null }
+        else aggregate.mappedResults
 //        logger.debug("Total ${aggregate.mappedResults.size} results found")
 //
 //        if(aggregate.mappedResults.size == 0) return emptyList()
@@ -52,7 +53,7 @@ class UserAnalyticsRepositoryImpl: UserAnalyticsRepository{
 
     override fun getReachability(query: Aggregation, clientId: Long): Reachability {
         var result= mongoTemplate.aggregate(query,"${clientId}_event",Reachability::class.java)
-        return result.mappedResults[0]
+        return if(result.mappedResults.isNotEmpty()) result.mappedResults[0] else Reachability()
     }
 
     override fun funnelData(query: Aggregation, clientId: Long): List<UserData> {

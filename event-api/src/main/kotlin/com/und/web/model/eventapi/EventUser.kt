@@ -58,6 +58,10 @@ class EventUser {
     @Pattern(regexp = "[A-Za-z][a-zA-Z\\s]*", message = "{eventUser.city.invalid}")
     var city: String? = null
 
+    @Size(min = 2, max = 40, message = "{eventUser.city.invalidSize}")
+    @Pattern(regexp = "[A-Za-z][a-zA-Z\\s]*", message = "{eventUser.city.invalid}")
+    var state: String? = null
+
     var address: String? = null
 
     @Pattern(regexp = "^(\\+?\\d{1,3})", message = "{eventUser.countryCode.invalid}")
