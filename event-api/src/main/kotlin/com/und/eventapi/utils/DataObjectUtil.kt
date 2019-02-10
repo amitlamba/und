@@ -138,6 +138,7 @@ fun com.und.model.mongo.eventapi.EventUser.copyNonNull(eventUser: EventUser): co
     }
     copyEventUser.standardInfo.country = unchanged(eventUser.country, standardInfo.country)
     copyEventUser.standardInfo.city = unchanged(eventUser.city, standardInfo.city)
+    copyEventUser.standardInfo.state= unchanged(eventUser.state,standardInfo.state)
     copyEventUser.standardInfo.address = unchanged(eventUser.address, standardInfo.address)
     copyEventUser.standardInfo.countryCode = unchanged(eventUser.countryCode, standardInfo.countryCode)
     copyEventUser.communication=getCommunication(this,eventUser)
