@@ -147,11 +147,11 @@ class EmailService {
         when (serviceProviderCredential.serviceProvider) {
             ServiceProviderCredentialsService.ServiceProvider.SMTP.desc,
             ServiceProviderCredentialsService.ServiceProvider.AWS_SES_SMTP.desc -> {
-                val emailSMTPConfig = EmailSMTPConfig.build(serviceProviderCredential)
+                val emailSMTPConfig = EmailSMTPConfig.build(serviceProviderCredential,email.clientEmailSettingId)
                 sendEmailBySMTP(emailSMTPConfig, email)
             }
             ServiceProviderCredentialsService.ServiceProvider.AWS_SES_API.desc -> {
-                val emailSESConfig = EmailSESConfig.build(serviceProviderCredential)
+                val emailSESConfig = EmailSESConfig.build(serviceProviderCredential,email.clientEmailSettingId)
                 sendEmailByAWSSDK(emailSESConfig, email)
             }
 

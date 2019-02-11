@@ -3,12 +3,15 @@ package com.und.service
 import com.und.common.utils.loggerFor
 import com.und.exception.EmailError
 import com.und.model.Status
+import com.und.model.jpa.ClientSettingsEmail
 import com.und.model.jpa.EmailFailureAuditLog
 import com.und.model.mongo.BlockHistory
 import com.und.model.mongo.BlockedEmail
+import com.und.repository.jpa.ClientSettingsEmailRepository
 import com.und.repository.jpa.EmailFailureAuditLogRepository
 import com.und.repository.mongo.BlockedEmailRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.data.domain.Example
 import org.springframework.data.domain.Sort
@@ -42,6 +45,9 @@ class EmailFailureHandlerService {
     @Autowired
     private lateinit var blockedEmailRepository: BlockedEmailRepository
 
+    @Autowired
+    private lateinit var clientSettingsEmailRepository: ClientSettingsEmailRepository
+
 
     @StreamListener("emailFailureEventReceive")
     @Transactional
@@ -67,11 +73,16 @@ class EmailFailureHandlerService {
 
         emailError.clientid?.let { clientId ->
             //mark status as inactive
-            val providers = userSettingsService.getEmailServiceProvider(clientId)
-            val settings = providers.filter { it.id == emailError.failedSettingId }
-            if (settings.isNotEmpty()) {
-                userSettingsService.saveEmailServiceProvider(settings.first(), Status.DISABLED)
+            emailError.failedSettingId?.let {
+                val setting=getClientEmailSetting(clientId,it)
+                setting?.let {
+                    val providers = userSettingsService.getEmailServiceProvider(clientId,it.serviceProviderId!!)
+                    if (providers!=null) {
+                        userSettingsService.saveEmailServiceProvider(providers, Status.DISABLED)
+                    }
+                }
             }
+
             //pause forced campaign
             campaignService.pauseAllRunning(clientId)
             //send an email
@@ -81,6 +92,12 @@ class EmailFailureHandlerService {
 
     }
 
+    @Cacheable(key = "'client_'+#clientId+'id_'+#id",cacheNames = ["clientemailsettings"])
+    private fun getClientEmailSetting(clientId:Long,id:Long):ClientSettingsEmail?{
+        val setting=clientSettingsEmailRepository.findByClientIdAndId(clientId,id)
+        if(setting.isPresent) return setting.get()
+        else {logger.error("Client Email Setting not present for client $clientId id $id"); return null}
+    }
     private fun handleEmailDeliveryFailure(emailError: EmailError) {
         //log error
         saveEmailFailureLog(emailError)
