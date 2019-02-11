@@ -53,7 +53,7 @@ data class EmailSESConfig(
         val awsSecretAccessKey: String
 ) {
     companion object {
-        fun build(serviceProviderCredentials: ServiceProviderCredentials): EmailSESConfig {
+        fun build(serviceProviderCredentials: ServiceProviderCredentials,clientEmailSettingId:Long?): EmailSESConfig {
             val credentialMap = serviceProviderCredentials.credentialsMap
             val region = credentialMap["AWS_REGION"]
             val accessKeyId = credentialMap["AWS_ACCESS_KEY_ID"]
@@ -64,7 +64,7 @@ data class EmailSESConfig(
                 with(error) {
                     clientid = serviceProviderCredentials.clientID
                     causeMessage = "details for email setting are incorrect region : $region , accesKeyId : $accessKeyId , secretAccesKey :$secretAccessKey  "
-                    failedSettingId = serviceProviderCredentials.id
+                    failedSettingId = clientEmailSettingId
                     failureType = EmailError.FailureType.CONNECTION
                 }
                 throw EmailFailureException("details for email setting are incorrect region : $region , accesKeyId : $accessKeyId , secretAccesKey :$secretAccessKey  ", error)
@@ -92,7 +92,7 @@ data class EmailSMTPConfig(
         var CONFIGSET: String? = null
 ) {
     companion object {
-        fun build(serviceProviderCredentials: ServiceProviderCredentials): EmailSMTPConfig {
+        fun build(serviceProviderCredentials: ServiceProviderCredentials,clientEmailSettingId: Long?): EmailSMTPConfig {
             val host = serviceProviderCredentials.credentialsMap["url"]
             val port = serviceProviderCredentials.credentialsMap["port"]
             val username = serviceProviderCredentials.credentialsMap["username"]
@@ -103,7 +103,7 @@ data class EmailSMTPConfig(
                 with(error) {
                     clientid = serviceProviderCredentials.clientID
                     causeMessage = "details for email setting are incorrect host : $host , port : $port , username :$username , password : $password "
-                    failedSettingId = serviceProviderCredentials.id
+                    failedSettingId = clientEmailSettingId
                     failureType = EmailError.FailureType.CONNECTION
                 }
                 throw EmailFailureException("details for email setting are incorrect host : $host , port : $port , username :$username , password : $password ", error)
