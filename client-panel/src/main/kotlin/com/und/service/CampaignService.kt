@@ -96,9 +96,11 @@ class CampaignService {
             val sendToKafka = sendToKafka(jobDescriptor)
             return persistedCampaign
         }catch (ex:ConstraintViolationException){
+            logger.error("Exception In Campaign Save clientId ${campaign.clientID} constaintsName ${ex.constraintName} cause ${ex.cause?.message}")
             throw CustomException("Campaign with this name already exists.${ex.message}")
         }catch (ex:DataIntegrityViolationException){
-            throw CustomException("Campaign with this name already exists.${ex.message}")
+            logger.error("Exception In Campaign Save clientId ${campaign.clientID} cause ${ex.message}")
+            throw CustomException("Campaign with this name already exists.${ex.message} ${ex.cause?.message}")
         }
         return null
     }
