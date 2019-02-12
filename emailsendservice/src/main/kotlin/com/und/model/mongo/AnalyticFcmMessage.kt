@@ -18,7 +18,8 @@ data class AnalyticFcmMessage(
         var templateId: Long,
         var userId: String?=null,
         var serviceProvider: String,
-        var creationTime: Date = DateUtils.nowInUTC()
+        var creationTime: Date = DateUtils.nowInUTC(),
+        var segmentId:Long?=null
 )
 
 enum class FcmMessageStatus(var order: Int) {

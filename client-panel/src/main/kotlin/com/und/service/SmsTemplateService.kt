@@ -22,11 +22,11 @@ class SmsTemplateService {
         return smsTemplateRepository.findByClientIDAndStatus()
     }
 
-    fun getClientSmsTemplates(clientID: Long, smsTemplateID: Long?): List<SmsTemplate> {
-        return if (smsTemplateID == null) {
-            smsTemplateRepository.findByClientIDAndStatus(clientID)
-        } else
-            listOf(smsTemplateRepository.findByIdAndClientIDAndStatus(smsTemplateID, clientID))
+    fun getClientSmsTemplates(clientID: Long): List<SmsTemplate> {
+//        return if (smsTemplateID == null) {
+          return  smsTemplateRepository.findByClientIDAndStatus(clientID)
+//        } else
+//            listOf(smsTemplateRepository.findByIdAndClientIDAndStatus(smsTemplateID, clientID))
     }
 
     fun saveSmsTemplate(smsTemplate: SmsTemplate): Long {

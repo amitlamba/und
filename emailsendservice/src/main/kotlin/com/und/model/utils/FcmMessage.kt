@@ -11,5 +11,6 @@ data class FcmMessage(
         var userId:String?=null,
         var eventUser:EventUser?=null,
         var data:MutableMap<String,Any> = mutableMapOf(),
-        var serviceProviderId:Long?=null
+        var serviceProviderId:Long?=null,
+        var segmentId:Long?=null
 )

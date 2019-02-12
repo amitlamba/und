@@ -29,8 +29,8 @@ class SmsTemplateController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/templates"])
-    fun getClientSmsTemplates(@RequestParam(value = "id", required = false) id: Long? = null): List<SmsTemplate> {
-        return smsTemplateService.getClientSmsTemplates(AuthenticationUtils.clientID!!, id)
+    fun getClientSmsTemplates(): List<SmsTemplate> {
+        return smsTemplateService.getClientSmsTemplates(AuthenticationUtils.clientID!!)
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

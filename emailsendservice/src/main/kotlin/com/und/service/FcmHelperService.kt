@@ -212,7 +212,8 @@ class FcmHelperService {
                 type = fcmMessage.type,
                 campaignId = fcmMessage.campaignId,
                 userId = fcmMessage.userId,
-                serviceProvider = serviceProvider
+                serviceProvider = serviceProvider,
+                segmentId = fcmMessage.segmentId
         )
         repository.saveAnalyticMessage(analyticFcmMessage, clientId = fcmMessage.clientId)
     }

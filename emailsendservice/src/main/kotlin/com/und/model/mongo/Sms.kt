@@ -21,7 +21,8 @@ data class Sms(
         var smsProviderMessageID: String? = null,
         var smsServiceProvider: String? = null,
         var status: SmsStatus,
-        var statusUpdates: MutableList<SmsStatusUpdate> = mutableListOf()
+        var statusUpdates: MutableList<SmsStatusUpdate> = mutableListOf(),
+        var segmentId:Long?=null
 )
 
 enum class SmsStatus(val order: Int) {

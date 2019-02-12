@@ -26,7 +26,8 @@ data class Email(
         var userID: String? = null,
         var emailProviderMessageID: String? = null,
         var emailServiceProvider: String? = null,
-        var creationTime: Date = DateUtils.nowInUTC()
+        var creationTime: Date = DateUtils.nowInUTC(),
+        var segmentId:Long?=null
 //FIXME add creation date
 ) {
     @Transient

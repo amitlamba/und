@@ -13,7 +13,8 @@ data class Sms(
     var data: MutableMap<String, Any> = mutableMapOf(),
     var eventUser: EventUser? = null,
     var serviceProviderId:Long?=null,
-    var campaignId:Long?=null
+    var campaignId:Long?=null,
+    var segmentId:Long?=null
 
 )
 

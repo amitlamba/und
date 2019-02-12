@@ -141,7 +141,8 @@ class ReachabilityServiceImpl : ReachabilityService {
 //        }
 
 
-        segmentReachabilityRepository.updateSegmentReachability(segmentId,getKey(todayDate),objectIds.size)    }
+        segmentReachabilityRepository.updateSegmentReachability(segmentId,getKey(todayDate),objectIds.size)
+    }
 
     private fun getKey(date: String):String{
         var formattedDate = date.replace("-","")

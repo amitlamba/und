@@ -32,8 +32,8 @@ class EmailTemplateController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/templates"])
-    fun getClientEmailTemplates(@RequestParam(value = "id", required = false) id: Long? = null): List<EmailTemplate> {
-        return emailTemplateService.getClientEmailTemplates(id)
+    fun getClientEmailTemplates(): List<EmailTemplate> {
+        return emailTemplateService.getClientEmailTemplates()
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
