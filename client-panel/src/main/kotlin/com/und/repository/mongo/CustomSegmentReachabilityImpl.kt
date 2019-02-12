@@ -1,6 +1,8 @@
 package com.und.repository.mongo
 
+import com.und.model.mongo.SegmentReachability
 import com.und.report.service.SegmentResult
+import com.und.security.utils.AuthenticationUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
@@ -14,7 +16,19 @@ class CustomSegmentReachabilityRepositoryImpl:CustomSegmentReachabilityRepositor
     private lateinit var mongoTemplate:MongoTemplate
 
     override fun updateSegmentReachability(segmentId:Long,key:String,objectIds:Int) {
-        mongoTemplate.updateFirst(Query(Criteria.where("_id").`is`(segmentId)), Update.update(key,objectIds),"segmentreachability")
+        //TODO create a segmentreachability document when a segment created.
+        val exist=mongoTemplate.exists(Query(Criteria.where("_id").`is`(segmentId)),"segmentreachability")
+        if(exist) {
+            mongoTemplate.updateFirst(Query(Criteria.where("_id").`is`(segmentId)), Update.update(key, objectIds), "segmentreachability")
+        }else {
+            val reachability=SegmentReachability()
+            with(reachability){
+                id=segmentId
+                clientId=AuthenticationUtils.clientID
+                dates= mutableMapOf(Pair(key.split(".")[1].toInt(),objectIds))
+            }
+            mongoTemplate.save(reachability,"segmentreachability")
+        }
     }
 
     override fun getReachabilityOfSegmentByDate(segmentId: Long,key: String,date:String): Int {

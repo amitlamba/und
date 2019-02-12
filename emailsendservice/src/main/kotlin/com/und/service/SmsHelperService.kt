@@ -41,7 +41,8 @@ class SmsHelperService {
                 smsTemplateId = smsToSend.smsTemplateId,
                 userID = smsToSend.eventUser?.id,
                 status = status,
-                campaignId = smsToSend.campaignId
+                campaignId = smsToSend.campaignId,
+                segmentId = smsToSend.segmentId
         )
         //TenantProvider().setTenant(smsToSend.clientID.toString())
         smsSentRepository.saveSms(mongoSms, smsToSend.clientID )
