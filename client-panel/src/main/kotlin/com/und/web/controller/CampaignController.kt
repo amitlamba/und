@@ -52,7 +52,7 @@ class CampaignController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/list/all"])
-    fun getCampaigns(@RequestParam(value = "id", required = false) id: Long? = null,request:HttpServletRequest): List<Campaign> {
+    fun getCampaigns(): List<Campaign> {
         return campaignService.getCampaigns()
     }
 

@@ -16,7 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestMethod
-import springfox.documentation.swagger2.annotations.EnableSwagger2
+//import springfox.documentation.swagger2.annotations.EnableSwagger2
 import java.io.BufferedReader
 import java.time.Instant
 import java.time.ZoneId

@@ -10,16 +10,16 @@ import com.und.service.AggregationQuerybuilder
 import com.und.service.SegmentParserCriteria
 import com.und.service.SegmentService
 import com.und.service.UserSettingsService
-import com.und.web.model.DataType
-import com.und.web.model.GlobalFilter
-import com.und.web.model.GlobalFilterType
-import com.und.web.model.StringOperator
+import com.und.web.model.*
+import org.hibernate.internal.util.collections.CollectionHelper
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.aggregation.*
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 
 const val FUNNEL_QUERY_PAGE_SIZE = 100
@@ -130,16 +130,18 @@ class FunnelReportServiceImpl : FunnelReportService {
 
         allfilters.addAll(filters)
         allfilters.addAll(funnelFilter.filters)
+        val dateFilter = createDateFilter(tz, funnelFilter)
+        allfilters.add(dateFilter)
         val filterGlobalQ = segmentParserCriteria.filterGlobalQ(allfilters, tz)
 
         val matchOperation = Aggregation.match(filterGlobalQ.first)
-        val sortOperation = Aggregation.sort(Sort.by("creationTime").ascending())
+        val sortOperation = Aggregation.sort(Sort.by(AggregationQuerybuilder.Field.CreationTime.name).ascending())
         val groupBys = mutableListOf<Field>()
         groupBys.add(Fields.field(AggregationQuerybuilder.Field.UserId.fName, AggregationQuerybuilder.Field.UserId.fName))
         groupBys.add(Fields.field(AggregationQuerybuilder.Field.EventName.fName, AggregationQuerybuilder.Field.EventName.fName))
         val split = funnelFilter.splitProperty
-        var c=ConvertOperators.ConvertOperatorFactory("creationTime").convertToLong()
-        var projectionOperation= Aggregation.project("userId","name").and(c).`as`("creationTime")
+        var c=ConvertOperators.ConvertOperatorFactory(AggregationQuerybuilder.Field.CreationTime.name).convertToLong()
+        var projectionOperation= Aggregation.project("userId","name").and(c).`as`(AggregationQuerybuilder.Field.CreationTime.name)
         var propertyPath:String
         if (split != null && !funnelFilter.splitProperty.isNullOrBlank()) {
             propertyPath = segmentParserCriteria.getFieldPath(funnelFilter.splitPropertyType, split)
@@ -147,7 +149,7 @@ class FunnelReportServiceImpl : FunnelReportService {
             projectionOperation=projectionOperation.and(propertyPath).`as`("splitproperty")
         }
 
-        val groupByOperation1 = Aggregation.group(Fields.from(*groupBys.toTypedArray())).push("creationTime").`as`("chronology")
+        val groupByOperation1 = Aggregation.group(Fields.from(*groupBys.toTypedArray())).push(AggregationQuerybuilder.Field.CreationTime.name).`as`("chronology")
 
         val aggregationOperations = mutableListOf<AggregationOperation>()
         aggregationOperations.add(matchOperation)
@@ -161,5 +163,18 @@ class FunnelReportServiceImpl : FunnelReportService {
         val groupByOperation2 = Aggregation.group("\$${AggregationQuerybuilder.Field.UserId.fName}").push(pushObject).`as`("chronologies")
         aggregationOperations.add(groupByOperation2)
         return Aggregation.newAggregation(*aggregationOperations.toTypedArray())
+    }
+
+    private fun createDateFilter(tz: ZoneId, funnelFilter: FunnelReport.FunnelReportFilter): GlobalFilter {
+        val dateFilter = GlobalFilter()
+        dateFilter.globalFilterType = GlobalFilterType.EventProperties
+        dateFilter.name = AggregationQuerybuilder.Field.CreationTime.name
+        dateFilter.type = DataType.date
+        dateFilter.operator = DateOperator.After.name
+        val date = LocalDate.now(tz).minusDays(funnelFilter.days)
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val formattedString = date.format(formatter)
+        dateFilter.values += formattedString
+        return dateFilter
     }
 }
