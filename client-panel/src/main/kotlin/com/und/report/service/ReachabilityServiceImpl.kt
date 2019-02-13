@@ -134,8 +134,9 @@ class ReachabilityServiceImpl : ReachabilityService {
             }
         } else emptyList()
 
-        val timeZoneId= ZoneId.of((clientSetting.findByClientID(clientId)?.timezone)?:"UTC")
-        val todayDate=LocalDate.now(timeZoneId).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        clientSetting.findByClientID(clientId)?.let {
+            val timeZoneId= ZoneId.of(it.timezone)
+            val todayDate=LocalDate.now(timeZoneId).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 //        var sr: Optional<SegmentReachability> = findSegmentReachability(clientId, segmentId)
 //        if(sr.isPresent && isPresent(sr.get(), todayDate)) {
 //            return
@@ -146,7 +147,8 @@ class ReachabilityServiceImpl : ReachabilityService {
 //        }
 
 
-        segmentReachabilityRepository.updateSegmentReachability(segmentId,getKey(todayDate),objectIds.size,clientId)
+            segmentReachabilityRepository.updateSegmentReachability(segmentId,getKey(todayDate),objectIds.size,clientId)
+        }
     }
 
     private fun getKey(date: String):String{
