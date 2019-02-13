@@ -134,7 +134,7 @@ class ReachabilityServiceImpl : ReachabilityService {
             }
         } else emptyList()
 
-        val timeZoneId= ZoneId.of(clientSetting.findByClientID(clientId)?.timezone?:"UTC")
+        val timeZoneId= ZoneId.of((clientSetting.findByClientID(clientId)?.timezone)?:"UTC")
         val todayDate=LocalDate.now(timeZoneId).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 //        var sr: Optional<SegmentReachability> = findSegmentReachability(clientId, segmentId)
 //        if(sr.isPresent && isPresent(sr.get(), todayDate)) {
