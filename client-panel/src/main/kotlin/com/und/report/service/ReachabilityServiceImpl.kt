@@ -80,14 +80,14 @@ class ReachabilityServiceImpl : ReachabilityService {
 //        return reachability
 //    }
 //
-    private fun buildSegmentReachability(cId:Long,sId: Long,totalUser: Int,sr:SegmentReachability):SegmentReachability{
-        with(sr){
-            clientId=cId
-            id=sId
-            dates.put(parseInt(LocalDate.now(ZoneId.of(AuthenticationUtils.principal.timeZoneId)).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")).replace("-","")),totalUser)
-        }
-        return sr
-    }
+//    private fun buildSegmentReachability(cId:Long,sId: Long,totalUser: Int,sr:SegmentReachability):SegmentReachability{
+//        with(sr){
+//            clientId=cId
+//            id=sId
+//            dates.put(parseInt(LocalDate.now(ZoneId.of(AuthenticationUtils.principal.timeZoneId)).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")).replace("-","")),totalUser)
+//        }
+//        return sr
+//    }
     fun isPresent(sr: SegmentReachability,date:String):Boolean{
         return sr.dates.contains(parseInt(date.replace("-","")))
     }
