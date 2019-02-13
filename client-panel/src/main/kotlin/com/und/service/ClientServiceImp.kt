@@ -28,4 +28,8 @@ class ClientServiceImp:ClientService {
     override fun getNewClient(): Long {
         return clientRepository.getNewClient()
     }
+
+    override fun getClients(): List<Client> {
+        return clientRepository.findAll()
+    }
 }

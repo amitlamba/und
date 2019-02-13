@@ -151,7 +151,7 @@ class AggregationQuerybuilder {
                         AggregationType.Avg -> eventGroupOperation = Aggregation.group(Fields.from(*fields, Fields.field(Field.UserId.fName))).avg(scopedName).`as`(AGGREGATE_VALUE)
                     }
                 }
-                else eventGroupOperation = Aggregation.group(Fields.from(*fields, Fields.field(Field.UserId.fName))).count().`as`(USER_COUNT)
+                else eventGroupOperation = Aggregation.group(Fields.from(*fields,Fields.field(Field.UserId.fName))).count().`as`(USER_COUNT)
             }
             else if(entityType == EventReport.EntityType.user)
                 eventGroupOperation = eventGroupOperation.addToSet(Field.UserId.fName).`as`(Field.UserId.fName)
