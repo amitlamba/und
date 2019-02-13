@@ -15,24 +15,24 @@ class CustomSegmentReachabilityRepositoryImpl:CustomSegmentReachabilityRepositor
     @Autowired
     private lateinit var mongoTemplate:MongoTemplate
 
-    override fun updateSegmentReachability(segmentId:Long,key:String,objectIds:Int) {
+    override fun updateSegmentReachability(segmentId:Long,key:String,objectIds:Int,clientID:Long) {
         //TODO create a segmentreachability document when a segment created.
-        val exist=mongoTemplate.exists(Query(Criteria.where("_id").`is`(segmentId)),"segmentreachability")
+        val exist=mongoTemplate.exists(Query(Criteria.where("_id").`is`(segmentId).and("clientId").`is`(clientID)),"segmentreachability")
         if(exist) {
-            mongoTemplate.updateFirst(Query(Criteria.where("_id").`is`(segmentId)), Update.update(key, objectIds), "segmentreachability")
+            mongoTemplate.updateFirst(Query(Criteria.where("_id").`is`(segmentId).and("clientId").`is`(clientID)), Update.update(key, objectIds), "segmentreachability")
         }else {
             val reachability=SegmentReachability()
             with(reachability){
                 id=segmentId
-                clientId=AuthenticationUtils.clientID
+                clientId=clientID
                 dates= mutableMapOf(Pair(key.split(".")[1].toInt(),objectIds))
             }
             mongoTemplate.save(reachability,"segmentreachability")
         }
     }
 
-    override fun getReachabilityOfSegmentByDate(segmentId: Long,key: String,date:String): Int {
-        var match= Aggregation.match(Criteria("_id").`is`(segmentId))
+    override fun getReachabilityOfSegmentByDate(segmentId: Long,key: String,date:String,clientId: Long): Int {
+        var match= Aggregation.match(Criteria("_id").`is`(segmentId).and("clientId").`is`(clientId))
         var project1= Aggregation.project(key).andExclude("_id")
         var project2= Aggregation.project().and(date.replace("-","")).`as`("key")
         var agg= Aggregation.newAggregation(match,project1,project2)

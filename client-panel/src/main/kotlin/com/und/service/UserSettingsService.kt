@@ -472,6 +472,14 @@ class UserSettingsService {
 
     }
 
+    fun getTimeZoneByClientId(clientID: Long): ZoneId {
+        val tz = clientID?.let {
+            clientSettingsRepository.findByClientID(clientID)?.timezone
+        } ?: TimeZone.getDefault().id
+        return ZoneId.of(tz)
+
+    }
+
     fun testConnection(serviceProviderCredential: com.und.web.model.ServiceProviderCredentials): Boolean {
 
         var port = Integer.parseInt(serviceProviderCredential.credentialsMap.get("port"))

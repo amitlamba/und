@@ -176,7 +176,8 @@ class SegmentServiceImpl : SegmentService {
 
     private fun getSegmentUserIds(segment: Segment, clientId: Long): List<String> {
 
-        val tz = userSettingsService.getTimeZone()
+//        val tz = userSettingsService.getTimeZone()
+        val tz = userSettingsService.getTimeZoneByClientId(clientId)
         val allResult = mutableListOf<Set<String>>()
         val websegment = buildWebSegment(segment)
         val queries = segmentParserCriteria.segmentQueries(websegment, tz)
@@ -264,4 +265,7 @@ class SegmentServiceImpl : SegmentService {
         return eventUserListWeb
     }
 
+    override fun segmentByClientId(clientId: Long): List<Segment> {
+        return segmentRepository.findByClientID(clientId)?: emptyList()
+    }
 }
