@@ -22,7 +22,7 @@ class EventUserRepoImp:EventUserRepo {
         var day=date.dayOfMonth
 
 
-        print("$year $month $day")
+        //print("$year $month $day")
         val format= SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
 
         var newfromDate=format.parse("$year-$month-$day 00:00:00")

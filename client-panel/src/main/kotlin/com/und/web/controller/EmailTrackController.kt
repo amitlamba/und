@@ -26,9 +26,9 @@ class EmailTrackController {
     @ResponseBody
     fun getImage(@PathVariable id: String): ByteArray {
         try {
-            println(id)
-            println(URLDecoder.decode(id,"UTF-8"))
-            println(decrypt(URLDecoder.decode(id,"UTF-8")))
+            //println(id)
+            //println(URLDecoder.decode(id,"UTF-8"))
+            //println(decrypt(URLDecoder.decode(id,"UTF-8")))
             val imageLink: String? = decrypt(URLDecoder.decode(id,"UTF-8"))
             emailService.trackEmailRead(EmailRead(1, imageLink!!)) //TODO: clientID hard coded
             var bufferedImage = BufferedImage(1, 1,

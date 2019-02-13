@@ -39,21 +39,21 @@ class SchedulingReports {
 
 
         //Task 1 and 2
-        println("scheduler running every 10 th second")
+        //println("scheduler running every 10 th second")
         var totalClient=clientService.getClientCount()
         var newClient=clientService.getNewClient()
 
-        println("\n total client $totalClient \t total new client $newClient")
+       // println("\n total client $totalClient \t total new client $newClient")
 
         // Task 7
         var totalEventUser=eventUserService.getTotalEventUserToday()
-        print("\n totalevevt   $totalEventUser")
+        //print("\n totalevevt   $totalEventUser")
 
         //Task 8 and 9
 
         var lastDayEvent=eventService.getTotalEventToday()
         var maxEventUser=eventService.getUserWithMaxEvent()
-        print("\nmaxeventuser $maxEventUser   \tlastdayevent $lastDayEvent")
+        //print("\nmaxeventuser $maxEventUser   \tlastdayevent $lastDayEvent")
 
     }
 }
