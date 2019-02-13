@@ -76,7 +76,7 @@ class AuthenticationRestController {
 
     }
 
-    @GetMapping(value = ["\${security.route.authentication.path}/xyz/validate/{authToken}"])
+    @GetMapping(value = ["\${security.route.authentication.path}/validate/{authToken}"])
     @Throws(AuthenticationException::class)
     fun authenticationToken(@PathVariable("authToken", required = true) authToken: String, request: HttpServletRequest): ResponseEntity<*> {
         val type:String? = request.getParameter("type")

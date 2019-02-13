@@ -77,7 +77,7 @@ class SpringMVCConfig : WebMvcConfigurer {
         config.addAllowedMethod("*")
         source.registerCorsConfiguration("/**", config)
         val bean = FilterRegistrationBean(CorsFilter(source))
-        bean.setOrder(Ordered.HIGHEST_PRECEDENCE)
+        bean.order = Ordered.HIGHEST_PRECEDENCE
         return CorsFilter(source)
     }
 
