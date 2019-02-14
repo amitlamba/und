@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation
+import org.springframework.data.mongodb.core.aggregation.ConvertOperators
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Service
 import kotlin.reflect.KClass
@@ -105,7 +107,8 @@ class SegmentServiceImpl : SegmentService {
         val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
         return if (segmentOption.isPresent) {
             val segment = segmentOption.get()
-            getSegmentUserIds(segment, clientId,"userId").second
+//            getSegmentUserIds(segment, clientId,"userId").second
+            getSegmentUsers(segment,clientId,"userId").second
         } else emptyList()
         //return listOf("5b1f5b080be60f4cc2942875", "5b49c41c00156a1860d1f82d", "5b49d11400156a1860d1f83a")
     }
@@ -170,9 +173,8 @@ class SegmentServiceImpl : SegmentService {
     }
 
     private fun getSegmentUsersList(segment: Segment, clientId: Long): List<EventUser> {
-//        val userIds = getSegmentUserIds(segment, clientId)
-//        return eventUserRepository.findUserByIds(userIds.toSet(), clientId)
-        return getSegmentUserIds(segment,clientId).first
+//        return getSegmentUserIds(segment,clientId).first
+        return getSegmentUsers(segment,clientId).first
     }
 
     private fun getTestSEgmentUsers(clientId: Long): List<EventUser> {
@@ -180,75 +182,60 @@ class SegmentServiceImpl : SegmentService {
         return eventUserRepository.findUserByIds(userIds.toSet(), clientId)
     }
 
-    private fun getSegmentUserIds(segment: Segment, clientId: Long,type:String="eventuser"): Pair<List<EventUser>,List<String>> {
+//    private fun getSegmentUserIds(segment: Segment, clientId: Long,type:String="eventuser"): Pair<List<EventUser>,List<String>> {
+//
+//        val tz = userSettingsService.getTimeZoneByClientId(clientId)
+//        val websegment = buildWebSegment(segment)
+//        var query=segmentParserCriteria.segmentQuery1(websegment,tz,type)
+//        var agg=query.first
+//        var finalAgg=Aggregation.newAggregation(agg)
+//
+//        data class Result(var userId:List<String> = emptyList())
+//        if(type.equals("userId")) {
+//            var allResult= mutableListOf<Result>()
+//            if(query.second){
+//                 allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_eventUser",Result::class.java).mappedResults
+//            }else{
+//                 allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_event",Result::class.java).mappedResults
+//            }
+//
+//            if(allResult.isNotEmpty())
+//                return Pair(emptyList(), allResult[0].userId)
+//            else
+//                return Pair(emptyList(),emptyList())
+//        }else{
+//            var allResult= mutableListOf<EventUser>()
+//            if(query.second){
+//                allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_eventUser",EventUser::class.java).mappedResults
+//            }else{
+//                allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_event",EventUser::class.java).mappedResults
+//            }
+//            return Pair(allResult, emptyList())
+//        }
+//    }
 
-//        val tz = userSettingsService.getTimeZone()
+
+    private fun getSegmentUsers(segment: Segment, clientId: Long, type: String = "eventuser"): Pair<List<EventUser>, List<String>> {
         val tz = userSettingsService.getTimeZoneByClientId(clientId)
-        val allResult = mutableListOf<Set<String>>()
         val websegment = buildWebSegment(segment)
-//        val queries = segmentParserCriteria.segmentQueries(websegment, tz)
-//
-//        val (didQueries, joincondition) = queries.didq
-//        if (didQueries.isNotEmpty()) {
-//            val userDidList = retrieveUsers(didQueries, joincondition, clientId)
-//            allResult.add(userDidList.toSet())
-//        } else if (queries.query != null) {
-//            var query = Query().addCriteria(queries.query)
-//            val userList = eventRepository.usersFromEvent(query, clientId)
-//            allResult.add(userList.toSet())
-//        }
-//
-//        val (didNotQueries, joinconditionfornot) = queries.didntq
-//        if (didNotQueries.isNotEmpty()) {
-//            val userDidNotDid = retrieveUsers(didNotQueries, joinconditionfornot, clientId)
-//
-//            val userDidNotList = eventUserRepository.findUsersNotIn(userDidNotDid.toSet(), clientId)
-//            allResult.add(userDidNotList.toSet())
-//        }
-//
-//        val userQuery = queries.userQuery
-//        if (userQuery != null) {
-//            val userProfiles = eventUserRepository.usersFromUserProfile(userQuery, clientId)
-//            allResult.add(userProfiles.toSet())
-//        }
-//
-//        val userList = allResult.reduce { f, s -> f.intersect(s) }
-        var query=segmentParserCriteria.segmentQuery1(websegment,tz,type)
-        var agg=query.first
-        var finalAgg=Aggregation.newAggregation(agg)
-
-        data class Result(var userId:List<String> = emptyList())
-        if(type.equals("userId")) {
-            var allResult= mutableListOf<Result>()
-            if(query.second){
-                 allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_eventUser",Result::class.java).mappedResults
-            }else{
-                 allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_event",Result::class.java).mappedResults
+        var eventAggregation = segmentParserCriteria.getEventSpecificAggOperation(websegment, tz)
+        val idList = eventRepository.usersFromEvent(eventAggregation, clientId)
+        var userAggregation = segmentParserCriteria.getUserSpecificAggOperation(websegment, tz, idList)
+        if (type.equals("userId")) {
+            //Adding aggregation to return  only id of user instead of user profile.
+            if (type.equals("userId")) {
+                var convertor = ConvertOperators.ConvertOperatorFactory("_id").convertToString()
+                userAggregation.add(Aggregation.project().and(convertor).`as`("_id"))
+                userAggregation.add(Aggregation.group().push("_id").`as`("userId"))
             }
-
-            if(allResult.isNotEmpty())
-                return Pair(emptyList(), allResult[0].userId)
-            else
-                return Pair(emptyList(),emptyList())
-        }else{
-            var allResult= mutableListOf<EventUser>()
-            if(query.second){
-                allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_eventUser",EventUser::class.java).mappedResults
-            }else{
-                allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_event",EventUser::class.java).mappedResults
-            }
-            return Pair(allResult, emptyList())
+            val result = eventUserRepository.usersIdFromEventUser(userAggregation, clientId)
+            return Pair(emptyList(), result)
+        } else {
+            val result = eventUserRepository.usersProfileFromEventUser(userAggregation, clientId)
+            return Pair(result, emptyList())
         }
-
-
-//<<<<<<< HEAD
-//=======
-//        // reduce function call on empty collection throw exception
-//        val userList:Set<String>
-//        if(allResult.isNotEmpty()) userList= allResult.reduce { f, s -> f.intersect(s) } else userList = emptySet()
-//        return userList.toList()
-//>>>>>>> origin/jogendra
     }
+
 
     private fun retrieveUsers(queries: List<Aggregation>, conditionType: ConditionType, clientId: Long): MutableSet<String> {
         val userDidList = mutableListOf<Set<String>>()

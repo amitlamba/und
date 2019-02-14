@@ -3,7 +3,8 @@ package com.und.service
 import com.und.common.utils.DateUtils
 import com.und.common.utils.loggerFor
 import com.und.web.model.*
-import kotlin.Unit
+import com.und.web.model.Unit
+import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.aggregation.*
@@ -12,7 +13,6 @@ import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.aggregation.GroupOperation
 import org.springframework.data.mongodb.core.aggregation.MatchOperation
 import org.springframework.data.mongodb.core.query.Criteria
-import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Component
 import java.io.Serializable
 import java.time.LocalDate
@@ -131,8 +131,8 @@ class SegmentParserCriteria {
     }
 
 
-    fun segmentQuery1(segment: Segment, tz: ZoneId, type:String): Pair<List<AggregationOperation>,Boolean>{
-        var onlyEventUser=false
+
+    fun getEventSpecificAggOperation(segment: Segment, tz: ZoneId): List<AggregationOperation> {
         var listOfAggregation = mutableListOf<AggregationOperation>()
         /*
         * Geography based aggregation
@@ -142,8 +142,6 @@ class SegmentParserCriteria {
             var geoCriteriaAgg = Aggregation.match(it)
             listOfAggregation.add(geoCriteriaAgg)
         }
-
-
         /*
         * divide globalfilter into event and user and find criteria
         * */
@@ -152,46 +150,101 @@ class SegmentParserCriteria {
         //adding event globalCriteria aggregation
         if (eventPropertyMatch != null)
             listOfAggregation.add(Aggregation.match(eventPropertyMatch))
-
         //add didnot
         addDidNotAggregation(segment, listOfAggregation, tz)
         //add did
-        if(geoCriteria==null&&eventPropertyMatch==null && listOfAggregation.isEmpty()){
-            addDidAggregationWithoutFacet(segment,listOfAggregation,tz)
-        }else{
+        if (geoCriteria == null && eventPropertyMatch == null && listOfAggregation.isEmpty()) {
+            addDidAggregationWithoutFacet(segment, listOfAggregation, tz)
+        } else {
             addDidAggregation(segment, listOfAggregation, tz)
         }
-        if(!listOfAggregation.isEmpty()){
-            //common to all after did
-            var group = Aggregation.group("userId")
-            var convertToOBjectId = ConvertOperators.ConvertOperatorFactory("_id").convertToObjectId()
-            var project = Aggregation.project().and(convertToOBjectId).`as`("_id")
-            var sort = Aggregation.sort(Sort.Direction.ASC, "_id")
-            var lookup = Aggregation.lookup("3_eventUser", "_id", "_id", "user")
-            var unwindOperation = Aggregation.unwind("user")
-            var replaceRootOperation = Aggregation.replaceRoot("user")
+        return listOfAggregation
+    }
 
-            listOfAggregation.add(group)
-            listOfAggregation.add(project)
-            listOfAggregation.add(sort)
-            listOfAggregation.add(lookup)
-            listOfAggregation.add(unwindOperation)
-            listOfAggregation.add(replaceRootOperation)
-        }else{
-            onlyEventUser=true
+    fun getUserSpecificAggOperation(segment: Segment, tz: ZoneId, idList: List<String>): MutableList<AggregationOperation> {
+        var listOfAggregation = mutableListOf<AggregationOperation>()
+        var objectIds = mutableSetOf<ObjectId>()
+        idList.forEach {
+            objectIds.add(ObjectId(it))
         }
+        var match = Aggregation.match(Criteria("_id").`in`(objectIds))
+        if (objectIds.isNotEmpty()) {
+            listOfAggregation.add(match)
+        }
+        //var sort = Aggregation.sort(Sort.Direction.ASC, "_id")
+        val gFilters = segment.globalFilters
+        val (eventPropertyMatch, userPropertyMatch) = filterGlobalQWithUserId(gFilters, tz, segment.userId)
         //adding user globalcriteria aggregation
         if (userPropertyMatch != null) {
             listOfAggregation.add(Aggregation.match(userPropertyMatch))
         }
-        if(type.equals("userId")){
-            var convertor=ConvertOperators.ConvertOperatorFactory("_id").convertToString()
-            listOfAggregation.add(Aggregation.project().and(convertor).`as`("_id"))
-            listOfAggregation.add(Aggregation.group().push("_id").`as`("userId"))
-        }
-
-        return Pair(listOfAggregation,onlyEventUser)
+        return listOfAggregation
     }
+
+
+
+
+//    fun segmentQuery1(segment: Segment, tz: ZoneId, type:String): Pair<List<AggregationOperation>,Boolean>{
+//        var onlyEventUser=false
+//        var listOfAggregation = mutableListOf<AggregationOperation>()
+//        /*
+//        * Geography based aggregation
+//        * */
+//        val geoCriteria = if (segment.geographyFilters.isNotEmpty()) segment.geographyFilters.let { geoFilter -> filterGeography(geoFilter, segment.userId) } else null
+//        geoCriteria?.let {
+//            var geoCriteriaAgg = Aggregation.match(it)
+//            listOfAggregation.add(geoCriteriaAgg)
+//        }
+//
+//
+//        /*
+//        * divide globalfilter into event and user and find criteria
+//        * */
+//        val gFilters = segment.globalFilters
+//        val (eventPropertyMatch, userPropertyMatch) = filterGlobalQWithUserId(gFilters, tz, segment.userId)
+//        //adding event globalCriteria aggregation
+//        if (eventPropertyMatch != null)
+//            listOfAggregation.add(Aggregation.match(eventPropertyMatch))
+//
+//        //add didnot
+//        addDidNotAggregation(segment, listOfAggregation, tz)
+//        //add did
+//        if(geoCriteria==null&&eventPropertyMatch==null && listOfAggregation.isEmpty()){
+//            addDidAggregationWithoutFacet(segment,listOfAggregation,tz)
+//        }else{
+//            addDidAggregation(segment, listOfAggregation, tz)
+//        }
+//        if(!listOfAggregation.isEmpty()){
+//            //common to all after did
+//            var group = Aggregation.group("userId")
+//            var convertToOBjectId = ConvertOperators.ConvertOperatorFactory("_id").convertToObjectId()
+//            var project = Aggregation.project().and(convertToOBjectId).`as`("_id")
+//            var sort = Aggregation.sort(Sort.Direction.ASC, "_id")
+//            var lookup = Aggregation.lookup("3_eventUser", "_id", "_id", "user")
+//            var unwindOperation = Aggregation.unwind("user")
+//            var replaceRootOperation = Aggregation.replaceRoot("user")
+//
+//            listOfAggregation.add(group)
+//            listOfAggregation.add(project)
+//            listOfAggregation.add(sort)
+//            listOfAggregation.add(lookup)
+//            listOfAggregation.add(unwindOperation)
+//            listOfAggregation.add(replaceRootOperation)
+//        }else{
+//            onlyEventUser=true
+//        }
+//        //adding user globalcriteria aggregation
+//        if (userPropertyMatch != null) {
+//            listOfAggregation.add(Aggregation.match(userPropertyMatch))
+//        }
+//        if(type.equals("userId")){
+//            var convertor=ConvertOperators.ConvertOperatorFactory("_id").convertToString()
+//            listOfAggregation.add(Aggregation.project().and(convertor).`as`("_id"))
+//            listOfAggregation.add(Aggregation.group().push("_id").`as`("userId"))
+//        }
+//
+//        return Pair(listOfAggregation,onlyEventUser)
+//    }
 
     private fun addDidNotAggregation(segment: Segment, listOfAggregation: MutableList<AggregationOperation>, tz: ZoneId) {
         var didnot = segment.didNotEvents?.events
