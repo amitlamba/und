@@ -74,8 +74,8 @@ class UserSettingsServiceTest {
 
     @Test
     fun testAddEmailAddress() {
-        val emailAddress = EmailAddress("amit@userndot.com", "Amit Lamba")
-        val emailAddress2 = EmailAddress("anil@userndot.com", "Anil Thamba")
+        val emailAddress = EmailAddress("amit@userndot.com", "Amit Lamba",1)
+        val emailAddress2 = EmailAddress("anil@userndot.com", "Anil Thamba",1)
         val emailAddressList = listOf(emailAddress2,emailAddress )
         whenever((clientSettingsRepository).findSenderEmailAddressesByClientId(clientID)).thenReturn(objectMapper.writeValueAsString(listOf(emailAddress2)))
         userSettingsService.addSenderEmailAddress(emailAddress = emailAddress, clientID = clientID)
@@ -86,8 +86,8 @@ class UserSettingsServiceTest {
 
     @Test
     fun testRemoveEmailAddress() {
-        val emailAddress = EmailAddress("amit@userndot.com", "Amit Lamba")
-        val emailAddress2 = EmailAddress("anil@userndot.com", "Anil Thamba")
+        val emailAddress = EmailAddress("amit@userndot.com", "Amit Lamba",1)
+        val emailAddress2 = EmailAddress("anil@userndot.com", "Anil Thamba",1)
         val emailAddressList = listOf(emailAddress2,emailAddress )
         whenever((clientSettingsRepository).findSenderEmailAddressesByClientId(clientID)).thenReturn(objectMapper.writeValueAsString(emailAddressList))
         userSettingsService.removeSenderEmailAddress(emailAddress = emailAddress, clientID = clientID)

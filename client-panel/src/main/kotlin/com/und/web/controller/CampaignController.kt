@@ -10,6 +10,8 @@ import com.und.service.*
 import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.web.model.Campaign
+import com.und.web.model.ClientEmailSettIdFromAddrSrp
+import com.und.web.model.ClientFromAddressAndSrp
 import com.und.web.model.EmailTemplate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -18,6 +20,7 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import java.util.*
+import javax.servlet.http.HttpServletRequest
 import javax.validation.Valid
 
 @CrossOrigin
@@ -48,13 +51,14 @@ class CampaignController {
     lateinit var campaignService: CampaignService
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping(value = ["list/all"])
-    fun getCampaigns(@RequestParam(value = "id", required = false) id: Long? = null): List<Campaign> {
+    @GetMapping(value = ["/list/all"])
+    fun getCampaigns(): List<Campaign> {
         return campaignService.getCampaigns()
     }
 
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping(value = ["error/{campaignId}"])
+    @GetMapping(value = ["/error/{campaignId}"])
     fun scheduleError(@PathVariable("campaignId") campaignId: Long): ResponseEntity<String> {
 
         logger.info("campaign schedule error fetching for campaignId $campaignId")
@@ -80,16 +84,19 @@ class CampaignController {
         if (clientId != null && templateId!=null) {
             val template = when(campaign.campaignType) {
                 CampaignType.EMAIL -> emailTempleteService.getEmailTemplate(templateId)
-                CampaignType.SMS -> smsTempleteService.getClientSmsTemplates(clientId, templateId)
+                CampaignType.SMS -> listOf(smsTempleteService.getSmsTemplateById(templateId))
                 CampaignType.PUSH_ANDROID -> androidService.getAndroidTemplatesById(clientId,templateId)
                 CampaignType.PUSH_IOS->{throw CustomException("This Service Not present")}
                 CampaignType.PUSH_WEB -> webPushService.findExistsTemplate(templateId)
             }
 
             if (template.isNotEmpty()) {
+                //TODO we always return campaign here
                 val persistedCampaign = campaignService.save(campaign)
+                if(persistedCampaign.id!=null){
                 logger.info("campaign saved with name ${campaign.name}")
                 return ResponseEntity(persistedCampaign, HttpStatus.CREATED)
+                }
             }else{
                 logger.info("campaign not saved with name ${campaign.name}")
                 throw CustomException("template with id $templateId not exist")
@@ -160,5 +167,16 @@ class CampaignController {
         return ResponseEntity(campaignId, HttpStatus.EXPECTATION_FAILED)
     }
 
+//    @GetMapping(value = ["/email/faddrandsrp"])
+//    fun getClientFromAddressAndSrp1():ClientFromAddressAndSrp{
+//        val clientId=AuthenticationUtils.clientID?:throw AccessDeniedException("Access denied")
+//        return campaignService.getClientFromAddressAndSrp(clientId)
+//    }
+
+    @GetMapping(value = ["/email/faddrandsrp"])
+    fun getClientFromAddressAndSrp(): List<ClientEmailSettIdFromAddrSrp> {
+        val clientId=AuthenticationUtils.clientID?:throw AccessDeniedException("Access denied")
+        return campaignService.getClientFromAddressAndSrp(clientId)
+    }
 
 }

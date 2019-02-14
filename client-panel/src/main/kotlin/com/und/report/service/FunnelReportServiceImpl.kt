@@ -10,16 +10,16 @@ import com.und.service.AggregationQuerybuilder
 import com.und.service.SegmentParserCriteria
 import com.und.service.SegmentService
 import com.und.service.UserSettingsService
-import com.und.web.model.DataType
-import com.und.web.model.GlobalFilter
-import com.und.web.model.GlobalFilterType
-import com.und.web.model.StringOperator
+import com.und.web.model.*
+import org.hibernate.internal.util.collections.CollectionHelper
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.aggregation.*
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 
 const val FUNNEL_QUERY_PAGE_SIZE = 100
@@ -69,10 +69,42 @@ class FunnelReportServiceImpl : FunnelReportService {
             val computedFunnels = awsFunnelLambdaInvoker.computeFunnels(funnelData)
 
             logger.debug("Funnel data computed: $computedFunnels")
-            return computedFunnels
+            return if(funnelFilter.filters.isEmpty()) fillMissingSteps(orderFunnelByStep(computedFunnels),funnelFilter.steps)
+            else orderFunnelByStep(computedFunnels)
         } ?: emptyList()
     }
+    //This code should be synchronized its possible that two thread invoke that method at same time
+    private fun orderFunnelByStep(result:List<FunnelReport.FunnelStep>):List<FunnelReport.FunnelStep>{
+        var funnelResult=result.toMutableList()
+        for (i in 0..(funnelResult.size - 1) step 1) {
 
+            var min = funnelResult[i].step.order
+
+            for (j in (i + 1)..(funnelResult.size-1) step 1) {
+                if (min > funnelResult[j].step.order) {
+                    var temp = funnelResult[j]
+                    funnelResult[j] = funnelResult[i]
+                    funnelResult[i] = temp
+                    min = temp.step.order
+                }
+            }
+        }
+
+        return funnelResult
+    }
+    // This code should be synchronized its possible that two thread invoke that method at same time
+    private fun fillMissingSteps(result:List<FunnelReport.FunnelStep>,funnelSteps:List<FunnelReport.Step>):List<FunnelReport.FunnelStep>{
+        val outputSize=result.size
+        val inputSize=funnelSteps.size
+        if(outputSize!=inputSize){
+            var rs=result.toMutableList()
+            for(i in outputSize..(inputSize-1) step 1){
+                rs.add(FunnelReport.FunnelStep(funnelSteps[outputSize],count = 0,property = "all"))
+            }
+            return rs
+        }
+        return result
+    }
 
     fun buildAggregationAllUsers(funnelFilter: FunnelReport.FunnelReportFilter, clientID: Long, tz: ZoneId): Aggregation {
 
@@ -94,24 +126,30 @@ class FunnelReportServiceImpl : FunnelReportService {
 
     private fun buildAggregation(funnelFilter: FunnelReport.FunnelReportFilter, filters: List<GlobalFilter>, tz: ZoneId): Aggregation {
 
+        val allfilters :MutableList<GlobalFilter> = mutableListOf()
 
-        val filterGlobalQ = segmentParserCriteria.filterGlobalQ(filters, tz)
+        allfilters.addAll(filters)
+        allfilters.addAll(funnelFilter.filters)
+        val dateFilter = createDateFilter(tz, funnelFilter)
+        allfilters.add(dateFilter)
+        val filterGlobalQ = segmentParserCriteria.filterGlobalQ(allfilters, tz)
+
         val matchOperation = Aggregation.match(filterGlobalQ.first)
-        val sortOperation = Aggregation.sort(Sort.by("creationTime").ascending())
+        val sortOperation = Aggregation.sort(Sort.by(AggregationQuerybuilder.Field.CreationTime.name).ascending())
         val groupBys = mutableListOf<Field>()
         groupBys.add(Fields.field(AggregationQuerybuilder.Field.UserId.fName, AggregationQuerybuilder.Field.UserId.fName))
         groupBys.add(Fields.field(AggregationQuerybuilder.Field.EventName.fName, AggregationQuerybuilder.Field.EventName.fName))
-        val split = funnelFilter.splitProprty
-        var c=ConvertOperators.ConvertOperatorFactory("creationTime").convertToLong()
-        var projectionOperation= Aggregation.project("userId","name").and(c).`as`("creationTime")
+        val split = funnelFilter.splitProperty
+        var c=ConvertOperators.ConvertOperatorFactory(AggregationQuerybuilder.Field.CreationTime.name).convertToLong()
+        var projectionOperation= Aggregation.project("userId","name").and(c).`as`(AggregationQuerybuilder.Field.CreationTime.name)
         var propertyPath:String
-        if (split != null && !funnelFilter.splitProprty.isNullOrBlank()) {
-            propertyPath = segmentParserCriteria.getFieldPath(funnelFilter.splitProprtyType, split)
+        if (split != null && !funnelFilter.splitProperty.isNullOrBlank()) {
+            propertyPath = segmentParserCriteria.getFieldPath(funnelFilter.splitPropertyType, split)
             groupBys.add(Fields.field("attribute", "splitproperty"))
             projectionOperation=projectionOperation.and(propertyPath).`as`("splitproperty")
         }
 
-        val groupByOperation1 = Aggregation.group(Fields.from(*groupBys.toTypedArray())).push("creationTime").`as`("chronology")
+        val groupByOperation1 = Aggregation.group(Fields.from(*groupBys.toTypedArray())).push(AggregationQuerybuilder.Field.CreationTime.name).`as`("chronology")
 
         val aggregationOperations = mutableListOf<AggregationOperation>()
         aggregationOperations.add(matchOperation)
@@ -120,10 +158,23 @@ class FunnelReportServiceImpl : FunnelReportService {
         aggregationOperations.add(groupByOperation1)
 
         var pushObject = BasicDBObject("Event", "\$_id.${AggregationQuerybuilder.Field.EventName.fName}").append("chronology", "\$chronology" )
-        if(!funnelFilter.splitProprty.isNullOrBlank()) pushObject = pushObject.append("attribute", "\$_id.attribute")
+        if(!funnelFilter.splitProperty.isNullOrBlank()) pushObject = pushObject.append("attribute", "\$_id.attribute")
 
         val groupByOperation2 = Aggregation.group("\$${AggregationQuerybuilder.Field.UserId.fName}").push(pushObject).`as`("chronologies")
         aggregationOperations.add(groupByOperation2)
         return Aggregation.newAggregation(*aggregationOperations.toTypedArray())
+    }
+
+    private fun createDateFilter(tz: ZoneId, funnelFilter: FunnelReport.FunnelReportFilter): GlobalFilter {
+        val dateFilter = GlobalFilter()
+        dateFilter.globalFilterType = GlobalFilterType.EventProperties
+        dateFilter.name = AggregationQuerybuilder.Field.CreationTime.name
+        dateFilter.type = DataType.date
+        dateFilter.operator = DateOperator.After.name
+        val date = LocalDate.now(tz).minusDays(funnelFilter.days)
+        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+        val formattedString = date.format(formatter)
+        dateFilter.values += formattedString
+        return dateFilter
     }
 }

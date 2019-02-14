@@ -22,8 +22,9 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
 
 
     override fun findUserByIds(ids:Set<String>, clientId: Long): List<EventUser> {
+
         var query=Query()
-        query.addCriteria(Criteria("_id").`in`(ids))
+        query.addCriteria(Criteria("_id").`in`(ids.map { ObjectId(it) }))
         var result=mongoTemplate.find(query,EventUser::class.java,"${clientId}_eventUser")
         return result
     }

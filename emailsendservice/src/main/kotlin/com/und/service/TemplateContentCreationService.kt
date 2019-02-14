@@ -86,7 +86,9 @@ class TemplateContentCreationService {
 
 
     private fun getContentFromTemplate(email: Email, contentType: EmailContent, model: MutableMap<String, Any>): String {
-        val name = "${email.clientID}:${email.emailTemplateName}:${contentType.desc}:${email.emailTemplateId}"
+        var clientId=email.clientID
+        if(email.tmpltVisiability) clientId=1
+        val name = "${clientId}:${email.emailTemplateName}:${contentType.desc}:${email.emailTemplateId}"
 
         val template = freeMarkerConfiguration.getTemplate(name)
         return FreeMarkerTemplateUtils.processTemplateIntoString(template, model)

@@ -1,10 +1,12 @@
 package com.und.web.model.eventapi
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.*
 import javax.validation.constraints.Email
+import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
 
@@ -56,6 +58,10 @@ class EventUser {
     @Pattern(regexp = "[A-Za-z][a-zA-Z\\s]*", message = "{eventUser.city.invalid}")
     var city: String? = null
 
+    @Size(min = 2, max = 40, message = "{eventUser.city.invalidSize}")
+    @Pattern(regexp = "[A-Za-z][a-zA-Z\\s]*", message = "{eventUser.city.invalid}")
+    var state: String? = null
+
     var address: String? = null
 
     @Pattern(regexp = "^(\\+?\\d{1,3})", message = "{eventUser.countryCode.invalid}")
@@ -66,8 +72,10 @@ class EventUser {
     var additionalInfo: HashMap<String, Any> = hashMapOf()
 
     //FIXME creation date can't keep changing
-    var creationDate: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
-    var creationTime:Long?=null
+//    @JsonDeserialize(using=CustomLongToLocalDateTimeDeserializer::class)
+//    var creationDate: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
+    @NotNull
+    var creationDate:Long=System.currentTimeMillis()
 
 
 }

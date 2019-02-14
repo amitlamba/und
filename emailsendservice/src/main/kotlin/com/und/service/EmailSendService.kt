@@ -9,6 +9,7 @@ import com.amazonaws.services.sns.model.ThrottledException
 import com.und.exception.Connection
 import com.und.exception.EmailError
 import com.und.exception.EmailFailureException
+import com.und.model.mongo.EmailStatus
 import com.und.model.utils.Email
 import com.und.model.utils.EmailSESConfig
 import com.und.model.utils.EmailSMTPConfig
@@ -70,7 +71,7 @@ class EmailSendService {
                 clientid = email.clientID
                 failureType = EmailError.FailureType.CONNECTION
                 causeMessage = "${e.message}"
-                failedSettingId = emailSESConfig.serviceProviderCredentialsId
+                failedSettingId = email.clientEmailSettingId
                 invalidAddresses = email.toEmailAddresses.toEmail()
                 from = email.fromEmailAddress?.toString()
                 retries = ++retries
@@ -88,7 +89,7 @@ class EmailSendService {
                 errorCode = "${e.errorCode}"
                 invalidAddresses = email.toEmailAddresses.toEmail()
                 from = email.fromEmailAddress?.toString()
-                failedSettingId = emailSESConfig.serviceProviderCredentialsId
+                failedSettingId = email.clientEmailSettingId
 
             }
             throw  EmailFailureException("Message rejected : ${e.message}", e, error)
@@ -106,7 +107,7 @@ class EmailSendService {
                 errorCode = "${e.errorCode}"
                 invalidAddresses = email.toEmailAddresses.toEmail()
                 from = email.fromEmailAddress?.toString()
-                failedSettingId = emailSESConfig.serviceProviderCredentialsId
+                failedSettingId = email.clientEmailSettingId
 
             }
             throw  EmailFailureException("${e.message}", e, error)
@@ -122,7 +123,7 @@ class EmailSendService {
                 errorCode = "${e.errorCode}"
                 invalidAddresses = email.toEmailAddresses.toEmail()
                 from = email.fromEmailAddress?.toString()
-                failedSettingId = emailSESConfig.serviceProviderCredentialsId
+                failedSettingId = email.clientEmailSettingId
 
             }
             throw  EmailFailureException("Configuration set ${e.configurationSetName} doesn't exist : ${e.message}", e, error)
@@ -144,10 +145,15 @@ class EmailSendService {
                 errorCode = "${e.errorCode}"
                 invalidAddresses = email.toEmailAddresses.toEmail()
                 from = email.fromEmailAddress?.toString()
-                failedSettingId = emailSESConfig.serviceProviderCredentialsId
+                failedSettingId = email.clientEmailSettingId
 
             }
             throw  EmailFailureException("${e.message}", e, error)
+        } catch (ex:EmailFailureException){
+            email.mongoNotificationId?.let {
+                emailHelperService.updateEmailStatus(it,EmailStatus.ERROR,email.clientID)
+            }
+            throw ex
         } catch (e: Exception) {
             logger.error("The email was not sent. Error message: ${e.message}")
             val error = EmailError()
@@ -155,7 +161,7 @@ class EmailSendService {
                 clientid = email.clientID
                 failureType = EmailError.FailureType.OTHER
                 causeMessage = "Unable to send email : ${e.message}"
-                failedSettingId = emailSESConfig.serviceProviderCredentialsId
+                failedSettingId = email.clientEmailSettingId
                 invalidAddresses = email.toEmailAddresses.toEmail()
                 from = email.fromEmailAddress?.toString()
             }
@@ -170,7 +176,7 @@ class EmailSendService {
         try {
             val session = emailHelperService.session(email.clientID, emailSMTPConfig)
 
-            val transport = emailHelperService.transport(email.clientID)
+            val transport = emailHelperService.transport(email.clientID,email.clientEmailSettingId!!)
             transport.removeTransportListener(messageTransPortListener)
             //transport.addTransportListener(messageTransPortListener)
             //transport.
@@ -185,6 +191,7 @@ class EmailSendService {
                         clientid = email.clientID
                         failureType = EmailError.FailureType.CONNECTION
                         causeMessage = "Incorrect Authentication : ${e.message}"
+                        failedSettingId=email.clientEmailSettingId
                     }
                     throw  EmailFailureException("Incorrect Authentication : ${e.message}", e, error)
                 }
@@ -196,7 +203,7 @@ class EmailSendService {
             val msg = emailHelperService.createMimeMessage(session, email)
             //FIXME transport is single thread use thread safety synchronization
             transport.sendMessage(msg, msg.allRecipients)
-            logger.info("email sent to   ${email.toEmailAddresses} from  ${email.fromEmailAddress}} with msg ${email.emailBody}")
+            logger.info("email sent to   ${email.toEmailAddresses.get(0).address} from  ${email.fromEmailAddress}} with msg ${email.emailBody}")
         } catch (e: SendFailedException) {
 
             logger.error(e.message)
@@ -205,7 +212,7 @@ class EmailSendService {
                 clientid = email.clientID
                 failureType = EmailError.FailureType.DELIVERY
                 causeMessage = "Incorrect Authentication : ${e.message}"
-                failedSettingId = emailSMTPConfig.serviceProviderCredentialsId
+                failedSettingId = email.clientEmailSettingId
                 invalidAddresses = e.invalidAddresses?.toEmail() ?: emptyList()
                 validSentAddresses = e.validSentAddresses?.toEmail() ?: emptyList()
                 unsentAddresses = e.validUnsentAddresses?.toEmail() ?: emptyList()
@@ -223,7 +230,7 @@ class EmailSendService {
                 clientid = email.clientID
                 failureType = EmailError.FailureType.INCORRECT_EMAIL
                 causeMessage = "Incorrect email address : ${e.message}"
-                failedSettingId = emailSMTPConfig.serviceProviderCredentialsId
+                failedSettingId = email.clientEmailSettingId
                 invalidAddresses = listOf(invalidFormattedAddress)
             }
             throw  EmailFailureException("Incorrect email address : ${e.message}", e, error)
@@ -235,10 +242,15 @@ class EmailSendService {
                 clientid = email.clientID
                 failureType = EmailError.FailureType.OTHER
                 causeMessage = "Unable to send email : ${e.message}"
-                failedSettingId = emailSMTPConfig.serviceProviderCredentialsId
+                failedSettingId = email.clientEmailSettingId
             }
             throw  EmailFailureException("Unable to send email : ${e.message}", e, error)
 
+        } catch (ex:EmailFailureException){
+            email.mongoNotificationId?.let {
+                emailHelperService.updateEmailStatus(it,EmailStatus.ERROR,email.clientID)
+            }
+            throw ex
         } catch (e: Exception) {
             logger.error(e.message)
             val error = EmailError()
@@ -246,10 +258,13 @@ class EmailSendService {
                 clientid = email.clientID
                 failureType = EmailError.FailureType.OTHER
                 causeMessage = "Unable to send email : ${e.message}"
-                failedSettingId = emailSMTPConfig.serviceProviderCredentialsId
+                failedSettingId = email.clientEmailSettingId
+            }
+            email.mongoNotificationId?.let {
+                emailHelperService.updateEmailStatus(it,EmailStatus.ERROR,email.clientID)
             }
             throw  EmailFailureException("Unable to send email : ${e.message}", e, error)
-        } /*finally {
+        }  /*finally {
             //emailHelperService.closeTransport(email.clientID)
         }*/
 

@@ -15,8 +15,8 @@ data class Email(
         var clientID: Long,
         var toEmailAddresses: Array<InternetAddress>,
         var emailSubject: String,
-        var campaignID: Long,
-        var emailStatus: EmailStatus,
+        var campaignId: Long,
+        var status: EmailStatus,
         var statusUpdates: MutableList<EmailStatusUpdate> = mutableListOf(),
         var emailTemplateId: Long,
         var fromEmailAddress: InternetAddress? = null,
@@ -26,7 +26,8 @@ data class Email(
         var userID: String? = null,
         var emailProviderMessageID: String? = null,
         var emailServiceProvider: String? = null,
-        var creationTime: Date = DateUtils.nowInUTC()
+        var creationTime: Date = DateUtils.nowInUTC(),
+        var segmentId:Long?=null
 //FIXME add creation date
 ) {
     @Transient
@@ -35,7 +36,7 @@ data class Email(
 
 data class EmailStatusUpdate (
         val date: LocalDateTime,
-        val emailStatus: EmailStatus,
+        val status: EmailStatus,
         val clickTrackEventId: String? = null
 )
 
@@ -43,5 +44,6 @@ enum class EmailStatus(val order: Int) {
     NOT_SENT(1),
     SENT(2),
     READ(3),
-    CTA_PERFORMED(4);
+    CTA_PERFORMED(4),
+    ERROR(5)
 }

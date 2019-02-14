@@ -37,9 +37,14 @@ class FcmFailureHandler {
         saveFcmFailure(notificationError)
         notificationError.clientId?.let {
             //pause all running campaign
-//            campaignService.pauseAllRunning(it)
+            //TODO pause all running campaign for this service provider. take sp name in notification error
             //sending mail
-            emailService.sendNotificationConnectionErrorEmail(notificationError)
+            //TODO handle multiple email send.Send Email just once not for all failure message add a flag
+            // TODO which we used to check is mai sent for this campaign errr or not once errr is solved reset fag..
+            if(notificationError.errorCode == 401L||notificationError.errorCode == 404L||notificationError.errorCode.toString().startsWith("5")){
+                emailService.sendNotificationConnectionErrorEmail(notificationError)
+                campaignService.pauseAllRunning(it)
+            }
 
             //if error is NotRegistered & InvalidRegistration then remove token from eventuser in mongo
             if(notificationError.campaignType.equals("android")){
@@ -66,7 +71,7 @@ class FcmFailureHandler {
         var log=FcmFailureAuditLog()
         with(log){
             clientID=notificationError.clientId
-            status=notificationError.status
+            status=notificationError.status?:""
             message=notificationError.message
             errorCode=notificationError.errorCode
             type=notificationError.campaignType
@@ -83,4 +88,6 @@ class NotificationError{
     var errorCode:Long?=null
     var campaignType:String?=null
     var userId:String?=null
+    var serviceProviderId:Long?=null
+    var serviceProvider:String?=null
 }

@@ -6,6 +6,7 @@ import com.und.model.redis.security.UserCache
 import com.und.repository.jpa.security.ClientSettingsRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class JWTKeyService {
@@ -45,9 +46,12 @@ class JWTKeyService {
                     this.userId = generateIdKey(userId)
                     this.secret = user.get().clientSecret
                     this.loginKey = user.get().key
+                    this.androidKey=user.get().androidKey
+                    this.iosKey=user.get().iosKey
                     this.username = user.get().username
                     this.password = user.get().password
                     this.email = user.get().email
+                    this.identified=false
                 }
             }
             save(jwtKeys)

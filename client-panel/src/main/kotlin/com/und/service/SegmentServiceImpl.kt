@@ -11,6 +11,7 @@ import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.SegmentNotFoundException
 import com.und.web.model.ConditionType
+import org.bson.types.ObjectId
 import org.hibernate.exception.ConstraintViolationException
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
@@ -181,7 +182,8 @@ class SegmentServiceImpl : SegmentService {
 
     private fun getSegmentUserIds(segment: Segment, clientId: Long,type:String="eventuser"): Pair<List<EventUser>,List<String>> {
 
-        val tz = userSettingsService.getTimeZone()
+//        val tz = userSettingsService.getTimeZone()
+        val tz = userSettingsService.getTimeZoneByClientId(clientId)
         val allResult = mutableListOf<Set<String>>()
         val websegment = buildWebSegment(segment)
 //        val queries = segmentParserCriteria.segmentQueries(websegment, tz)
@@ -239,6 +241,13 @@ class SegmentServiceImpl : SegmentService {
         }
 
 
+//<<<<<<< HEAD
+//=======
+//        // reduce function call on empty collection throw exception
+//        val userList:Set<String>
+//        if(allResult.isNotEmpty()) userList= allResult.reduce { f, s -> f.intersect(s) } else userList = emptySet()
+//        return userList.toList()
+//>>>>>>> origin/jogendra
     }
 
     private fun retrieveUsers(queries: List<Aggregation>, conditionType: ConditionType, clientId: Long): MutableSet<String> {
@@ -249,8 +258,8 @@ class SegmentServiceImpl : SegmentService {
         }
 
         val result = when (conditionType) {
-            ConditionType.AnyOf -> userDidList.reduce { f, s -> f.union(s) }
-            ConditionType.AllOf -> userDidList.reduce { f, s -> f.intersect(s) }
+            ConditionType.AnyOf -> if(userDidList.isNotEmpty()) userDidList.reduce { f, s -> f.union(s) } else emptySet()
+            ConditionType.AllOf -> if(userDidList.isNotEmpty()) userDidList.reduce { f, s -> f.intersect(s) } else emptySet()
         }
         val mutableResult = mutableSetOf<String>()
         mutableResult.addAll(result)
@@ -294,4 +303,7 @@ class SegmentServiceImpl : SegmentService {
         return eventUserListWeb
     }
 
+    override fun segmentByClientId(clientId: Long): List<Segment> {
+        return segmentRepository.findByClientID(clientId)?: emptyList()
+    }
 }

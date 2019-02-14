@@ -9,6 +9,7 @@ import com.und.service.EmailService
 import com.und.utils.loggerFor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
+import org.springframework.kafka.listener.AbstractMessageListenerContainer
 import org.springframework.stereotype.Service
 
 @Service
@@ -28,15 +29,15 @@ class EmailListener {
         val logger = loggerFor(EmailListener::class.java)
     }
 
-    @StreamListener("emailEventSend")
+    @StreamListener("emailEventReceive")
     fun sendEmailCampaign(email: Email) {
         sendEmail(email)
     }
 
     @StreamListener("clientEmailReceive")
     fun sendClientEmail(email: Email) {
-        email.clientID = 1
-
+//        email.clientID = 1
+        email.tmpltVisiability=true;
         sendEmail(email)
     }
 

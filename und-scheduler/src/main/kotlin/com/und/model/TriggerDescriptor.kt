@@ -32,7 +32,6 @@ class TriggerDescriptor {
     var cron: String? = null
 
 
-
     private fun buildName(jobDescriptor: JobDescriptor): String {
         return JobUtil.getJobName(jobDescriptor)
     }
@@ -52,9 +51,9 @@ class TriggerDescriptor {
         group = buildGroupName(jobDescriptor)
         val timeZone = jobDescriptor.timeZoneId
         val startDayTime = startDate?.atStartOfDay(timeZone)
-        val endDateTime = endDate?.let{
+        val endDateTime = endDate?.let {
 
-            val endTime = LocalTime.of(23,59, 59)
+            val endTime = LocalTime.of(23, 59, 59)
             LocalDateTime.of(endDate, endTime)?.atZone(timeZone)
         }
         val triggerBuilder = when {
@@ -78,12 +77,11 @@ class TriggerDescriptor {
 
             }
             !isEmpty(fireTime) -> {
-
-                val firetimeatzone = fireTime?.atZone(timeZone)
+                val firetimeatzone = advanceExpiredToNow(timeZone,fireTime)
                 newTrigger()
                         .withIdentity(name, group)
                         .withSchedule(simpleSchedule()
-                                .withMisfireHandlingInstructionNextWithExistingCount()
+                                .withMisfireHandlingInstructionFireNow()
 
                         )
                         .startAt(Date.from(firetimeatzone?.toInstant()))
@@ -101,7 +99,7 @@ class TriggerDescriptor {
                 newTrigger()
                         .withIdentity(name, group)
                         .withSchedule(simpleSchedule()
-                                .withMisfireHandlingInstructionNextWithExistingCount()
+                                .withMisfireHandlingInstructionFireNow()
                                 .withIntervalInSeconds(5)
                                 //.withIntervalInHours(24)
                                 .withRepeatCount((fireTimes?.size ?: 0) - 1)
@@ -117,18 +115,18 @@ class TriggerDescriptor {
 
         }
         if (startDate != null) {
-            val startDate:LocalDate = startDate!!
+            val startDate: LocalDate = startDate!!
             val db = DateBuilder.newDateInTimezone(TimeZone.getTimeZone(timeZone))
-            db.inYear(startDate.year).inMonthOnDay(startDate.monthValue, startDate.dayOfMonth).atHourMinuteAndSecond(0,0,0)
+            db.inYear(startDate.year).inMonthOnDay(startDate.monthValue, startDate.dayOfMonth).atHourMinuteAndSecond(0, 0, 0)
             triggerBuilder.startAt(db.build())
             //start time not resolve correctly from one point of view its correct if user select the start data > today if user select today then its not
             //correct make restriction on ui that in case of multiple date he/she not able to select today as start date.instead use other option.
         }
         if (endDate != null) {
 
-            val endDate:LocalDate = endDate!!
+            val endDate: LocalDate = endDate!!
             val db = DateBuilder.newDateInTimezone(TimeZone.getTimeZone(timeZone))
-            db.inYear(endDate.year).inMonthOnDay(endDate.monthValue, endDate.dayOfMonth).atHourMinuteAndSecond(23,59,59)
+            db.inYear(endDate.year).inMonthOnDay(endDate.monthValue, endDate.dayOfMonth).atHourMinuteAndSecond(23, 59, 59)
 //            triggerBuilder.startAt(db.build())
 //            triggerBuilder.endAt(java.sql.Date.valueOf(endDate))
             triggerBuilder.endAt(db.build())
@@ -145,6 +143,18 @@ class TriggerDescriptor {
 
     }
 
+    private fun advanceExpiredToNow(timeZone: ZoneId ,firetime: LocalDateTime?): ZonedDateTime? {
+        return fireTime?.let { time ->
+
+            var firetimeatzone = time.atZone(timeZone)
+            val now = ZonedDateTime.now(timeZone)
+            val expired = firetimeatzone.isBefore(now)
+            if (expired) now.plusSeconds(5) else firetimeatzone
+
+        }
+
+    }
+
     companion object {
         /**
          *
@@ -157,7 +167,7 @@ class TriggerDescriptor {
             with(triggerDescriptor) {
                 name = trigger.key.name
                 group = trigger.key.group
-                val timeZoneId =  trigger.jobDataMap["timezone"] as String
+                val timeZoneId = trigger.jobDataMap["timezone"] as String
                 val tz = TimeZone.getTimeZone(timeZoneId)
                 val fireTimeString = trigger.jobDataMap["fireTime"] as String?
                 if (!fireTimeString.isNullOrBlank()) {
@@ -165,8 +175,8 @@ class TriggerDescriptor {
                 }
                 cron = trigger.jobDataMap["cron"] as String?
                 val startDateString = trigger.jobDataMap["startDate"] as String?
-                if (!startDateString.isNullOrBlank())  {
-                    startDate = startDateString?.let{LocalDate.ofEpochDay(startDateString.toLong())}
+                if (!startDateString.isNullOrBlank()) {
+                    startDate = startDateString?.let { LocalDate.ofEpochDay(startDateString.toLong()) }
                 }
                 val endDateString = trigger.jobDataMap["endDate"] as String?
                 if (!endDateString.isNullOrBlank()) {

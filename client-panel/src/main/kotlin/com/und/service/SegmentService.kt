@@ -25,5 +25,7 @@ interface SegmentService {
     fun segmentUsers(segment: WebSegment, clientId: Long): List<EventUserWeb>
 
     fun isUserPresentInSegment(segment: Segment, clientId: Long, userId: String): Boolean
+
+    fun segmentByClientId(clientId: Long):List<Segment>
 }
 

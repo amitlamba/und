@@ -16,7 +16,7 @@ class SmsListner {
     @Autowired
     private lateinit var smsService: SmsService
 
-    @StreamListener("smsEventSend")
+    @StreamListener("smsEventReceive")
     fun sendSmsCampaign(sms: Sms) {
         smsService.sendSms(sms)
     }

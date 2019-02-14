@@ -1,13 +1,16 @@
 package com.und.web.model.eventapi
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.und.eventapi.validation.*
+import com.und.model.mongo.eventapi.AppField
 import com.und.model.mongo.eventapi.LineItem
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
+import java.time.*
 import java.util.*
+import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
 
@@ -18,14 +21,18 @@ import javax.validation.constraints.Size
 //FIXME handle validation for other fields and different types, e.g. @see
 open class Event {
 
-    @Size(min=2,max=40,message="{event.name.invalidSize}")
+    @Size(min = 2, max = 40, message = "{event.name.invalidSize}")
     lateinit var name: String
 
     var clientId: Long = -1L
     var identity: Identity = Identity()
-    var creationTime: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
 
-    @Pattern(regexp="(([0-9]|[1][0-9]{1,2}|2[0-4][0-9]|25[0-5])[.]){3}([0-9]|[1][0-9]{1,2}|2[0-4][0-9]|25[0-5])",message="{event.ip.invalid}")
+//    @JsonDeserialize(using=CustomLongToLocalDateTimeDeserializer::class)
+//    var creationTime: LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
+    @NotNull
+    var creationTime:Long=System.currentTimeMillis()
+
+    @Pattern(regexp = "(([0-9]|[1][0-9]{1,2}|2[0-4][0-9]|25[0-5])[.]){3}([0-9]|[1][0-9]{1,2}|2[0-4][0-9]|25[0-5])", message = "{event.ip.invalid}")
     var ipAddress: String? = null
 
     @Size(min = 2, max = 40, message = "{event.city.invalidSize}")
@@ -40,10 +47,10 @@ open class Event {
     @Pattern(regexp = "[A-Za-z][a-zA-Z\\s]*", message = "{event.country.invalid}")
     var country: String? = null
 
-    @ValidateLatitude(message="{event.latitude.invalid}")
+    @ValidateLatitude(message = "{event.latitude.invalid}")
     var latitude: String? = null
 
-    @ValidateLongitude(message="{event.longitude.invalid}")
+    @ValidateLongitude(message = "{event.longitude.invalid}")
     var longitude: String? = null
 
     var agentString: String? = null
@@ -51,12 +58,12 @@ open class Event {
     var lineItem: MutableList<LineItem> = mutableListOf()
     var attributes: HashMap<String, Any> = hashMapOf()
 
+    var appField: AppField? = null
+
     //@get:JsonIgnore
-    var timeZone:String? = null
+    var timeZone: String? = null
 
-    var notificationId:String? = null
-    var creationDate:Long?=null
-
+    var notificationId: String? = null
 
 }
 
@@ -86,5 +93,21 @@ data class EventMessage(
     var eventUser: EventUser = EventUser()
 }
 */
+
+class CustomLongToLocalDateTimeDeserializer:StdDeserializer<LocalDateTime>{
+
+    constructor():this(null)
+
+    constructor(vc: Class<*>?) : super(vc)
+
+
+    override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): LocalDateTime {
+
+        p?.let {
+            return LocalDateTime.from(Instant.ofEpochMilli(p.text.toLong()).atZone(ZoneId.of("UTC")))
+        }
+        return LocalDateTime.now(ZoneId.of("UTC"))
+    }
+}
 
 

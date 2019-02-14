@@ -2,6 +2,7 @@ package com.und.report.web.controller
 
 import com.und.report.service.FunnelReportService
 import com.und.report.web.model.FunnelReport
+import com.und.report.web.model.FunnelStepAndFilter
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
 
@@ -38,10 +39,10 @@ class FunnelController {
 
 
     @PostMapping("/funnel")
-    fun funnel(@RequestBody(required = true) steps:List<FunnelReport.Step>,
+    fun funnel(@RequestBody(required = true) body:FunnelStepAndFilter,
                funnelFilter: FunnelReport.FunnelReportFilter): List<FunnelReport.FunnelStep> {
-
-        funnelFilter.steps=steps;
+        funnelFilter.steps=body.steps
+        funnelFilter.filters=body.filters
         return funnelReportService.funnel(funnelFilter)
     }
 }

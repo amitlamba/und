@@ -28,7 +28,7 @@ class CampaignServiceTest {
 
     @Test
     fun executeCampaign() {
-            var campaign=campaignRepository.getCampaignByCampaignId(campaignId,clientId)
+            var campaign=campaignRepository.findById(campaignId)
             print("$campaign.campaignId,$campaign.campaignType")
     }
 

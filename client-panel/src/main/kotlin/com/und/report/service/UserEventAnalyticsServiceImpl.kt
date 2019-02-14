@@ -139,9 +139,12 @@ class UserEventAnalyticsServiceImpl : UserEventAnalyticsService {
         val groupBys = buildTimePeriodGroupBy(period)
         val aggregation = aggregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap(), entityType, tz, clientID)
         val resultList = userAnalyticsRepository.aggregate(aggregation, clientID)
-
         return buildTimePeriodTrend(resultList)
     }
+
+//    private fun sortResult(resultList:List<AggregateOutput>):List<AggregateOutput>{
+//        resultList.sortedBy { it -> it.groupByInfo.get("") }
+//    }
 
     override fun eventUserTrend(requestFilter: EventReport.EventReportFilter): List<EventReport.EventUserFrequency> {
         logger.debug("EventUserTrend aggregation for requestFilter : $requestFilter")
@@ -188,12 +191,10 @@ class UserEventAnalyticsServiceImpl : UserEventAnalyticsService {
     private fun buildTimePeriodGroupBy(period: EventReport.PERIOD): List<GroupBy> {
         when (period) {
             EventReport.PERIOD.daily -> {
-                //TODO correct for daily
                 return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties), buildGroupBy("dayOfMonth", GlobalFilterType.EventTimeProperties))
             }
             EventReport.PERIOD.weekly -> {
-                //TODO correct for weekly
-                return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties), buildGroupBy("dayOfWeek", GlobalFilterType.EventTimeProperties))
+                return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties), buildGroupBy("dayOfMonth", GlobalFilterType.EventTimeProperties))
             }
             EventReport.PERIOD.monthly -> {
                 return listOf(buildGroupBy("year", GlobalFilterType.EventTimeProperties), buildGroupBy("month", GlobalFilterType.EventTimeProperties))
@@ -272,7 +273,7 @@ class UserEventAnalyticsServiceImpl : UserEventAnalyticsService {
     }
 
 
-    private fun buildUserCountByEventResult(aggregate: List<AggregateOutput>): List<UserCountByEventForDate> {
+    private fun      buildUserCountByEventResult(aggregate: List<AggregateOutput>): List<UserCountByEventForDate> {
         return aggregate.map {
             UserCountByEventForDate(it.groupByInfo[Field.DateVal.fName].toString(),
                     listOf(UserCountByEvent(it.aggregateVal.toInt(), it.groupByInfo[Field.EventName.fName].toString())))

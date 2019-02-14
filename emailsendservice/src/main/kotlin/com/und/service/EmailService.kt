@@ -1,13 +1,17 @@
 package com.und.service
 
+import com.netflix.discovery.converters.Auto
 import com.und.config.EventStream
 import com.und.exception.EmailError
 import com.und.exception.EmailFailureException
 import com.und.model.mongo.EmailStatus.NOT_SENT
 import com.und.model.mongo.EmailStatus.SENT
 import com.und.model.utils.*
+import com.und.model.utils.eventapi.Event
+import com.und.model.utils.eventapi.Identity
 import com.und.repository.jpa.ClientSettingsRepository
 import com.und.repository.jpa.EmailTemplateRepository
+import com.und.repository.jpa.security.UserRepository
 import com.und.utils.loggerFor
 import org.apache.commons.lang.StringUtils
 import org.bson.types.ObjectId
@@ -43,6 +47,12 @@ class EmailService {
     @Autowired
     private lateinit var eventStream: EventStream
 
+    @Autowired
+    private lateinit var eventApiFeignClient:EventApiFeignClient
+
+    @Autowired
+    private lateinit var userRepository:UserRepository
+
     private var wspCredsMap: MutableMap<Long, ServiceProviderCredentials> = mutableMapOf()
 
 
@@ -71,6 +81,7 @@ class EmailService {
         //FIXME: cache the findByClientID clientSettings
         val clientSettings = clientSettingsRepository.findByClientID(emailToSend.clientID)
         val mongoEmailId = ObjectId().toString()
+        emailToSend.mongoNotificationId=mongoEmailId
         emailToSend.eventUser?.let {
             model["user"] = it
         }
@@ -85,35 +96,53 @@ class EmailService {
         emailToSend.emailBody = body.addUrlTracking(mongoEmailId).addPixelTracking(mongoEmailId)
         emailToSend.emailSubject = subject
 
-        if (isSystemClient(email)) {
-            val template = emailTemplateRepository.findByIdAndClientID(email.emailTemplateId, email.clientID)
-            val from = template.map { it.from }
-            if (from.isPresent) {
-                emailToSend.fromEmailAddress = InternetAddress(from.get())
-            } else {
-
-                logger.error("from email for template id ${email.emailTemplateId} is not present for system user")
-                val error = EmailError()
-                with(error) {
-                    clientid = email.clientID
-                    failureType = EmailError.FailureType.CONNECTION
-                    causeMessage = "from email for template id ${email.emailTemplateId} is not present for system user"
-                    failedSettingId = clientSettings?.id
-
-                }
-                throw  EmailFailureException("from email for template id ${email.emailTemplateId} is not present for system user", error)
-            }
-        }
-
+//        if (isSystemClient(email)) {
+//            val template = emailTemplateRepository.findByIdAndClientID(email.emailTemplateId, email.clientID)
+//            val from = template.map { it.from }
+//            if (from.isPresent) {
+//                emailToSend.fromEmailAddress = InternetAddress(from.get())
+//            } else {
+//
+//                logger.error("from email for template id ${email.emailTemplateId} is not present for system user")
+//                val error = EmailError()
+//                with(error) {
+//                    clientid = email.clientID
+//                    failureType = EmailError.FailureType.CONNECTION
+//                    causeMessage = "from email for template id ${email.emailTemplateId} is not present for system user"
+//                    failedSettingId = clientSettings?.id
+//
+//                }
+//                throw  EmailFailureException("from email for template id ${email.emailTemplateId} is not present for system user", error)
+//            }
+//        }
         emailHelperService.saveMailInMongo(emailToSend, NOT_SENT, mongoEmailId)
+        println("Not sent ${System.currentTimeMillis()}")
         sendEmailWithoutTracking(emailToSend)
+        println("sending ${System.currentTimeMillis()}")
         emailHelperService.updateEmailStatus(mongoEmailId, SENT, emailToSend.clientID)
+        println("sent ${System.currentTimeMillis()}")
+
+        //TODO this event is track only for campaign not for system emails
+        val token = userRepository.findSystemUser().key
+        var event= Event()
+        with(event) {
+            name = "Notification Sent"
+            clientId=emailToSend.clientID
+            notificationId=mongoEmailId
+            attributes.put("campaign_id",emailToSend.campaignId)
+            userIdentified=true
+            identity= Identity(userId = email.eventUser?.id,clientId = emailToSend.clientID.toInt())
+
+        }
+        eventApiFeignClient.pushEvent(token,event)
     }
 
     private fun isSystemClient(email: Email) = email.clientID == 1L
 
     fun sendEmailWithoutTracking(email: Email) {
         val serviceProviderCredential = serviceProviderCredentials(email = email)
+//        val serviceProviderCredential= emailHelperService.getEmailServiceProviderCredentials(email.clientID,email.clientEmailSettingId!!)
+//        val spcrd=serviceProviderCredentialsService.buildWebServiceProviderCredentials(serviceProviderCredential)
         sendEmail(serviceProviderCredential, email)
     }
 
@@ -121,11 +150,11 @@ class EmailService {
         when (serviceProviderCredential.serviceProvider) {
             ServiceProviderCredentialsService.ServiceProvider.SMTP.desc,
             ServiceProviderCredentialsService.ServiceProvider.AWS_SES_SMTP.desc -> {
-                val emailSMTPConfig = EmailSMTPConfig.build(serviceProviderCredential)
+                val emailSMTPConfig = EmailSMTPConfig.build(serviceProviderCredential,email.clientEmailSettingId)
                 sendEmailBySMTP(emailSMTPConfig, email)
             }
             ServiceProviderCredentialsService.ServiceProvider.AWS_SES_API.desc -> {
-                val emailSESConfig = EmailSESConfig.build(serviceProviderCredential)
+                val emailSESConfig = EmailSESConfig.build(serviceProviderCredential,email.clientEmailSettingId)
                 sendEmailByAWSSDK(emailSESConfig, email)
             }
 

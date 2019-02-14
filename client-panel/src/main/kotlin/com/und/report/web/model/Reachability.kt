@@ -1,6 +1,7 @@
 package com.und.report.web.model
 
 class Reachability {
+    var totalUser: Int? =null
     var email: Long = 0
     var sms: Long = 0
     var webpush: Long = 0

@@ -5,10 +5,8 @@ import com.und.model.mongo.eventapi.*
 import com.und.model.mongo.eventapi.SystemDetails
 import com.und.web.model.eventapi.Event
 import com.und.web.model.eventapi.EventUser
-import java.time.Instant
+import java.time.*
 import com.und.model.mongo.eventapi.EventUser as MongoEventUser
-import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.regex.Pattern
@@ -19,31 +17,32 @@ fun Event.copyToMongo(): MongoEvent {
     val mongoEvent = MongoEvent(clientId = event.clientId, name = event.name)
     mongoEvent.timeZoneId = ZoneId.of(event.timeZone)
     //
-    mongoEvent.clientTime = ClientTimeNow(LocalDateTime.now(mongoEvent.timeZoneId))
+//    mongoEvent.clientTime = ClientTimeNow(LocalDateTime.now(mongoEvent.timeZoneId))
+    mongoEvent.clientTime = ClientTimeNow(LocalDateTime.from(Instant.ofEpochMilli(event.creationTime).atZone(mongoEvent.timeZoneId)))
 
-    event.creationDate?.let {
-//        mongoEvent.creationTime=Date.from(Instant.ofEpochSecond(it).atZone(ZoneId.of("UTC")).toInstant())
-        //if we store date object in mongo it will convert in utc automatically
-        mongoEvent.creationTime=Date.from(Instant.ofEpochMilli(it))
-    }
-
+//    event.creationTime?.let {
+////        mongoEvent.creationTime=Date.from(Instant.ofEpochSecond(it).atZone(ZoneId.of("UTC")).toInstant())
+//        //if we store date object in mongo it will convert in utc automatically
+//        mongoEvent.creationTime=Date.from(Instant.ofEpochMilli(it))
+//    }
+    mongoEvent.creationTime=Date.from(Instant.ofEpochMilli(event.creationTime).atZone(ZoneId.of("UTC")).toInstant())
     //copying system info
-    val agentString = event.agentString
+    val agentString = event.agentString?:""
     var pattern = Pattern.compile("^(Mobile-Agent).*")
     var matcher=pattern.matcher(agentString)
-    if (!matcher.matches() && agentString!=null) {
+    if (!matcher.matches() && agentString.isNotEmpty()) {
         mongoEvent.agentString = agentString
         val sysDetail = systemDetails(agentString)
         val system = System()
         mongoEvent.system = system
         with(system) {
 
-            os = SystemDetails(name = sysDetail.OS ?: "", version = "")
-            if (sysDetail.browser != null && sysDetail.browserVersion != null) {
-                browser = SystemDetails(sysDetail.browser!!, sysDetail.browserVersion!!)
+            os = SystemDetails(name = sysDetail.OS ?: "", version = sysDetail.osVersion?:"")
+            if (sysDetail.browser != null) {
+                browser = SystemDetails(sysDetail.browser!!, sysDetail.browserVersion?:"")
             }
             application = SystemDetails(name = "", version = "")
-            device = SystemDetails(name = sysDetail.deviceType ?: "", version = "")
+            device = SystemDetails(name = sysDetail.deviceType ?: "", version = sysDetail.deviceVersion?:"")
         }
     }
 
@@ -53,6 +52,7 @@ fun Event.copyToMongo(): MongoEvent {
     mongoEvent.sessionId = event.identity.sessionId
     mongoEvent.deviceId = event.identity.deviceId
     mongoEvent.notificationId = event.notificationId
+    mongoEvent.appfield = event.appField
 
     //copy geo details
     with(mongoEvent.geoDetails) {
@@ -126,10 +126,20 @@ fun com.und.model.mongo.eventapi.EventUser.copyNonNull(eventUser: EventUser): co
     copyEventUser.standardInfo.firstname = unchanged(eventUser.firstName, standardInfo.firstname)
     copyEventUser.standardInfo.lastname = unchanged(eventUser.lastName, standardInfo.lastname)
     copyEventUser.standardInfo.gender = unchanged(eventUser.gender, standardInfo.gender)
-    copyEventUser.standardInfo.dob = unchanged(eventUser.dob, standardInfo.dob)
+//    copyEventUser.standardInfo.dob = unchanged(eventUser.dob, standardInfo.dob)
+    if(eventUser.dob!=null) {
+        var date= LocalDate.parse(eventUser.dob)
+        copyEventUser.standardInfo.dob=date
+        copyEventUser.standardInfo.age=date.year
+    }
+    else {
+        copyEventUser.standardInfo.dob= this.standardInfo.dob
+        copyEventUser.standardInfo.age= this.standardInfo.age
+    }
     copyEventUser.standardInfo.country = unchanged(eventUser.country, standardInfo.country)
-    copyEventUser.standardInfo.City = unchanged(eventUser.city, standardInfo.City)
-    copyEventUser.standardInfo.Address = unchanged(eventUser.address, standardInfo.Address)
+    copyEventUser.standardInfo.city = unchanged(eventUser.city, standardInfo.city)
+    copyEventUser.standardInfo.state= unchanged(eventUser.state,standardInfo.state)
+    copyEventUser.standardInfo.address = unchanged(eventUser.address, standardInfo.address)
     copyEventUser.standardInfo.countryCode = unchanged(eventUser.countryCode, standardInfo.countryCode)
     copyEventUser.communication=getCommunication(this,eventUser)
     return copyEventUser

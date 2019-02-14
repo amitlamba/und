@@ -28,9 +28,10 @@ class SmsSentCustomRepositoryImpl : SmsSentCustomRepository {
 
     override fun updateStatus(smsId: String, smsStatus: SmsStatus, clientId: Long, clickTrackEventId: String?, message: String) {
 
-        val query = Query(Criteria.where("clientId").`is`(clientId).and("_id").`is`(ObjectId(smsId)))
+        val query = Query(Criteria.where("clientID").`is`(clientId).and("_id").`is`(ObjectId(smsId)))
         val statusupdate = SmsStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), smsStatus, clickTrackEventId,message)
-        val update = Update().push("statusUpdates", statusupdate).set("smsStatus", smsStatus)
-        mongoTemplate.updateFirst(query, update, Sms::class.java, "${clientId}_email")
+        val update = Update().push("statusUpdates", statusupdate).set("status", smsStatus)
+        var v=mongoTemplate.findOne(query,Sms::class.java)
+        mongoTemplate.updateFirst(query, update, Sms::class.java, "${clientId}_sms")
     }
 }

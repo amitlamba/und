@@ -6,6 +6,7 @@ import com.und.report.web.model.GroupBy
 import com.und.web.model.*
 import com.und.web.model.Unit
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.aggregation.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.stereotype.Component
@@ -150,7 +151,7 @@ class AggregationQuerybuilder {
                         AggregationType.Avg -> eventGroupOperation = Aggregation.group(Fields.from(*fields, Fields.field(Field.UserId.fName))).avg(scopedName).`as`(AGGREGATE_VALUE)
                     }
                 }
-                else eventGroupOperation = Aggregation.group(Fields.from(*fields, Fields.field(Field.UserId.fName))).count().`as`(USER_COUNT)
+                else eventGroupOperation = Aggregation.group(Fields.from(*fields,Fields.field(Field.UserId.fName))).count().`as`(USER_COUNT)
             }
             else if(entityType == EventReport.EntityType.user)
                 eventGroupOperation = eventGroupOperation.addToSet(Field.UserId.fName).`as`(Field.UserId.fName)
@@ -195,6 +196,9 @@ class AggregationQuerybuilder {
 
 
             aggregationPipeline.add(projectOperation)
+
+//            aggregationPipeline.add(Aggregation.group(Field.UserIdObject.fName))
+//            aggregationPipeline.add(Aggregation.project().and("_id").`as`(Field.UserIdObject.fName))
 
             val lookupOperation = Aggregation.lookup("${clientId}_eventUser", "${Field.UserIdObject.fName}", "_id", USER_DOC)
             aggregationPipeline.add(lookupOperation)
@@ -254,13 +258,11 @@ class AggregationQuerybuilder {
 //            val allGroupByFields = mutableMapOf<String, String>()
 //            allGroupByFields.putAll(eventGroupFields)
 //            allGroupByFields.putAll(userGroupFields)
-
             var resultProjectOperation = Aggregation.project().and(Field.UserId.fName).size().`as`(AGGREGATE_VALUE)
 //            if(allGroupByFields.size > 1) {
 //                allGroupByFields.forEach { t, u -> resultProjectOperation = resultProjectOperation.and(t).`as`(u) }
 //                resultProjectOperation = resultProjectOperation.and(Field.UserId.fName).size().`as`(AGGREGATE_VALUE)
 //            }
-
             aggregationPipeline.add(resultProjectOperation)
         }
 

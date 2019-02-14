@@ -7,6 +7,7 @@ import com.und.web.model.EmailTemplate
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import javax.servlet.http.HttpServletRequest
 import javax.validation.Valid
 import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
@@ -32,8 +33,8 @@ class EmailTemplateController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/templates"])
-    fun getClientEmailTemplates(@RequestParam(value = "id", required = false) id: Long? = null): List<EmailTemplate> {
-        return emailTemplateService.getClientEmailTemplates(id)
+    fun getClientEmailTemplates(): List<EmailTemplate> {
+        return emailTemplateService.getClientEmailTemplates()
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -41,9 +42,9 @@ class EmailTemplateController {
     fun saveEmailTemplate(@Valid @RequestBody emailTemplate: EmailTemplate): Long {
         var clientId=AuthenticationUtils.clientID
         if(clientId!=null) {
-            var exist = emailTemplateService.checkFromUserExistOrNot(clientId, emailTemplate.from)
+//            var exist = emailTemplateService.checkFromUserExistOrNot(clientId, emailTemplate.from)
 
-            if (exist) {
+            if (true) {
                 return emailTemplateService.saveEmailTemplate(emailTemplate)
             }
         }

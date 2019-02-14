@@ -12,11 +12,7 @@ interface EventMetadataRepository : MongoRepository<EventMetadata, String> {
 
 }
 
-@Repository
-interface CommonMetadataRepository : MongoRepository<CommonMetadata, String> {
-    fun findByName(name: String):CommonMetadata?
 
-}
 
 
 

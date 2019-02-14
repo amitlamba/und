@@ -1,6 +1,5 @@
 package com.und.scheduler
 
-import com.und.job.CampaignJobService
 import com.und.job.LiveSegmentJobService
 import org.quartz.Job
 import org.quartz.JobExecutionContext

@@ -1,13 +1,20 @@
 package com.und.service
 
+import com.netflix.discovery.converters.Auto
 import com.und.factory.EmailServiceProviderConnectionFactory
 import com.und.model.mongo.EmailStatus
 import com.und.model.utils.Email
 import com.und.model.utils.EmailSMTPConfig
+import com.und.model.jpa.ServiceProviderCredentials
+import com.und.repository.jpa.ClientEmailSettingsRepository
+import com.und.repository.jpa.ServiceProviderCredentialsRepository
 import com.und.repository.mongo.EmailSentRepository
+import com.und.utils.loggerFor
 import org.jsoup.Jsoup
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 import java.net.URLEncoder
@@ -27,12 +34,25 @@ class EmailHelperService {
     @Autowired
     private lateinit var emailServiceProviderConnectionFactory: EmailServiceProviderConnectionFactory
 
+    @Autowired
+    private lateinit var clientEmailSettingsRepository: ClientEmailSettingsRepository
+
+    @Autowired
+    lateinit var serviceProviderCredentialsRepository: ServiceProviderCredentialsRepository
+
+    @Autowired
+    private lateinit var serviceProviderCredentialsService: ServiceProviderCredentialsService
+
     @Value("\${und.url.event}")
     private lateinit var eventApiUrl: String
 
+    companion object {
+        var logger=LoggerFactory.getLogger(EmailHelperService::class.java)
+    }
+
 
     fun createMimeMessage(session: Session, email: Email): MimeMessage {
-        val emailSMTPConfig = emailServiceProviderConnectionFactory.getEmailServiceProvider(email.clientID)
+        val emailSMTPConfig = emailServiceProviderConnectionFactory.getEmailServiceProvider(email.clientID,email.clientEmailSettingId!!)
 
         val msg = MimeMessage(session)
 
@@ -62,9 +82,10 @@ class EmailHelperService {
                 toEmailAddresses = email.toEmailAddresses,
                 emailTemplateId = email.emailTemplateId,
                 emailSubject = email.emailSubject ?: "NA",
-                campaignID = email.campaignId,
-                emailStatus = emailStatus,
-                userID = email.eventUser?.id
+                campaignId = email.campaignId,
+                status = emailStatus,
+                userID = email.eventUser?.id,
+                segmentId = email.segmentId
 
         )
         //TenantProvider().setTenant(email.clientID.toString())
@@ -95,7 +116,7 @@ class EmailHelperService {
 
     fun session(clientId: Long, emailSMTPConfig: EmailSMTPConfig) = emailServiceProviderConnectionFactory.getSMTPSession(clientId, emailSMTPConfig)
 
-    fun transport(clientId: Long) = emailServiceProviderConnectionFactory.getSMTPTransportConnection(clientId)
+    fun transport(clientId: Long,clientEmailSettingId: Long) = emailServiceProviderConnectionFactory.getSMTPTransportConnection(clientId,clientEmailSettingId)
 
     fun closeTransport(clientId: Long) = emailServiceProviderConnectionFactory.closeSMTPTransportConnection(clientId)
 
@@ -148,6 +169,21 @@ class EmailHelperService {
             //val url = it.value
             value.replace(url,
                     "$trackingURL?c=$clientId&e=$mongoEmailId&u=" + URLEncoder.encode(url, "UTF-8"))
+        }
+    }
+    //TODO jedis connection error.
+//    @Cacheable(key = "'client_'+#clientId+'setting_id_'+#clientEmailSettingId",cacheNames = ["serviceProviderCredentials"])
+    fun getEmailServiceProviderCredentials(clientId: Long, clientEmailSettingId: Long): ServiceProviderCredentials {
+        logger.info("Getting service provider for client ${clientId} and clientEmailSetting ${clientEmailSettingId}")
+        val clientEmailSetting = clientEmailSettingsRepository.findById(clientEmailSettingId)
+        if (!clientEmailSetting.isPresent) throw Exception("Client Email Setting not exists for id ${clientEmailSettingId} client ${clientId}")
+        else {
+            val sp = serviceProviderCredentialsRepository.findByClientIDAndId(clientId,clientEmailSetting.get().serviceProviderId!! )
+            if (sp.isPresent) {
+                return sp.get()
+            } else {
+                return ServiceProviderCredentials()
+            }
         }
     }
 

@@ -7,10 +7,14 @@ import com.und.model.*
 import com.und.model.jpa.*
 import com.und.repository.jpa.CampaignAuditLogRepository
 import com.und.repository.jpa.CampaignRepository
+import com.und.repository.jpa.ClientSettingsEmailRepository
+import com.und.repository.jpa.CustomFromAddrAndSrpRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.ScheduleUpdateException
 import com.und.web.controller.exception.UndBusinessValidationException
+import com.und.web.model.ClientEmailSettIdFromAddrSrp
+import com.und.web.model.ClientFromAddressAndSrp
 import com.und.web.model.ValidationError
 import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
@@ -45,12 +49,17 @@ class CampaignService {
     @Autowired
     private lateinit var campaignAuditRepository: CampaignAuditLogRepository
 
+    @Autowired
+    private lateinit var clientSettingsEmailRepository: ClientSettingsEmailRepository
 
     @Autowired
     private lateinit var eventStream: EventStream
 
     @Autowired
     private lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    private lateinit var clientFromAddrAndSrpRepository: CustomFromAddrAndSrpRepository
 
     fun getCampaigns(): List<WebCampaign> {
         val campaigns = AuthenticationUtils.clientID?.let {
@@ -87,9 +96,11 @@ class CampaignService {
             val sendToKafka = sendToKafka(jobDescriptor)
             return persistedCampaign
         }catch (ex:ConstraintViolationException){
-            throw CustomException("Template with this name already exists.")
+            logger.error("Exception In Campaign Save clientId ${campaign.clientID} constaintsName ${ex.constraintName} cause ${ex.cause?.message}")
+            throw CustomException("Campaign with this name already exists.${ex.message}")
         }catch (ex:DataIntegrityViolationException){
-
+            logger.error("Exception In Campaign Save clientId ${campaign.clientID} cause ${ex.message}")
+            throw CustomException("Campaign with this name already exists.${ex.message} ${ex.cause?.message}")
         }
         return null
     }
@@ -184,12 +195,14 @@ class CampaignService {
 
         with(campaign) {
             this.id = webCampaign.id
-            this.clientID = AuthenticationUtils.clientID
+            this.clientID = AuthenticationUtils.clientID ?: throw AccessDeniedException("Access Denied.")
             name = webCampaign.name
             appuserID = AuthenticationUtils.principal.id
             campaignType = webCampaign.campaignType
             segmentationID = webCampaign.segmentationID
-
+            serviceProviderId=webCampaign.serviceProviderId
+            conversionEvent=webCampaign.conversionEvent
+            fromUser=webCampaign.fromUser
             webCampaign.schedule?.oneTime?.let { whenTo ->
                 if (whenTo.nowOrLater == Now.Now) {
                     whenTo.campaignDateTime = null
@@ -204,11 +217,22 @@ class CampaignService {
 
         when (webCampaign.campaignType) {
             CampaignType.EMAIL -> {
-                val emailcampaign = EmailCampaign()
-                emailcampaign.appuserId = campaign.appuserID
-                emailcampaign.clientID = campaign.clientID
-                emailcampaign.templateId = webCampaign.templateID
-                campaign.emailCampaign = emailcampaign
+//                if(webCampaign.fromUser.isNullOrEmpty()||webCampaign.serviceProviderId==null) throw CustomException("Email Campaign must have fromuser and serviceproviderid")
+//                val clientSettingsEmail=clientSettingsEmailRepository.findByClientIdAndEmailAndServiceProviderId(campaign.clientID!!,webCampaign.fromUser!!,webCampaign.serviceProviderId!!)
+                webCampaign.clientEmailSettingId?.let {
+                    val clientSettingsEmail=clientSettingsEmailRepository.findByClientIdAndId(campaign.clientID!!,it)
+                    if(!clientSettingsEmail.isPresent) throw CustomException("No client email setting found for client ${campaign.clientID} ,from email address ${webCampaign.fromUser} ,sp ${webCampaign.serviceProviderId}")
+                    else{
+                        val emailcampaign = EmailCampaign()
+                        emailcampaign.appuserId = campaign.appuserID
+                        emailcampaign.clientID = campaign.clientID
+                        emailcampaign.templateId = webCampaign.templateID
+                        emailcampaign.clientSettingEmailId=clientSettingsEmail.get().id
+                        campaign.emailCampaign = emailcampaign
+                        campaign.serviceProviderId=clientSettingsEmail.get().serviceProviderId
+                    }
+                }
+
             }
             CampaignType.SMS -> {
                 val smscampaign = SmsCampaign()
@@ -257,7 +281,9 @@ class CampaignService {
             dateCreated = campaign.dateCreated
             dateModified = campaign.dateModified
             status = campaign.status
-
+            conversionEvent=campaign.conversionEvent
+            serviceProviderId=campaign.serviceProviderId
+            fromUser=campaign.fromUser
 
 
             schedule = objectMapper.readValue(campaign.schedule, Schedule::class.java)
@@ -474,6 +500,36 @@ class CampaignService {
             listOfCampaign.add(campaign)
         }
         return listOfCampaign
+    }
+
+//    fun getClientFromAddressAndSrp(clientId: Long):ClientFromAddressAndSrp {
+//        val emailSettings = clientSettingsEmailRepository.findByClientIdAndVerified(clientId, true)
+//        var result = ClientFromAddressAndSrp()
+//        if (emailSettings != null && emailSettings.isNotEmpty()) {
+//            with(result) {
+//                settings = buildClientFromAddressAndSrp(emailSettings)
+//            }
+//            return result
+//        } else  return result
+//    }
+//
+//    fun buildClientFromAddressAndSrp(result:List<ClientSettingsEmail>):Map<String,List<Long>>{
+//        var map= mutableMapOf<String,MutableList<Long>>()
+//        result.forEach {
+//            if(map.containsKey(it.email)){
+//                var list=map.get(it.email)!!
+//                list?.add(it.serviceProviderId!!)
+//                map.put(it.email!!,list)
+//            }else{
+//                map.put(it.email!!, mutableListOf(it.serviceProviderId!!))
+//            }
+//        }
+//        return map
+//    }
+
+    fun getClientFromAddressAndSrp(clientId: Long): List<ClientEmailSettIdFromAddrSrp> {
+//        var result=clientSettingsEmailRepository.joinClientEmailSettingAndServicePtoivder(clientId)
+        return clientFromAddrAndSrpRepository.joinClientEmailSettingAndServicePtoivder(clientId)
     }
 
 }

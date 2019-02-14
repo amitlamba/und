@@ -3,11 +3,14 @@ package com.und.service
 import com.und.common.utils.DateUtils
 import com.und.common.utils.loggerFor
 import com.und.web.model.*
-import com.und.web.model.Unit
+import kotlin.Unit
 import org.slf4j.Logger
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.aggregation.*
+import org.springframework.data.mongodb.core.aggregation.Aggregation
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation
+import org.springframework.data.mongodb.core.aggregation.GroupOperation
+import org.springframework.data.mongodb.core.aggregation.MatchOperation
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.stereotype.Component
@@ -41,36 +44,37 @@ class SegmentParserCriteria {
         val logger: Logger = loggerFor(SegmentParserCriteria::class.java)
     }
 
-    var userMap: HashMap<String, String>;
-    var eventMap: HashMap<String, String>;
 
-    constructor() {
-        userMap = HashMap();
-        userMap.put("gender", "standardInfo.gender")
-        userMap.put("dob", "standardInfo.dob")
-        userMap.put("country", "standardInfo.country")
-        userMap.put("state", "standardInfo.state")
-        userMap.put("countryCode", "standardInfo.countryCode")
-        userMap.put("City", "standardInfo.City")
-        userMap.put("emailIdentity", "identity.email")
-        userMap.put("mobileIdentity", "identity.mobile")
-        userMap.put("emailReach", "communication.email.dnd")
-        userMap.put("mobileReach", "communication.mobile.dnd")
-        userMap.put("creationTime", "creationTime")
-        userMap.put("os", "system.os.name")
-        userMap.put("browser", "system.browser.name")
-        userMap.put("device", "system.device.name")
+    var userMap:HashMap<String,String>
+    var eventMap:HashMap<String,String>
 
-        eventMap = HashMap();
-        eventMap.put("country", "geogrophy.country")
-        eventMap.put("state", "geogrophy.state")
-        eventMap.put("city", "geogrophy.city")
-        eventMap.put("clientTime", "clientTime")
-        eventMap.put("name", "name")
-        eventMap.put("os", "system.os.name")
-        eventMap.put("browser", "system.browser.name")
-        eventMap.put("device", "system.device.name")
-        eventMap.put("creationTime", "creationTime")
+    constructor(){
+        userMap=HashMap();
+        userMap.put("gender","standardInfo.gender")
+        userMap.put("dob","standardInfo.dob")
+        userMap.put("country","standardInfo.country")
+        userMap.put("state","standardInfo.state")
+        userMap.put("countryCode","standardInfo.countryCode")
+        userMap.put("City","standardInfo.City")
+        userMap.put("emailIdentity","identity.email")
+        userMap.put("mobileIdentity","identity.mobile")
+        userMap.put("emailReach","communication.email.dnd")
+        userMap.put("mobileReach","communication.mobile.dnd")
+        userMap.put("creationTime","creationTime")
+        userMap.put("os","system.os.name")
+        userMap.put("browser","system.browser.name")
+        userMap.put("device","system.device.name")
+
+        eventMap=HashMap();
+        eventMap.put("country","geogrophy.country")
+        eventMap.put("state","geogrophy.state")
+        eventMap.put("city","geogrophy.city")
+        eventMap.put("clientTime","clientTime")
+        eventMap.put("name","name")
+        eventMap.put("os","system.os.name")
+        eventMap.put("browser","system.browser.name")
+        eventMap.put("device","system.device.name")
+        eventMap.put("creationTime","creationTime")
 
 
     }
@@ -105,6 +109,7 @@ class SegmentParserCriteria {
 
         val userQuery = if (userPropertyMatch != null) parseUsers(userPropertyMatch) else null
 
+        //is this condition come true.
         val userCriteria = if (eventPropertyMatch == null && segment.userId != null) Criteria.where("userId").`is`(segment.userId) else null
 
         //did
@@ -126,7 +131,7 @@ class SegmentParserCriteria {
     }
 
 
-    fun segmentQuery1(segment: Segment, tz: ZoneId,type:String): Pair<List<AggregationOperation>,Boolean>{
+    fun segmentQuery1(segment: Segment, tz: ZoneId, type:String): Pair<List<AggregationOperation>,Boolean>{
         var onlyEventUser=false
         var listOfAggregation = mutableListOf<AggregationOperation>()
         /*
@@ -336,19 +341,20 @@ class SegmentParserCriteria {
 
     private fun parseEvents(events: List<Event>, tz: ZoneId, did: Boolean, eventPropertyMatch: Criteria?, geoCriteria: Criteria?, userCriteria: Criteria?): List<Aggregation> {
 
-        return events.map { event ->
-            val matches = if (did) listOfNotNull(eventPropertyMatch, geoCriteria, userCriteria).toMutableList() else mutableListOf()
-            matches.addAll(parsePropertyFilters(event, tz))
-            matches.add(Criteria.where(Field.eventName.fName).`is`(event.name))
-            matches.add(Criteria.where("userId").exists(true))
-            matches.add(parseDateFilter(event.dateFilter, tz))
-            var fields = Aggregation.fields(Field.userId.name, Field.creationTime.name, Field.clientId.name)
-            matches.forEach { criteria ->
-                val name = criteria.key
-                if (name != null) {
-                    fields = fields.and(name, name)
+         if(events.isNotEmpty()) {
+            return events.map { event ->
+                val matches = if (did) listOfNotNull(eventPropertyMatch, geoCriteria, userCriteria).toMutableList() else mutableListOf()
+                matches.addAll(parsePropertyFilters(event, tz))
+                matches.add(Criteria.where(Field.eventName.fName).`is`(event.name))
+                matches.add(Criteria.where("userId").exists(true))
+                matches.add(parseDateFilter(event.dateFilter, tz))
+                var fields = Aggregation.fields(Field.userId.name, Field.creationTime.name, Field.clientId.name)
+                matches.forEach { criteria ->
+                    val name = criteria.key
+                    if (name != null) {
+                        fields = fields.and(name, name)
+                    }
                 }
-            }
 //            val project = Aggregation.project(fields)
 //                    .and("clientTime.month").`as`(Field.month.name)
 //                    .and("clientTime.dayOfMonth").`as`(Field.monthday.name)
@@ -358,10 +364,10 @@ class SegmentParserCriteria {
 //                    .and("clientTime.year").`as`(Field.year.name)
 
 
-            val matchOps = Aggregation.match(Criteria().andOperator(*matches.toTypedArray()))
-            val whereCond = if (did) {
-                event.whereFilter?.let { whereFilter -> whereFilterParse(whereFilter, tz) } ?: Optional.empty()
-            } else Optional.empty()
+                val matchOps = Aggregation.match(Criteria().andOperator(*matches.toTypedArray()))
+                val whereCond = if (did) {
+                    event.whereFilter?.let { whereFilter -> whereFilterParse(whereFilter, tz) } ?: Optional.empty()
+                } else Optional.empty()
 
             if (whereCond.isPresent) {
                 val group = whereCond.get().first
@@ -373,7 +379,18 @@ class SegmentParserCriteria {
             }
 
 
-        }
+
+            }
+        }else if(eventPropertyMatch !=null)  {
+             var stage= mutableListOf<AggregationOperation>()
+             stage.add(Aggregation.match(eventPropertyMatch))
+             if(geoCriteria !=null){
+                 stage.add(Aggregation.match(geoCriteria))
+             }
+             stage.add(Aggregation.project().and("userId").`as`("_id"))
+             return listOf<Aggregation>(Aggregation.newAggregation(*stage.toTypedArray()))
+         }
+        else return emptyList()
 
     }
 
@@ -652,22 +669,24 @@ class SegmentParserCriteria {
         }
     }
 
-    fun getFieldPath(filterType: GlobalFilterType, name: String): String {
-        when (filterType) {
-            GlobalFilterType.Demographics -> return "standardInfo.${name}"
-            GlobalFilterType.UserProperties -> return "additionalInfo.${name}"
-            GlobalFilterType.Reachability -> return "communication.${name}.dnd"
-            GlobalFilterType.UserComputedProperties -> return "${name}"
-            GlobalFilterType.UserIdentity -> return "identity.${name}"
-            GlobalFilterType.UserTechnographics -> return return "system.${name}.name"
 
-            GlobalFilterType.Geogrophy -> return "geogrophy.${name}"
-            GlobalFilterType.Technographics -> return "system.${name}.name"
-            GlobalFilterType.EventProperties -> return "${name}"
-            GlobalFilterType.EventAttributeProperties -> return "attributes.${name}"
-            GlobalFilterType.EventTimeProperties -> return "clientTime.${name}"
-            GlobalFilterType.EventComputedProperties -> return "${name}"
-            else -> return ""
+    fun getFieldPath(filterType:GlobalFilterType,name:String):String{
+        when(filterType){
+            GlobalFilterType.Demographics->return "standardInfo.${name}"
+            GlobalFilterType.UserProperties-> return "additionalInfo.${name}"
+            GlobalFilterType.Reachability->return  "communication.${name}.dnd"
+            GlobalFilterType.UserComputedProperties-> return "${name}"
+            GlobalFilterType.UserIdentity->return "identity.${name}"
+            GlobalFilterType.UserTechnographics->return return "system.${name}.name"
+            GlobalFilterType.AppFields->return return "appfield.${name}.name"
+
+            GlobalFilterType.Geogrophy->return "geogrophy.${name}"
+            GlobalFilterType.Technographics->return "system.${name}.name"
+            GlobalFilterType.EventProperties->return "${name}"
+            GlobalFilterType.EventAttributeProperties-> return "attributes.${name}"
+            GlobalFilterType.EventTimeProperties-> return "clientTime.${name}"
+            GlobalFilterType.EventComputedProperties->return "${name}"
+            else-> return ""
         }
     }
 
@@ -676,15 +695,21 @@ class SegmentParserCriteria {
         return globalFilterType in listOf(GlobalFilterType.UserProperties, GlobalFilterType.Demographics, GlobalFilterType.Reachability, GlobalFilterType.UserComputedProperties)
     }
 
-    fun joinAwareFilterGlobalQ(globalFilters: List<GlobalFilter>, tz: ZoneId, userId: String?, joinWithUser: Boolean): Pair<Criteria?, Criteria?> {
-        fun parseGlobalFilter(filter: GlobalFilter, filterType: GlobalFilterType): Criteria {
-            var fieldPath = getFieldPath(filterType, filter.name)
-            val fieldName = if (joinWithUser && isUserCollection(filterType)) "$USER_DOC.$fieldPath" else "$fieldPath"
 
-
+    fun joinAwareFilterGlobalQ(globalFilters: List<GlobalFilter>, tz: ZoneId, userId: String?, joinWithUser: Boolean): Pair<Criteria?, Criteria?>{
+        fun parseGlobalFilter(filter: GlobalFilter,filterType:GlobalFilterType): Criteria {
+            var fieldPath= getFieldPath(filterType,filter.name)
+            val fieldName = if(joinWithUser &&  isUserCollection(filterType)) "$USER_DOC.$fieldPath" else "$fieldPath"
+            var values = filter.values
+            if(fieldPath.equals("standardInfo.age")){
+                var v:MutableList<String> = mutableListOf()
+                v.add(0,(LocalDateTime.now().year - Integer.parseInt(filter.values[1])).toString())
+                v.add(1,(LocalDateTime.now().year - Integer.parseInt(filter.values[0])).toString())
+                values=v
+            }
             val type = filter.type
             val unit = filter.valueUnit
-            val values = filter.values
+
             val operator = filter.operator
             return match(values, operator, fieldName, type, unit, tz)
         }

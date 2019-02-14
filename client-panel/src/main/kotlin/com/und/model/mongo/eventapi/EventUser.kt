@@ -32,7 +32,7 @@ class Identity {
     var mobile: String? = null
     var androidFcmToken:String?=null
     var iosFcmToken:String?=null
-    var webFcmToken:String?=null
+    var webFcmToken:Array<String>?=null
 
 }
 
@@ -46,7 +46,8 @@ class StandardInfo {
     var firstname: String? = null
     var lastname: String? = null
     var gender: String? = null
-    var dob: String? = null
+    var age:Int? = null
+    var dob: LocalDate? = null
     var languages: MutableList<String> = mutableListOf()
     var country: String? = null
     var city: String? = null

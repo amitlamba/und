@@ -11,6 +11,7 @@ import com.und.service.security.ClientService
 import com.und.service.security.SecurityAuthenticationResponse
 import com.und.service.security.UserService
 import com.und.security.utils.AuthenticationUtils
+import com.und.security.utils.KEYTYPE
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
@@ -61,7 +62,6 @@ class UserProfileController {
                     phone = client.phone,
                     eventUserToken = client.users.filter { it.userType == AuthenticationUtils.USER_TYPE_EVENT }.first().key
                             ?: ""
-
             )
 
             ResponseEntity.ok().body(Response(
@@ -92,22 +92,38 @@ class UserProfileController {
     }
 
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping(value = ["/refreshToken/{new}"])
-    fun generateToken(@PathVariable("new") new:Boolean ): ResponseEntity<*> {
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    @PostMapping(value = ["/refreshToken/{new}/{type}"])
+    fun generateToken(@PathVariable("new") new:Boolean ,@PathVariable("type" ,required = true) type:String): ResponseEntity<*> {
         //val device = DeviceUtils.getCurrentDevice(request)
         val user = AuthenticationUtils.principal
         val jwt  = if(new) {
-             userService.updateJwtOfEventUser(user)
-        } else userService.retrieveJwtOfEventUser( user)
-        return  ResponseEntity.ok(
-                Response(
-                        status = ResponseStatus.SUCCESS,
-                        data = Data(SecurityAuthenticationResponse(jwt.loginKey))
-                )
-        )
+            userService.updateJwtOfEventUser(user,KEYTYPE.valueOf(type))
+        } else {
+            userService.retrieveJwtOfEventUser( user,KEYTYPE.valueOf(type))
+        }
+        when(KEYTYPE.valueOf(type)){
+
+            KEYTYPE.EVENT_WEB -> {return  ResponseEntity.ok(
+                    Response(
+                            status = ResponseStatus.SUCCESS,
+                            data = Data(SecurityAuthenticationResponse(jwt.loginKey))
+                    )
+            )}
+            KEYTYPE.EVENT_IOS -> {return  ResponseEntity.ok(
+                    Response(
+                            status = ResponseStatus.SUCCESS,
+                            data = Data(SecurityAuthenticationResponse(jwt.iosKey))
+                    )
+            )}
+            KEYTYPE.EVENT_ANDROID -> {return  ResponseEntity.ok(
+                    Response(
+                            status = ResponseStatus.SUCCESS,
+                            data = Data(SecurityAuthenticationResponse(jwt.androidKey))
+                    )
+            )}
+        }
+        return ResponseEntity.ok().body(Response(status = ResponseStatus.SUCCESS))
     }
-
-
 
 }

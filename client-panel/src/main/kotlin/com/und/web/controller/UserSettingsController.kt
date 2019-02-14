@@ -2,6 +2,7 @@ package com.und.web.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.common.utils.decrypt
+import com.und.common.utils.loggerFor
 import com.und.model.Status
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.CampaignService
@@ -15,6 +16,7 @@ import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
+import org.springframework.security.access.prepost.PostAuthorize
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.security.core.AuthenticationException
 import org.springframework.web.bind.annotation.*
@@ -32,7 +34,6 @@ class UserSettingsController {
 
     @Autowired
     private lateinit var campaignService: CampaignService
-
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/service-providers"])
@@ -64,13 +65,15 @@ class UserSettingsController {
         serviceProviderCredentials.clientID = clientID
         serviceProviderCredentials.serviceProviderType = ServiceProviderType.EMAIL_SERVICE_PROVIDER.desc
         //check credential are correct or not
-        //println("checking connection")
-        val success = userSettingsService.testConnection(serviceProviderCredentials)
-        //println(success)
-        return if (success) {
-            userSettingsService.saveEmailServiceProvider(serviceProviderCredentials, Status.ACTIVE)
-            //clientID?.let{ id->campaignService.resumeAllForcePaused(id)}
-        } else 0L
+        try {
+            val success = userSettingsService.testConnection(serviceProviderCredentials)
+            return if (success) {
+                userSettingsService.saveEmailServiceProvider(serviceProviderCredentials, Status.ACTIVE)
+                //clientID?.let{ id->campaignService.resumeAllForcePaused(id)}
+            } else -1L
+        }catch (ex:Exception){
+            throw CustomException("${ex.message}",ex)
+        }
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -182,7 +185,7 @@ class UserSettingsController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/account-settings/save"])
-    fun saveAccountSettings(@RequestBody accountSettings: AccountSettings) {
+    fun saveAccountSettings(@RequestBody accountSettings: AccountSettings):Map<String,Any>? {
         val clientID = AuthenticationUtils.clientID
         val userID = AuthenticationUtils.principal.id
         return userSettingsService.saveAccountSettings(accountSettings, clientID, userID)
@@ -217,22 +220,26 @@ class UserSettingsController {
     }
 
     @GetMapping(value = ["/verifyemail"])
-    fun verifyEmail(@RequestParam(value = "c") link: String) {
+    fun verifyEmail(@RequestParam(value = "c") link: String):ResponseEntity<Response> {
+    //mvc automatically decode urlencoded string in parameter.
+//        var decodeString = URLDecoder.decode(link, "UTF-8")
+        try {
+            var decryptString = decrypt(link)
+            var details = decryptString.split("||")
+            var timeStamp = details[0].toLong()
+            var mail = details[1]
+            var clientId = details[2].toLong()
 
-        var decodeString = URLDecoder.decode(link, "UTF-8")
-        var decryptString = decrypt(decodeString)
-        var details = decryptString.split("||")
-        var timeStamp = details[0].toLong()
-        var mail = details[1]
-        var clientId = details[2].toLong()
-
-        userSettingsService.updateStatusOfEmailSetting(timeStamp, mail, clientId)
-
-
+            userSettingsService.updateStatusOfEmailSetting(timeStamp, mail, clientId)
+        }catch (ex:Exception){
+            loggerFor(UserSettingsController::class.java).info("Verification for from email address fail with error ${ex.message}")
+            return ResponseEntity(Response(message = "${ex.message}"),HttpStatus.EXPECTATION_FAILED)
+        }
+        return ResponseEntity(Response(message = "Verified Successfully."),HttpStatus.OK)
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping(value = arrayOf("/mark/default"))
+    @PostMapping(value = arrayOf("/mark/default"))
     fun markDefault(@RequestParam(required = true,name = "default") default:Boolean,
                     @RequestParam(required = true,name = "type") type:String,
                     @RequestParam(required = true,name = "id") id:Long):ResponseEntity<String>{
@@ -244,5 +251,23 @@ class UserSettingsController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = ["/android-service-providers"])
+    fun getAndroidServiceProviders(): List<ServiceProviderCredentials> {
+        val clientID = AuthenticationUtils.clientID?:throw AccessDeniedException("")
+        return userSettingsService.getAndroidServiceProviders(clientID!!)
+    }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = ["/web-service-providers"])
+    fun getWebServiceProviders(): List<ServiceProviderCredentials> {
+        val clientID = AuthenticationUtils.clientID?:throw AccessDeniedException("")
+        return userSettingsService.getWebServiceProviders(clientID!!)
+    }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = ["/ios-service-providers"])
+    fun getIosServiceProviders(): List<ServiceProviderCredentials> {
+        val clientID = AuthenticationUtils.clientID?:throw AccessDeniedException("")
+        return userSettingsService.getIosServiceProviders(clientID!!)
+    }
 }
 

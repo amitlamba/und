@@ -1,0 +1,160 @@
+{"userProperties":[
+  {
+    "name": "Demographics",
+    "properties": [
+      {
+        "name": "age",
+        "dataType": "number"
+      },
+      {
+        "name": "gender",
+        "dataType": "string",
+        "options": [
+          "Male",
+          "Female"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Technographics",
+    "properties": [
+      {
+        "name": "browser",
+        "dataType": "string",
+        "options": [
+          "Chrome",
+          "Firefox",
+          "Internet Explorer",
+          "Mobile Application",
+          "Opera",
+          "Microsoft Edge",
+          "Others",
+          "Safari",
+          "BlackBerry",
+          "SeaMonkey",
+          "UC Browser"
+        ]
+      },
+      {
+        "name": "os",
+        "dataType": "string",
+        "options": [
+          "Android",
+          "BlackBerryOS",
+          "iOS",
+          "Linux",
+          "Mac OS",
+          "Others",
+          "Windows"
+        ]
+      },
+      {
+        "name": "device",
+        "dataType": "string",
+        "options": [
+          "Desktop",
+          "Mobile",
+          "Tablet",
+          "TV",
+          "Computer"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "Reachability",
+    "properties": [
+      {
+        "name": "hasDeviceToken",
+        "dataType": "boolean",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "name": "hasEmailAddress",
+        "dataType": "boolean",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "name": "hasPhoneNumber",
+        "dataType": "boolean",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "name": "unsubscribedPush",
+        "dataType": "boolean",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "name": "unsubscribedEmail",
+        "dataType": "boolean",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "name": "unsubscribedSMS",
+        "dataType": "boolean",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      }
+    ]
+  },
+  {
+    "name": "AppFields",
+    "properties": [
+      {
+        "name": "appversion",
+        "dataType": "string",
+        "options": [
+
+        ]
+      },
+      {
+        "name": "make",
+        "dataType": "string",
+        "options": [
+
+        ]
+      },
+      {
+        "name": "model",
+        "dataType": "string",
+        "options": [
+
+        ]
+      },
+      {
+        "name": "os",
+        "dataType": "string",
+        "options": [
+
+        ]
+      },
+      {
+        "name": "sdkversion",
+        "dataType": "string",
+        "options": [
+
+        ]
+      }
+    ]
+  }
+]}
+
+

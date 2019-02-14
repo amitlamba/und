@@ -1,15 +1,12 @@
-[
+{"userProperties":[
   {
     "name": "Demographics",
     "properties": [
       {
         "name": "age",
-        "type": "range",
+        "type": "string",
         "options": [
-          "18-25",
-          "25-35",
-          "35-45",
-          "45-60"
+
         ]
       },
       {
@@ -26,7 +23,7 @@
     "name": "Technographics",
     "properties": [
       {
-        "name": "Browser",
+        "name": "browser",
         "type": "string",
         "options": [
           "Chrome",
@@ -41,12 +38,12 @@
         ]
       },
       {
-        "name": "OS",
+        "name": "os",
         "type": "string",
         "options": [
           "Android",
           "Blackberry",
-          "Ios",
+          "ios",
           "Linux",
           "Mac",
           "Others",
@@ -54,7 +51,7 @@
         ]
       },
       {
-        "name": "Device",
+        "name": "device",
         "type": "string",
         "options": [
           "Desktop",
@@ -122,61 +119,42 @@
     "name": "AppFields",
     "properties": [
       {
-        "name": "App Version",
+        "name": "appversion",
         "type": "string",
         "options": [
-          0,
-          1,
-          2,
-          3,
-          4
+
         ]
       },
       {
-        "name": "Make",
+        "name": "make",
         "type": "string",
         "options": [
-          "Apple",
-          "Samsung",
-          "Motorola",
-          "Sony",
-          "HTC",
-          "Xiaomi"
+
         ]
       },
       {
-        "name": "Models",
+        "name": "model",
         "type": "string",
         "options": [
-          "Iphone 6",
-          "Iphone 8",
-          "Iphone 7",
-          "Moto g3"
+
         ]
       },
       {
-        "name": "OS Version",
+        "name": "os",
         "type": "string",
         "options": [
-          "4.0.1",
-          "4.4.1",
-          "9.2",
-          "9.1",
-          "6.0.1"
+
         ]
       },
       {
-        "name": "SDK Version",
+        "name": "sdkversion",
         "type": "string",
         "options": [
-          9001,
-          9002,
-          9003,
-          9004
+
         ]
       }
     ]
   }
-]
+]}
 
 

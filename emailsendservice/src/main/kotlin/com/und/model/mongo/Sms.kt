@@ -15,13 +15,14 @@ data class Sms(
         var smsTemplateId: Long? = null,
 
         var userID: String? = null,
-        var campaignID: Long? = null,
+        var campaignId: Long? = null,
         @Id
         var id: String? = null, //Mongo Auto-generated Document id
         var smsProviderMessageID: String? = null,
         var smsServiceProvider: String? = null,
-        var smsStatus: SmsStatus,
-        var statusUpdates: MutableList<SmsStatusUpdate> = mutableListOf()
+        var status: SmsStatus,
+        var statusUpdates: MutableList<SmsStatusUpdate> = mutableListOf(),
+        var segmentId:Long?=null
 )
 
 enum class SmsStatus(val order: Int) {
@@ -34,7 +35,7 @@ enum class SmsStatus(val order: Int) {
 
 data class SmsStatusUpdate(
         val date: LocalDateTime,
-        val smsStatus: SmsStatus,
+        val status: SmsStatus,
         val clickTrackEventId: String? = null,
         var message: String? = null
 )

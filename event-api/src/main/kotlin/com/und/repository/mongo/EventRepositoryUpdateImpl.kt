@@ -47,4 +47,9 @@ class EventRepositoryUpdateImpl : EventRepositoryUpdate {
 
 
     }
+
+    override fun save(event: Event) {
+        mongoTemplate.save(event,"${event.clientId}_event")
+
+    }
 }

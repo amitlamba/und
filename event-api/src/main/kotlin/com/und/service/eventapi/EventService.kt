@@ -5,18 +5,18 @@ import com.und.eventapi.utils.copyToMongo
 import com.und.eventapi.utils.ipAddr
 import com.und.config.EventStream
 import com.und.model.mongo.eventapi.*
-import com.und.repository.mongo.EventMetadataRepository
-import com.und.repository.mongo.EventRepository
-import com.und.repository.mongo.EventUserRepository
-import com.und.repository.mongo.IpLocationRepository
+import com.und.repository.mongo.*
 import com.und.security.utils.AuthenticationUtils
 import com.und.security.utils.TenantProvider
 import com.und.web.exception.EventNotFoundException
 import com.und.web.model.eventapi.Event
 import com.und.web.model.eventapi.EventMessage
 import com.und.web.model.eventapi.Identity
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
+import org.springframework.data.mongodb.core.MongoOperations
+import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
@@ -27,6 +27,9 @@ import com.und.model.mongo.eventapi.Event as MongoEvent
 @Service
 class EventService {
 
+
+    @Autowired
+    private lateinit var mongoTemplate: MongoTemplate
 
     @Autowired
     private lateinit var tenantProvider: TenantProvider
@@ -41,6 +44,9 @@ class EventService {
     private lateinit var eventMetadataRepository: EventMetadataRepository
 
     @Autowired
+    private lateinit var userMetadataRepository: CommonMetadataRepository
+
+    @Autowired
     private lateinit var eventUserRepository: EventUserRepository
 
     @Autowired
@@ -53,6 +59,7 @@ class EventService {
 
 
     @StreamListener("inEvent")
+//    @SendTo("outEvent")
     fun save(event: Event) {
 
         saveEvent(event)
@@ -64,10 +71,11 @@ class EventService {
         tenantProvider.setTenat(clientId.toString())
         val mongoEvent = event.copyToMongo()
         mongoEvent.clientTime.hour
-        var agentString = event.agentString
+        var agentString = event.agentString?:""
         var pattern = Pattern.compile("^(Mobile-Agent).*")
         var matcher = pattern.matcher(agentString)
-        if (matcher.matches() && agentString != null) {
+        //No need to check is empty
+        if (matcher.matches() && agentString.isNotEmpty()) {
             val system = System()
             mongoEvent.system = system
             var agent = agentString.split("/")
@@ -79,21 +87,72 @@ class EventService {
             }
 
             mongoEvent.system = system
+
+            var appFileds=AppField()
+            with(appFileds){
+                make=agent[9]
+                model=agent[6]
+                sdkversion=agent[10]
+                appversion=agent[8]
+                os=agent[1]
+            }
+            mongoEvent.appfield=appFileds
+
         }
-        //fixme we can make it better eg if country present then found only state and city.
-        if (event.country == null || event.state == null || event.city == null){
+        if (event.country == null || event.state == null || event.city == null) {
+
             var geogrophy = getGeography(event.ipAddress)
-            geogrophy?.let { mongoEvent.geogrophy=geogrophy }
+            geogrophy?.let { mongoEvent.geogrophy = geogrophy }
         }
 
 
         val eventMetadata = buildMetadata(mongoEvent)
         eventMetadataRepository.save(eventMetadata)
+        val technographicsMetadata = buildTechnoGraphics(mongoEvent)
+        userMetadataRepository.updateTechnographics(clientId, technographicsMetadata)
+        val appFieldsMetadata = buildAppFields(mongoEvent)
+        userMetadataRepository.updateAppFields(clientId, appFieldsMetadata)
         //FIXME add to metadata
-        val saved = eventRepository.insert(mongoEvent)
-
+//        val saved = eventRepository.insert(mongoEvent)
+        val id=ObjectId()
+        mongoEvent.id=id.toString()
+        eventRepository.save(mongoEvent)
+        val saved=eventRepository.findById(id.toString()).get()
         eventStream.outEventForLiveSegment().send(MessageBuilder.withPayload(buildEventForLiveSegment(saved)).build())
         return saved.id
+    }
+
+    private inline fun addProperty(propertyName: String, optionName: String?, technographics: CommonMetadata) {
+        optionName?.let { option ->
+            val property = Property()
+            property.name = propertyName
+            property.options.add(option)
+            technographics.properties.add(property)
+        }
+    }
+
+    private fun buildTechnoGraphics(event: MongoEvent): CommonMetadata {
+
+        val technographics = CommonMetadata()
+        technographics.name = "Technographics"
+        addProperty("browser", event.system.browser?.name, technographics)
+        addProperty("os", event.system.os?.name, technographics)
+        addProperty("device", event.system.device?.name, technographics)
+
+        return technographics
+    }
+
+    private fun buildAppFields(event: MongoEvent): CommonMetadata {
+
+        val appFields = CommonMetadata()
+        appFields.name = "AppFields"
+        addProperty("appversion", event.appfield?.appversion, appFields)
+        addProperty("make", event.appfield?.make, appFields)
+        addProperty("model", event.appfield?.model, appFields)
+        addProperty("os", event.appfield?.os, appFields)
+        addProperty("sdkversion", event.appfield?.sdkversion, appFields)
+
+        return appFields
     }
 
     private fun buildMetadata(event: MongoEvent): EventMetadata {
@@ -114,7 +173,7 @@ class EventService {
 
     fun buildEvent(fromEvent: Event, request: HttpServletRequest): Event {
         with(fromEvent) {
-            clientId = tenantProvider.tenant.toLong()
+            if(fromEvent.clientId!=-1L) clientId =fromEvent.clientId else clientId =tenantProvider.tenant.toLong()
             ipAddress = request.ipAddr()
             timeZone = AuthenticationUtils.principal.timeZoneId
             var agent = request.getHeader("User-Agent")

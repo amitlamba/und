@@ -40,7 +40,9 @@ class SmsHelperService {
                 smsBody = smsToSend.smsBody,
                 smsTemplateId = smsToSend.smsTemplateId,
                 userID = smsToSend.eventUser?.id,
-                smsStatus = status
+                status = status,
+                campaignId = smsToSend.campaignId,
+                segmentId = smsToSend.segmentId
         )
         //TenantProvider().setTenant(smsToSend.clientID.toString())
         smsSentRepository.saveSms(mongoSms, smsToSend.clientID )
@@ -49,13 +51,14 @@ class SmsHelperService {
     }
 
     fun updateSmsStatus(mongoSmsId: String, sent: SmsStatus, clientID: Long, message: String?, clickTrackEventId: String? = null) {
-        //TenantProvider().setTenant(clientID.toString())
-       // val mongoSms = mongoSmsId?.let { smsSentRepository.findById(mongoSmsId).get() }
-        //if (mongoSms != null && mongoSms.smsStatus.order < sent.order) {
-           // mongoSms.smsStatus = SmsStatus.READ
-            //mongoSms.statusUpdates.add(SmsStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), sent, clickTrackEventId, message))
-            smsSentRepository.updateStatus(mongoSmsId, SmsStatus.READ, clientID, null, "")
-        //}
+//        TenantProvider().setTenant(clientID.toString())
+//        val mongoSms = mongoSmsId?.let { smsSentRepository.findById(mongoSmsId).get() }
+//        if (mongoSms != null && mongoSms.smsStatus.order < sent.order) {
+//            mongoSms.smsStatus = SmsStatus.READ
+//            mongoSms.statusUpdates.add(SmsStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), sent, clickTrackEventId, message))
+//            smsSentRepository.updateStatus(mongoSmsId, SmsStatus.READ, clientID, null, "")
+//        }
+        smsSentRepository.updateStatus(mongoSmsId, sent, clientID, null, message?:"")
 
     }
 

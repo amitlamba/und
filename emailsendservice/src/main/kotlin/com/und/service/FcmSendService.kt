@@ -9,6 +9,9 @@ import com.und.config.EventStream
 import com.und.exception.FcmFailureException
 import com.und.model.mongo.FcmMessage
 import com.und.model.mongo.FcmMessageStatus
+import com.und.model.utils.eventapi.Event
+import com.und.model.utils.eventapi.Identity
+import com.und.repository.jpa.security.UserRepository
 import com.und.utils.loggerFor
 import feign.FeignException
 import org.bson.types.ObjectId
@@ -36,6 +39,10 @@ class FcmSendService {
     private lateinit var objectMapper: ObjectMapper
     @Autowired
     private lateinit var eventStream: EventStream
+    @Autowired
+    private lateinit var eventApiFeignClient: EventApiFeignClient
+    @Autowired
+    private lateinit var userRepository:UserRepository
 
     fun sendMessage(clientId: Long, authKey: String, message: FcmMessage): ResponseEntity<Any?>? {
         try {
@@ -219,17 +226,18 @@ class FcmSendService {
 
     fun sendMessage(message: com.und.model.utils.FcmMessage) {
         var fcmMessageToSend = buildFcmMessage(message)
-        var credential = service.getCredentials(message.clientId)
+        var credential = service.getCredentials(message.clientId,message.serviceProviderId,message.type)
         if (credential == null) {
-            logger.info("Android Credential does not exists for clientId ${message.clientId}")
+            logger.info("Credential does not exists for clientId ${message.clientId}")
             var notificationError = NotificationError()
             with(notificationError) {
                 clientId = message.clientId
-                this.message = "Android service provider not found.First add a service provider"
+                this.message = "Service provider not found.First add a service provider"
                 errorCode = 400
                 campaignType=message.type
                 userId=message.userId
-
+                serviceProvider=null
+                serviceProviderId=null
             }
             toFcmFailureKafka(notificationError)
         } else {
@@ -241,12 +249,26 @@ class FcmSendService {
             var credentialMap = parseStringToMap(credential.credentialsMap)
             var serverKey = credentialMap.get("apiKey")!!
 
-            var statusCode: Int? = 400
+            var statusCode: Int? = 404
             try {
                 statusCode = sendMessageToFcm(fcmMessageToSend, serverKey)
                 if (statusCode == 200) {
                     service.updateStatus(mongoFcmId, FcmMessageStatus.SENT, message.clientId,message.type)
                     logger.info("Fcm Send message successfuly for token= ${message.to}")
+
+                    val token = userRepository.findSystemUser().key
+                    var event= Event()
+                    with(event) {
+                        name = "Notification Sent"
+                        clientId=message.clientId
+                        notificationId=mongoFcmId
+                        attributes.put("campaign_id",message.campaignId)
+                        userIdentified=true
+                        identity= Identity(userId = message.userId,clientId = message.clientId.toInt())
+
+                    }
+                    eventApiFeignClient.pushEvent(token,event)
+
                 } else {
                     throw FcmFailureException("Sending to fcm fail with status $statusCode")
                 }
@@ -263,6 +285,8 @@ class FcmSendService {
                     errorCode = ex.status().toLong()
                     campaignType=message.type
                     userId=message.userId
+                    serviceProviderId=credential.id
+                    serviceProvider=credential.name
                 }
                 toFcmFailureKafka(notificationError)
             } catch (ex: FcmFailureException) {
@@ -277,6 +301,8 @@ class FcmSendService {
                     errorCode = statusCode?.toLong()
                     campaignType=message.type
                     userId=message.userId
+                    serviceProviderId=credential.id
+                    serviceProvider=credential.name
                 }
                 toFcmFailureKafka(notificationError)
 
@@ -292,6 +318,8 @@ class FcmSendService {
                     errorCode = statusCode?.toLong()
                     campaignType=message.type
                     userId=message.userId
+                    serviceProviderId=credential.id
+                    serviceProvider=credential.name
                 }
                 toFcmFailureKafka(notificationError)
             }
@@ -340,6 +368,8 @@ class NotificationError {
     var errorCode: Long? = null
     var campaignType:String?=null
     var userId:String?=null
+    var serviceProvider:String?=null
+    var serviceProviderId:Long?=null
 }
 
 class TestMessage {
