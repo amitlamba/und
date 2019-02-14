@@ -15,16 +15,16 @@ import java.time.ZoneId
 @Component
 class AggregationQuerybuilder {
 
-    enum class Collection{
+    enum class Collection {
         Event,
         User
     }
 
     enum class Field(val fName: String = "", val collectionName: Collection = Collection.Event, type: GlobalFilterType = GlobalFilterType.EventProperties, properties: List<String> = emptyList()) {
-        EventName ("name", Collection.Event, GlobalFilterType.EventProperties),
-        CreationTime ("creationTime", Collection.Event, GlobalFilterType.EventProperties),
-        UserId ("userId", Collection.Event, GlobalFilterType.EventProperties),
-        UserIdObject ("userIdObject", Collection.Event, GlobalFilterType.EventComputedProperties),
+        EventName("name", Collection.Event, GlobalFilterType.EventProperties),
+        CreationTime("creationTime", Collection.Event, GlobalFilterType.EventProperties),
+        UserId("userId", Collection.Event, GlobalFilterType.EventProperties),
+        UserIdObject("userIdObject", Collection.Event, GlobalFilterType.EventComputedProperties),
         MinutesPeriod("minutesPeriod", Collection.Event, GlobalFilterType.EventComputedProperties, listOf(NUM_OF_MINUTES)),
         DateVal("dateVal", Collection.Event, GlobalFilterType.EventComputedProperties),
         TimePeriod("timePeriod", Collection.Event, GlobalFilterType.EventComputedProperties),
@@ -36,11 +36,11 @@ class AggregationQuerybuilder {
     private lateinit var segmentParserCriteria: SegmentParserCriteria
 
     fun getAggregationExpression(fieldName: String, properties: Map<String, Any> = emptyMap()): AggregationExpression {
-        return when(fieldName){
+        return when (fieldName) {
             //{ $floor: {$divide: [{$add: [ {$multiply: [60, "$clientTime.hour"]}, "$clientTime.minute"]}, 5] } }
             // equivalent in Spel: ((clientTime.hour * 60) + (clientTime.minute - (clientTime.minute % 5)))/5
             Field.MinutesPeriod.fName -> {
-                val numOfMinutes = properties.get(NUM_OF_MINUTES).toString().toInt()
+                val numOfMinutes = properties[NUM_OF_MINUTES].toString().toInt()
                 ArithmeticOperators.Floor.floorValueOf(ArithmeticOperators.Divide.valueOf(ArithmeticOperators.Add.valueOf(ArithmeticOperators.Multiply.valueOf("clientTime.hour").multiplyBy(60)
                 ).add("clientTime.minute")).divideBy(numOfMinutes))
             }
@@ -55,15 +55,18 @@ class AggregationQuerybuilder {
                 ConditionalOperators.`when`(eventDateSameAsUserCreationDate).then("new").otherwise("old")
             }
             else -> {
-                throw Exception("${fieldName} is not supported in computed fields")
+                throw Exception("$fieldName is not supported in computed fields")
             }
         }
     }
 
     private fun getCompleteScopedName(name: String, globalFilterType: GlobalFilterType): String {
-        val fieldPath = segmentParserCriteria.getFieldPath(globalFilterType,name)
-        if(isUserCollection(globalFilterType)) return "$USER_DOC.$fieldPath"
-        else return "$fieldPath"
+
+        val fieldPath = segmentParserCriteria.getFieldPath(globalFilterType, name)
+        return when {
+            isUserCollection(globalFilterType) -> "$USER_DOC.$fieldPath"
+            else -> fieldPath
+        }
     }
 
     fun buildAggregationPipeline(filters: List<GlobalFilter>, groupBys: List<GroupBy>, aggregateBy: AggregateBy?, paramValues: Map<String, Any> = emptyMap(), entityType: EventReport.EntityType, tz: ZoneId, clientId: Long): List<AggregationOperation> {
@@ -82,7 +85,7 @@ class AggregationQuerybuilder {
 
         //event match
         val eventFilterCriterias = segmentParserCriteria.filterGlobalQ(allFilters.eventSimpleFilters, tz)
-        if(eventFilterCriterias.first != null){
+        if (eventFilterCriterias.first != null) {
             val eventMatchOperation = Aggregation.match(eventFilterCriterias.first)
             aggregationPipeline.add(eventMatchOperation)
         }
@@ -90,7 +93,7 @@ class AggregationQuerybuilder {
         //computed event match
         val eventProjectionRequired = allFilters.eventComputedFilters.isNotEmpty() || allGroupBys.eventComputedGroupBys.isNotEmpty()
                 || (aggregateBy != null && !isUserCollection(aggregateBy.globalFilterType))
-        if(eventProjectionRequired){
+        if (eventProjectionRequired) {
             var projectOperation = Aggregation.project(Field.UserId.fName)
 
             allFilters.eventComputedFilters.forEach {
@@ -103,18 +106,18 @@ class AggregationQuerybuilder {
             }
 
             //add those computed event groupBy only which are not in computed event filters
-            allGroupBys.eventComputedGroupBys.filter {group -> !allFilters.eventComputedFilters.map { it.name }.contains(group.groupName)}.forEach {
+            allGroupBys.eventComputedGroupBys.filter { group -> !allFilters.eventComputedFilters.map { it.name }.contains(group.groupName) }.forEach {
                 projectOperation = projectOperation.and(getAggregationExpression(it.groupName, paramValues)).`as`(it.groupName)
             }
 
-            if(aggregateBy != null && !isUserCollection(aggregateBy.globalFilterType)){
+            if (aggregateBy != null && !isUserCollection(aggregateBy.globalFilterType)) {
                 val scopedName = getCompleteScopedName(aggregateBy.name, aggregateBy.globalFilterType)
                 projectOperation = projectOperation.and(scopedName).`as`(scopedName)
             }
 
             aggregationPipeline.add(projectOperation)
 
-            if(allFilters.eventComputedFilters.isNotEmpty()){
+            if (allFilters.eventComputedFilters.isNotEmpty()) {
                 val eventComputedFilterCriterias = segmentParserCriteria.filterGlobalQ(allFilters.eventComputedFilters, tz)
                 val eventComputedMatchOperation = Aggregation.match(eventComputedFilterCriterias.first)
                 aggregationPipeline.add(eventComputedMatchOperation)
@@ -131,44 +134,53 @@ class AggregationQuerybuilder {
         val eventGroupFields = mutableMapOf<String, String>()
         val eventOutputJoinWithUser = (entityType == EventReport.EntityType.event && (eventGroupByPresent || eventAggregateByPresent))
                 && (userFilterPresent || userGroupByPresent || userAggregateByPresent)
-        if(eventGroupByPresent){
-            eventGroupFields.putAll(allGroupBys.eventSimpleGroupBys.map { it.groupName to getCompleteScopedName(it.groupName, it.groupFilterType)}.toMap())
-            eventGroupFields.putAll(allGroupBys.eventComputedGroupBys.map { it.groupName to it.groupName}.toMap())
+        if (eventGroupByPresent) {
+            eventGroupFields.putAll(allGroupBys.eventSimpleGroupBys.map { it.groupName to getCompleteScopedName(it.groupName, it.groupFilterType) }.toMap())
+            eventGroupFields.putAll(allGroupBys.eventComputedGroupBys.map { it.groupName to it.groupName }.toMap())
 
             /**
              * User count output: put userId in a set
              * Event count output & (user filter or user group by): group by userId to a user-count
              * Event count output with no user filter/group by: count events to result [last point of pipeline]
              */
-            val fields = eventGroupFields.map { it -> Fields.field(it.key, it.value) }.toTypedArray()
+            val fields = eventGroupFields.map { Fields.field(it.key, it.value) }.toTypedArray()
             var eventGroupOperation = Aggregation.group(Fields.from(*fields))
 
-            if(eventOutputJoinWithUser) {
-                if(eventAggregateByPresent && aggregateBy!=null){
-                    val scopedName = getCompleteScopedName(aggregateBy.name, aggregateBy.globalFilterType)
-                    when(aggregateBy.aggregationType){
-                        AggregationType.Sum -> eventGroupOperation = Aggregation.group(Fields.from(*fields, Fields.field(Field.UserId.fName))).sum(scopedName).`as`(AGGREGATE_VALUE)
-                        AggregationType.Avg -> eventGroupOperation = Aggregation.group(Fields.from(*fields, Fields.field(Field.UserId.fName))).avg(scopedName).`as`(AGGREGATE_VALUE)
+
+            eventGroupOperation = when {
+                eventOutputJoinWithUser -> {
+                      if (eventAggregateByPresent && aggregateBy != null) {
+                        val scopedName = getCompleteScopedName(aggregateBy.name, aggregateBy.globalFilterType)
+                        when (aggregateBy.aggregationType) {
+                            AggregationType.Sum ->  Aggregation.group(Fields.from(*fields, Fields.field(Field.UserId.fName))).sum(scopedName).`as`(AGGREGATE_VALUE)
+                            AggregationType.Avg -> Aggregation.group(Fields.from(*fields, Fields.field(Field.UserId.fName))).avg(scopedName).`as`(AGGREGATE_VALUE)
+                        }
+                    } else {
+                        Aggregation.group(Fields.from(*fields, Fields.field(Field.UserId.fName))).count().`as`(USER_COUNT)
                     }
                 }
-                else eventGroupOperation = Aggregation.group(Fields.from(*fields, Fields.field(Field.UserId.fName))).count().`as`(USER_COUNT)
-            }
-            else if(entityType == EventReport.EntityType.user)
-                eventGroupOperation = eventGroupOperation.addToSet(Field.UserId.fName).`as`(Field.UserId.fName)
-            else {//last operation of pipeline
-                if(eventAggregateByPresent && aggregateBy!=null){
-                    val scopedName = getCompleteScopedName(aggregateBy.name, aggregateBy.globalFilterType)
-                    when(aggregateBy.aggregationType){
-                        AggregationType.Sum -> eventGroupOperation = eventGroupOperation.sum(scopedName).`as`(AGGREGATE_VALUE)
-                        AggregationType.Avg -> eventGroupOperation = eventGroupOperation.avg(scopedName).`as`(AGGREGATE_VALUE)
-                    }
+
+                entityType == EventReport.EntityType.user -> {
+                     eventGroupOperation.addToSet(Field.UserId.fName).`as`(Field.UserId.fName)
                 }
-                else eventGroupOperation = eventGroupOperation.count().`as`(AGGREGATE_VALUE)
+
+                else -> {//last operation of pipeline
+                    if (eventAggregateByPresent && aggregateBy != null) {
+                        val scopedName = getCompleteScopedName(aggregateBy.name, aggregateBy.globalFilterType)
+                        when (aggregateBy.aggregationType) {
+                            AggregationType.Sum -> eventGroupOperation.sum(scopedName).`as`(AGGREGATE_VALUE)
+                            AggregationType.Avg -> eventGroupOperation.avg(scopedName).`as`(AGGREGATE_VALUE)
+                        }
+                    } else  eventGroupOperation.count().`as`(AGGREGATE_VALUE)
+                }
+
             }
+
+
 
             aggregationPipeline.add(eventGroupOperation)
 
-            if(entityType == EventReport.EntityType.user && (userFilterPresent || userGroupByPresent)){
+            if (entityType == EventReport.EntityType.user && (userFilterPresent || userGroupByPresent)) {
                 val unwindOperation = Aggregation.unwind(Field.UserId.fName)
                 aggregationPipeline.add(unwindOperation)
             }
@@ -176,23 +188,42 @@ class AggregationQuerybuilder {
 
         //join with user collection if needed
         val userGroupFields = mutableMapOf<String, String>()
-        if(userFilterPresent || userGroupByPresent){
+        if (userFilterPresent || userGroupByPresent) {
             val projectionFields = mutableListOf<String>()
 
             projectionFields.add(Field.UserId.fName)
 
-            if(eventOutputJoinWithUser){
-                if(eventAggregateByPresent) projectionFields.add(AGGREGATE_VALUE)
+            if (eventOutputJoinWithUser) {
+                if (eventAggregateByPresent) projectionFields.add(AGGREGATE_VALUE)
                 else projectionFields.add(USER_COUNT)
             }
 
             var projectOperation = Aggregation.project(*projectionFields.toTypedArray())
 
-            if(entityType == EventReport.EntityType.user && eventGroupFields.size == 1) projectOperation = projectOperation.and("_id").`as`(eventGroupFields.values.first())
-            else eventGroupFields.forEach { t, u ->   projectOperation = projectOperation.and(t).`as`(u)}
+            if (entityType == EventReport.EntityType.user && eventGroupFields.size == 1) {
+                projectOperation = projectOperation.and("_id").`as`(eventGroupFields.values.first())
+            }
+            else {
+              /*
+                projectOperation =  eventGroupFields.entries.fold(projectOperation){
+                acc, eventGroupField ->  acc.and(eventGroupField.key).`as`(eventGroupField.value)
+                }
+               */
+                // below operation can be written with fold as well
+                eventGroupFields.forEach { t, u -> projectOperation = projectOperation.and(t).`as`(u) }
+            }
 
-            if(eventOutputJoinWithUser) projectOperation = projectOperation.and(ConvertOperators.ToObjectId.toObjectId("\$_id.${Field.UserId.fName}")).`as`(Field.UserIdObject.fName)
-            else projectOperation = projectOperation.and(getAggregationExpression(Field.UserIdObject.fName)).`as`(Field.UserIdObject.fName)
+            projectOperation =  eventGroupFields.entries.fold(projectOperation){
+                acc, eventGroupField ->  acc.and(eventGroupField.key).`as`(eventGroupField.value)
+            }
+
+
+            projectOperation = if (eventOutputJoinWithUser) {
+                projectOperation.and(ConvertOperators.ToObjectId.toObjectId("\$_id.${Field.UserId.fName}")).`as`(Field.UserIdObject.fName)
+            }
+            else {
+                projectOperation.and(getAggregationExpression(Field.UserIdObject.fName)).`as`(Field.UserIdObject.fName)
+            }
 
 
             aggregationPipeline.add(projectOperation)
@@ -209,44 +240,46 @@ class AggregationQuerybuilder {
 
 
 
-            if(userFilterPresent){
+            if (userFilterPresent) {
                 //TODO handling for computed user filters
-                val userFilterCriterias = segmentParserCriteria.joinAwareFilterGlobalQ(allFilters.userSimpleFilters, tz, null,true)
+                val userFilterCriterias = segmentParserCriteria.joinAwareFilterGlobalQ(allFilters.userSimpleFilters, tz, null, true)
                 val userMatchOperation = Aggregation.match(userFilterCriterias.second)
                 aggregationPipeline.add(userMatchOperation)
             }
 
-            if(eventGroupByPresent || userGroupByPresent){
+            if (eventGroupByPresent || userGroupByPresent) {
                 //TODO handling for computed user group by
                 //check here
-                userGroupFields.putAll(allGroupBys.userSimpleGroupBys.map { it.groupName to getCompleteScopedName(it.groupName, it.groupFilterType)}.toMap())
+                userGroupFields.putAll(allGroupBys.userSimpleGroupBys.map { it.groupName to getCompleteScopedName(it.groupName, it.groupFilterType) }.toMap())
                 val allGroupByFields = mutableListOf<String>()
                 allGroupByFields.addAll(eventGroupFields.values)
                 allGroupByFields.addAll(userGroupFields.values)
                 var userGroupOperation = Aggregation.group(*allGroupByFields.toTypedArray())
 
-                if(entityType == EventReport.EntityType.user) {
-                    if(userAggregateByPresent && aggregateBy != null){
+                userGroupOperation = if (entityType == EventReport.EntityType.user) {
+                    if (userAggregateByPresent && aggregateBy != null) {
                         val scopedName = getCompleteScopedName(aggregateBy.name, aggregateBy.globalFilterType)
-                        when(aggregateBy.aggregationType){
-                            AggregationType.Sum -> userGroupOperation = userGroupOperation.sum(scopedName).`as`(AGGREGATE_VALUE)
-                            AggregationType.Avg -> userGroupOperation = userGroupOperation.avg(scopedName).`as`(AGGREGATE_VALUE)
+                        when (aggregateBy.aggregationType) {
+                            AggregationType.Sum -> userGroupOperation.sum(scopedName).`as`(AGGREGATE_VALUE)
+                            AggregationType.Avg -> userGroupOperation.avg(scopedName).`as`(AGGREGATE_VALUE)
                         }
+                    } else {
+                        userGroupOperation.addToSet(Field.UserId.fName).`as`(Field.UserId.fName)
                     }
-                    else userGroupOperation = userGroupOperation.addToSet(Field.UserId.fName).`as`(Field.UserId.fName)
-                }
-                else if (eventOutputJoinWithUser){//last operation of pipeline
-                    if(eventAggregateByPresent && aggregateBy != null){
+                } else if (eventOutputJoinWithUser) {//last operation of pipeline
+                    if (eventAggregateByPresent && aggregateBy != null) {
                         val scopedName = getCompleteScopedName(aggregateBy.name, aggregateBy.globalFilterType)
-                        when(aggregateBy.aggregationType){
-                            AggregationType.Sum -> userGroupOperation = userGroupOperation.sum(AGGREGATE_VALUE).`as`(AGGREGATE_VALUE)
-                            AggregationType.Avg -> userGroupOperation = userGroupOperation.avg(AGGREGATE_VALUE).`as`(AGGREGATE_VALUE)
+                        when (aggregateBy.aggregationType) {
+                            AggregationType.Sum ->  userGroupOperation.sum(AGGREGATE_VALUE).`as`(AGGREGATE_VALUE)
+                            AggregationType.Avg ->  userGroupOperation.avg(AGGREGATE_VALUE).`as`(AGGREGATE_VALUE)
                         }
+                    } else {
+                        userGroupOperation.sum(USER_COUNT).`as`(AGGREGATE_VALUE)
                     }
-                    else userGroupOperation = userGroupOperation.sum(USER_COUNT).`as`(AGGREGATE_VALUE)
+                } else
+                {
+                    userGroupOperation.count().`as`(AGGREGATE_VALUE)
                 }
-                else
-                    userGroupOperation = userGroupOperation.count().`as`(AGGREGATE_VALUE)
 
                 specialAggStageForReachability(groupBys, entityType, userFilterPresent, userGroupByPresent, aggregationPipeline, userGroupOperation)
 
@@ -254,7 +287,7 @@ class AggregationQuerybuilder {
         }
 
         //final output if not allready pushed in pipeline
-        if(entityType == EventReport.EntityType.user && !userAggregateByPresent){
+        if (entityType == EventReport.EntityType.user && !userAggregateByPresent) {
 //            val allGroupByFields = mutableMapOf<String, String>()
 //            allGroupByFields.putAll(eventGroupFields)
 //            allGroupByFields.putAll(userGroupFields)
@@ -271,7 +304,7 @@ class AggregationQuerybuilder {
 
     private fun specialAggStageForReachability(groupBys: List<GroupBy>, entityType: EventReport.EntityType, userFilterPresent: Boolean, userGroupByPresent: Boolean, aggregationPipeline: MutableList<AggregationOperation>, userGroupOperation: GroupOperation) {
         //here we adding some extra stage for handling reachability case only when group by is reachability.
-        if(!groupBys.isEmpty()) {
+        if (!groupBys.isEmpty()) {
 
             if (groupBys[0].groupFilterType.type.equals("Reachability")) {
 
@@ -337,39 +370,39 @@ class AggregationQuerybuilder {
     }
 
 
-    private fun segregateEventUserFilter(filters: List<GlobalFilter>): FilterHolder{
+    private fun segregateEventUserFilter(filters: List<GlobalFilter>): FilterHolder {
         val filterHolder = FilterHolder()
-        if(filters.isEmpty()) return filterHolder
+        if (filters.isEmpty()) return filterHolder
 
 
-        filters.forEach{
-            if(isUserCollection(it.globalFilterType)){
-                if(isComputedProperty(it.globalFilterType)) filterHolder.userComputedFilters.add(it) else filterHolder.userSimpleFilters.add(it)
+        filters.forEach {
+            if (isUserCollection(it.globalFilterType)) {
+                if (isComputedProperty(it.globalFilterType)) filterHolder.userComputedFilters.add(it) else filterHolder.userSimpleFilters.add(it)
             } else {
-                if(isComputedProperty(it.globalFilterType)) filterHolder.eventComputedFilters.add(it) else filterHolder.eventSimpleFilters.add(it)
+                if (isComputedProperty(it.globalFilterType)) filterHolder.eventComputedFilters.add(it) else filterHolder.eventSimpleFilters.add(it)
             }
         }
 
         return filterHolder
     }
 
-    private fun segregateEventUserGroupBy(groupBys: List<GroupBy>): GroupByHolder{
+    private fun segregateEventUserGroupBy(groupBys: List<GroupBy>): GroupByHolder {
         val groupByHolder = GroupByHolder()
-        if(groupBys.isEmpty()) return groupByHolder
+        if (groupBys.isEmpty()) return groupByHolder
 
 
-        groupBys.forEach{
-            if(isUserCollection(it.groupFilterType)){
-                if(isComputedProperty(it.groupFilterType)) groupByHolder.userComputedGroupBys.add(it) else groupByHolder.userSimpleGroupBys.add(it)
+        groupBys.forEach {
+            if (isUserCollection(it.groupFilterType)) {
+                if (isComputedProperty(it.groupFilterType)) groupByHolder.userComputedGroupBys.add(it) else groupByHolder.userSimpleGroupBys.add(it)
             } else {
-                if(isComputedProperty(it.groupFilterType)) groupByHolder.eventComputedGroupBys.add(it) else groupByHolder.eventSimpleGroupBys.add(it)
+                if (isComputedProperty(it.groupFilterType)) groupByHolder.eventComputedGroupBys.add(it) else groupByHolder.eventSimpleGroupBys.add(it)
             }
         }
 
         return groupByHolder
     }
 
-    private fun isUserCollection(globalFilterType: GlobalFilterType): Boolean{
+    private fun isUserCollection(globalFilterType: GlobalFilterType): Boolean {
         //TODO, move it to the enum so in case of a new entry in enum it doesn't get missed
         return globalFilterType in listOf(GlobalFilterType.UserProperties, GlobalFilterType.Demographics, GlobalFilterType.Reachability, GlobalFilterType.UserComputedProperties)
     }
@@ -379,9 +412,9 @@ class AggregationQuerybuilder {
         return globalFilterType in listOf(GlobalFilterType.UserComputedProperties, GlobalFilterType.EventComputedProperties)
     }
 
-    private fun buildFilter(globalFilterType: GlobalFilterType, name: String, type: DataType, operator: String, values: List<String>, valueUnit: Unit?): GlobalFilter{
+    private fun buildFilter(globalFilterType: GlobalFilterType, name: String, type: DataType, operator: String, values: List<String>, valueUnit: Unit?): GlobalFilter {
         var filter = GlobalFilter()
-        if(globalFilterType != null) filter.globalFilterType = globalFilterType
+        if (globalFilterType != null) filter.globalFilterType = globalFilterType
         if (name != null) filter.name = name
         if (type != null) filter.type = type
         if (operator != null) filter.operator = operator
@@ -401,9 +434,9 @@ class AggregationQuerybuilder {
 
     class GroupByHolder {
         val eventSimpleGroupBys = mutableListOf<GroupBy>()
-        val eventComputedGroupBys= mutableListOf<GroupBy>()
+        val eventComputedGroupBys = mutableListOf<GroupBy>()
 
-        val userSimpleGroupBys= mutableListOf<GroupBy>()
-        val userComputedGroupBys= mutableListOf<GroupBy>()
+        val userSimpleGroupBys = mutableListOf<GroupBy>()
+        val userComputedGroupBys = mutableListOf<GroupBy>()
     }
 }
