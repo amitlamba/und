@@ -69,8 +69,9 @@ class FunnelReportServiceImpl : FunnelReportService {
             val computedFunnels = awsFunnelLambdaInvoker.computeFunnels(funnelData)
 
             logger.debug("Funnel data computed: $computedFunnels")
-            return if(funnelFilter.filters.isEmpty()) fillMissingSteps(orderFunnelByStep(computedFunnels),funnelFilter.steps)
-            else orderFunnelByStep(computedFunnels)
+//            return if(funnelFilter.filters.isEmpty()) fillMissingSteps(orderFunnelByStep(computedFunnels),funnelFilter.steps)
+//            else orderFunnelByStep(computedFunnels)
+            return computedFunnels
         } ?: emptyList()
     }
     //This code should be synchronized its possible that two thread invoke that method at same time
