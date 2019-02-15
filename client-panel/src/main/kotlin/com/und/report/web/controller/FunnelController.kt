@@ -41,6 +41,7 @@ class FunnelController {
     @PostMapping("/funnel")
     fun funnel(@RequestBody(required = true) body:FunnelStepAndFilter,
                funnelFilter: FunnelReport.FunnelReportFilter): List<FunnelReport.FunnelStep> {
+        if((funnelFilter.splitProperty?.isEmpty())?:true) funnelFilter.splitProperty=null
         funnelFilter.steps=body.steps
         funnelFilter.filters=body.filters
         return funnelReportService.funnel(funnelFilter)
