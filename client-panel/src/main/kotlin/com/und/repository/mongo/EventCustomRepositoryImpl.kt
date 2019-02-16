@@ -28,9 +28,9 @@ class EventCustomRepositoryImpl : EventCustomRepository {
         if(aggregations.isNotEmpty()){
             val agg=Aggregation.newAggregation(aggregations)
             val output = mongoTemplate.aggregate(agg, "${clientId}_event", Document::class.java)
-            return output.mappedResults.map {
-                it["userId"].toString()
-            }
+            return output.mappedResults.filter {
+                it["_id"] !=null
+            }.map { it["_id"] as String }
         }
         return emptyList()
     }

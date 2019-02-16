@@ -214,7 +214,11 @@ class SegmentServiceImpl : SegmentService {
 //        }
 //    }
 
-
+/*
+* performance improvement  we can add project to remove that part of document which is not used in next stage.
+* eg. we add geo filter in first stage it mean after this stage we are not performing geo specific match so we can drop that field here.
+* Its decrease the size of document for next stage.
+* */
     private fun getSegmentUsers(segment: Segment, clientId: Long, type: String = "eventuser"): Pair<List<EventUser>, List<String>> {
         val tz = userSettingsService.getTimeZoneByClientId(clientId)
         val websegment = buildWebSegment(segment)

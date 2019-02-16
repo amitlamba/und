@@ -158,6 +158,10 @@ class SegmentParserCriteria {
         } else {
             addDidAggregation(segment, listOfAggregation, tz)
         }
+        if(listOfAggregation.isNotEmpty()){
+            listOfAggregation.add(Aggregation.project("userId").andExclude("_id"))
+            listOfAggregation.add(Aggregation.group("userId"))
+        }
         return listOfAggregation
     }
 
@@ -167,8 +171,8 @@ class SegmentParserCriteria {
         idList.forEach {
             objectIds.add(ObjectId(it))
         }
-        var match = Aggregation.match(Criteria("_id").`in`(objectIds))
         if (objectIds.isNotEmpty()) {
+            var match = Aggregation.match(Criteria("_id").`in`(objectIds))
             listOfAggregation.add(match)
         }
         //var sort = Aggregation.sort(Sort.Direction.ASC, "_id")
@@ -274,10 +278,10 @@ class SegmentParserCriteria {
         did?.let{
             if (it.size >= 2) {
                 var afterFacetStage:ProjectionOperation
-                if(segment.didEvents!!.joinCondition.conditionType.equals("AllOf")) {
+                if(segment.didEvents!!.joinCondition.conditionType.equals(ConditionType.AllOf)) {
                     setIntersection = SetOperators.SetOperatorFactory("pipe0._id").intersects("pipe1._id")
 
-                    did?.forEachIndexed { index, event ->
+                    did.forEachIndexed { index, event ->
                         if (index > 1) {
                             setIntersection = setIntersection.intersects("pipe" + index + "._id")
                         }
@@ -287,7 +291,7 @@ class SegmentParserCriteria {
                 }else{
                     setUnion = SetOperators.SetOperatorFactory("pipe0._id").union("pipe1._id")
 
-                    did?.forEachIndexed { index, event ->
+                    did.forEachIndexed { index, event ->
                         if (index > 1) {
                             setUnion = setUnion.union("pipe" + index + "._id")
                         }
@@ -315,18 +319,23 @@ class SegmentParserCriteria {
     }
 
     private fun addDidAggregationWithoutFacet(segment: Segment, listOfAggregation: MutableList<AggregationOperation>, tz: ZoneId){
-        var did = segment.didEvents?.events
-        var listOfCriteria= mutableListOf<Criteria>()
-        did?.forEachIndexed{index, event ->
-             var matches=getListOfCriteria(event,tz)
-            var criteria=Criteria().andOperator(*matches.toTypedArray())
-            listOfCriteria.add(criteria)
+        segment.didEvents?.let {
+            var did = it.events
+            var listOfCriteria = mutableListOf<Criteria>()
+            did.forEachIndexed { index, event ->
+                var matches = getListOfCriteria(event, tz)
+                var criteria = Criteria().andOperator(*matches.toTypedArray())
+                listOfCriteria.add(criteria)
+            }
+            if (did.isNotEmpty()) {
+                if (it.joinCondition.conditionType.equals(ConditionType.AllOf)) {
+                    listOfAggregation.add(Aggregation.match(Criteria().andOperator(*listOfCriteria.toTypedArray())))
+                }
+                if (it.joinCondition.conditionType.equals(ConditionType.AnyOf)) {
+                    listOfAggregation.add(Aggregation.match(Criteria().orOperator(*listOfCriteria.toTypedArray())))
+                }
+            }
         }
-
-        listOfAggregation.add(Aggregation.match(Criteria().orOperator(*listOfCriteria.toTypedArray())))
-        //add facet
-
-
     }
     private fun getListOfCriteria(event: Event,tz: ZoneId):MutableList<Criteria>{
         var matches = mutableListOf<Criteria>()
