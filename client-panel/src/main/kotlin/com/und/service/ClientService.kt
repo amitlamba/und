@@ -10,4 +10,5 @@ interface ClientService  {
     fun getClientByClientId(clientId:Long): Client?
     fun getClientCount():Long
     fun getNewClient():Long
+    fun getClients():List<Client>
 }

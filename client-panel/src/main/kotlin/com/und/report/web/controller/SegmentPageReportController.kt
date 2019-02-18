@@ -1,11 +1,14 @@
 package com.und.report.web.controller
 
 
+import com.und.report.model.SegmentTrendCount
 import com.und.report.service.ReachabilityService
 import com.und.report.web.model.Reachability
+import com.und.security.utils.AuthenticationUtils
 import com.und.service.CampaignService
 import com.und.web.model.Campaign
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
@@ -34,7 +37,8 @@ class SegmentPageReportController {
     @GetMapping("/set/{segmentId}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     fun setSegmentReachability(@PathVariable (required = true)segmentId: Long){
-        reachabilityService.setReachabilityOfSegmentToday(segmentId)
+        val clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
+        reachabilityService.setReachabilityOfSegmentToday(segmentId,clientId)
     }
 
     @GetMapping("/get/{segmentId}/{date}")
@@ -47,7 +51,7 @@ class SegmentPageReportController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     fun getSegmentReachabilityByDateRangle(@RequestParam (value = "start" ,required = true)startDate: String,
                                            @RequestParam (value = "end" ,required = true)endDate: String,
-                                           @PathVariable (required = true) segmentId: Long):List<Int>{
+                                           @PathVariable (required = true) segmentId: Long):List<SegmentTrendCount>{
         return reachabilityService.getReachabilityOfSegmentByDateRange(segmentId,startDate,endDate)
     }
 

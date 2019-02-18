@@ -112,7 +112,8 @@ class CampaignService {
                 smsTemplateName = smsTemplate.get().name,
                 eventUser = user,
                 serviceProviderId = campaign.serviceProviderId,
-                campaignId = campaign.id
+                campaignId = campaign.id,
+                segmentId = campaign.segmentationID
         )
     }
 
@@ -133,7 +134,8 @@ class CampaignService {
                     emailTemplateName = emailTemplate.get().name,
                     campaignId = campaign.id!!,
                     eventUser = user,
-                    clientEmailSettingId = emailCampaign.get().clientSettingEmailId
+                    clientEmailSettingId = emailCampaign.get().clientSettingEmailId,
+                    segmentId = campaign.segmentationID
             )
         }catch (ex:Exception){
             throw ex
@@ -151,7 +153,8 @@ class CampaignService {
                 campaignId = campaign.id!!,
                 userId = user.id,
                 eventUser = user,
-                serviceProviderId = campaign?.serviceProviderId
+                serviceProviderId = campaign.serviceProviderId,
+                segmentId = campaign.segmentationID
         )
     }
 
@@ -166,7 +169,8 @@ class CampaignService {
                 campaignId = campaign.id!!,
                 userId = user.id,
                 eventUser = user,
-                serviceProviderId = campaign?.serviceProviderId
+                serviceProviderId = campaign.serviceProviderId,
+                segmentId = campaign.segmentationID
         )
     }
     private fun fcmIosMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
@@ -180,7 +184,8 @@ class CampaignService {
                 campaignId = campaign.id!!,
                 userId = user.id,
                 eventUser = user,
-                serviceProviderId = campaign?.serviceProviderId
+                serviceProviderId = campaign.serviceProviderId,
+                segmentId = campaign.segmentationID
         )
     }
 

@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.und.common.utils.loggerFor
 import com.und.model.mongo.SegmentReachability
+import com.und.report.model.SegmentTrendCount
 import com.und.report.repository.mongo.ReachabilityRepository
 import com.und.report.web.model.Reachability
+import com.und.repository.jpa.ClientSettingsRepository
 import com.und.repository.mongo.SegmentReachabilityRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.SegmentService
@@ -28,7 +30,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.NoSuchElementException
 
-@Service
+@Service("reachabilityiservicempl")
 class ReachabilityServiceImpl : ReachabilityService {
 
     companion object {
@@ -47,6 +49,9 @@ class ReachabilityServiceImpl : ReachabilityService {
 
     @Autowired
     private lateinit var segmentReachabilityRepository: SegmentReachabilityRepository
+
+    @Autowired
+    private lateinit var clientSetting:ClientSettingsRepository
 
     override fun getReachabilityBySegmentId(segmentId: Long): Reachability {
         val clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
@@ -75,14 +80,14 @@ class ReachabilityServiceImpl : ReachabilityService {
 //        return reachability
 //    }
 //
-    private fun buildSegmentReachability(cId:Long,sId: Long,totalUser: Int,sr:SegmentReachability):SegmentReachability{
-        with(sr){
-            clientId=cId
-            id=sId
-            dates.put(parseInt(LocalDate.now(ZoneId.of(AuthenticationUtils.principal.timeZoneId)).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")).replace("-","")),totalUser)
-        }
-        return sr
-    }
+//    private fun buildSegmentReachability(cId:Long,sId: Long,totalUser: Int,sr:SegmentReachability):SegmentReachability{
+//        with(sr){
+//            clientId=cId
+//            id=sId
+//            dates.put(parseInt(LocalDate.now(ZoneId.of(AuthenticationUtils.principal.timeZoneId)).format(DateTimeFormatter.ofPattern("yyyy-MM-dd")).replace("-","")),totalUser)
+//        }
+//        return sr
+//    }
     fun isPresent(sr: SegmentReachability,date:String):Boolean{
         return sr.dates.contains(parseInt(date.replace("-","")))
     }
@@ -95,33 +100,33 @@ class ReachabilityServiceImpl : ReachabilityService {
 //        }
 //        return null
 
-        return segmentReachabilityRepository.getReachabilityOfSegmentByDate(segmentId,getKey(date),date)
+        return segmentReachabilityRepository.getReachabilityOfSegmentByDate(segmentId,getKey(date),date,clientId)
     }
 
-    override fun getReachabilityOfSegmentByDateRange(segmentId: Long, date1: String, date2: String): List<Int> {
+    override fun getReachabilityOfSegmentByDateRange(segmentId: Long, date1: String, date2: String): List<SegmentTrendCount> {
         val clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
         var sr: Optional<SegmentReachability> = findSegmentReachability(clientId, segmentId)
         var startDate= LocalDate.parse(date1)
         var endDate= LocalDate.parse(date2)
         var dateRange= mutableListOf<Int>()
+        var result= mutableListOf<SegmentTrendCount>()
         while (startDate.compareTo(endDate)<=0){
             var month=if(startDate.monthValue<10) "0${startDate.monthValue}" else startDate.monthValue
             var day=if(startDate.dayOfMonth<10) "0${startDate.dayOfMonth}" else startDate.dayOfMonth
             dateRange.add(parseInt("${startDate.year}${month}${day}"))
+//            result.add(SegmentTrendCount(date=startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),count = 0))
             startDate=startDate.plusDays(1)
         }
-        var result= mutableListOf<Int>()
         if(sr.isPresent){
             var dates= sr.get().dates
             for ( i in dateRange){
-                result.add(dates.get(i)?:0)
+                result.add(SegmentTrendCount(date=i.toString(),count = dates.get(i)?:0))
             }
         }
         return result
     }
 
-    override fun setReachabilityOfSegmentToday(segmentId: Long) {
-        val clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
+    override fun setReachabilityOfSegmentToday(segmentId: Long,clientId: Long) {
         val objectIds = if (segmentId != allUser) {
             val segmentUsers = segmentService.segmentUserIds(segmentId, clientId)
             segmentUsers.map {
@@ -129,8 +134,9 @@ class ReachabilityServiceImpl : ReachabilityService {
             }
         } else emptyList()
 
-        val timeZoneId=ZoneId.of(AuthenticationUtils.principal.timeZoneId)
-        val todayDate=LocalDate.now(timeZoneId).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+        clientSetting.findByClientID(clientId)?.let {
+            val timeZoneId= ZoneId.of(it.timezone)
+            val todayDate=LocalDate.now(timeZoneId).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 //        var sr: Optional<SegmentReachability> = findSegmentReachability(clientId, segmentId)
 //        if(sr.isPresent && isPresent(sr.get(), todayDate)) {
 //            return
@@ -141,7 +147,9 @@ class ReachabilityServiceImpl : ReachabilityService {
 //        }
 
 
-        segmentReachabilityRepository.updateSegmentReachability(segmentId,getKey(todayDate),objectIds.size)    }
+            segmentReachabilityRepository.updateSegmentReachability(segmentId,getKey(todayDate),objectIds.size,clientId)
+        }
+    }
 
     private fun getKey(date: String):String{
         var formattedDate = date.replace("-","")

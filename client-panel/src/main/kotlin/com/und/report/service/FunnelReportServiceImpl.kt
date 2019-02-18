@@ -99,7 +99,7 @@ class FunnelReportServiceImpl : FunnelReportService {
         if(outputSize!=inputSize){
             var rs=result.toMutableList()
             for(i in outputSize..(inputSize-1) step 1){
-                rs.add(FunnelReport.FunnelStep(funnelSteps[outputSize],count = 0,property = "all"))
+                rs.add(FunnelReport.FunnelStep(funnelSteps[i],count = 0,property = "all"))
             }
             return rs
         }
@@ -135,13 +135,13 @@ class FunnelReportServiceImpl : FunnelReportService {
         val filterGlobalQ = segmentParserCriteria.filterGlobalQ(allfilters, tz)
 
         val matchOperation = Aggregation.match(filterGlobalQ.first)
-        val sortOperation = Aggregation.sort(Sort.by(AggregationQuerybuilder.Field.CreationTime.name).ascending())
+        val sortOperation = Aggregation.sort(Sort.by(AggregationQuerybuilder.Field.CreationTime.fName).ascending())
         val groupBys = mutableListOf<Field>()
         groupBys.add(Fields.field(AggregationQuerybuilder.Field.UserId.fName, AggregationQuerybuilder.Field.UserId.fName))
         groupBys.add(Fields.field(AggregationQuerybuilder.Field.EventName.fName, AggregationQuerybuilder.Field.EventName.fName))
         val split = funnelFilter.splitProperty
-        var c=ConvertOperators.ConvertOperatorFactory(AggregationQuerybuilder.Field.CreationTime.name).convertToLong()
-        var projectionOperation= Aggregation.project("userId","name").and(c).`as`(AggregationQuerybuilder.Field.CreationTime.name)
+        var c=ConvertOperators.ConvertOperatorFactory(AggregationQuerybuilder.Field.CreationTime.fName).convertToLong()
+        var projectionOperation= Aggregation.project("userId","name").and(c).`as`(AggregationQuerybuilder.Field.CreationTime.fName)
         var propertyPath:String
         if (split != null && !funnelFilter.splitProperty.isNullOrBlank()) {
             propertyPath = segmentParserCriteria.getFieldPath(funnelFilter.splitPropertyType, split)
@@ -149,7 +149,7 @@ class FunnelReportServiceImpl : FunnelReportService {
             projectionOperation=projectionOperation.and(propertyPath).`as`("splitproperty")
         }
 
-        val groupByOperation1 = Aggregation.group(Fields.from(*groupBys.toTypedArray())).push(AggregationQuerybuilder.Field.CreationTime.name).`as`("chronology")
+        val groupByOperation1 = Aggregation.group(Fields.from(*groupBys.toTypedArray())).push(AggregationQuerybuilder.Field.CreationTime.fName).`as`("chronology")
 
         val aggregationOperations = mutableListOf<AggregationOperation>()
         aggregationOperations.add(matchOperation)
@@ -168,7 +168,7 @@ class FunnelReportServiceImpl : FunnelReportService {
     private fun createDateFilter(tz: ZoneId, funnelFilter: FunnelReport.FunnelReportFilter): GlobalFilter {
         val dateFilter = GlobalFilter()
         dateFilter.globalFilterType = GlobalFilterType.EventProperties
-        dateFilter.name = AggregationQuerybuilder.Field.CreationTime.name
+        dateFilter.name = AggregationQuerybuilder.Field.CreationTime.fName
         dateFilter.type = DataType.date
         dateFilter.operator = DateOperator.After.name
         val date = LocalDate.now(tz).minusDays(funnelFilter.days)

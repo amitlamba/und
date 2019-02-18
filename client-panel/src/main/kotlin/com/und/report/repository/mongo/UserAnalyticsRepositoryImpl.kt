@@ -24,7 +24,6 @@ class UserAnalyticsRepositoryImpl: UserAnalyticsRepository{
 
     override fun aggregate(query: Aggregation, clientId: Long): List<AggregateOutput> {
         logger.debug("Fetching aggregation results for query : $query, clientId: $clientId")
-        println("query:: $query")
 
         val aggregate = mongoTemplate.aggregate<Document>(query, "${clientId}_event", Document::class.java)
         val result=if(aggregate.mappedResults.isNotEmpty() && aggregate.mappedResults[0]["_id"] !=null)

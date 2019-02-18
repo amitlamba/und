@@ -15,16 +15,16 @@ import java.time.ZoneId
 @Component
 class AggregationQuerybuilder {
 
-    enum class Collection {
+    enum class Collection{
         Event,
         User
     }
 
     enum class Field(val fName: String = "", val collectionName: Collection = Collection.Event, type: GlobalFilterType = GlobalFilterType.EventProperties, properties: List<String> = emptyList()) {
-        EventName("name", Collection.Event, GlobalFilterType.EventProperties),
-        CreationTime("creationTime", Collection.Event, GlobalFilterType.EventProperties),
-        UserId("userId", Collection.Event, GlobalFilterType.EventProperties),
-        UserIdObject("userIdObject", Collection.Event, GlobalFilterType.EventComputedProperties),
+        EventName ("name", Collection.Event, GlobalFilterType.EventProperties),
+        CreationTime ("creationTime", Collection.Event, GlobalFilterType.EventProperties),
+        UserId ("userId", Collection.Event, GlobalFilterType.EventProperties),
+        UserIdObject ("userIdObject", Collection.Event, GlobalFilterType.EventComputedProperties),
         MinutesPeriod("minutesPeriod", Collection.Event, GlobalFilterType.EventComputedProperties, listOf(NUM_OF_MINUTES)),
         DateVal("dateVal", Collection.Event, GlobalFilterType.EventComputedProperties),
         TimePeriod("timePeriod", Collection.Event, GlobalFilterType.EventComputedProperties),

@@ -84,7 +84,8 @@ class EmailHelperService {
                 emailSubject = email.emailSubject ?: "NA",
                 campaignId = email.campaignId,
                 status = emailStatus,
-                userID = email.eventUser?.id
+                userID = email.eventUser?.id,
+                segmentId = email.segmentId
 
         )
         //TenantProvider().setTenant(email.clientID.toString())
