@@ -116,11 +116,8 @@ class EmailService {
 //            }
 //        }
         emailHelperService.saveMailInMongo(emailToSend, NOT_SENT, mongoEmailId)
-        println("Not sent ${System.currentTimeMillis()}")
         sendEmailWithoutTracking(emailToSend)
-        println("sending ${System.currentTimeMillis()}")
         emailHelperService.updateEmailStatus(mongoEmailId, SENT, emailToSend.clientID)
-        println("sent ${System.currentTimeMillis()}")
 
         //TODO this event is track only for campaign not for system emails
         val token = userRepository.findSystemUser().key

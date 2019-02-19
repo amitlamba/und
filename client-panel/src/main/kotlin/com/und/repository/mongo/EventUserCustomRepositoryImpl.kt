@@ -6,6 +6,7 @@ import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.aggregation.AggregationResults
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
@@ -115,4 +116,22 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
 
     private fun extractids(output: AggregationResults<Document>): List<String> = output.map { it["_id"].toString() }
 
+    override fun usersProfileFromEventUser(query: List<AggregationOperation>, clientId: Long): List<EventUser> {
+        if(query.isNotEmpty()){
+            val agg=Aggregation.newAggregation(query)
+            return mongoTemplate.aggregate(agg, "${clientId}_eventUser",EventUser::class.java).mappedResults
+        }else {
+            return emptyList()
+        }
+    }
+
+    override fun usersIdFromEventUser(query: List<AggregationOperation>, clientId: Long): List<String> {
+        data class Result(var userId:List<String> = emptyList())
+        if(query.isNotEmpty()){
+            val agg=Aggregation.newAggregation(query)
+            var result=mongoTemplate.aggregate(agg, "${clientId}_eventUser",Result::class.java).mappedResults
+            return if(result.isNotEmpty()) result[0].userId else emptyList()
+        }
+        return emptyList()
+    }
 }

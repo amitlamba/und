@@ -2,6 +2,7 @@ package com.und.repository.mongo
 
 import com.und.model.mongo.eventapi.EventUser
 import org.springframework.data.mongodb.core.aggregation.Aggregation
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import java.util.*
 
 interface EventUserCustomRepository {
@@ -18,6 +19,7 @@ interface EventUserCustomRepository {
     fun findUsersNotIn(ids: Set<String>, clientId: Long): List<String>
     fun testSegmentUsers( clientId: Long): List<String>
     fun usersFromUserProfile(query: Aggregation, clientId: Long): List<String>
-
+    fun usersProfileFromEventUser(query:List<AggregationOperation>,clientId: Long):List<EventUser>
+    fun usersIdFromEventUser(query:List<AggregationOperation>,clientId: Long):List<String>
 
 }
