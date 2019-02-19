@@ -1,0 +1,2 @@
+alter table  email_failure_audit_log drop constraint email_failure_audit_log_client_setting_email_id_fkey;
+alter table  email_failure_audit_log add  foreign key  (client_setting_email_id)references client_setting_email;

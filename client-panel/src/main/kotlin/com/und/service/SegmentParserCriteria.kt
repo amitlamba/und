@@ -158,9 +158,11 @@ class SegmentParserCriteria {
         } else {
             addDidAggregation(segment, listOfAggregation, tz)
         }
+        //project and group only unique userId instead of whole event document and repetition of userid.
         if(listOfAggregation.isNotEmpty()){
             listOfAggregation.add(Aggregation.project("userId").andExclude("_id"))
             listOfAggregation.add(Aggregation.group("userId"))
+            listOfAggregation.add(Aggregation.sort(Sort.Direction.ASC, "_id"))
         }
         return listOfAggregation
     }
@@ -175,7 +177,6 @@ class SegmentParserCriteria {
             var match = Aggregation.match(Criteria("_id").`in`(objectIds))
             listOfAggregation.add(match)
         }
-        //var sort = Aggregation.sort(Sort.Direction.ASC, "_id")
         val gFilters = segment.globalFilters
         val (eventPropertyMatch, userPropertyMatch) = filterGlobalQWithUserId(gFilters, tz, segment.userId)
         //adding user globalcriteria aggregation

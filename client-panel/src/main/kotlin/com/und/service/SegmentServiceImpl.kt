@@ -107,10 +107,8 @@ class SegmentServiceImpl : SegmentService {
         val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
         return if (segmentOption.isPresent) {
             val segment = segmentOption.get()
-//            getSegmentUserIds(segment, clientId,"userId").second
             getSegmentUsers(segment,clientId,"userId").second
         } else emptyList()
-        //return listOf("5b1f5b080be60f4cc2942875", "5b49c41c00156a1860d1f82d", "5b49d11400156a1860d1f83a")
     }
 
     override fun segmentUsers(segmentId: Long, clientId: Long): List<EventUser> {
@@ -173,7 +171,6 @@ class SegmentServiceImpl : SegmentService {
     }
 
     private fun getSegmentUsersList(segment: Segment, clientId: Long): List<EventUser> {
-//        return getSegmentUserIds(segment,clientId).first
         return getSegmentUsers(segment,clientId).first
     }
 
@@ -181,38 +178,6 @@ class SegmentServiceImpl : SegmentService {
         val userIds = eventUserRepository.testSegmentUsers(clientId)
         return eventUserRepository.findUserByIds(userIds.toSet(), clientId)
     }
-
-//    private fun getSegmentUserIds(segment: Segment, clientId: Long,type:String="eventuser"): Pair<List<EventUser>,List<String>> {
-//
-//        val tz = userSettingsService.getTimeZoneByClientId(clientId)
-//        val websegment = buildWebSegment(segment)
-//        var query=segmentParserCriteria.segmentQuery1(websegment,tz,type)
-//        var agg=query.first
-//        var finalAgg=Aggregation.newAggregation(agg)
-//
-//        data class Result(var userId:List<String> = emptyList())
-//        if(type.equals("userId")) {
-//            var allResult= mutableListOf<Result>()
-//            if(query.second){
-//                 allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_eventUser",Result::class.java).mappedResults
-//            }else{
-//                 allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_event",Result::class.java).mappedResults
-//            }
-//
-//            if(allResult.isNotEmpty())
-//                return Pair(emptyList(), allResult[0].userId)
-//            else
-//                return Pair(emptyList(),emptyList())
-//        }else{
-//            var allResult= mutableListOf<EventUser>()
-//            if(query.second){
-//                allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_eventUser",EventUser::class.java).mappedResults
-//            }else{
-//                allResult=mongoTemplate.aggregate(finalAgg, "${clientId}_event",EventUser::class.java).mappedResults
-//            }
-//            return Pair(allResult, emptyList())
-//        }
-//    }
 
 /*
 * performance improvement  we can add project to remove that part of document which is not used in next stage.

@@ -75,6 +75,7 @@ class FcmFailureHandler {
             message=notificationError.message
             errorCode=notificationError.errorCode
             type=notificationError.campaignType
+            serviceProviderId=notificationError.serviceProviderId
         }
         fcmFailureAuditLogRepository.save(log)
     }
