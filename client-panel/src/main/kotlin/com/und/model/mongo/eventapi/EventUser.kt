@@ -40,6 +40,9 @@ data class CommunicationDetails(val value: String?, var dnd: Boolean = false)
 class Communication {
     var email: CommunicationDetails? = null
     var mobile: CommunicationDetails? = null
+    var android:CommunicationDetails?=null
+    var ios:CommunicationDetails?=null
+    var webpush:CommunicationDetails?= null
 }
 
 class StandardInfo {

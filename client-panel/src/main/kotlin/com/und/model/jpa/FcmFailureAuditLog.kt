@@ -36,6 +36,9 @@ class FcmFailureAuditLog {
     @Column(name="service_provider_id")
     var serviceProviderId:Long?=0
 
+    @Column(name="service_provider_name")
+    var serviceProviderName:String?=null
+
     @field:CreationTimestamp
     @Column(name = "date_created", updatable = false)
     lateinit var dateCreated: LocalDateTime
