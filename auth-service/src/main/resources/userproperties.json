@@ -66,8 +66,24 @@
     "name": "Reachability",
     "properties": [
       {
-        "name": "hasDeviceToken",
-        "dataType": "boolean",
+        "name": "hasAndroid",
+        "dataType": "string",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "name": "hasIos",
+        "dataType": "string",
+        "options": [
+          "Yes",
+          "No"
+        ]
+      },
+      {
+        "name": "hasWeb",
+        "dataType": "string",
         "options": [
           "Yes",
           "No"
@@ -75,7 +91,7 @@
       },
       {
         "name": "hasEmailAddress",
-        "dataType": "boolean",
+        "dataType": "string",
         "options": [
           "Yes",
           "No"
@@ -83,34 +99,50 @@
       },
       {
         "name": "hasPhoneNumber",
-        "dataType": "boolean",
+        "dataType": "string",
         "options": [
           "Yes",
           "No"
         ]
       },
       {
-        "name": "unsubscribedPush",
+        "name": "unsubscribedAndroidPush",
         "dataType": "boolean",
         "options": [
-          "Yes",
-          "No"
+          "true",
+          "false"
+        ]
+      },
+      {
+        "name": "unsubscribedIosPush",
+        "dataType": "boolean",
+        "options": [
+          "true",
+          "false"
+        ]
+      },
+      {
+        "name": "unsubscribedWebPush",
+        "dataType": "boolean",
+        "options": [
+          "true",
+          "false"
         ]
       },
       {
         "name": "unsubscribedEmail",
         "dataType": "boolean",
         "options": [
-          "Yes",
-          "No"
+          "true",
+          "false"
         ]
       },
       {
-        "name": "unsubscribedSMS",
+        "name": "unsubscribedSms",
         "dataType": "boolean",
         "options": [
-          "Yes",
-          "No"
+          "true",
+          "false"
         ]
       }
     ]

@@ -47,6 +47,7 @@ class SegmentParserCriteria {
 
     var userMap:HashMap<String,String>
     var eventMap:HashMap<String,String>
+    var reachabilityMap:HashMap<String,String>
 
     constructor(){
         userMap=HashMap();
@@ -76,6 +77,18 @@ class SegmentParserCriteria {
         eventMap.put("device","system.device.name")
         eventMap.put("creationTime","creationTime")
 
+        reachabilityMap= HashMap()
+        reachabilityMap.put("hasEmailAddress","identity.email")
+        reachabilityMap.put("hasPhoneNumber","identity.mobile")
+        reachabilityMap.put("hasAndroid","identity.androidFcmToken")
+        reachabilityMap.put("hasWeb","identity.webFcmToken")
+        reachabilityMap.put("hasIos","identity.iosFcmToekn")
+
+        reachabilityMap.put("unsubscribedSms","communication.email.dnd")
+        reachabilityMap.put("unsubscribedEmail","communication.mobile.dnd")
+        reachabilityMap.put("unsubscribedWebPush","communication.webpush.dnd")
+        reachabilityMap.put("unsubscribedAndroidPush","communication.android.dnd")
+        reachabilityMap.put("unsubscribedIosPush","communication.ios.dnd")
 
     }
 
@@ -552,7 +565,7 @@ class SegmentParserCriteria {
             DataType.number -> matchNumber(values, NumberOperator.valueOf(operator), fieldName)
             DataType.date -> matchDate(values, DateOperator.valueOf(operator), unit, fieldName, tz)
             DataType.range -> Criteria()
-            DataType.boolean -> Criteria()
+            DataType.boolean -> Criteria(fieldName).`is`(values[0].toBoolean())
 
         }
 
@@ -732,12 +745,11 @@ class SegmentParserCriteria {
         }
     }
 
-
     fun getFieldPath(filterType:GlobalFilterType,name:String):String{
         when(filterType){
             GlobalFilterType.Demographics->return "standardInfo.${name}"
             GlobalFilterType.UserProperties-> return "additionalInfo.${name}"
-            GlobalFilterType.Reachability->return  "communication.${name}.dnd"
+            GlobalFilterType.Reachability->return reachabilityMap[name]?:"communication.${name}.dnd"
             GlobalFilterType.UserComputedProperties-> return "${name}"
             GlobalFilterType.UserIdentity->return "identity.${name}"
             GlobalFilterType.UserTechnographics->return return "system.${name}.name"
