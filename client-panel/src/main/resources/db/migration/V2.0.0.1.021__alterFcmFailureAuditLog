@@ -1,1 +1,0 @@
-alter table fcm_failure_audit_log add column service_provider_id bigint, add column service_provider_name varchar (100);
