@@ -18,7 +18,8 @@ class BlockedEmailCustomRepositoryImpl : BlockedEmailCustomRepository {
         if (blockedEmailPersisted == null || blockedEmailPersisted.isEmpty()) {
             mongoTemplate.save(blockedEmail)
         } else {
-            val update = Update().pushAll("history", blockedEmail.history.toTypedArray())
+//            val update = Update().pushAll("history", blockedEmail.history.toTypedArray())
+                val update=Update().push("history").each(blockedEmail.history)
             mongoTemplate.updateFirst(query, update, BlockedEmail::class.java)
         }
 

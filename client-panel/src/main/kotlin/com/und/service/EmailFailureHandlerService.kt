@@ -84,7 +84,7 @@ class EmailFailureHandlerService {
             }
 
             //pause forced campaign
-//            campaignService.pauseAllRunning(clientId)
+            campaignService.pauseAllRunning(clientId)
             //send an email
             emailService.sendEmailConnectionErrorEmail(emailError)
         }
@@ -92,8 +92,8 @@ class EmailFailureHandlerService {
 
     }
 
-//    @Cacheable(key = "'client_'+#clientId+'id_'+#id",cacheNames = ["clientemailsettings"])
-    private fun getClientEmailSetting(clientId:Long,id:Long):ClientSettingsEmail?{
+    @Cacheable(key = "'client_'+#clientId+'id_'+#id",cacheNames = ["clientemailsettings"])
+    protected fun getClientEmailSetting(clientId:Long,id:Long):ClientSettingsEmail?{
         val setting=clientSettingsEmailRepository.findByClientIdAndId(clientId,id)
         if(setting.isPresent) return setting.get()
         else {logger.error("Client Email Setting not present for client $clientId id $id"); return null}
