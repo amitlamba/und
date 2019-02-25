@@ -84,7 +84,7 @@ class EmailFailureHandlerService {
             }
 
             //pause forced campaign
-            campaignService.pauseAllRunning(clientId)
+//            campaignService.pauseAllRunning(clientId)
             //send an email
             emailService.sendEmailConnectionErrorEmail(emailError)
         }
