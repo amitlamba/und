@@ -415,7 +415,7 @@ class CampaignService {
         }
 
         val jobDescriptor = JobDescriptor()
-        jobDescriptor.clientId = AuthenticationUtils.clientID.toString()
+        jobDescriptor.clientId = campaign.clientID.toString()
         jobDescriptor.action = action
         //jobDescriptor.campaignName = campaign.name //set because it cant be null moved to below now FIXME find some other way around
         jobDescriptor.jobDetail = buildJobDetail(campaignId.toString(), campaign.name, jobDescriptor.clientId)
