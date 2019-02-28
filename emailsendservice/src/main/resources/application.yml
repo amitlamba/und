@@ -1,0 +1,267 @@
+## config context path to "/" by setting an empty string
+#server:
+#  port: 7484
+#
+## JACKSON
+#spring:
+#  application:
+#    name: emailsendservice
+#  thymeleaf:
+#    cache: false
+#  redis:
+#    host: ${REDIS_IP}
+#    port: ${REDIS_PORT}
+#  cache:
+#    redis:
+#      use-key-prefix: true
+#  jackson:
+#    serialization:
+#      INDENT_OUTPUT: true
+#  cloud:
+#    stream:
+#      kafka:
+#        binder:
+#          brokers: ${KAFKA_IP}
+#          defaultBrokerPort: ${KAFKA_PORT}
+#          zkNodes: ${KAFKA_IP}
+#          defaultZkPort: 2181
+#          configuration:
+#            enable:
+#              auto:
+#                commit: true
+#            auto:
+#              offset:
+#                reset: earliest
+#              #                  This property effect performance.
+#              commit:
+#                interval:
+#                  ms: 5000  #default value
+#            max:
+#              poll:
+#                interval:
+#                  ms: 300000  # default value
+#        bindings:
+#          emailEventSend:
+#            producer:
+#              configuration:
+#                client:
+#                  id: 1
+#            group: emailEventGroup
+#            destination: emailEventStaging
+#          emailEventReceive:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 1
+#                group:
+#                  id: emailEventReceive
+#            group: emailEventReceive
+#            destination: emailEventStaging
+#          smsEventSend:
+#            producer:
+#              configuration:
+#                client:
+#                  id: 2
+#            group: smsEventGroup
+#            destination: smsEventStaging
+#          smsEventReceive:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 2
+#                group:
+#                  id: smsEventReceive
+#            group: smsEventReceive
+#            destination: smsEventStaging
+#          clientEmailReceive:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 3
+#                group:
+#                  id: clientEmailReceiveGroup
+#            group: clientEmailReceiveGroup
+#            destination: clientEmailStaging
+#          clickTrackEventReceive:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 4
+#                group:
+#                  id: clickTrackEventGroup
+#            group: clickTrackEventGroup
+#            destination: clickTrackEventStaging
+#          EmailUpdateReceive:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 5
+#                group:
+#                  id: EmailUpdateReceiveGroup
+#            group: EmailUpdateReceiveGroup
+#            destination: EmailUpdateStaging
+#          campaignTriggerReceive:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 6
+#                group:
+#                  id: campaignTriggerReceive
+#            group: campaignTriggerReceive
+#            destination: campaignTriggerStaging
+#          fcmEventSend:
+#            producer:
+#              configuration:
+#                client:
+#                  id: 3
+#            group: fcmMessageGroup
+#            destination: fcmMessageStaging
+#          fcmEventReceive:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 7
+#                group:
+#                  id: fcmMessageReceive
+#          #              group: fcmMessageReceive
+#          #              destination: fcmMessageStaging
+#          fcmFailureEventSend:
+#            producer:
+#              configuration:
+#                client:
+#                  id: 4
+#            group: fcmFailureEventGroup
+#            destination: fcmEventFailureStaging
+#          emailFailureEventSend:
+#            producer:
+#              configuration:
+#                client:
+#                  id: 5
+#            group: emailFailureEventGroup
+#            destination: emailFailureEventStaging
+#          VerificationEmailReceive:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 7
+#                group:
+#                  id: verificationEmailReceive
+#            group: verificationEmailReceive
+#            destination: verificationEmailStaging
+#      bindings:
+#        emailEventSend:
+#          destination: emailEventStaging
+#        emailEventReceive:
+#          destination: emailEventStaging
+#        smsEventSend:
+#          destination: smsEventStaging
+#        smsEventReceive:
+#          destination: smsEventStaging
+#        clientEmailReceive:
+#          destination: clientEmailStaging
+#        clickTrackEventReceive:
+#          destination: clickTrackEventStaging
+#        EmailUpdateReceive:
+#          destination: EmailUpdateStaging
+#        campaignTriggerReceive:
+#          destination: campaignTriggerStaging
+#        fcmEventSend:
+#          destination: fcmMessageStaging
+#        fcmEventReceive:
+#          destination: fcmMessageStaging
+#        fcmFailureEventSend:
+#          destination: fcmEventFailureStaging
+#        emailFailureEventSend:
+#          destination: emailFailureEventStaging
+#        VerificationEmailReceive:
+#          destination: verificationEmailStaging
+#  mvc:
+#    view:
+#      prefix: /WEB-INF/views/
+#      suffix: .jsp
+#  jpa:
+#    database-platform: org.hibernate.dialect.PostgreSQL9Dialect
+#    properties:
+#      hibernate:
+#        temp:
+#          use_jdbc_metadata_defaults: false
+#
+#  datasource:
+#    url: jdbc:postgresql://${POSTGRES_IP}:${POSTGRES_PORT}/undstaging
+#    driver-class-name: org.postgresql.Driver
+#    username: postgres
+#    password:  postgres
+#    tomcat:
+#      initial-size: 10
+#      max-wait: 10000
+#      max-active: 50
+#      test-on-borrow: true
+#  data:
+#    mongodb:
+#      database: eventdbstaging
+#      host: ${MONGO_IP}
+#      port: ${MONGO_PORT}
+#
+#  zipkin:
+#    base-url: http://springbootzipkin:7777
+#    sender:
+#      type: kafka
+#  sleuth:
+#    sampler:
+#      probability: 1
+#  kafka:
+#    bootstrap-servers: ${KAFKA_IP}:${KAFKA_PORT}
+#
+#security:
+#  header:
+#    token: authorization
+#    username: UserName
+#  secret: mySecret
+#  expiration: 604800
+#  route:
+#    authentication:
+#      path: auth
+#      refresh: refresh
+#
+#eureka:
+#  instance:
+#    prefer-ip-address: true
+#    health-check-url-path: /email-service/health
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    region: desktop
+#    service-url:
+#      defaultZone: http://${EUREKA_IP}:${EUREKA_PORT_STAGING}/eureka
+#
+#
+#logging:
+#  level:
+#    org:
+#      springframework: info
+#      apache: info
+#      hibernate: info
+#    com:
+#      und: info
+#  file: ${HOME}/log/staging/und-emailsendservice.log
+#
+#
+#encryption-decryption:
+#  key:
+#    default: DaO1TXt5B0R92Yys
+#    unsubscribe: TaO5T01R9BXt2yYS
+#
+#und:
+#  system:
+#    user:
+#      token: jasdghajskdhg
+#  url:
+#    event: http://userndot.com/event
+#  auth-url: http://nestros.com:8090/auth
+#  from-email: shiv@userndot.com
+#  lambda:
+#    sms:
+#      secretKey: tEA3hwNdgerwF4oiVIscjtvEbPIJvwePxrNCAdhv
+#      accessKey: AKIAIEEV7Q6MG5DLL52Q
+#      region : ap-south-1
+#      functionName: exotel
