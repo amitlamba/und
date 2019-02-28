@@ -49,7 +49,7 @@ class EmailTemplateService {
         } ?: emptyList()
     }
 
-    @Cacheable(cacheNames = ["emailtemplate"],key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_template_list'" )
+//    @Cacheable(cacheNames = ["emailtemplate"],key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_template_list'" )
     fun getClientEmailTemplates(): List<WebEmailTemplate> {
         val clientId = AuthenticationUtils.clientID
         return clientId?.let { emailTemplateRepository.findByClientID(clientId).map { buildWebEmailTemplate(it) } }
