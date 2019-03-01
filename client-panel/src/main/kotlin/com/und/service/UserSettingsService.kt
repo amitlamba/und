@@ -117,6 +117,7 @@ class UserSettingsService {
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
         try {
             serviceProviderCredentialsRepository.save(serviceProviderCredentials)
+            logger.info("Saved sp successfully.")
         } catch (ex: Throwable) {
             logger.error("Exception during saving service provider ${ex.message}")
             throw ex
@@ -515,7 +516,7 @@ class UserSettingsService {
                 // for debugging purpose session.debug=true
                 transport = session.getTransport(protocaol)
                 transport.connect(username, password)
-                logger.info("Added Email Sp connection successfuly.")
+                logger.info("Test connection for sp $username is successful")
                 return true
             } catch (e: AuthenticationFailedException) {
                 throw WrongCredentialException("authentication failed")
