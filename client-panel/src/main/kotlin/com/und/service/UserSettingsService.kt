@@ -111,16 +111,15 @@ class UserSettingsService {
     }
 
     @Transactional
-    fun saveEmailServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials, status: Status): Long? {
+    fun saveEmailServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials, status: Status) {
         webServiceProviderCredentials.status = status
         performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials)
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
-        return try {
-            val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
-            saved.id
+        try {
+            serviceProviderCredentialsRepository.save(serviceProviderCredentials)
         } catch (ex: Throwable) {
             logger.error("Exception during saving service provider ${ex.message}")
-            -1
+            throw ex
         }
     }
 
@@ -511,21 +510,19 @@ class UserSettingsService {
                 }
             }
             var transport:Transport?=null
-            var success:Boolean=false
             try {
                 val session = Session.getInstance(props)
                 // for debugging purpose session.debug=true
                 transport = session.getTransport(protocaol)
                 transport.connect(username, password)
                 logger.info("Added Email Sp connection successfuly.")
-                success=true
+                return true
             } catch (e: AuthenticationFailedException) {
                 throw WrongCredentialException("authentication failed")
             } catch (e: MessagingException) {
                 throw WrongCredentialException(" Not valid credential")
             }finally {
                 transport?.close()
-                return success
             }
 
         }else{

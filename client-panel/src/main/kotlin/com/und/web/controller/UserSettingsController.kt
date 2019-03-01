@@ -58,7 +58,7 @@ class UserSettingsController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/email-service-provider/save"])
-    fun saveEmailServiceProvider(@Valid @RequestBody serviceProviderCredentials: ServiceProviderCredentials): Long? {
+    fun saveEmailServiceProvider(@Valid @RequestBody serviceProviderCredentials: ServiceProviderCredentials):ResponseEntity<String>  {
         val clientID = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
         val userID = AuthenticationUtils.principal.id
         serviceProviderCredentials.appuserID = userID
@@ -69,9 +69,9 @@ class UserSettingsController {
             val success = userSettingsService.testConnection(serviceProviderCredentials)
             return if (success) {
                 userSettingsService.saveEmailServiceProvider(serviceProviderCredentials, Status.ACTIVE)
-                //clientID?.let{ id->campaignService.resumeAllForcePaused(id)}
-            } else -1L
-        }catch (ex:Exception){
+                ResponseEntity(HttpStatus.OK)
+            } else ResponseEntity(HttpStatus.EXPECTATION_FAILED)
+        }catch (ex:Throwable){
             throw CustomException("${ex.message}",ex)
         }
     }
