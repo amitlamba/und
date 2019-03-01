@@ -217,7 +217,7 @@ class UserSettingsService {
             spCreds.appuserID = webServiceProviderCredentials.appuserID
             spCreds.clientID = webServiceProviderCredentials.clientID
             spCreds.name = webServiceProviderCredentials.name
-            spCreds.id = webServiceProviderCredentials.id
+//            spCreds.id = webServiceProviderCredentials.id
             spCreds.serviceProvider = webServiceProviderCredentials.serviceProvider
             spCreds.serviceProviderType = webServiceProviderCredentials.serviceProviderType
             spCreds.status = webServiceProviderCredentials.status
