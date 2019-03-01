@@ -11,6 +11,7 @@ import com.und.repository.jpa.ClientSettingsRepository
 import com.und.repository.jpa.ServiceProviderCredentialsRepository
 import com.und.web.model.AccountSettings
 import com.und.web.model.EmailAddress
+import com.und.web.model.ServiceProviderCredentials
 import org.junit.Assert.assertThat
 import org.junit.Before
 import org.junit.Test
@@ -37,7 +38,7 @@ class UserSettingsServiceTest {
     @InjectMocks
     private var objectMapper: ObjectMapper = ObjectMapper()
 
-    @Before
+//    @Before
     fun setup() {
         MockitoAnnotations.initMocks(this)
         ReflectionTestUtils.setField(userSettingsService, "clientSettingsRepository", clientSettingsRepository) // one hour
@@ -92,5 +93,20 @@ class UserSettingsServiceTest {
         whenever((clientSettingsRepository).findSenderEmailAddressesByClientId(clientID)).thenReturn(objectMapper.writeValueAsString(emailAddressList))
         userSettingsService.removeSenderEmailAddress(emailAddress = emailAddress, clientID = clientID)
         verify(clientSettingsRepository, times(1)).saveSenderEmailAddresses(objectMapper.writeValueAsString(listOf(emailAddress2)), clientID)
+    }
+
+    @Test
+    fun testSmtpConnection(){
+        var srpc=ServiceProviderCredentials()
+        var cred = HashMap<String,String>()
+        cred.put("port","465")
+        cred.put("username","userndot19@gmail.com")
+        cred.put("url","smtp.gmail.com")
+        cred.put("password","Userndot1@")
+        cred.put("security","NONE")
+        srpc.credentialsMap=cred
+        srpc.serviceProvider="SMTP"
+        println(UserSettingsService().testConnection(srpc))
+//        assertThat("Fail",UserSettingsService().testConnection(srpc),Is(true))
     }
 }
