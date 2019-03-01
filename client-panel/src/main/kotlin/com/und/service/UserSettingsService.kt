@@ -113,8 +113,11 @@ class UserSettingsService {
     @Transactional
     fun saveEmailServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials, status: Status) {
         webServiceProviderCredentials.status = status
+        logger.info("Performing default check....")
         performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials)
+        logger.info("Performing default check successful. Building jpa sp ")
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
+        logger.info("jap sp ${objectMapper.writeValueAsString(serviceProviderCredentials)}")
         try {
             serviceProviderCredentialsRepository.save(serviceProviderCredentials)
             logger.info("Saved sp successfully.")
@@ -128,7 +131,9 @@ class UserSettingsService {
         if (webServiceProviderCredentials.isDefault) {
             unMarkDefaultSp(webServiceProviderCredentials.serviceProviderType, webServiceProviderCredentials.isDefault, webServiceProviderCredentials.clientID!!)
         } else {
+            logger.info("Getting list of sp's for client ${webServiceProviderCredentials.clientID}")
             var spList = serviceProviderCredentialsRepository.findAllByClientIDAndServiceProviderType(webServiceProviderCredentials.clientID!!, webServiceProviderCredentials.serviceProviderType)
+            logger.info("Getting list of sp's for client ${webServiceProviderCredentials.clientID} is successful.")
             if (spList.isEmpty()) webServiceProviderCredentials.isDefault = true
         }
     }
@@ -620,7 +625,9 @@ class UserSettingsService {
     fun unMarkDefaultSp(type: String, isDefault: Boolean, clientID: Long) {
         if (isDefault) {
             //unmark other default service provider of this type for this client
+            logger.info("Unmarking... sp for client $clientID")
             serviceProviderCredentialsRepository.unMarkDefaultSp(type, clientID)
+            logger.info("Unmarking sp for client $clientID is successful.")
         }
     }
 
