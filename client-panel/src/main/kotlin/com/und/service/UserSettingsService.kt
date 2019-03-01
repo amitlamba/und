@@ -113,10 +113,14 @@ class UserSettingsService {
     @Transactional
     fun saveEmailServiceProvider(webServiceProviderCredentials: WebServiceProviderCredentials, status: Status) {
         webServiceProviderCredentials.status = status
+        logger.info("Performing default check....")
         performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials)
+        logger.info("Performing default check successful. Building jpa sp ")
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
+        logger.info("jap sp ${objectMapper.writeValueAsString(serviceProviderCredentials)}")
         try {
             serviceProviderCredentialsRepository.save(serviceProviderCredentials)
+            logger.info("Saved sp successfully.")
         } catch (ex: Throwable) {
             logger.error("Exception during saving service provider ${ex.message}")
             throw ex
@@ -124,10 +128,13 @@ class UserSettingsService {
     }
 
     private fun performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials: com.und.web.model.ServiceProviderCredentials) {
+        logger.info("Is it default sp ${webServiceProviderCredentials.isDefault}")
         if (webServiceProviderCredentials.isDefault) {
             unMarkDefaultSp(webServiceProviderCredentials.serviceProviderType, webServiceProviderCredentials.isDefault, webServiceProviderCredentials.clientID!!)
         } else {
+            logger.info("Getting list of sp's for client ${webServiceProviderCredentials.clientID}")
             var spList = serviceProviderCredentialsRepository.findAllByClientIDAndServiceProviderType(webServiceProviderCredentials.clientID!!, webServiceProviderCredentials.serviceProviderType)
+            logger.info("Getting list of ${spList.size} sp's for client ${webServiceProviderCredentials.clientID} is successful.")
             if (spList.isEmpty()) webServiceProviderCredentials.isDefault = true
         }
     }
@@ -210,7 +217,7 @@ class UserSettingsService {
             spCreds.appuserID = webServiceProviderCredentials.appuserID
             spCreds.clientID = webServiceProviderCredentials.clientID
             spCreds.name = webServiceProviderCredentials.name
-            spCreds.id = webServiceProviderCredentials.id
+//            spCreds.id = webServiceProviderCredentials.id
             spCreds.serviceProvider = webServiceProviderCredentials.serviceProvider
             spCreds.serviceProviderType = webServiceProviderCredentials.serviceProviderType
             spCreds.status = webServiceProviderCredentials.status
@@ -515,7 +522,7 @@ class UserSettingsService {
                 // for debugging purpose session.debug=true
                 transport = session.getTransport(protocaol)
                 transport.connect(username, password)
-                logger.info("Added Email Sp connection successfuly.")
+                logger.info("Test connection for sp $username is successful")
                 return true
             } catch (e: AuthenticationFailedException) {
                 throw WrongCredentialException("authentication failed")
@@ -619,7 +626,9 @@ class UserSettingsService {
     fun unMarkDefaultSp(type: String, isDefault: Boolean, clientID: Long) {
         if (isDefault) {
             //unmark other default service provider of this type for this client
+            logger.info("Unmarking... sp for client $clientID")
             serviceProviderCredentialsRepository.unMarkDefaultSp(type, clientID)
+            logger.info("Unmarking sp for client $clientID is successful.")
         }
     }
 
