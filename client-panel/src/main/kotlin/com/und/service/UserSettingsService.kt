@@ -128,12 +128,13 @@ class UserSettingsService {
     }
 
     private fun performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials: com.und.web.model.ServiceProviderCredentials) {
+        logger.info("Is it default sp ${webServiceProviderCredentials.isDefault}")
         if (webServiceProviderCredentials.isDefault) {
             unMarkDefaultSp(webServiceProviderCredentials.serviceProviderType, webServiceProviderCredentials.isDefault, webServiceProviderCredentials.clientID!!)
         } else {
             logger.info("Getting list of sp's for client ${webServiceProviderCredentials.clientID}")
             var spList = serviceProviderCredentialsRepository.findAllByClientIDAndServiceProviderType(webServiceProviderCredentials.clientID!!, webServiceProviderCredentials.serviceProviderType)
-            logger.info("Getting list of sp's for client ${webServiceProviderCredentials.clientID} is successful.")
+            logger.info("Getting list of ${spList.size} sp's for client ${webServiceProviderCredentials.clientID} is successful.")
             if (spList.isEmpty()) webServiceProviderCredentials.isDefault = true
         }
     }
