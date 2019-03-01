@@ -126,7 +126,7 @@ class EmailService {
     }
 
     @Cacheable(key = "'client_1'+'setting_id_'+#id",cacheNames = ["client_email_settings"])
-    private fun getClientEmailSettings(id:Long):String?{
+    protected fun getClientEmailSettings(id:Long):String?{
         val clientSettings=clientSettingsEmailRepository.findById(id)
         if(!clientSettings.isPresent) throw CustomException("Email Settings not present for client 1")
         else return clientSettings.get().email

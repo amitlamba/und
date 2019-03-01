@@ -69,7 +69,7 @@ class UserSettingsController {
             val success = userSettingsService.testConnection(serviceProviderCredentials)
             return if (success) {
                 userSettingsService.saveEmailServiceProvider(serviceProviderCredentials, Status.ACTIVE)
-                ResponseEntity(HttpStatus.OK)
+                return ResponseEntity(HttpStatus.OK)
             } else ResponseEntity(HttpStatus.EXPECTATION_FAILED)
         }catch (ex:Throwable){
             throw CustomException("${ex.message}",ex)
