@@ -12,6 +12,7 @@ class FcmListner {
     @Autowired
     private lateinit var fcmSendService: FcmSendService
 
+    //TODO make reties 0
     @StreamListener("fcmEventReceive")
     fun sendMessage(message: FcmMessage) {
         fcmSendService.sendMessage(message)

@@ -93,7 +93,7 @@ class EmailFailureHandlerService {
     }
 
     @Cacheable(key = "'client_'+#clientId+'id_'+#id",cacheNames = ["clientemailsettings"])
-    private fun getClientEmailSetting(clientId:Long,id:Long):ClientSettingsEmail?{
+    protected fun getClientEmailSetting(clientId:Long,id:Long):ClientSettingsEmail?{
         val setting=clientSettingsEmailRepository.findByClientIdAndId(clientId,id)
         if(setting.isPresent) return setting.get()
         else {logger.error("Client Email Setting not present for client $clientId id $id"); return null}
