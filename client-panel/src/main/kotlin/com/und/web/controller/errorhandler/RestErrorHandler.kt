@@ -104,6 +104,7 @@ class RestErrorHandler : ResponseEntityExceptionHandler() {
     }
 
     @ExceptionHandler(CustomException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleCustomException(ex:RuntimeException,request: WebRequest):ResponseEntity<Any>{
         logger.error(ex)
         val bodyOfResponse=GenericResponse(messageSource.getMessage("message.error",null,request.locale),ex.message)

@@ -119,6 +119,7 @@ class UserSettingsService {
             val saved = serviceProviderCredentialsRepository.save(serviceProviderCredentials)
             saved.id
         } catch (ex: Throwable) {
+            logger.error("Exception during saving service provider ${ex.message}")
             -1
         }
     }
@@ -473,13 +474,13 @@ class UserSettingsService {
     }
 
     fun getTimeZoneByClientId(clientID: Long): ZoneId {
-        val tz = clientID?.let {
+        val tz = clientID.let {
             clientSettingsRepository.findByClientID(clientID)?.timezone
         } ?: TimeZone.getDefault().id
         return ZoneId.of(tz)
 
     }
-
+    @Throws(WrongCredentialException::class)
     fun testConnection(serviceProviderCredential: com.und.web.model.ServiceProviderCredentials): Boolean {
 
         var port = Integer.parseInt(serviceProviderCredential.credentialsMap.get("port"))
@@ -510,19 +511,21 @@ class UserSettingsService {
                 }
             }
             var transport:Transport?=null
+            var success:Boolean=false
             try {
                 val session = Session.getInstance(props)
                 // for debugging purpose session.debug=true
                 transport = session.getTransport(protocaol)
                 transport.connect(username, password)
                 logger.info("Added Email Sp connection successfuly.")
-                return true
+                success=true
             } catch (e: AuthenticationFailedException) {
                 throw WrongCredentialException("authentication failed")
             } catch (e: MessagingException) {
                 throw WrongCredentialException(" Not valid credential")
             }finally {
                 transport?.close()
+                return success
             }
 
         }else{
