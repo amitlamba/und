@@ -117,6 +117,8 @@ class UserSettingsService {
         performIsDefaultCheckOnSpBeforeSave(webServiceProviderCredentials)
         logger.info("Performing default check successful. Building jpa sp ")
         val serviceProviderCredentials = buildServiceProviderCredentials(webServiceProviderCredentials)
+        serviceProviderCredentials.dateCreated= LocalDateTime.now()
+        serviceProviderCredentials.dateModified= LocalDateTime.now()
         logger.info("jap sp ${objectMapper.writeValueAsString(serviceProviderCredentials)}")
         try {
             serviceProviderCredentialsRepository.save(serviceProviderCredentials)
