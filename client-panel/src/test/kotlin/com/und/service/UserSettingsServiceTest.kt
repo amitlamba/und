@@ -100,9 +100,9 @@ class UserSettingsServiceTest {
         var srpc=ServiceProviderCredentials()
         var cred = HashMap<String,String>()
         cred.put("port","465")
-        cred.put("username","userndot19@gmail.com")
+        cred.put("username","shubhambist1995@gmail.com")
         cred.put("url","smtp.gmail.com")
-        cred.put("password","Userndot1@")
+        cred.put("password","026057bist")
         cred.put("security","NONE")
         srpc.credentialsMap=cred
         srpc.serviceProvider="SMTP"
