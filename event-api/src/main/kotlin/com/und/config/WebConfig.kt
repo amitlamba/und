@@ -11,13 +11,16 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
+import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer
+import org.springframework.web.servlet.config.annotation.EnableWebMvc
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 
 
 
 
 @Configuration
+@EnableWebMvc
 class WebConfig : WebMvcConfigurer {
     @Bean
     fun messageSource(): MessageSource {
@@ -54,5 +57,11 @@ class WebConfig : WebMvcConfigurer {
         val bean = FilterRegistrationBean(CorsFilter(source))
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE)
         return CorsFilter(source)
+    }
+
+
+    override fun addCorsMappings(registry: CorsRegistry?) {
+        registry!!.addMapping("/**")
+                .allowedHeaders("GET","POST")
     }
 }
