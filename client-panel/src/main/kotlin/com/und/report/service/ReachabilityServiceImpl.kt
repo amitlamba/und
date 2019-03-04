@@ -25,6 +25,7 @@ import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import java.lang.Integer.parseInt
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -55,13 +56,8 @@ class ReachabilityServiceImpl : ReachabilityService {
 
     override fun getReachabilityBySegmentId(segmentId: Long): Reachability {
         val clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
-            val objectIds = if (segmentId != allUser) {
-                val segmentUsers = segmentService.segmentUserIds(segmentId, clientId)
-                segmentUsers.map {
-                    ObjectId(it)
-                }
-            } else emptyList()
-            val result = reachabilityRepository.getReachabilityOfSegment(clientId, segmentId, objectIds)
+        val objectIds = usersInSegment(segmentId, clientId)
+        val result = reachabilityRepository.getReachabilityOfSegment(clientId, segmentId, objectIds)
 
             val reachability = Reachability()
             with(reachability) {
@@ -117,26 +113,26 @@ class ReachabilityServiceImpl : ReachabilityService {
 //            result.add(SegmentTrendCount(date=startDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")),count = 0))
             startDate=startDate.plusDays(1)
         }
-        if(sr.isPresent){
-            var dates= sr.get().dates
-            for ( i in dateRange){
-                result.add(SegmentTrendCount(date=i.toString(),count = dates.get(i)?:0))
+        if(sr.isPresent) {
+            var dates = sr.get().dates
+            for (i in dateRange) {
+                result.add(SegmentTrendCount(date = i.toString(), count = dates.get(i) ?: 0))
+            }
+            //TODO if end date is today and lastmodified time is > 2 hour update result.
+            if(endDate.isEqual(LocalDate.now(ZoneId.of(sr.get().timeZone)))&& sr.get().lastModifiedTime.isBefore(LocalDateTime.now(ZoneId.of(sr.get().timeZone)).minusHours(2))){
+                val count=setReachabilityOfSegmentToday(segmentId, clientId)
+                result.add((result.size)-1,SegmentTrendCount(date=dateRange.last().toString(),count = count))
             }
         }
         return result
     }
 
-    override fun setReachabilityOfSegmentToday(segmentId: Long,clientId: Long) {
-        val objectIds = if (segmentId != allUser) {
-            val segmentUsers = segmentService.segmentUserIds(segmentId, clientId)
-            segmentUsers.map {
-                ObjectId(it)
-            }
-        } else emptyList()
+    private fun setReachabilityOfSegmentNow(objectIds:List<ObjectId>,segmentId: Long,clientId: Long){
 
         clientSetting.findByClientID(clientId)?.let {
             val timeZoneId= ZoneId.of(it.timezone)
             val todayDate=LocalDate.now(timeZoneId).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            val modifiedTime=LocalDateTime.now(timeZoneId)
 //        var sr: Optional<SegmentReachability> = findSegmentReachability(clientId, segmentId)
 //        if(sr.isPresent && isPresent(sr.get(), todayDate)) {
 //            return
@@ -147,8 +143,24 @@ class ReachabilityServiceImpl : ReachabilityService {
 //        }
 
 
-            segmentReachabilityRepository.updateSegmentReachability(segmentId,getKey(todayDate),objectIds.size,clientId)
+            segmentReachabilityRepository.updateSegmentReachability(segmentId,getKey(todayDate),objectIds.size,clientId,modifiedTime,it.timezone)
         }
+    }
+
+    override fun setReachabilityOfSegmentToday(segmentId: Long,clientId: Long):Int {
+        val objectIds = usersInSegment(segmentId, clientId)
+        setReachabilityOfSegmentNow(objectIds,segmentId, clientId)
+        return objectIds.size
+    }
+
+    private fun usersInSegment(segmentId: Long, clientId: Long): List<ObjectId> {
+        val objectIds = if (segmentId != allUser) {
+            val segmentUsers = segmentService.segmentUserIds(segmentId, clientId)
+            segmentUsers.map {
+                ObjectId(it)
+            }
+        } else emptyList()
+        return objectIds
     }
 
     private fun getKey(date: String):String{
