@@ -15,12 +15,14 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer
 import org.springframework.web.servlet.config.annotation.EnableWebMvc
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
+
+
 
 
 
 
 @Configuration
-@EnableWebMvc
 class WebConfig : WebMvcConfigurer {
     @Bean
     fun messageSource(): MessageSource {
@@ -60,8 +62,17 @@ class WebConfig : WebMvcConfigurer {
     }
 
 
-    override fun addCorsMappings(registry: CorsRegistry?) {
-        registry!!.addMapping("/**")
-                .allowedHeaders("GET","POST")
+//    override fun addCorsMappings(registry: CorsRegistry?) {
+//        registry!!.addMapping("/**")
+//                .allowedHeaders("GET","POST")
+//    }
+
+    @Bean
+    fun corsConfigurer(): WebMvcConfigurer {
+        return object : WebMvcConfigurerAdapter() {
+            override fun addCorsMappings(registry: CorsRegistry?) {
+                registry!!.addMapping("/**")
+            }
+        }
     }
 }
