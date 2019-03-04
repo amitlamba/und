@@ -62,17 +62,17 @@ class WebConfig : WebMvcConfigurer {
     }
 
 
-//    override fun addCorsMappings(registry: CorsRegistry?) {
-//        registry!!.addMapping("/**")
-//                .allowedHeaders("GET","POST")
-//    }
-
-    @Bean
-    fun corsConfigurer(): WebMvcConfigurer {
-        return object : WebMvcConfigurerAdapter() {
-            override fun addCorsMappings(registry: CorsRegistry?) {
-                registry!!.addMapping("/**")
-            }
-        }
+    override fun addCorsMappings(registry: CorsRegistry?) {
+        registry!!.addMapping("/**")
+                .allowedHeaders("GET","POST").allowedOrigins("*")
     }
+
+//    @Bean
+//    fun corsConfigurer(): WebMvcConfigurer {
+//        return object : WebMvcConfigurerAdapter() {
+//            override fun addCorsMappings(registry: CorsRegistry?) {
+//                registry!!.addMapping("/**")
+//            }
+//        }
+//    }
 }
