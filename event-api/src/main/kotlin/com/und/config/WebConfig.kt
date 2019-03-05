@@ -48,7 +48,7 @@ class WebConfig : WebMvcConfigurer {
     }
 
     @Bean
-    fun corsFilter(): CorsFilter {
+    fun corsFilter(): FilterRegistrationBean<CorsFilter> {
         val source = UrlBasedCorsConfigurationSource()
         val config = CorsConfiguration()
         config.allowCredentials = true
@@ -58,7 +58,7 @@ class WebConfig : WebMvcConfigurer {
         source.registerCorsConfiguration("/**", config)
         val bean = FilterRegistrationBean(CorsFilter(source))
         bean.setOrder(Ordered.HIGHEST_PRECEDENCE)
-        return CorsFilter(source)
+        return bean
     }
 //
 //
