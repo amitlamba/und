@@ -147,11 +147,11 @@ class AggregationQuerybuilder {
                 if(eventAggregateByPresent && aggregateBy!=null){
                     val scopedName = getCompleteScopedName(aggregateBy.name, aggregateBy.globalFilterType)
                     when(aggregateBy.aggregationType){
-                        AggregationType.Sum -> eventGroupOperation = Aggregation.group(Fields.from(*fields, Fields.field(Field.UserId.fName))).sum(scopedName).`as`(AGGREGATE_VALUE)
-                        AggregationType.Avg -> eventGroupOperation = Aggregation.group(Fields.from(*fields, Fields.field(Field.UserId.fName))).avg(scopedName).`as`(AGGREGATE_VALUE)
+                        AggregationType.Sum -> eventGroupOperation = Aggregation.group(Fields.from(*addFields(fields))).sum(scopedName).`as`(AGGREGATE_VALUE)
+                        AggregationType.Avg -> eventGroupOperation = Aggregation.group(Fields.from(*addFields(fields))).avg(scopedName).`as`(AGGREGATE_VALUE)
                     }
                 }
-                else eventGroupOperation = Aggregation.group(Fields.from(*fields,Fields.field(Field.UserId.fName))).count().`as`(USER_COUNT)
+                else eventGroupOperation = Aggregation.group(Fields.from(*addFields(fields))).count().`as`(USER_COUNT)
             }
             else if(entityType == EventReport.EntityType.user)
                 eventGroupOperation = eventGroupOperation.addToSet(Field.UserId.fName).`as`(Field.UserId.fName)
@@ -179,7 +179,7 @@ class AggregationQuerybuilder {
         if(userFilterPresent || userGroupByPresent){
             val projectionFields = mutableListOf<String>()
 
-            projectionFields.add(Field.UserId.fName)
+//            projectionFields.add(Field.UserId.fName)
 
             if(eventOutputJoinWithUser){
                 if(eventAggregateByPresent) projectionFields.add(AGGREGATE_VALUE)
@@ -191,7 +191,8 @@ class AggregationQuerybuilder {
             if(entityType == EventReport.EntityType.user && eventGroupFields.size == 1) projectOperation = projectOperation.and("_id").`as`(eventGroupFields.values.first())
             else eventGroupFields.forEach { t, u ->   projectOperation = projectOperation.and(t).`as`(u)}
 
-            if(eventOutputJoinWithUser) projectOperation = projectOperation.and(ConvertOperators.ToObjectId.toObjectId("\$_id.${Field.UserId.fName}")).`as`(Field.UserIdObject.fName)
+            if(eventOutputJoinWithUser) /*projectOperation = projectOperation.and(ConvertOperators.ToObjectId.toObjectId("\$_id.${Field.UserId.fName}")).`as`(Field.UserIdObject.fName)*/
+                projectOperation = projectOperation.and(ConvertOperators.ToObjectId.toObjectId("_id")).`as`(Field.UserIdObject.fName)
             else projectOperation = projectOperation.and(getAggregationExpression(Field.UserIdObject.fName)).`as`(Field.UserIdObject.fName)
 
 
@@ -267,6 +268,16 @@ class AggregationQuerybuilder {
         }
 
         return aggregationPipeline
+    }
+
+    private fun addFields(fields: Array<org.springframework.data.mongodb.core.aggregation.Field>):Array<org.springframework.data.mongodb.core.aggregation.Field> {
+        var contains=false
+        fields.forEach {
+            if(it.name.equals(Field.UserId.fName)&& it.target.equals(Field.UserId.fName)) contains=true
+        }
+        return if(!contains) fields.plus(Fields.field(Field.UserId.fName)) else fields
+//         Aggregation.group(Fields.from(*fields)).count().`as`(USER_COUNT)
+//        else Aggregation.group(Fields.from(*fields,Fields.field(Field.UserId.fName))).count().`as`(USER_COUNT)
     }
 
     private fun specialAggStageForReachability(groupBys: List<GroupBy>, entityType: EventReport.EntityType, userFilterPresent: Boolean, userGroupByPresent: Boolean, aggregationPipeline: MutableList<AggregationOperation>, userGroupOperation: GroupOperation) {

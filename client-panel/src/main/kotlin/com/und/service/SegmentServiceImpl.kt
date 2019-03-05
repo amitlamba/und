@@ -180,7 +180,7 @@ class SegmentServiceImpl : SegmentService {
     }
 
 /*
-* performance improvement  we can add project to remove that part of document which is not used in next stage.
+* TODO performance improvement  we can add project aggregation stage to remove that part of document which is not used in next stage.
 * eg. we add geo filter in first stage it mean after this stage we are not performing geo specific match so we can drop that field here.
 * Its decrease the size of document for next stage.
 * */
@@ -188,8 +188,19 @@ class SegmentServiceImpl : SegmentService {
         val tz = userSettingsService.getTimeZoneByClientId(clientId)
         val websegment = buildWebSegment(segment)
         var eventAggregation = segmentParserCriteria.getEventSpecificAggOperation(websegment, tz)
-        val idList = eventRepository.usersFromEvent(eventAggregation, clientId)
-        var userAggregation = segmentParserCriteria.getUserSpecificAggOperation(websegment, tz, idList)
+        val idList = eventRepository.usersFromEvent(eventAggregation.first, clientId)
+        val didNotIdList = eventRepository.usersFromEvent(eventAggregation.second, clientId)
+    var userAggregation:MutableList<AggregationOperation>
+    if (idList.isNotEmpty()) {
+        var filteredResult = idList.toMutableList()
+        didNotIdList.forEach{
+            filteredResult.remove(it)
+        }
+        userAggregation = segmentParserCriteria.getUserSpecificAggOperation(websegment, tz, filteredResult.toList())
+    } else {
+        userAggregation = segmentParserCriteria.getUserSpecificAggOperation(websegment, tz, didNotIdList, true)
+    }
+//        var userAggregation = segmentParserCriteria.getUserSpecificAggOperation(websegment, tz, idList)
         if (type.equals("userId")) {
             //Adding aggregation to return  only id of user instead of user profile.
             if (type.equals("userId")) {
