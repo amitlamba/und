@@ -2,41 +2,38 @@ package com.und
 
 import org.junit.Test
 import java.net.URI
-import java.net.URISyntaxException
 import java.util.regex.Pattern
+import java.net.URISyntaxException
+
+
 
 class ReferrerTest {
     @Test
     fun refrerTest(){
-//        var v="https://userndot.com/sdk/js/index.html"
-        var v="http://myadvo-beta.tech"
-//        var pattern= Pattern.compile("^(?<scheme>https?)(:\\/\\/)(?<host>\\w+(\\.\\w+)+\\/?)")
-//        var matcher=pattern.matcher(v)
-//        if(matcher.find()){
-//            var scheme=matcher.group("scheme")
-//            var host=matcher.group("host")
-//            v="$scheme://$host"
-//
-//            println(v)
-//        }else{
-//            print("emd")
-////            logger.info("Referer format not match $v")
-//        }
-
-        var c= arrayOf("http://myadvo-beta.tech/")
-        print(isInDomains(c,v))
+//        var v="http://userndot.com/sdk/js/index.html"
+        var v="http://myadvo-beta.tech/"
+        var domains= arrayOf("http://myadvo-beta.tech")
+        print(isInDomains(domains,v))
 
     }
 
+    @Throws(URISyntaxException::class)
+    fun getDomainName(url: String): String {
+        val uri = URI(url)
+        val domain = uri.getHost()
+        val scheme=uri.scheme
+        return if (domain.startsWith("www.")) "${scheme}://"+domain.substring(4) else "${scheme}://${domain}"
+    }
+
+
+
 
     private fun isInDomains(url1s: Array<String>, url2: String): Boolean {
-//        logger.error("Referer is $url2")
         url1s.forEach { if(matchDomains(it,url2)) return true }
         return false
     }
 
     private fun matchDomains(url1: String, url2: String): Boolean {
-//        logger.error("Matching referer with domian $url1")
         try {
             val uri1 = URI(url1)
             val domain1 = uri1.host

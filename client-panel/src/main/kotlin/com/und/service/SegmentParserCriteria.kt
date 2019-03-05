@@ -145,7 +145,7 @@ class SegmentParserCriteria {
 
 
 
-    fun getEventSpecificAggOperation(segment: Segment, tz: ZoneId): List<AggregationOperation> {
+    fun getEventSpecificAggOperation(segment: Segment, tz: ZoneId): Pair<List<AggregationOperation>,List<AggregationOperation>> {
         var listOfAggregation = mutableListOf<AggregationOperation>()
         /*
         * Geography based aggregation
@@ -163,11 +163,10 @@ class SegmentParserCriteria {
         //adding event globalCriteria aggregation
         if (eventPropertyMatch != null)
             listOfAggregation.add(Aggregation.match(eventPropertyMatch))
-        //add didnot
-        addDidNotAggregation(segment, listOfAggregation, tz)
         //add did
         if (geoCriteria == null && eventPropertyMatch == null && listOfAggregation.isEmpty()) {
             addDidAggregationWithoutFacet(segment, listOfAggregation, tz)
+//            addDidAggregation(segment, listOfAggregation, tz)
         } else {
             addDidAggregation(segment, listOfAggregation, tz)
         }
@@ -177,17 +176,24 @@ class SegmentParserCriteria {
             listOfAggregation.add(Aggregation.group("userId"))
             listOfAggregation.add(Aggregation.sort(Sort.Direction.ASC, "_id"))
         }
-        return listOfAggregation
+        //add didnot
+        var didnotAggOperation= mutableListOf<AggregationOperation>()
+        addDidNotAggregation(segment, didnotAggOperation, tz)
+        return Pair(listOfAggregation,didnotAggOperation)
     }
 
-    fun getUserSpecificAggOperation(segment: Segment, tz: ZoneId, idList: List<String>): MutableList<AggregationOperation> {
+    fun getUserSpecificAggOperation(segment: Segment, tz: ZoneId, idList: List<String>,didNot:Boolean=false): MutableList<AggregationOperation> {
         var listOfAggregation = mutableListOf<AggregationOperation>()
         var objectIds = mutableSetOf<ObjectId>()
         idList.forEach {
             objectIds.add(ObjectId(it))
         }
-        if (objectIds.isNotEmpty()) {
+        if (objectIds.isNotEmpty() && !didNot) {
             var match = Aggregation.match(Criteria("_id").`in`(objectIds))
+            listOfAggregation.add(match)
+        }
+        if (objectIds.isNotEmpty() && didNot) {
+            var match = Aggregation.match(Criteria("_id").nin(objectIds))
             listOfAggregation.add(match)
         }
         val gFilters = segment.globalFilters
@@ -271,8 +277,12 @@ class SegmentParserCriteria {
             listOfDidNotCriteria.add(parseEvents2(event, tz, false))
         }
         if(listOfDidNotCriteria.isNotEmpty()){
-            var matchOperation = Aggregation.match(Criteria().norOperator(Criteria().orOperator(*listOfDidNotCriteria.toTypedArray())))
+//            var matchOperation = Aggregation.match(Criteria().norOperator(Criteria().orOperator(*listOfDidNotCriteria.toTypedArray())))
+            var matchOperation = Aggregation.match(Criteria().orOperator(*listOfDidNotCriteria.toTypedArray()))
             listOfAggregation.add(matchOperation)
+            listOfAggregation.add(Aggregation.project("userId").andExclude("_id"))
+            listOfAggregation.add(Aggregation.group("userId"))
+            listOfAggregation.add(Aggregation.sort(Sort.Direction.ASC, "_id"))
         }
 
     }
@@ -342,13 +352,9 @@ class SegmentParserCriteria {
                 listOfCriteria.add(criteria)
             }
             if (did.isNotEmpty()) {
-                if (it.joinCondition.conditionType.equals(ConditionType.AllOf)) {
-                    listOfAggregation.add(Aggregation.match(Criteria().andOperator(*listOfCriteria.toTypedArray())))
-                }
-                if (it.joinCondition.conditionType.equals(ConditionType.AnyOf)) {
                     listOfAggregation.add(Aggregation.match(Criteria().orOperator(*listOfCriteria.toTypedArray())))
-                }
             }
+            addDidAggregation(segment,listOfAggregation,tz)
         }
     }
     private fun getListOfCriteria(event: Event,tz: ZoneId):MutableList<Criteria>{

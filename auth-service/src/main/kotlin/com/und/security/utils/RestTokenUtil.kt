@@ -121,7 +121,7 @@ class RestTokenUtil {
                 }
 
             }else{
-                if(claims.second.toString()=="EVENT_WEB"){
+                if((claims.second.toString())=="EVENT_WEB"){
                     if (isInDomains(idenity,it)) identified = true
                 }else{
                     if(idenity.indexOf(it)>=0) identified=true
@@ -222,13 +222,13 @@ class RestTokenUtil {
     }
 
     private fun isInDomains(url1s: Array<String>, url2: String): Boolean {
-        logger.error("Referer is $url2")
+        logger.info("Referer is $url2")
         url1s.forEach { if(matchDomains(it,url2)) return true }
         return false
     }
 
     private fun matchDomains(url1: String, url2: String): Boolean {
-        logger.error("Matching referer with domian $url1")
+        logger.info("Matching referer with domian $url1")
         try {
             val uri1 = URI(url1)
             val domain1 = uri1.host

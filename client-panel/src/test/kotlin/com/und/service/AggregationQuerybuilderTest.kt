@@ -14,8 +14,9 @@ import org.springframework.test.util.ReflectionTestUtils
 import java.time.ZoneId
 import com.und.service.AggregationQuerybuilder.*
 import org.springframework.data.mongodb.core.aggregation.Aggregation
+import org.springframework.data.mongodb.core.aggregation.ConvertOperators
 
-@RunWith(MockitoJUnitRunner::class)
+//@RunWith(MockitoJUnitRunner::class)
 class AggregationQuerybuilderTest {
 
 
@@ -23,7 +24,7 @@ class AggregationQuerybuilderTest {
 
     private lateinit var agregationQuerybuilder: AggregationQuerybuilder
 
-    @Before
+//    @Before
     fun setup(){
         segmentParserCriteria= SegmentParserCriteria()
         agregationQuerybuilder = AggregationQuerybuilder()
@@ -343,5 +344,38 @@ class AggregationQuerybuilderTest {
         groupBy.groupName = name
         groupBy.groupFilterType = globalFilterType
         return groupBy
+    }
+
+    enum class Field(val fName: String = "", val collectionName: AggregationQuerybuilder.Collection = AggregationQuerybuilder.Collection.Event, type: GlobalFilterType = GlobalFilterType.EventProperties, properties: List<String> = emptyList()) {
+        EventName ("name", AggregationQuerybuilder.Collection.Event, GlobalFilterType.EventProperties),
+        CreationTime ("creationTime", AggregationQuerybuilder.Collection.Event, GlobalFilterType.EventProperties),
+        UserId ("userId", AggregationQuerybuilder.Collection.Event, GlobalFilterType.EventProperties),
+        UserIdObject ("userIdObject", AggregationQuerybuilder.Collection.Event, GlobalFilterType.EventComputedProperties),
+        MinutesPeriod("minutesPeriod", AggregationQuerybuilder.Collection.Event, GlobalFilterType.EventComputedProperties, listOf(NUM_OF_MINUTES)),
+        DateVal("dateVal", AggregationQuerybuilder.Collection.Event, GlobalFilterType.EventComputedProperties),
+        TimePeriod("timePeriod", AggregationQuerybuilder.Collection.Event, GlobalFilterType.EventComputedProperties),
+        Hour("hour", AggregationQuerybuilder.Collection.Event, GlobalFilterType.EventTimeProperties),
+        UserType("userType", AggregationQuerybuilder.Collection.User, GlobalFilterType.UserComputedProperties),
+    }
+
+    @Test
+    fun testFields(){
+
+        val projectionFields = mutableListOf<String>()
+
+        projectionFields.add(Field.UserId.fName)
+        projectionFields.add(USER_COUNT)
+
+        var projectOperation = Aggregation.project(*projectionFields.toTypedArray())
+
+//          projectOperation = projectOperation.and("userId").`as`("userId")
+
+        projectOperation = projectOperation.and(ConvertOperators.ToObjectId.toObjectId("\$_id.${AggregationQuerybuilder.Field.UserId.fName}")).`as`(AggregationQuerybuilder.Field.UserIdObject.fName)
+
+        var v=Aggregation.newAggregation(projectOperation)
+
+        println("hello")
+// adding same field with diff target
+
     }
 }
