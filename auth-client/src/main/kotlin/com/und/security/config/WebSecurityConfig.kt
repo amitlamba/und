@@ -103,4 +103,18 @@ class WebSecurityConfig : WebSecurityConfigurerAdapter() {
     @Bean(name = arrayOf(BeanIds.AUTHENTICATION_MANAGER))
     @Throws(Exception::class)
     override fun authenticationManagerBean(): AuthenticationManager = super.authenticationManagerBean()
+
+    @Bean
+    fun corsFilter(): FilterRegistrationBean<CorsFilter> {
+        val source = UrlBasedCorsConfigurationSource()
+        val config = CorsConfiguration()
+        config.allowCredentials = true
+        config.addAllowedOrigin("*")
+        config.addAllowedHeader("*")
+        config.addAllowedMethod("*")
+        source.registerCorsConfiguration("/**", config)
+        val bean = FilterRegistrationBean(CorsFilter(source))
+        bean.setOrder(Ordered.HIGHEST_PRECEDENCE)
+        return bean
+    }
 }
