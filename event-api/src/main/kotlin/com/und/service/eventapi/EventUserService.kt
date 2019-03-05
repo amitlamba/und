@@ -103,12 +103,16 @@ class EventUserService {
             } else {
                 eventUserRepository.findById(userId)
             }
-            val existingUser = if (existingEventUser.isPresent) existingEventUser.get() else MongoEventUser()
+            val existingUser = if (existingEventUser.isPresent) existingEventUser.get() else {
+                val user = MongoEventUser()
+                user.creationTime = Date.from(Instant.ofEpochMilli(eventUser.creationDate).atZone(ZoneId.of("UTC")).toInstant())
+                user
+            }
 //            eventUser.creationTime?.let {
 ////                existingUser.creationTime=Date.from(Instant.ofEpochSecond(it).atZone(ZoneId.of("UTC")).toInstant())
 //                existingUser.creationTime=Date.from(Instant.ofEpochMilli(it))
 //            }
-            existingUser.creationTime=Date.from(Instant.ofEpochMilli(eventUser.creationDate).atZone(ZoneId.of("UTC")).toInstant())
+//            existingUser.creationTime=Date.from(Instant.ofEpochMilli(eventUser.creationDate).atZone(ZoneId.of("UTC")).toInstant())
             return existingUser.copyNonNull(eventUser)
         }
 
