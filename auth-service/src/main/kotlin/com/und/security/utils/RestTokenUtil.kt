@@ -121,7 +121,7 @@ class RestTokenUtil {
                 }
 
             }else{
-                if(claims.second.toString()=="EVENT_WEB"){
+                if((claims.second.toString())=="EVENT_WEB"){
                     if (isInDomains(idenity,it)) identified = true
                 }else{
                     if(idenity.indexOf(it)>=0) identified=true
