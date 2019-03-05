@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
 import javax.validation.Valid
 
-//@CrossOrigin(origins = ["*"],allowedHeaders = ["*"],maxAge = )
+@CrossOrigin(origins = ["*"],methods = [RequestMethod.GET,RequestMethod.POST,RequestMethod.OPTIONS])
 @RestController
 class EventRestController {
 

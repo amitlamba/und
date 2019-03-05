@@ -9,7 +9,7 @@ import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import java.util.*
 
-//@CrossOrigin
+@CrossOrigin(origins = ["*"],methods = [RequestMethod.GET,RequestMethod.POST,RequestMethod.OPTIONS])
 @Controller
 class NotificationTrackController {
 
