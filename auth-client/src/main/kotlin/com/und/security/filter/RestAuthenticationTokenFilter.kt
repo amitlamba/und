@@ -34,7 +34,7 @@ class RestAuthenticationTokenFilter : OncePerRequestFilter() {
         when(type){
             "WEB"-> { t="EVENT_WEB" ;
                 v="${request.getHeader("referer")}"
-                var pattern= Pattern.compile("^(?<scheme>https?)(:\\/\\/)(?<host>\\w+(\\.\\w+)+\\/?)")
+                var pattern= Pattern.compile("^(?<scheme>https?)(:\\/\\/)(?<host>\\w+(\\.\\w+)+)")
                 var matcher=pattern.matcher(v)
                 if(matcher.find()){
                     var scheme=matcher.group("scheme")
