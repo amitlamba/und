@@ -1,6 +1,11 @@
 package com.und.security.config
 
-
+import org.springframework.boot.web.servlet.FilterRegistrationBean
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.core.Ordered
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
+import org.springframework.web.filter.CorsFilter
+import org.springframework.web.servlet.config.annotation.CorsRegistry
 import com.und.security.filter.RestAuthenticationEntryPoint
 import com.und.security.filter.RestAuthenticationTokenFilter
 import org.springframework.beans.factory.annotation.Autowired
