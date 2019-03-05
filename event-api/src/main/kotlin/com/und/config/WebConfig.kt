@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.core.Ordered
+import org.springframework.http.HttpMethod
 import org.springframework.validation.Validator
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean
 import org.springframework.web.cors.CorsConfiguration
@@ -67,12 +68,15 @@ class WebConfig : WebMvcConfigurer {
 //                .allowedHeaders("GET","POST").allowedOrigins("*")
 //    }
 
-//    @Bean
-//    fun corsConfigurer(): WebMvcConfigurer {
-//        return object : WebMvcConfigurerAdapter() {
-//            override fun addCorsMappings(registry: CorsRegistry?) {
-//                registry!!.addMapping("/**")
-//            }
-//        }
-//    }
+    @Bean
+    fun corsConfigurer(): WebMvcConfigurer {
+        return object : WebMvcConfigurerAdapter() {
+            override fun addCorsMappings(registry: CorsRegistry?) {
+                registry!!.addMapping("/**")
+                        .allowedOrigins("*")
+                        .allowedHeaders("*")
+                        .allowedMethods("*")
+            }
+        }
+    }
 }
