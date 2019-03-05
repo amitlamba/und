@@ -81,25 +81,25 @@ class RestAuthenticationTokenFilter : OncePerRequestFilter() {
         chain.doFilter(request, response)
     }
 
-    @Throws(URISyntaxException::class)
-    fun getDomainName(url: String): String {
-        val uri = URI(url)
-        val domain = uri.getHost()
-        val scheme=uri.scheme
-        return if (domain.startsWith("www.")) "${scheme}://"+domain.substring(4) else "${scheme}://${domain}"
-    }
-
-    fun matchDomains(url1: String, url2: String): Boolean {
-        val uri1 = URI(url1)
-        val domain1 = uri1.getHost()
-        val domainWoWww1 = if (domain1.startsWith("www.")) domain1.substring(4) else domain1)
-        val scheme1 = uri1.scheme
-        val uri2 = URI(url2)
-        val domain2 = uri2.getHost()
-        val domainWoWww2 = if (domain2.startsWith("www.")) domain2.substring(4) else domain2)
-        val scheme2 = uri2.scheme
-        return scheme1 == scheme2 && domainWoWww1 == domainWoWww2
-    }
+//    @Throws(URISyntaxException::class)
+//    fun getDomainName(url: String): String {
+//        val uri = URI(url)
+//        val domain = uri.getHost()
+//        val scheme=uri.scheme
+//        return if (domain.startsWith("www.")) "${scheme}://"+domain.substring(4) else "${scheme}://${domain}"
+//    }
+//
+//    fun matchDomains(url1: String, url2: String): Boolean {
+//        val uri1 = URI(url1)
+//        val domain1 = uri1.getHost()
+//        val domainWoWww1 = if (domain1.startsWith("www.")) domain1.substring(4) else domain1)
+//        val scheme1 = uri1.scheme
+//        val uri2 = URI(url2)
+//        val domain2 = uri2.getHost()
+//        val domainWoWww2 = if (domain2.startsWith("www.")) domain2.substring(4) else domain2)
+//        val scheme2 = uri2.scheme
+//        return scheme1 == scheme2 && domainWoWww1 == domainWoWww2
+//    }
 }
 
 enum class KEYTYPE {
