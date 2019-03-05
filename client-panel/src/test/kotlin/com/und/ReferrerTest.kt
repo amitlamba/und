@@ -27,6 +27,7 @@ class ReferrerTest {
 
 
 
+
     private fun isInDomains(url1s: Array<String>, url2: String): Boolean {
         url1s.forEach { if(matchDomains(it,url2)) return true }
         return false

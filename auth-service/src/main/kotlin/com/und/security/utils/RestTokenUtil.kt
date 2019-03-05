@@ -121,7 +121,12 @@ class RestTokenUtil {
                 }
 
             }else{
-                if(idenity.indexOf(it)>=0) identified=true
+                if((claims.second.toString())=="EVENT_WEB"){
+                    if (isInDomains(idenity,it)) identified = true
+                }else{
+                    if(idenity.indexOf(it)>=0) identified=true
+                }
+
             }
         }
 
@@ -234,7 +239,7 @@ class RestTokenUtil {
             val domainWoWww2 = if (domain2.startsWith("www.")) domain2.substring(4) else domain2
             val scheme2 = uri2.scheme
             return scheme1 == scheme2 && domainWoWww1 == domainWoWww2
-        }catch(ex:URISyntaxException){
+        }catch(ex: URISyntaxException){
             return false
         }
     }
