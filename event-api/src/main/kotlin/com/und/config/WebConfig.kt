@@ -48,35 +48,29 @@ class WebConfig : WebMvcConfigurer {
         configurer.enable()
     }
 
-    @Bean
-    fun corsFilter(): FilterRegistrationBean<CorsFilter> {
-        val source = UrlBasedCorsConfigurationSource()
-        val config = CorsConfiguration()
-        config.allowCredentials = true
-        config.addAllowedOrigin("*")
-        config.addAllowedHeader("*")
-        config.addAllowedMethod("*")
-        source.registerCorsConfiguration("/**", config)
-        val bean = FilterRegistrationBean(CorsFilter(source))
-        bean.setOrder(Ordered.HIGHEST_PRECEDENCE)
-        return bean
-    }
-//
-//
-//    override fun addCorsMappings(registry: CorsRegistry?) {
-//        registry!!.addMapping("/**")
-//                .allowedHeaders("GET","POST").allowedOrigins("*")
+//    @Bean
+//    fun corsFilter(): FilterRegistrationBean<CorsFilter> {
+//        val source = UrlBasedCorsConfigurationSource()
+//        val config = CorsConfiguration()
+//        config.allowCredentials = true
+//        config.addAllowedOrigin("*")
+//        config.addAllowedHeader("*")
+//        config.addAllowedMethod("*")
+//        source.registerCorsConfiguration("/**", config)
+//        val bean = FilterRegistrationBean(CorsFilter(source))
+//        bean.setOrder(Ordered.HIGHEST_PRECEDENCE)
+//        return bean
 //    }
 
-    @Bean
-    fun corsConfigurer(): WebMvcConfigurer {
-        return object : WebMvcConfigurerAdapter() {
-            override fun addCorsMappings(registry: CorsRegistry?) {
-                registry!!.addMapping("/**")
-                        .allowedOrigins("*")
-                        .allowedHeaders("*")
-                        .allowedMethods("*")
-            }
-        }
-    }
+//    @Bean
+//    fun corsConfigurer(): WebMvcConfigurer {
+//        return object : WebMvcConfigurerAdapter() {
+//            override fun addCorsMappings(registry: CorsRegistry?) {
+//                registry!!.addMapping("/**")
+//                        .allowedOrigins("*")
+//                        .allowedHeaders("*")
+//                        .allowedMethods("*")
+//            }
+//        }
+//    }
 }
