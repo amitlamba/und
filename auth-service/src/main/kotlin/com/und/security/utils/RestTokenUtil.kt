@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.mobile.device.Device
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.stereotype.Component
+import java.net.URI
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.util.*
@@ -110,7 +111,7 @@ class RestTokenUtil {
                             var appId = user.get().authorizedUrls
                             if (appId != null){
                                 val v=objectMapper.readValue(appId, Array<String>::class.java)
-                                if (v.indexOf(it) >= 0) identified = true
+                                if (isInDomains(v,it)) identified = true
                                 tokenIdentityRepository.save(TokenIdentity(token,v))
                             }
 
@@ -212,6 +213,23 @@ class RestTokenUtil {
         jwtKeyService.save(jwt)
         return jwt
 
+    }
+
+    private fun isInDomains(url1s: Array<String>, url2: String): Boolean {
+        url1s.forEach { if(matchDomains(it,url2)) return true }
+        return false
+    }
+
+    private fun matchDomains(url1: String, url2: String): Boolean {
+        val uri1 = URI(url1)
+        val domain1 = uri1.host
+        val domainWoWww1 = if (domain1.startsWith("www.")) domain1.substring(4) else domain1
+        val scheme1 = uri1.scheme
+        val uri2 = URI(url2)
+        val domain2 = uri2.host
+        val domainWoWww2 = if (domain2.startsWith("www.")) domain2.substring(4) else domain2
+        val scheme2 = uri2.scheme
+        return scheme1 == scheme2 && domainWoWww1 == domainWoWww2
     }
 
 
