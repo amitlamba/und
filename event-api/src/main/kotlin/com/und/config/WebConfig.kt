@@ -47,25 +47,25 @@ class WebConfig : WebMvcConfigurer {
         configurer.enable()
     }
 
-    @Bean
-    fun corsFilter(): CorsFilter {
-        val source = UrlBasedCorsConfigurationSource()
-        val config = CorsConfiguration()
-        config.allowCredentials = true
-        config.addAllowedOrigin("*")
-        config.addAllowedHeader("*")
-        config.addAllowedMethod("*")
-        source.registerCorsConfiguration("/**", config)
-        val bean = FilterRegistrationBean(CorsFilter(source))
-        bean.setOrder(Ordered.HIGHEST_PRECEDENCE)
-        return CorsFilter(source)
-    }
-
-
-    override fun addCorsMappings(registry: CorsRegistry?) {
-        registry!!.addMapping("/**")
-                .allowedHeaders("GET","POST").allowedOrigins("*")
-    }
+//    @Bean
+//    fun corsFilter(): CorsFilter {
+//        val source = UrlBasedCorsConfigurationSource()
+//        val config = CorsConfiguration()
+//        config.allowCredentials = true
+//        config.addAllowedOrigin("*")
+//        config.addAllowedHeader("*")
+//        config.addAllowedMethod("*")
+//        source.registerCorsConfiguration("/**", config)
+//        val bean = FilterRegistrationBean(CorsFilter(source))
+//        bean.setOrder(Ordered.HIGHEST_PRECEDENCE)
+//        return CorsFilter(source)
+//    }
+//
+//
+//    override fun addCorsMappings(registry: CorsRegistry?) {
+//        registry!!.addMapping("/**")
+//                .allowedHeaders("GET","POST").allowedOrigins("*")
+//    }
 
 //    @Bean
 //    fun corsConfigurer(): WebMvcConfigurer {
