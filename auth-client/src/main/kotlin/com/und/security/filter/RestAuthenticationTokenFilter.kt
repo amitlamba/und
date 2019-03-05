@@ -34,15 +34,15 @@ class RestAuthenticationTokenFilter : OncePerRequestFilter() {
         when(type){
             "WEB"-> { t="EVENT_WEB" ;
                 v="${request.getHeader("referer")}"
-                var pattern= Pattern.compile("^(?<scheme>https?)(:\\/\\/)(?<host>\\w+(\\.\\w+)+\\/?)")
-                var matcher=pattern.matcher(v)
-                if(matcher.find()){
-                    var scheme=matcher.group("scheme")
-                    var host=matcher.group("host")
-                    v="$scheme://$host"
-                }else{
-                    logger.info("Referer format not match $v")
-                }
+//                var pattern= Pattern.compile("^(?<scheme>https?)(:\\/\\/)(?<host>\\w+(\\.\\w+)+)")
+//                var matcher=pattern.matcher(v)
+//                if(matcher.find()){
+//                    var scheme=matcher.group("scheme")
+//                    var host=matcher.group("host")
+//                    v="$scheme://$host"
+//                }else{
+//                    logger.info("Referer format not match $v")
+//                }
             }
             "ANDROID"->{ t="EVENT_ANDROID" ; v=request.getHeader("androidAppId")}
             "IOS"->{ t="EVENT_IOS" ; v=request.getHeader("iosAppId")}
@@ -78,6 +78,26 @@ class RestAuthenticationTokenFilter : OncePerRequestFilter() {
         }
 
         chain.doFilter(request, response)
+    }
+
+    @Throws(URISyntaxException::class)
+    fun getDomainName(url: String): String {
+        val uri = URI(url)
+        val domain = uri.getHost()
+        val scheme=uri.scheme
+        return if (domain.startsWith("www.")) "${scheme}://"+domain.substring(4) else "${scheme}://${domain}"
+    }
+
+    fun matchDomains(url1: String, url2: String): Boolean {
+        val uri1 = URI(url1)
+        val domain1 = uri1.getHost()
+        val domainWoWww1 = if (domain1.startsWith("www.")) domain1.substring(4) else domain1)
+        val scheme1 = uri1.scheme
+        val uri2 = URI(url2)
+        val domain2 = uri2.getHost()
+        val domainWoWww2 = if (domain2.startsWith("www.")) domain2.substring(4) else domain2)
+        val scheme2 = uri2.scheme
+        return scheme1 == scheme2 && domainWoWww1 == domainWoWww2
     }
 }
 
