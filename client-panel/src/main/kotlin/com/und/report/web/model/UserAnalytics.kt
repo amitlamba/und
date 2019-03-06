@@ -23,8 +23,8 @@ class GroupBy : Serializable {
     var groupFilterType: GlobalFilterType = GlobalFilterType.EventAttributeProperties
     var groupName: String = ""
 }
-
 class AggregateBy : Serializable {
+
     var globalFilterType: GlobalFilterType = GlobalFilterType.EventAttributeProperties
     var name: String = ""
     var aggregationType: AggregationType = AggregationType.Sum

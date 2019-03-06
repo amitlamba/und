@@ -35,7 +35,7 @@ class EventRestController {
 
 
 
-    @PreAuthorize("hasRole('ROLE_EVENT')")
+    //@PreAuthorize("hasRole('ROLE_EVENT')")
     @PostMapping(value = ["/event/initialize"], produces = ["application/json"], consumes =["application/json"])
     fun initialize(@Valid @RequestBody identity: Identity?): ResponseEntity<Response<Identity>> {
 
@@ -45,7 +45,7 @@ class EventRestController {
         ))
     }
 
-    @PreAuthorize("hasRole('ROLE_EVENT')")
+    //@PreAuthorize("hasRole('ROLE_EVENT')")
     @PostMapping(value = ["/push/event"], produces = ["application/json"], consumes = ["application/json"])
     fun saveEvent(@Valid @RequestBody event: Event, request: HttpServletRequest): ResponseEntity<Response<String>> {
         val toEvent = eventService.buildEvent(event, request)
@@ -53,7 +53,7 @@ class EventRestController {
         return ResponseEntity.ok(Response(status = ResponseStatus.SUCCESS))
     }
 
-    @PreAuthorize("hasRole('ROLE_EVENT')")
+    //@PreAuthorize("hasRole('ROLE_EVENT')")
     @PostMapping(value = ["/push/profile"], produces = ["application/json"], consumes = ["application/json"])
     fun profile(@Valid @RequestBody eventUser: EventUser): ResponseEntity<Response<Identity>> {
 
@@ -99,7 +99,7 @@ class EventRestController {
         ))
     }
 
-    @PreAuthorize("hasRole('ROLE_EVENT')")
+    //@PreAuthorize("hasRole('ROLE_EVENT')")
     @GetMapping("/check")
     fun checkConnection(): ResponseEntity<Response<String>> {
         return ResponseEntity.ok(Response(status = ResponseStatus.SUCCESS))

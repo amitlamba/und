@@ -48,7 +48,7 @@ class FcmSendService {
         try {
             return fcmFeignClient.pushMessage("key=" + authKey, jacksonObjectMapper().writeValueAsString(message))
         } catch (ex: FeignException) {
-            println("Feign Error Code: ${ex.status()}, Message: ${ex.message}")
+           // println("Feign Error Code: ${ex.status()}, Message: ${ex.message}")
             ex.printStackTrace()
         }
         return null
@@ -87,10 +87,10 @@ class FcmSendService {
                 sb.append(file)
                 file = reader.readLine()
             }
-            println(sb.toString())
+            //println(sb.toString())
             var accessToken = getAccessToken(sb.toString())
-            println("access token $accessToken")
-            println(send(message, accessToken))
+            //println("access token $accessToken")
+            //println(send(message, accessToken))
 //                var res=fcmFeignClient.pushMessage(message.project_id,"Bearer"+accessToken, jacksonObjectMapper().writeValueAsString(message))
 //                return res
         } catch (ex: Exception) {

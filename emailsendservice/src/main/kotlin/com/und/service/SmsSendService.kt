@@ -50,6 +50,6 @@ class SmsSendService {
                 .withMessage(message)
                 .withPhoneNumber(phoneNumber)
                 .withMessageAttributes(smsAttributes))
-        println(result) // Prints the message ID.
+        //println(result) // Prints the message ID.
     }
 }
