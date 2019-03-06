@@ -246,18 +246,18 @@ class UserEventAnalyticsServiceImpl : UserEventAnalyticsService {
     }
 
     private fun buildLiveUserByTypeTrendResult(aggregate: List<AggregateOutput>): List<UserTypeTrendForDate> {
-        val groupedByDate = aggregate.map { it ->
+        val groupedByDate = aggregate.map {
             mapOf(it.groupByInfo[Field.DateVal.fName] to mapOf(AGGREGATE_VALUE to it.aggregateVal.toInt(),
                     Field.MinutesPeriod.fName to it.groupByInfo[Field.MinutesPeriod.fName], Field.UserType.fName to it.groupByInfo[Field.UserType.fName]))
         }
                 .groupBy({ it.keys.toList().first() }, { it.values.toList().first() })
 
         val result = mutableListOf<UserTypeTrendForDate>()
-        groupedByDate.forEach() {
+        groupedByDate.forEach {
             val userCountDataList = mutableListOf<UserCountByTypeForTime>()
             val groupedByTime = it.value.groupBy({ it[Field.MinutesPeriod.fName].toString().toDouble().toInt() }, { it })
 
-            groupedByTime.forEach() {
+            groupedByTime.forEach {
                 val newUserCountList = it.value.filter { it[Field.UserType.fName] == "new" }
                 val oldUserCountList = it.value.filter { it[Field.UserType.fName] == "old" }
 

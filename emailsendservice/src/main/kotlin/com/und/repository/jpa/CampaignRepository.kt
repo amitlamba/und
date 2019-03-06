@@ -34,4 +34,6 @@ interface CampaignRepository : JpaRepository<Campaign, Long> {
                     where c.id = :campaignId and (c.campaign_status <> 'deleted' or c.campaign_status is null) and c.client_id = :clientId""",
             nativeQuery = true)
     fun getCampaignByCampaignId(campaignId: Long, clientId: Long): Optional<Campaign>
+
+    fun getCampaignBySegmentationIDAndClientID(segmentId: Long, clientId: Long): List<Campaign>
 }

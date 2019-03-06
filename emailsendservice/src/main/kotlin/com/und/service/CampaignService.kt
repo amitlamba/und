@@ -44,56 +44,72 @@ class CampaignService {
 
     fun executeCampaign(campaignId: Long, clientId: Long) {
 //        val campaignOption = campaignRepository.getCampaignByCampaignId(campaignId, clientId)
-        val campaignOption=campaignRepository.findById(campaignId)
-        val campaign = campaignOption.orElseThrow({ IllegalStateException("campaign not found for campaign id $campaignId and client $clientId") })
+        val campaign = findCampaign(campaignId, clientId)
         val usersData = getUsersData(campaign.segmentationID!!, clientId)
         usersData.forEach { user ->
-            try {
-                //TODO: filter out unsubscribed and blacklisted users
-                //TODO: How to skip transactional Messages
-                //check mode of communication is email
-                if (campaign?.campaignType == "EMAIL") {
+            executeCampaignForUser(campaign, user, clientId)
+        }
+    }
 
-                    if (user.communication?.email?.dnd == true)
-                        return@forEach //Local lambda return
-                    val email: Email = email(clientId, campaign, user)
-                    toKafka(email)
-                }
-                //check mode of communication is sms
-                if (campaign?.campaignType == "SMS") {
+    fun executeLiveCampaign(campaign: Campaign, clientId: Long, user: EventUser) {
+            executeCampaignForUser(campaign, user, clientId)
+    }
 
-                    if (user.communication?.mobile?.dnd == true)
-                        return@forEach //Local lambda return
-                    val sms: Sms = sms(clientId, campaign, user)
-                    toKafka(sms)
-                }
-//                check mode of communication is mobile push
-                if (campaign?.campaignType=="PUSH_ANDROID"){
-                    if (user.communication?.android?.dnd == true)
-                        return@forEach //Local lambda return
-                    val notification=fcmAndroidMessage(clientId,campaign,user)
-                    toKafka(notification)
-                }
-                if(campaign?.campaignType=="PUSH_WEB"){
-                    if (user.communication?.webpush?.dnd == true)
-                        return@forEach //Local lambda return
-                    user.identity.webFcmToken?.forEach {
-                        val notification=fcmWebMessage(clientId,campaign,user,it)
-                        toKafka(notification)
-                    }
-                }
-                if(campaign?.campaignType=="PUSH_IOS"){
-                    if (user.communication?.ios?.dnd == true)
-                        return@forEach //Local lambda return
-                    val notification=fcmIosMessage(clientId,campaign,user)
-                    toKafka(notification)
-                }
-            } catch (ex: Exception) {
-                logger.error(ex.message)
+    private fun findCampaign(campaignId: Long, clientId: Long): Campaign {
+        val campaignOption = campaignRepository.findById(campaignId)
+        return campaignOption.orElseThrow { IllegalStateException("campaign not found for campaign id $campaignId and client $clientId") }
+    }
 
-            } finally {
+    fun findLiveSegmentCampaign(segmentId: Long, clientId: Long): List<Campaign> {
+       return  campaignRepository.getCampaignBySegmentationIDAndClientID(segmentId, clientId)
+    }
 
+    private fun executeCampaignForUser(campaign: Campaign, user: EventUser, clientId: Long) {
+        try {
+            //TODO: filter out unsubscribed and blacklisted users
+            //TODO: How to skip transactional Messages
+            //check mode of communication is email
+            if (campaign.campaignType == "EMAIL") {
+
+                if (user.communication?.email?.dnd == true)
+                    return //Local lambda return
+                val email: Email = email(clientId, campaign, user)
+                toKafka(email)
             }
+            //check mode of communication is sms
+            if (campaign.campaignType == "SMS") {
+
+                if (user.communication?.mobile?.dnd == true)
+                    return //Local lambda return
+                val sms: Sms = sms(clientId, campaign, user)
+                toKafka(sms)
+            }
+    //                check mode of communication is mobile push
+            if (campaign.campaignType == "PUSH_ANDROID") {
+                if (user.communication?.android?.dnd == true)
+                    return //Local lambda return
+                val notification = fcmAndroidMessage(clientId, campaign, user)
+                toKafka(notification)
+            }
+            if (campaign.campaignType == "PUSH_WEB") {
+                if (user.communication?.webpush?.dnd == true)
+                    return //Local lambda return
+                user.identity.webFcmToken?.forEach {
+                    val notification = fcmWebMessage(clientId, campaign, user, it)
+                    toKafka(notification)
+                }
+            }
+            if (campaign.campaignType == "PUSH_IOS") {
+                if (user.communication?.ios?.dnd == true)
+                    return //Local lambda return
+                val notification = fcmIosMessage(clientId, campaign, user)
+                toKafka(notification)
+            }
+        } catch (ex: Exception) {
+            logger.error(ex.message)
+
+        } finally {
+
         }
     }
 
