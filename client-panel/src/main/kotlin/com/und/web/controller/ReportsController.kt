@@ -41,8 +41,8 @@ class ReportsController {
         var fromDate=userDateInput.fromDate!!
         var toDate=userDateInput.toDate!!
 
-        println("********************************"+fromDate)
-        print("********************************"+toDate)
+       // println("********************************"+fromDate)
+        //print("********************************"+toDate)
         return reportsService.getEventsCount(fromDate,toDate)
 
     }

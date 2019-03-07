@@ -3,7 +3,6 @@ package com.und.livesegment.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.common.utils.DateUtils
 import com.und.common.utils.loggerFor
-import com.und.config.EventStream
 import com.und.exception.UndException
 import com.und.livesegment.model.EventMessage
 import com.und.livesegment.model.LiveSegmentJobDetailProperties
@@ -37,9 +36,6 @@ class LiveSegmentProcessingService {
     }
 
     @Autowired
-    private lateinit var eventStream: EventStream
-
-    @Autowired
     private lateinit var liveSegmentService: LiveSegmentService
 
     @Autowired
@@ -65,11 +61,11 @@ class LiveSegmentProcessingService {
     fun processEventMessage(event: EventMessage){
         logger.info("Processing event: $event for segment checks")
 
-        if(event.name == null){
+        if(event.name.isEmpty()){
             logger.info("No name found on the event.")
         }
         processStartEventChecks(event)
-        processEventMessage(event)
+        processEndEventChecks(event)
     }
 
             /*
@@ -86,31 +82,36 @@ class LiveSegmentProcessingService {
             liveSegment ->
             //we would handle cases of end event not done in last some interval only here. As the cases of end event happen within some interval must have already been processed
             //at the time of respective end event itself (in processEventMessage)
-            if(liveSegment.endEventDone || liveSegment.endEventFilter == null || liveSegment.endEventFilter == "" || liveSegment.interval <= 0){
+            if(liveSegment.endEventDone ||  liveSegment.endEventFilter.isEmpty() || liveSegment.interval <= 0){
                 return@forEach
             }
 
             val segment = this.segmentService.persistedSegmentById(liveSegment.segmentId)
 
             val endEventMatched = endEventHappenedInLastIntervalWithPropertiesMatched(liveSegment, params)
-            if(endEventMatched) return@forEach
+
+            if(endEventMatched) {
+                return@forEach
+            }
 
             val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, params.clientId.toLong(), params.userId)
-            if(userPresentInSegment) sendJobToLiveSegmentQueue(params, liveSegment.id)
+            if(userPresentInSegment) {
+                sendJobToLiveSegmentQueue(params, liveSegment)
+            }
         }
     }
 
     @SendTo("outLiveSegment")
-    private fun sendToLiveSegmentQueue(event: EventMessage, liveSegmentId: Long): LiveSegmentUser{
-        logger.info("Pushing directly; details: ${event} for live-segment-id: $liveSegmentId")
-        return LiveSegmentUser(liveSegmentId, event.clientId, event.userId, event.creationTime)
+    private fun sendToLiveSegmentQueue(event: EventMessage, liveSegment: LiveSegment): LiveSegmentUser{
+        logger.info("Pushing directly; details: $event for live-segment-id: ${liveSegment.id}")
+        return LiveSegmentUser(liveSegment.id, liveSegment.segmentId, event.clientId, event.userId, event.creationTime)
     }
 
     @SendTo("outLiveSegment")
-    private fun sendJobToLiveSegmentQueue(params: LiveSegmentUserCheck, liveSegmentId: Long): LiveSegmentUser{
-        logger.info("Pushing through job checks; details: ${params} for live-segment-id: $liveSegmentId")
+    private fun sendJobToLiveSegmentQueue(params: LiveSegmentUserCheck, liveSegment: LiveSegment): LiveSegmentUser{
+        logger.info("Pushing through job checks; details: $params for live-segment-id: ${liveSegment.id}")
         val startEventTime = dateUtils.convertDateTimeToDate(dateUtils.parseDateTime(params.startEventTime))
-        return LiveSegmentUser(liveSegmentId, params.clientId.toLong(), params.userId, startEventTime)
+        return LiveSegmentUser(liveSegment.id, liveSegment.segmentId, params.clientId.toLong(), params.userId, startEventTime)
     }
 
     @SendTo("scheduleJobSend")
@@ -124,23 +125,23 @@ class LiveSegmentProcessingService {
 
         possibleLiveSegments.forEach {
             liveSegment ->
-            logger.info("Checking start event: ${event} for live-segment-id: ${liveSegment.id}")
+            logger.info("Checking start event: $event for live-segment-id: ${liveSegment.id}")
             val segment = this.segmentService.persistedSegmentById(liveSegment.segmentId)
 
             val startEventMatched = startEventPropertiesMatched(liveSegment, event.eventId, event.userId, event.clientId)
             if(!startEventMatched) {
-                logger.info("Start event not matched with ${event} for live-segment-id: ${liveSegment.id}")
+                logger.info("Start event not matched with $event for live-segment-id: ${liveSegment.id}")
                 return@forEach
             }
 
             val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, event.clientId, event.userId)
             if(!userPresentInSegment) {
-                logger.info("User checks not matched with ${event} for live-segment-id: ${liveSegment.id}")
+                logger.info("User checks not matched with $event for live-segment-id: ${liveSegment.id}")
                 return@forEach
             }
 
-            if(liveSegment.endEvent.isNullOrBlank())
-                sendToLiveSegmentQueue(event, liveSegment.id)
+            if(liveSegment.endEvent.isBlank())
+                sendToLiveSegmentQueue(event, liveSegment)
             else
                 sendToScheduleJob(event, liveSegment)
         }
@@ -151,7 +152,7 @@ class LiveSegmentProcessingService {
 
         possibleLiveSegments.forEach {
             liveSegment ->
-            logger.info("Checking end event: ${event} for live-segment-id: ${liveSegment.id}")
+            logger.info("Checking end event: $event for live-segment-id: ${liveSegment.id}")
             if(!liveSegment.endEventDone || liveSegment.interval <= 0){
                 logger.info("Not valid end event for live-segment-id: ${liveSegment.id}")
                 return@forEach
@@ -172,13 +173,13 @@ class LiveSegmentProcessingService {
             }
 
             val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, event.clientId, event.userId)
-            if(userPresentInSegment) sendToLiveSegmentQueue(event, liveSegment.id)
+            if(userPresentInSegment) sendToLiveSegmentQueue(event, liveSegment)
         }
     }
 
     private fun startEventPropertiesMatched(liveSegment: LiveSegment, eventId: String, userId: String, clientId: Long): Boolean {
         val startEvent = objectMapper.readValue(liveSegment.startEventFilter, Event::class.java)
-        if(startEvent == null || startEvent.propertyFilters == null || startEvent.propertyFilters.isEmpty()){
+        if(startEvent == null ||  startEvent.propertyFilters.isEmpty()){
             logger.error("Live segment-id: ${liveSegment.id} without a start event is not valid")
             throw UndException("Live segment ${liveSegment.id} without a start event is not valid")
         }
@@ -188,7 +189,7 @@ class LiveSegmentProcessingService {
 
     private fun endEventPropertiesMatched(liveSegment: LiveSegment, eventId: String, userId: String, clientId: Long): Boolean {
         val endEvent = objectMapper.readValue(liveSegment.endEventFilter, Event::class.java)
-        if(endEvent == null || endEvent.propertyFilters == null || endEvent.propertyFilters.isEmpty()){
+        if(endEvent == null || endEvent.propertyFilters.isEmpty()){
             logger.error("Live segment ${liveSegment.id} without an end event is not eligible for end event processing")
             throw UndException("Live segment ${liveSegment.id} without an end event is not eligible for end event processing")
         }
@@ -234,7 +235,7 @@ class LiveSegmentProcessingService {
         otherFilters.add(Criteria.where("userId").`is`(userId))
 
         if(eventId != null) otherFilters.add(Criteria.where("id").`is`(eventId))
-        if(event.dateFilter != null) otherFilters.add(this.segmentParserCriteria.parseDateFilter(event.dateFilter, tz))
+        if(event.dateFilter.values.isNotEmpty()) otherFilters.add(this.segmentParserCriteria.parseDateFilter(event.dateFilter, tz))
 
         val matchOps = Aggregation.match(Criteria().andOperator(*otherFilters.toTypedArray(), *propertyFilters.toTypedArray()))
         val groupOps = Aggregation.group(Aggregation.fields().and(SegmentParserCriteria.Field.userId.name, SegmentParserCriteria.Field.userId.name))

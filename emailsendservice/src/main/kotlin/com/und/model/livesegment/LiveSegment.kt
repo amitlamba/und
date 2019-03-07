@@ -1,4 +1,4 @@
-package com.und.livesegment.model
+package com.und.model.livesegment
 
 import java.util.*
 
