@@ -47,4 +47,7 @@ interface EventStream {
     @Input("campaignTriggerReceive")
     fun campaignTriggerReceive(): SubscribableChannel
 
+    @Input("inLiveSegment")
+    fun inLiveSegmentReceive():SubscribableChannel
+
 }

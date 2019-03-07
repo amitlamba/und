@@ -36,7 +36,7 @@ class DateTimeTest {
             //LocalDateTime.now(ZoneId.of("Asia/Kolkata")).toEpochSecond()
             var verificationCode = encrypt("$timeStamp||jogender@gmail.com||3")
             var encodeString=URLEncoder.encode(verificationCode,"UTF-8")
-            var emailVerificationLink = "emailVerificationLink" to "https://userndot.com/client/setting/verifyemail/"+encodeString
+            var emailVerificationLink = "emailVerificationLink" to "https://userndot.com/client/setting/verifyemail?c="+encodeString
             var decodeString=URLDecoder.decode(encodeString,"UTF-8")
             var decrypt= decrypt(decodeString)
             print("$verificationCode  \n $encodeString \n$emailVerificationLink \n$decodeString $decrypt")

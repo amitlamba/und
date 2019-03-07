@@ -223,9 +223,6 @@ class UserSettingsController {
     @GetMapping(value = ["/verifyemail"])
     fun verifyEmail(@RequestParam(value = "c") link: String,httpServletResponse: HttpServletResponse):ResponseEntity<Response> {
     //mvc automatically decode urlencoded string in parameter.
-        println(link)
-        var decodeString = URLDecoder.decode(link, "UTF-8")
-        println(decodeString)
         try {
             var decryptString = decrypt(link)
             var details = decryptString.split("||")
