@@ -187,8 +187,6 @@ class AggregationQuerybuilder {
 
             }
 
-//            if(eventGroupOperation.fields.count()>1) add_id=true
-//            var c=eventGroupOperation.fields.toList().size
             aggregationPipeline.add(eventGroupOperation)
 
             if (entityType == EventReport.EntityType.user && (userFilterPresent || userGroupByPresent)) {
@@ -225,7 +223,6 @@ class AggregationQuerybuilder {
                 // below operation can be written with fold as well
                 eventGroupFields.forEach { t, u -> projectOperation = projectOperation.and(t).`as`(u) }
             }
-
 
 
             if (eventOutputJoinWithUser) {

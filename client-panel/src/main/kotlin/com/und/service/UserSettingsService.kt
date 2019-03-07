@@ -83,6 +83,9 @@ class UserSettingsService {
     @Value("\${und.url.client}")
     lateinit var clientUrl: String
 
+    @Value("\${und.url.clientui}")
+    lateinit var clientPanelUi:String
+
     private var emptyArrayJson: String = "[]"
 
     private var templateId = 6L
@@ -545,7 +548,8 @@ class UserSettingsService {
             var fromEmailAddress = InternetAddress(emailAddress.address)
             var timeStamp = System.currentTimeMillis() / 1000
             var verificationCode = encrypt("$timeStamp||${emailAddress.address}||$clientID")
-            var emailVerificationLink = "${clientUrl}/setting/verifyemail?c=" + URLEncoder.encode(verificationCode, "UTF-8")
+//            var emailVerificationLink = "${clientUrl}/setting/verifyemail?c=" + URLEncoder.encode(verificationCode, "UTF-8")
+            var emailVerificationLink = "${clientPanelUi}verifyemail?email=addfemail&code=${verificationCode}"
             var name = emailAddress.personal
 //            var emailSubject = "Verify from email Address"
 //            var emailBody="Hi ${name} \n Please verify your email by clicking on below link\n $emailVerificationLink"
