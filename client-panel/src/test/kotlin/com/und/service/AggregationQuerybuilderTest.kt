@@ -1,5 +1,6 @@
 package com.und.service
 
+import com.mongodb.MongoClient
 import com.und.report.web.model.AggregateBy
 import com.und.report.web.model.EventReport
 import com.und.report.web.model.GroupBy
@@ -13,8 +14,10 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.springframework.test.util.ReflectionTestUtils
 import java.time.ZoneId
 import com.und.service.AggregationQuerybuilder.*
+import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.ConvertOperators
+import org.springframework.data.mongodb.core.aggregation.Fields
 
 //@RunWith(MockitoJUnitRunner::class)
 class AggregationQuerybuilderTest {
@@ -360,22 +363,46 @@ class AggregationQuerybuilderTest {
 
     @Test
     fun testFields(){
+        val eventGroupFields = mutableMapOf<String, String>()
+        eventGroupFields.put("userId","userId")
+        val fields = eventGroupFields.map { Fields.field(it.key, it.value) }.toTypedArray()
 
-        val projectionFields = mutableListOf<String>()
 
-        projectionFields.add(Field.UserId.fName)
-        projectionFields.add(USER_COUNT)
-
-        var projectOperation = Aggregation.project(*projectionFields.toTypedArray())
-
-//          projectOperation = projectOperation.and("userId").`as`("userId")
-
-        projectOperation = projectOperation.and(ConvertOperators.ToObjectId.toObjectId("\$_id.${AggregationQuerybuilder.Field.UserId.fName}")).`as`(AggregationQuerybuilder.Field.UserIdObject.fName)
-
-        var v=Aggregation.newAggregation(projectOperation)
-
-        println("hello")
+//        var eventGroupOperation = Aggregation.group(Fields.from(*addFields(fields))).count().`as`(USER_COUNT)
+//        val projectionFields = mutableListOf<String>()
+//
+////        projectionFields.add(Field.UserId.fName)
+////        projectionFields.add("userCount")
+//
+//        var projectOperation = Aggregation.project("userId","userCount")
+//
+////          projectOperation = projectOperation.and("userId").`as`("userId")
+//
+////        projectOperation = projectOperation.and(ConvertOperators.ToObjectId.toObjectId("\$_id.${AggregationQuerybuilder.Field.UserId.fName}")).`as`(AggregationQuerybuilder.Field.UserIdObject.fName)
+//
+//        var v=Aggregation.newAggregation(eventGroupOperation,projectOperation)
+//
+//        println(v)
 // adding same field with diff target
 
+
+        var eventGroupOperation = Aggregation.group(Fields.fields("userId"))
+        var projectOperation = Aggregation.project("userId")
+        println(Aggregation.newAggregation(eventGroupOperation,projectOperation))
+//        { "aggregate" : "__collection__", "pipeline" : [{ "$group" : { "_id" : "$userId" } }, { "$project" : { "userId" : "$_id.userId" } }] }
+    }
+
+    private fun addFields(fields: Array<org.springframework.data.mongodb.core.aggregation.Field>): Array<org.springframework.data.mongodb.core.aggregation.Field> {
+        var contains = false
+        fields.forEach {
+            if (it.name.equals(AggregationQuerybuilder.Field.UserId.fName) && it.target.equals(AggregationQuerybuilder.Field.UserId.fName)) contains = true
+        }
+        return if (!contains) fields.plus(Fields.field(AggregationQuerybuilder.Field.UserId.fName)) else fields
+//         Aggregation.group(Fields.from(*fields)).count().`as`(USER_COUNT)
+//        else Aggregation.group(Fields.from(*fields,Fields.field(Field.UserId.fName))).count().`as`(USER_COUNT)
+    }
+
+    fun aggTest(){
+        val template= MongoTemplate(MongoClient("192.168.0.109", 27017), "eventdbstaging")
     }
 }
