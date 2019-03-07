@@ -1,12 +1,15 @@
 package com.und.service
 
+import com.und.report.repository.mongo.UserAnalyticsRepository
 import com.und.report.web.model.AggregateBy
 import com.und.report.web.model.EventReport
 import com.und.report.web.model.GroupBy
 import com.und.web.model.*
 import com.und.web.model.Unit
+import org.bson.Document
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Sort
+import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.stereotype.Component
@@ -34,6 +37,9 @@ class AggregationQuerybuilder {
 
     @Autowired
     private lateinit var segmentParserCriteria: SegmentParserCriteria
+
+    @Autowired
+    lateinit var mongoTemplate: MongoTemplate
 
     fun getAggregationExpression(fieldName: String, properties: Map<String, Any> = emptyMap()): AggregationExpression {
         return when (fieldName) {
@@ -75,7 +81,7 @@ class AggregationQuerybuilder {
          * [match], [project, lookup, unwind, match], [group, project]  (User count using both-filters and any-groupBy)
          *
          */
-
+        var add_id=false
         val allFilters = segregateEventUserFilter(filters)
         val allGroupBys = segregateEventUserGroupBy(groupBys)
         val aggregationPipeline = mutableListOf<AggregationOperation>()
@@ -151,13 +157,17 @@ class AggregationQuerybuilder {
             eventGroupOperation = when {
                 eventOutputJoinWithUser -> {
                     if (eventAggregateByPresent && aggregateBy != null) {
+                        val field=addFields(fields)
+                        if(field.size>1) add_id=true
                         val scopedName = getCompleteScopedName(aggregateBy.name, aggregateBy.globalFilterType)
                         when (aggregateBy.aggregationType) {
-                            AggregationType.Sum -> Aggregation.group(Fields.from(*addFields(fields))).sum(scopedName).`as`(AGGREGATE_VALUE)
-                            AggregationType.Avg -> Aggregation.group(Fields.from(*addFields(fields))).avg(scopedName).`as`(AGGREGATE_VALUE)
+                            AggregationType.Sum -> Aggregation.group(Fields.from(*field)).sum(scopedName).`as`(AGGREGATE_VALUE)
+                            AggregationType.Avg -> Aggregation.group(Fields.from(*field)).avg(scopedName).`as`(AGGREGATE_VALUE)
                         }
                     } else {
-                        Aggregation.group(Fields.from(*addFields(fields))).count().`as`(USER_COUNT)
+                        val field=addFields(fields)
+                        if(field.size>1) add_id=true
+                        Aggregation.group(Fields.from(*field)).count().`as`(USER_COUNT)
                     }
                 }
 
@@ -176,8 +186,6 @@ class AggregationQuerybuilder {
                 }
 
             }
-
-
 
             aggregationPipeline.add(eventGroupOperation)
 
@@ -217,17 +225,20 @@ class AggregationQuerybuilder {
             }
 
 
-
             if (eventOutputJoinWithUser) {
-                projectOperation = projectOperation.and(ConvertOperators.ToObjectId.toObjectId("\$_id.${Field.UserId.fName}")).`as`(Field.UserIdObject.fName)
-                //projectOperation = projectOperation.and(ConvertOperators.ToObjectId.toObjectId("_id")).`as`(Field.UserIdObject.fName)
-            } else {
+                if(add_id) {
+//                    aggregationPipeline.add(Aggregation.match(Criteria.where("_id.userId").ne("null")))
+                    projectOperation = projectOperation.and(ConvertOperators.ToObjectId.toObjectId("\$_id.${Field.UserId.fName}")).`as`(Field.UserIdObject.fName)
+                }else {
+//                    aggregationPipeline.add(Aggregation.match(Criteria.where("_id").ne("null")))
+                    projectOperation=projectOperation.and("_id").`as`("userId")
+                    projectOperation = projectOperation.and(ConvertOperators.ToObjectId.toObjectId("\$_id")).`as`(Field.UserIdObject.fName)
+                }
+                } else {
                 projectOperation = projectOperation.and(getAggregationExpression(Field.UserIdObject.fName)).`as`(Field.UserIdObject.fName)
             }
 
-
             aggregationPipeline.add(projectOperation)
-
 //            aggregationPipeline.add(Aggregation.group(Field.UserIdObject.fName))
 //            aggregationPipeline.add(Aggregation.project().and("_id").`as`(Field.UserIdObject.fName))
 
@@ -308,7 +319,10 @@ class AggregationQuerybuilder {
     private fun addFields(fields: Array<org.springframework.data.mongodb.core.aggregation.Field>): Array<org.springframework.data.mongodb.core.aggregation.Field> {
         var contains = false
         fields.forEach {
-            if (it.name.equals(Field.UserId.fName) && it.target.equals(Field.UserId.fName)) contains = true
+            if (it.name.equals(Field.UserId.fName)) {
+                if (it.target == null || it.target.equals(Field.UserId.fName))
+                    contains = true
+            }
         }
         return if (!contains) fields.plus(Fields.field(Field.UserId.fName)) else fields
 //         Aggregation.group(Fields.from(*fields)).count().`as`(USER_COUNT)

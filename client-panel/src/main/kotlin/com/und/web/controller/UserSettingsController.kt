@@ -12,6 +12,7 @@ import com.und.web.controller.exception.CustomException
 import com.und.web.model.*
 import org.apache.kafka.common.errors.InvalidRequestException
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -220,9 +221,8 @@ class UserSettingsController {
     }
 
     @GetMapping(value = ["/verifyemail"])
-    fun verifyEmail(@RequestParam(value = "c") link: String):ResponseEntity<Response> {
+    fun verifyEmail(@RequestParam(value = "c") link: String,httpServletResponse: HttpServletResponse):ResponseEntity<Response> {
     //mvc automatically decode urlencoded string in parameter.
-//        var decodeString = URLDecoder.decode(link, "UTF-8")
         try {
             var decryptString = decrypt(link)
             var details = decryptString.split("||")
@@ -235,6 +235,8 @@ class UserSettingsController {
             loggerFor(UserSettingsController::class.java).info("Verification for from email address fail with error ${ex.message}")
             return ResponseEntity(Response(message = "${ex.message}"),HttpStatus.EXPECTATION_FAILED)
         }
+//        httpServletResponse.setHeader("Location",clientPanelEmailSettingUrl)
+//        httpServletResponse.status=HttpStatus.PERMANENT_REDIRECT.value()
         return ResponseEntity(Response(message = "Verified Successfully."),HttpStatus.OK)
     }
 
