@@ -9,5 +9,5 @@ interface ReachabilityService {
     fun getReachabilityBySegmentId(segmentId:Long):Reachability
     fun getReachabilityOfSegmentByDate(segmentId: Long,date:String):Int?
     fun getReachabilityOfSegmentByDateRange(segmentId: Long,date1:String,date2:String):List<SegmentTrendCount>
-    fun setReachabilityOfSegmentToday(segmentId: Long,clientId:Long)
+    fun setReachabilityOfSegmentToday(segmentId: Long,clientId:Long):Int
 }

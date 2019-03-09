@@ -9,23 +9,26 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
+import java.time.LocalDateTime
 
 class CustomSegmentReachabilityRepositoryImpl:CustomSegmentReachabilityRepository {
 
     @Autowired
     private lateinit var mongoTemplate:MongoTemplate
 
-    override fun updateSegmentReachability(segmentId:Long,key:String,objectIds:Int,clientID:Long) {
+    override fun updateSegmentReachability(segmentId:Long,key:String,objectIds:Int,clientID:Long,modifiedTime:LocalDateTime,timezone:String) {
         //TODO create a segmentreachability document when a segment created.
         val exist=mongoTemplate.exists(Query(Criteria.where("_id").`is`(segmentId).and("clientId").`is`(clientID)),"segmentreachability")
         if(exist) {
-            mongoTemplate.updateFirst(Query(Criteria.where("_id").`is`(segmentId).and("clientId").`is`(clientID)), Update.update(key, objectIds), "segmentreachability")
+            mongoTemplate.updateFirst(Query(Criteria.where("_id").`is`(segmentId).and("clientId").`is`(clientID)), Update.update(key, objectIds).set("lastModifiedTime",modifiedTime), "segmentreachability")
         }else {
             val reachability=SegmentReachability()
             with(reachability){
                 id=segmentId
                 clientId=clientID
                 dates= mutableMapOf(Pair(key.split(".")[1].toInt(),objectIds))
+                lastModifiedTime=modifiedTime
+                timeZone=timezone
             }
             mongoTemplate.save(reachability,"segmentreachability")
         }

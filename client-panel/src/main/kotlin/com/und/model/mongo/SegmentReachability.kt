@@ -2,9 +2,12 @@ package com.und.model.mongo
 
 import com.und.report.web.model.Reachability
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.ZoneId
+import java.util.*
 
 //@Document/*(collection="#{tenantProvider.getTenant()}_segmentReachability")*/
 //class SegmentReachability {
@@ -26,7 +29,9 @@ import java.time.LocalDateTime
 class SegmentReachability {
     @field:Id
     var id:Long?=null
+    var timeZone:String="UTC"
     var clientId:Long?=null
    var dates :MutableMap<Int,Int> = mutableMapOf()
+    var lastModifiedTime:LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
 
 }
