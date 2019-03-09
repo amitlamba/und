@@ -1,5 +1,7 @@
 package com.und.web.model
 
+import com.und.livesegment.model.jpa.LiveSegment
+import com.und.livesegment.model.webmodel.WebLiveSegment
 import java.io.Serializable
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -27,6 +29,7 @@ class Segment : Serializable {
     var didNotEvents: DidEvents? = null
     var globalFilters: List<GlobalFilter> = listOf()
     var geographyFilters: List<Geography> = listOf()
+    var liveSegment: LiveSegment?=null
 }
 
 class DidEvents : Serializable {

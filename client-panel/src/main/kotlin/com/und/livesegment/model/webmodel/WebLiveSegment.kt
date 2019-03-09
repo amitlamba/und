@@ -6,6 +6,8 @@ import com.und.web.model.Segment
 
 class WebLiveSegment {
 
+    var id:Long=0L
+    var clientId:Long?=null
     @NotNull
     lateinit var segment:Segment
     @NotNull
