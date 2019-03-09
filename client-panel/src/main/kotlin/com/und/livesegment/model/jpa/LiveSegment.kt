@@ -1,5 +1,6 @@
 package com.und.livesegment.model.jpa
 
+import com.und.model.jpa.Segment
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDateTime
@@ -23,6 +24,19 @@ class LiveSegment {
     @Column(name = "segment_id")
     @NotNull
     var segmentId: Long = 0L
+
+    //segment is mandatory its possible that its filter are empty
+
+//    @OneToOne(cascade = [CascadeType.ALL])
+//    @JoinColumn(name = "segent_id")
+//    var segment: Segment?=null
+
+    //name of live segment
+    //type of live segment
+    //when we fetch segment list then segment and live segment are two diff model so did we return result of both
+    // api in single api or use two diff api
+    @Column(name="live_segment_type",nullable = false)
+    lateinit var liveSegmentType:String
 
     @Column(name = "start_event")
     @NotNull
