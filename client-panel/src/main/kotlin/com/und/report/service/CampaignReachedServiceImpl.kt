@@ -31,9 +31,9 @@ class CampaignReachedServiceImpl :CampaignReachedService{
         var interacted: Long = getResult("CTA_PERFORMED", result)
         var campaignReached = CampaignReached()
         with(campaignReached) {
-            this.delivered = delivered
+            this.delivered = delivered + read +interacted
             this.failed = failed
-            this.read = read
+            this.read = read + interacted
             this.interacted = interacted
 
         }

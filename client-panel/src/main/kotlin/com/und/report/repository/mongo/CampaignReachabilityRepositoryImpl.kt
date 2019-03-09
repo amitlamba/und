@@ -16,9 +16,11 @@ class CampaignReachabilityRepositoryImpl:CampaignReachabilityRepository {
     override fun getCampaignReachability(clientId:Long,campaignId:Long,campaignType:String): List<CampaignReachedResult> {
     var collectionName= getCollectionName(clientId,campaignType)
     var matchOperation=Aggregation.match(Criteria("campaignId").`is`(campaignId))
-    var unwindOperation=Aggregation.unwind("statusUpdates")
-    var groupOperation=Aggregation.group("statusUpdates.status").count().`as`("count")
-    var aggregation=Aggregation.newAggregation(matchOperation,unwindOperation,groupOperation)
+//    var unwindOperation=Aggregation.unwind("statusUpdates")
+//    var groupOperation=Aggregation.group("statusUpdates.status").count().`as`("count")
+//    var aggregation=Aggregation.newAggregation(matchOperation,unwindOperation,groupOperation)
+        var groupOperation=Aggregation.group("status").count().`as`("count")
+        var aggregation =Aggregation.newAggregation(matchOperation,groupOperation)
         return mongoTemplate.aggregate(aggregation,collectionName,CampaignReachedResult::class.java).mappedResults
     }
     private fun getCollectionName(clientId: Long,campaignType: String):String{
