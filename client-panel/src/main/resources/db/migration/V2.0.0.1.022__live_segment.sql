@@ -1,0 +1,1 @@
+ALTER TABLE live_segment ADD COLUMN date_created timestamp with time zone default now(),ADD COLUMN live_segment_type varchar (100) not null ;

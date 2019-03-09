@@ -1,5 +1,6 @@
 package com.und.livesegment.model.jpa
 
+import com.und.model.jpa.Segment
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDateTime
@@ -23,6 +24,9 @@ class LiveSegment {
     @Column(name = "segment_id")
     @NotNull
     var segmentId: Long = 0L
+
+    @Column(name="live_segment_type",nullable = false)
+    lateinit var liveSegmentType:String
 
     @Column(name = "start_event")
     @NotNull

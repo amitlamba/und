@@ -1,5 +1,6 @@
 package com.und.model.jpa
 
+import com.und.livesegment.model.jpa.LiveSegment
 import com.und.web.model.DidEvents
 import com.und.web.model.Geography
 import com.und.web.model.GlobalFilter
@@ -51,6 +52,7 @@ class Segment {
     @NotNull
     var data: String = "{}"
 
+    //add live segment filed in web model
 
 }
 

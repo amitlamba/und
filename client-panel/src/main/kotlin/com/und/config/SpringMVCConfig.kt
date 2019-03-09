@@ -11,6 +11,7 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.core.Ordered
 import org.springframework.scheduling.TaskScheduler
 import org.springframework.scheduling.concurrent.ConcurrentTaskScheduler
+import org.springframework.transaction.annotation.EnableTransactionManagement
 import org.springframework.validation.Validator
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean
 import org.springframework.web.bind.WebDataBinder
@@ -30,6 +31,7 @@ import org.springframework.web.servlet.view.JstlView
  */
 @Configuration
 @EnableBinding(EventStream::class)
+@EnableTransactionManagement
 class SpringMVCConfig : WebMvcConfigurer {
 
 

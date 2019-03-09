@@ -2,6 +2,8 @@ package com.und.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.common.utils.loggerFor
+import com.und.livesegment.model.jpa.LiveSegment
+import com.und.livesegment.repository.jpa.LiveSegmentRepository
 import com.und.model.jpa.Segment
 import com.und.model.mongo.eventapi.EventUser
 import com.und.repository.jpa.SegmentRepository
@@ -56,6 +58,9 @@ class SegmentServiceImpl : SegmentService {
     @Autowired
     lateinit var mongoTemplate:MongoTemplate
 
+    @Autowired
+    private lateinit var liveSegmentRepository: LiveSegmentRepository
+
 
     //@CacheEvict("segmentlist", key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_segment_'" )
     override fun createSegment(websegment: WebSegment): WebSegment {
@@ -79,7 +84,11 @@ class SegmentServiceImpl : SegmentService {
         val websegments = mutableListOf<WebSegment>()
         if (clientID != null) {
             val segments = segmentRepository.findByClientID(clientID)
-            segments?.forEach { websegments.add(buildWebSegment(it)) }
+            val liveSegments=liveSegmentRepository.findByClientID(clientID)
+            segments?.forEach {
+                val liveSegment=liveSegments.get().find { liveSegment -> liveSegment.segmentId==it.id }
+                websegments.add(buildWebSegmentWithLive(it,liveSegment))
+            }
         }
 
         return websegments
@@ -258,6 +267,18 @@ class SegmentServiceImpl : SegmentService {
             type = segment.type
         }
         return websegment
+    }
+
+    private fun buildWebSegmentWithLive(segment: Segment,livSegment:LiveSegment?):WebSegment{
+        if(livSegment!=null){
+            val webSegment=buildWebSegment(segment)
+            with(webSegment){
+                liveSegment=livSegment
+            }
+            return webSegment
+        }else{
+            return buildWebSegment(segment)
+        }
     }
 
     private fun buildEventUserList(eventUserList: List<EventUser>): List<EventUserWeb> {
