@@ -136,7 +136,6 @@ class LiveSegmentProcessingService {
         possibleLiveSegments.forEach {
             liveSegment ->
             logger.info("Checking start event: $event for live-segment-id: ${liveSegment.id}")
-            //TODO handle build segment. first check.
             val segment = this.segmentService.persistedSegmentById(liveSegment.segmentId,liveSegment.clientID)
 
             //TODO why not we create a custom method to match it. and take eventFilter in event Message
@@ -146,7 +145,6 @@ class LiveSegmentProcessingService {
                 return@forEach
             }
 
-            //TODO what happen if all segment criteria is empty check any error . I think in that case its all user segment.
             val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, event.clientId, event.userId)
             if(!userPresentInSegment) {
                 logger.info("User checks not matched with $event for live-segment-id: ${liveSegment.id}")

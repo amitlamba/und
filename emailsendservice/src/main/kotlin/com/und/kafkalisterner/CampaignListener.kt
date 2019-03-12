@@ -67,6 +67,7 @@ class CampaignListener {
             val user=mongoTemplate.find(Query().addCriteria(Criteria.where("_id").`is`(ObjectId(userId))),EventUser::class.java,"${clientId}_eventUser")
             if(user.isEmpty()) throw EventUserNotFoundException("User Not Found.")
             val campaignList = campaignService.findLiveSegmentCampaign(segmentId, clientId)
+            //FIXME if campaign list is empty then update the status of campaign to completed.else make it running.
             logger.debug("campaign live trigger with id $segmentId and $clientId and $userId")
             campaignList.forEach { campaign ->
                 logger.debug("campaign live trigger with id $segmentId and $clientId and $userId and campaign id $campaign.id")
