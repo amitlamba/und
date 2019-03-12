@@ -110,6 +110,12 @@ class Campaign {
 
     @Column(name="from_user")
     var fromUser:String?=null
+
+    @Column(name="start_date")
+    var startDate:LocalDateTime?=null
+
+    @Column(name="end_date")
+    var endDate:LocalDateTime?=null
 }
 
 enum class CampaignType {

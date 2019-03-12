@@ -56,7 +56,7 @@ class SegmentServiceImpl : SegmentService {
     private lateinit var segmentParserCriteria: SegmentParserCriteria
 
     @Autowired
-    lateinit var mongoTemplate:MongoTemplate
+    lateinit var mongoTemplate: MongoTemplate
 
     @Autowired
     private lateinit var liveSegmentRepository: LiveSegmentRepository
@@ -66,14 +66,14 @@ class SegmentServiceImpl : SegmentService {
     override fun createSegment(websegment: WebSegment): WebSegment {
         logger.debug("Saving segment: ${websegment.name}")
         val segment = buildSegment(websegment)
-        try{
+        try {
             segmentRepository.save(segment)
             logger.debug("Segment with name: ${websegment.name} is saved successfully.")
             websegment.id = segment.id
             return websegment
-        }catch (ex: ConstraintViolationException){
+        } catch (ex: ConstraintViolationException) {
             throw CustomException("Template with this name already exists.")
-        }catch (ex: DataIntegrityViolationException){
+        } catch (ex: DataIntegrityViolationException) {
             throw CustomException("Template with this name already exists.")
         }
     }
@@ -84,10 +84,10 @@ class SegmentServiceImpl : SegmentService {
         val websegments = mutableListOf<WebSegment>()
         if (clientID != null) {
             val segments = segmentRepository.findByClientID(clientID)
-            val liveSegments=liveSegmentRepository.findByClientID(clientID)
+            val liveSegments = liveSegmentRepository.findByClientID(clientID)
             segments?.forEach {
-                val liveSegment=liveSegments.get().find { liveSegment -> liveSegment.segmentId==it.id }
-                websegments.add(buildWebSegmentWithLive(it,liveSegment))
+                val liveSegment = liveSegments.get().find { liveSegment -> liveSegment.segmentId == it.id }
+                websegments.add(buildWebSegmentWithLive(it, liveSegment))
             }
         }
 
@@ -95,13 +95,13 @@ class SegmentServiceImpl : SegmentService {
     }
 
     //@Cacheable(cacheNames = ["segment"], key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_segment_'+#id" )
-    override fun segmentById(id: Long): WebSegment {
+    override fun segmentById(id: Long, clientId: Long?): WebSegment {
         logger.debug("Fetching segment: $id")
-        return buildWebSegment(this.persistedSegmentById(id))
+        return buildWebSegment(this.persistedSegmentById(id, clientId))
     }
 
-    override fun persistedSegmentById(id: Long): Segment {
-        val clientID = AuthenticationUtils.clientID
+    override fun persistedSegmentById(id: Long, clientID: Long?): Segment {
+
         if (clientID != null) {
             val segmentOption = segmentRepository.findByIdAndClientID(id, clientID)
             if (segmentOption.isPresent) {
@@ -116,12 +116,12 @@ class SegmentServiceImpl : SegmentService {
         val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
         return if (segmentOption.isPresent) {
             val segment = segmentOption.get()
-            getSegmentUsers(segment,clientId,"userId").second
+            getSegmentUsers(segment, clientId, "userId").second
         } else emptyList()
     }
 
     override fun segmentUsers(segmentId: Long, clientId: Long): List<EventUser> {
-        if(segmentId == -2L) {
+        if (segmentId == -2L) {
             return getTestSEgmentUsers(clientId)
         }
         val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
@@ -142,7 +142,7 @@ class SegmentServiceImpl : SegmentService {
     }
 
     private fun checkUserInSegment(segment: Segment, clientId: Long, userId: String): Boolean {
-        val tz = userSettingsService.getTimeZone()
+        val tz = userSettingsService.getTimeZoneByClientId(clientId)
         val websegment = buildWebSegment(segment)
         val queries = segmentParserCriteria.segmentQueries(websegment, tz)
 
@@ -180,7 +180,7 @@ class SegmentServiceImpl : SegmentService {
     }
 
     private fun getSegmentUsersList(segment: Segment, clientId: Long): List<EventUser> {
-        return getSegmentUsers(segment,clientId).first
+        return getSegmentUsers(segment, clientId).first
     }
 
     private fun getTestSEgmentUsers(clientId: Long): List<EventUser> {
@@ -188,27 +188,27 @@ class SegmentServiceImpl : SegmentService {
         return eventUserRepository.findUserByIds(userIds.toSet(), clientId)
     }
 
-/*
-* TODO performance improvement  we can add project aggregation stage to remove that part of document which is not used in next stage.
-* eg. we add geo filter in first stage it mean after this stage we are not performing geo specific match so we can drop that field here.
-* Its decrease the size of document for next stage.
-* */
+    /*
+    * TODO performance improvement  we can add project aggregation stage to remove that part of document which is not used in next stage.
+    * eg. we add geo filter in first stage it mean after this stage we are not performing geo specific match so we can drop that field here.
+    * Its decrease the size of document for next stage.
+    * */
     private fun getSegmentUsers(segment: Segment, clientId: Long, type: String = "eventuser"): Pair<List<EventUser>, List<String>> {
         val tz = userSettingsService.getTimeZoneByClientId(clientId)
         val websegment = buildWebSegment(segment)
         var eventAggregation = segmentParserCriteria.getEventSpecificAggOperation(websegment, tz)
         val idList = eventRepository.usersFromEvent(eventAggregation.first, clientId)
         val didNotIdList = eventRepository.usersFromEvent(eventAggregation.second, clientId)
-    var userAggregation:MutableList<AggregationOperation>
-    if (idList.isNotEmpty()) {
-        var filteredResult = idList.toMutableList()
-        didNotIdList.forEach{
-            filteredResult.remove(it)
+        var userAggregation: MutableList<AggregationOperation>
+        if (idList.isNotEmpty()) {
+            var filteredResult = idList.toMutableList()
+            didNotIdList.forEach {
+                filteredResult.remove(it)
+            }
+            userAggregation = segmentParserCriteria.getUserSpecificAggOperation(websegment, tz, filteredResult.toList())
+        } else {
+            userAggregation = segmentParserCriteria.getUserSpecificAggOperation(websegment, tz, didNotIdList, true)
         }
-        userAggregation = segmentParserCriteria.getUserSpecificAggOperation(websegment, tz, filteredResult.toList())
-    } else {
-        userAggregation = segmentParserCriteria.getUserSpecificAggOperation(websegment, tz, didNotIdList, true)
-    }
 //        var userAggregation = segmentParserCriteria.getUserSpecificAggOperation(websegment, tz, idList)
         if (type.equals("userId")) {
             //Adding aggregation to return  only id of user instead of user profile.
@@ -234,8 +234,8 @@ class SegmentServiceImpl : SegmentService {
         }
 
         val result = when (conditionType) {
-            ConditionType.AnyOf -> if(userDidList.isNotEmpty()) userDidList.reduce { f, s -> f.union(s) } else emptySet()
-            ConditionType.AllOf -> if(userDidList.isNotEmpty()) userDidList.reduce { f, s -> f.intersect(s) } else emptySet()
+            ConditionType.AnyOf -> if (userDidList.isNotEmpty()) userDidList.reduce { f, s -> f.union(s) } else emptySet()
+            ConditionType.AllOf -> if (userDidList.isNotEmpty()) userDidList.reduce { f, s -> f.intersect(s) } else emptySet()
         }
         val mutableResult = mutableSetOf<String>()
         mutableResult.addAll(result)
@@ -269,14 +269,14 @@ class SegmentServiceImpl : SegmentService {
         return websegment
     }
 
-    private fun buildWebSegmentWithLive(segment: Segment,livSegment:LiveSegment?):WebSegment{
-        if(livSegment!=null){
-            val webSegment=buildWebSegment(segment)
-            with(webSegment){
-                liveSegment=livSegment
+    private fun buildWebSegmentWithLive(segment: Segment, livSegment: LiveSegment?): WebSegment {
+        if (livSegment != null) {
+            val webSegment = buildWebSegment(segment)
+            with(webSegment) {
+                liveSegment = livSegment
             }
             return webSegment
-        }else{
+        } else {
             return buildWebSegment(segment)
         }
     }
@@ -292,6 +292,6 @@ class SegmentServiceImpl : SegmentService {
     }
 
     override fun segmentByClientId(clientId: Long): List<Segment> {
-        return segmentRepository.findByClientID(clientId)?: emptyList()
+        return segmentRepository.findByClientID(clientId) ?: emptyList()
     }
 }

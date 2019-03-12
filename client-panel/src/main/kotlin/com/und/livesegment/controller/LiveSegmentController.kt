@@ -10,9 +10,11 @@ import com.und.web.model.ResponseStatus
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import javax.naming.AuthenticationException
+import javax.validation.Valid
 
 @RestController
 @RequestMapping("/livesegment")
@@ -24,14 +26,14 @@ class LiveSegmentController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/get/live/segments")
     fun getLiveSegments():List<WebLiveSegment>{
-        val clientId=AuthenticationUtils.clientID?:throw AuthenticationException("Access Denied.")
+        val clientId=AuthenticationUtils.clientID?:throw throw AccessDeniedException("Access Denied.")
         return liveSegmentService.getLiveSegments(clientId)
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/save")
-    fun saveLiveSegment(@RequestBody liveSegment: WebLiveSegment):ResponseEntity<HttpStatus>{
-        val clientId=AuthenticationUtils.clientID?:throw AuthenticationException("Access Denied.")
+    fun saveLiveSegment(@Valid @RequestBody liveSegment: WebLiveSegment):ResponseEntity<HttpStatus>{
+        val clientId=AuthenticationUtils.clientID?:throw throw AccessDeniedException("Access Denied.")
         val appUserId=AuthenticationUtils.principal.id
         return try {
             liveSegmentService.saveLiveSegment(liveSegment,clientId,appUserId)
@@ -45,8 +47,14 @@ class LiveSegmentController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/get/live/segment/{id}")
     fun getLiveSegmentById(@PathVariable("id",required = true)id:Long):WebLiveSegment{
-        val clientId=AuthenticationUtils.clientID?:throw AuthenticationException("Access Denied.")
+        val clientId=AuthenticationUtils.clientID?:throw throw AccessDeniedException("Access Denied.")
         return liveSegmentService.getLiveSegmentByClientIDAndId(clientId,id)
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/get/ls/users")
+    fun getLiveSegmentUserCount(@RequestParam("segmentId",required = true)segmentId:Long):Long{
+        val clientId=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        return liveSegmentService.getLiveSegmentUsersCount(clientId, segmentId)
+    }
 }

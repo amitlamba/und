@@ -14,9 +14,9 @@ interface SegmentService {
 
     fun allSegment(): List<WebSegment>
 
-    fun segmentById(id:Long): WebSegment
+    fun segmentById(id:Long,clientId: Long?): WebSegment
 
-    fun persistedSegmentById(id:Long): Segment
+    fun persistedSegmentById(id:Long,clientId: Long?): Segment
 
     fun segmentUserIds(segmentId: Long, clientId: Long): List<String>
 

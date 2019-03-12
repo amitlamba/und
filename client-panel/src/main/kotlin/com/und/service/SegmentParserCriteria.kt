@@ -619,7 +619,7 @@ class SegmentParserCriteria {
                 Criteria.where(fieldName).gt(values.first())
             }
             NumberOperator.LessThan -> {
-                Criteria.where(fieldName).gt(values.first())
+                Criteria.where(fieldName).lt(values.first())
             }
             NumberOperator.NotEquals -> {
                 Criteria.where(fieldName).ne(values.first())

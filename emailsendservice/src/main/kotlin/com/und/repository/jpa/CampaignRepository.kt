@@ -3,7 +3,9 @@ package com.und.repository.jpa
 import com.und.model.jpa.Campaign
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
+import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import java.time.LocalDateTime
 import java.util.*
 
 @Repository
@@ -35,5 +37,6 @@ interface CampaignRepository : JpaRepository<Campaign, Long> {
             nativeQuery = true)
     fun getCampaignByCampaignId(campaignId: Long, clientId: Long): Optional<Campaign>
 
-    fun getCampaignBySegmentationIDAndClientID(segmentId: Long, clientId: Long): List<Campaign>
+    @Query("""select * from campaign c where c.client_id= :clientId and c.segmentation_id= :segmentId and c.end_date > current_timestamp """,nativeQuery = true)
+    fun getCampaignByClientIDAndSegmentationIDAndEndDateAfter(@Param("segmentId")segmentId: Long, @Param("clientId")clientId: Long): List<Campaign>
 }

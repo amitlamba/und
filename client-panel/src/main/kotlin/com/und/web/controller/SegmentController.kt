@@ -10,6 +10,7 @@ import com.und.web.model.Segment
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 import javax.validation.Valid
@@ -55,7 +56,8 @@ class SegmentController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/segment/{segmentId}"])
     fun segment(@PathVariable("segmentId") segmentId: Long): ResponseEntity<Segment> {
-        val segment = segmentService.segmentById(segmentId)
+        val clientID = AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        val segment = segmentService.segmentById(segmentId,clientID)
         return ResponseEntity(segment, HttpStatus.OK)
     }
 
