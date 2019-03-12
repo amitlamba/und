@@ -26,3 +26,8 @@ class WebLiveSegment {
 
     var endEventDone:Boolean=false
 }
+
+
+enum class LiveSegmentType(name:String){
+    SINEGLE_ACTION("Single Action")
+}
