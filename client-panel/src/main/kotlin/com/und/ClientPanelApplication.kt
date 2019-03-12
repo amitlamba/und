@@ -13,7 +13,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories
 
 @SpringBootApplication
-@EnableMongoRepositories(basePackages = ["com.und.repository.mongo"])
+@EnableMongoRepositories(basePackages = ["com.und.repository.mongo","com.und.livesegment.repository.mongo"])
 @EnableJpaRepositories(basePackages = ["com.und.repository.jpa", "com.und.livesegment.repository.jpa"])
 //@EnableRedisRepositories(basePackages = ["com.und.repository.redis"])
 @EnableAutoConfiguration

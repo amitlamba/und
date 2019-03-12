@@ -30,6 +30,7 @@ class Campaign {
     var serviceProviderId:Long?=null
     var fromUser:String?=null
     var clientEmailSettingId:Long?=null
+    var liveCampaignDates:Schedule?=null
 
 }
 

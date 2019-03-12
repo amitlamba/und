@@ -210,10 +210,17 @@ class CampaignService {
 
             }
 
-            schedule = objectMapper.writeValueAsString(webCampaign.schedule)
+            if(webCampaign.schedule!=null) schedule =  objectMapper.writeValueAsString(webCampaign.schedule)
         }
 
-
+        webCampaign.liveCampaignDates?.let{
+            var time=it.multipleDates?.campaignDateTimeList
+            var start=time?.get(0)?.toLocalDateTime()
+            var end=time?.get(1)?.toLocalDateTime()
+            campaign.startDate=start
+            campaign.endDate=end
+            campaign.schedule=objectMapper.writeValueAsString(it)
+        }
 
         when (webCampaign.campaignType) {
             CampaignType.EMAIL -> {
@@ -286,8 +293,10 @@ class CampaignService {
             fromUser=campaign.fromUser
 
 
-            schedule = objectMapper.readValue(campaign.schedule, Schedule::class.java)
+            if(campaign.startDate!=null) liveCampaignDates = objectMapper.readValue(campaign.schedule, Schedule::class.java)
+            else schedule = objectMapper.readValue(campaign.schedule, Schedule::class.java)
         }
+
 
         if (campaign.emailCampaign != null) {
             val emailcampaign = campaign.emailCampaign

@@ -6,7 +6,9 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.und.livesegment.model.jpa.LiveSegment
 import com.und.livesegment.model.webmodel.WebLiveSegment
 import com.und.livesegment.repository.jpa.LiveSegmentRepository
+import com.und.livesegment.repository.mongo.LiveSegmentUserTrackRepository
 import com.und.repository.jpa.SegmentRepository
+import com.und.repository.jpa.UserRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.SegmentService
 import com.und.web.controller.exception.CustomException
@@ -32,6 +34,9 @@ class LiveSegmentServiceImpl : LiveSegmentService {
 
     @Autowired
     private lateinit var objectMapper:ObjectMapper
+
+    @Autowired
+    private lateinit var liveSegmentUserRepository: LiveSegmentUserTrackRepository
 
     override fun findByClientIDAndStartEvent(clientId: Long, startEvent: String): List<LiveSegment> {
         val segments = liveSegmentRepository.findByClientIDAndStartEvent(clientId, startEvent)
@@ -83,6 +88,10 @@ class LiveSegmentServiceImpl : LiveSegmentService {
             val normalSegment=segmentRepository.findByIdAndClientID(liveSegment.get().segmentId,clientId)
             return buildWebLiveSegment(liveSegment.get(),normalSegment.get())
         }else throw CustomException("Live Segment for client $clientId and id $id not exists.")
+    }
+
+    override fun getLiveSegmentUsersCount(clientId: Long, segmentId: Long): Long {
+        return liveSegmentUserRepository.findCountByClientIdAndSegmentId(clientId, segmentId)
     }
 
     private fun buildSegment(websegment: Segment, clientId: Long, appUserId:Long?): JpaSegment {

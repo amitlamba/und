@@ -12,6 +12,7 @@ import com.und.utils.loggerFor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import javax.mail.internet.InternetAddress
 
 @Service
@@ -61,7 +62,8 @@ class CampaignService {
     }
 
     fun findLiveSegmentCampaign(segmentId: Long, clientId: Long): List<Campaign> {
-       return  campaignRepository.getCampaignBySegmentationIDAndClientID(segmentId, clientId)
+        //FIXME if client panel and email send service are running in diff timezone then there is exact time matching problem.
+       return  campaignRepository.getCampaignByClientIDAndSegmentationIDAndEndDateAfter(segmentId, clientId)
     }
 
     private fun executeCampaignForUser(campaign: Campaign, user: EventUser, clientId: Long) {

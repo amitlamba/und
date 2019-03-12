@@ -16,4 +16,6 @@ interface LiveSegmentService {
     fun getLiveSegments(clientId: Long):List<WebLiveSegment>
 
     fun getLiveSegmentByClientIDAndId(clientId: Long,id:Long):WebLiveSegment
+
+    fun getLiveSegmentUsersCount(clientId: Long,segmentId:Long):Long
 }

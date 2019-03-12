@@ -1,10 +1,12 @@
 package com.und.model.mongo
 
 import org.springframework.data.annotation.Id
+import org.springframework.data.jpa.repository.Temporal
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
+import javax.persistence.TemporalType
 
 @Document(collection = "#{tenantProvider.getTenant()}_livesegmenttrack")
 data class LiveSegmentTrack(
