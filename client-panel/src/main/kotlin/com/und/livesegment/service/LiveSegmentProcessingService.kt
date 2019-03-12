@@ -90,7 +90,7 @@ class LiveSegmentProcessingService {
             liveSegment ->
             //we would handle cases of end event not done in last some interval only here. As the cases of end event happen within some interval must have already been processed
             //at the time of respective end event itself (in processEventMessage)
-            if(liveSegment.endEventDone ||  liveSegment.endEventFilter.isEmpty() || liveSegment.interval <= 0){
+            if(liveSegment.endEventDone ||  /*liveSegment.endEventFilter.isEmpty() ||*/ liveSegment.interval <= 0){
                 return@forEach
             }
 
@@ -189,7 +189,6 @@ class LiveSegmentProcessingService {
     }
 
     private fun startEventPropertiesMatched(liveSegment: LiveSegment, eventId: String, userId: String, clientId: Long): Boolean {
-        //FIXME endEventFilter is of type PropertyFilter List  not Event
 //        val startEvent = objectMapper.readValue(liveSegment.startEventFilter, Event::class.java)
         val filter:List<PropertyFilter> = objectMapper.readValue(liveSegment.startEventFilter)
         val startEvent=Event()
@@ -219,8 +218,13 @@ class LiveSegmentProcessingService {
     }
 
     private fun startEventHappenedInLastIntervalWithPropertiesMatched(liveSegment: LiveSegment, event: EventMessage): Boolean {
-        val startEvent = objectMapper.readValue(liveSegment.startEventFilter, Event::class.java)
-        if(startEvent == null){
+//        val startEvent = objectMapper.readValue(liveSegment.startEventFilter, Event::class.java)
+        val filter:List<PropertyFilter> = objectMapper.readValue(liveSegment.startEventFilter)
+        val startEvent=Event()
+        startEvent.propertyFilters=filter
+        startEvent.name=liveSegment.startEvent
+
+        if(startEvent.name.isBlank()){
             logger.error("Live segment ${liveSegment.id} without a start event is not valid")
             throw UndException("Live segment ${liveSegment.id} without a start event is not valid")
         }
@@ -234,8 +238,12 @@ class LiveSegmentProcessingService {
     }
 
     private fun endEventHappenedInLastIntervalWithPropertiesMatched(liveSegment: LiveSegment, params: LiveSegmentUserCheck): Boolean {
-        val endEvent = objectMapper.readValue(liveSegment.endEventFilter, Event::class.java)
-        if(endEvent == null){
+//        val endEvent = objectMapper.readValue(liveSegment.endEventFilter, Event::class.java)
+        val filter:List<PropertyFilter> = objectMapper.readValue(liveSegment.endEventFilter)
+        val endEvent=Event()
+        endEvent.propertyFilters=filter
+        endEvent.name=liveSegment.endEvent
+        if(endEvent.name.isBlank()){
             logger.error("Live segment ${liveSegment.id} without an end event is not eligible for end event processing")
             throw UndException("Live segment ${liveSegment.id} without an end event is not eligible for end event processing")
         }

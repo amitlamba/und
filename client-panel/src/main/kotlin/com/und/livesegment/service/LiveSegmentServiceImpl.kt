@@ -117,6 +117,7 @@ class LiveSegmentServiceImpl : LiveSegmentService {
             startEventFilter = getSimpleJsonStringOfObject(segment.startEventFilter)
             endEventFilter = getSimpleJsonStringOfObject(segment.endEventFilter)
             interval = segment.interval
+            endEventDone = segment.endEventDone
         }
         return liveSegment
     }

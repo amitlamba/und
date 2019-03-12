@@ -23,4 +23,6 @@ class WebLiveSegment {
     var endEventFilter  = emptyList<PropertyFilter>()
 
     var interval: Long = 0L
+
+    var endEventDone:Boolean=false
 }
