@@ -39,7 +39,7 @@ class LiveSegmentController {
             liveSegmentService.saveLiveSegment(liveSegment,clientId,appUserId)
             ResponseEntity(HttpStatus.CREATED)
         }catch (ex:Exception){
-            throw CustomException("Failed To save Segment.")
+            throw CustomException("Failed To save Segment. ${ex.message}")
         }
 
     }
