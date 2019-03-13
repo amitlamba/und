@@ -109,24 +109,26 @@ class LiveSegmentProcessingService {
         }
     }
 
-    @SendTo("outLiveSegment")
+//    @SendTo("outLiveSegment")
     private fun sendToLiveSegmentQueue(event: EventMessage, liveSegment: LiveSegment): LiveSegmentUser{
         logger.info("Pushing directly; details: $event for live-segment-id: ${liveSegment.id}")
-//         eventStream.outLiveSegment().send(MessageBuilder.withPayload(LiveSegmentUser(liveSegment.id, liveSegment.segmentId, event.clientId, event.userId, event.creationTime)).build())
+         eventStream.outLiveSegment().send(MessageBuilder.withPayload(LiveSegmentUser(liveSegment.id, liveSegment.segmentId, event.clientId, event.userId, event.creationTime)).build())
     return LiveSegmentUser(liveSegment.id, liveSegment.segmentId, event.clientId, event.userId, event.creationTime)
 
 }
 
-    @SendTo("outLiveSegment")
+//    @SendTo("outLiveSegment")
     private fun sendJobToLiveSegmentQueue(params: LiveSegmentUserCheck, liveSegment: LiveSegment): LiveSegmentUser{
         logger.info("Pushing through job checks; details: $params for live-segment-id: ${liveSegment.id}")
         val startEventTime = dateUtils.convertDateTimeToDate(dateUtils.parseDateTime(params.startEventTime))
-        return LiveSegmentUser(liveSegment.id, liveSegment.segmentId, params.clientId.toLong(), params.userId, startEventTime)
+    eventStream.outLiveSegment().send(MessageBuilder.withPayload(LiveSegmentUser(liveSegment.id, liveSegment.segmentId, params.clientId.toLong(), params.userId, startEventTime)).build())
+    return LiveSegmentUser(liveSegment.id, liveSegment.segmentId, params.clientId.toLong(), params.userId, startEventTime)
     }
 
-    @SendTo("scheduleJobSend")
+//    @SendTo("scheduleJobSend")
     private fun sendToScheduleJob(event: EventMessage, liveSegment: LiveSegment): JobDescriptor{
         logger.info("Pushing scheduled job, details: $event for live-segment-id: ${liveSegment.id}")
+        eventStream.scheduleJobSend().send(MessageBuilder.withPayload(buildJobDescriptor(event, liveSegment)).build())
         return buildJobDescriptor(event, liveSegment)
     }
 
