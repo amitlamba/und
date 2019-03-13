@@ -5,8 +5,10 @@ import com.und.livesegment.model.webmodel.WebLiveSegment
 import com.und.livesegment.service.LiveSegmentService
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.CustomException
+import com.und.web.model.DidEvents
 import com.und.web.model.Response
 import com.und.web.model.ResponseStatus
+import com.und.web.model.Segment
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -35,11 +37,7 @@ class LiveSegmentController {
     fun saveLiveSegment(@Valid @RequestBody liveSegment: WebLiveSegment):ResponseEntity<HttpStatus>{
         val clientId=AuthenticationUtils.clientID?:throw throw AccessDeniedException("Access Denied.")
         val appUserId=AuthenticationUtils.principal.id
-        if(liveSegment.segment==null){
-            throw CustomException("Failed To save Segment. Segment not be null.")
-        }else{
-
-        }
+        liveSegmentService.segmentValidator(liveSegment.segment)
         return try {
             liveSegmentService.saveLiveSegment(liveSegment,clientId,appUserId)
             ResponseEntity(HttpStatus.CREATED)
