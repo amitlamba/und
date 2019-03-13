@@ -9,7 +9,7 @@ class WebLiveSegment {
     var id:Long=0L
     var clientId:Long?=null
     @NotNull
-    lateinit var segment:Segment
+    var segment:Segment?=null
     @NotNull
     lateinit var liveSegmentType:String
 

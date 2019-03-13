@@ -35,6 +35,11 @@ class LiveSegmentController {
     fun saveLiveSegment(@Valid @RequestBody liveSegment: WebLiveSegment):ResponseEntity<HttpStatus>{
         val clientId=AuthenticationUtils.clientID?:throw throw AccessDeniedException("Access Denied.")
         val appUserId=AuthenticationUtils.principal.id
+        if(liveSegment.segment==null){
+            throw CustomException("Failed To save Segment. Segment not be null.")
+        }else{
+
+        }
         return try {
             liveSegmentService.saveLiveSegment(liveSegment,clientId,appUserId)
             ResponseEntity(HttpStatus.CREATED)
