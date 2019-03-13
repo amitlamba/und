@@ -296,6 +296,7 @@ class LiveSegmentProcessingService {
         jobDetail.properties = properties
 
         val jobDescriptor = JobDescriptor()
+        jobDescriptor.action=JobDescriptor.Action.CREATE
         jobDescriptor.clientId = liveSegment.clientID.toString()
         jobDescriptor.jobDetail = jobDetail
         jobDescriptor.triggerDescriptors = listOf(buildTriggerDescriptor(event.creationTime, liveSegment.interval))

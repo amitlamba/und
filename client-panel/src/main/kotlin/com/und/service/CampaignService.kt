@@ -461,36 +461,47 @@ class CampaignService {
         val campaignId = action.campaignId.toLong()
         val campignName = action.campaignName
         val actionPerformed = action.action
-        when {
-            status == JobActionStatus.Status.COMPLETED -> {
-                campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.COMPLETED.name)
-                logger.info(" Campaign Schedule created $campaignId")
-            }
-            status == JobActionStatus.Status.OK -> {
-                campaignRepository.updateScheduleStatus(campaignId, clientId, actionToCampaignStatus(actionPerformed).name)
-                logger.info(" Campaign Schedule created $campaignId")
-            }
-            status == JobActionStatus.Status.DUPLICATE -> {
-                //campaignRepository.updateScheduleStatus(campaignId, clientId, actionToCampaignStatus(actionPerformed).name)
-                logger.error(" Campaign Schedule is duplicate for  $campaignId")
-            }
-            actionPerformed == JobDescriptor.Action.CREATE -> {
-                campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.ERROR.name)
-                logger.error(" Campaign Schedule couldn't be created for $campaignId")
-            }
-            else -> {
-                logger.error("  Schedule action couldn't be performed for $campaignId")
+
+        //TODO here handle case of live segment campaign
+        //if end or start date are not null or schedule is not empty string I am saving empty string in case of live segment
+        //Better to cache it.
+        val campaign=campaignRepository.findByIdAndClientID(campaignId,clientId)
+        campaign.ifPresent{
+            it.schedule?.let {
+                if(it.isEmpty()){
+                    when {
+                        status == JobActionStatus.Status.COMPLETED -> {
+                            campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.COMPLETED.name)
+                            logger.info(" Campaign Schedule created $campaignId")
+                        }
+                        status == JobActionStatus.Status.OK -> {
+                            campaignRepository.updateScheduleStatus(campaignId, clientId, actionToCampaignStatus(actionPerformed).name)
+                            logger.info(" Campaign Schedule created $campaignId")
+                        }
+                        status == JobActionStatus.Status.DUPLICATE -> {
+                            //campaignRepository.updateScheduleStatus(campaignId, clientId, actionToCampaignStatus(actionPerformed).name)
+                            logger.error(" Campaign Schedule is duplicate for  $campaignId")
+                        }
+                        actionPerformed == JobDescriptor.Action.CREATE -> {
+                            campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.ERROR.name)
+                            logger.error(" Campaign Schedule couldn't be created for $campaignId")
+                        }
+                        else -> {
+                            logger.error("  Schedule action couldn't be performed for $campaignId")
+                        }
+                    }
+
+                    val auditLog = CampaignAuditLog()
+                    auditLog.campaignId = campaignId
+                    auditLog.clientID = clientId
+                    auditLog.status = status
+                    auditLog.action = action.action
+                    auditLog.message = jobActionStatus.message
+
+                    campaignAuditRepository.save(auditLog)
+                }
             }
         }
-
-        val auditLog = CampaignAuditLog()
-        auditLog.campaignId = campaignId
-        auditLog.clientID = clientId
-        auditLog.status = status
-        auditLog.action = action.action
-        auditLog.message = jobActionStatus.message
-
-        campaignAuditRepository.save(auditLog)
 
     }
 
