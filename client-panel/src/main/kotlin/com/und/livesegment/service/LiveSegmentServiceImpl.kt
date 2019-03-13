@@ -50,7 +50,7 @@ class LiveSegmentServiceImpl : LiveSegmentService {
     }
 
     override fun saveLiveSegment(segment: WebLiveSegment,clientId: Long,appUserId: Long?) {
-         val jpaSegment=buildSegment(segment.segment,clientId,appUserId)
+         val jpaSegment=buildSegment(segment.segment!!,clientId,appUserId)
         val liveJpaSegment=buildLiveSegment(segment,clientId)
         saveLiveSegment(jpaSegment,liveJpaSegment)
     }
