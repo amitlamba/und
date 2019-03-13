@@ -114,8 +114,8 @@ class LiveSegmentServiceImpl : LiveSegmentService {
             liveSegmentType = segment.liveSegmentType
             startEvent = segment.startEvent
             endEvent = segment.endEvent
-            startEventFilter = getSimpleJsonStringOfObject(segment.startEventFilter)
-            endEventFilter = getSimpleJsonStringOfObject(segment.endEventFilter)
+            startEventFilter = getSimpleJsonStringOfObject(segment.startEventFilters)
+            endEventFilter = getSimpleJsonStringOfObject(segment.endEventFilters)
             interval = segment.interval
             endEventDone = segment.endEventDone
         }
@@ -133,8 +133,8 @@ class LiveSegmentServiceImpl : LiveSegmentService {
             interval=liveSegment.interval
             startEvent=liveSegment.startEvent
             endEvent=liveSegment.endEvent
-            startEventFilter=getPropertyFilterListFromJsonString(liveSegment.startEventFilter)
-            endEventFilter=getPropertyFilterListFromJsonString(liveSegment.endEventFilter)
+            startEventFilters=getPropertyFilterListFromJsonString(liveSegment.startEventFilter)
+            endEventFilters=getPropertyFilterListFromJsonString(liveSegment.endEventFilter)
         }
         return liveWebSegment
     }
