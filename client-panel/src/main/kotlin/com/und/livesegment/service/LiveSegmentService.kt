@@ -2,6 +2,7 @@ package com.und.livesegment.service
 
 import com.und.livesegment.model.jpa.LiveSegment
 import com.und.livesegment.model.webmodel.WebLiveSegment
+import com.und.web.model.Segment
 import org.springframework.stereotype.Service
 
 @Service
@@ -18,4 +19,6 @@ interface LiveSegmentService {
     fun getLiveSegmentByClientIDAndId(clientId: Long,id:Long):WebLiveSegment
 
     fun getLiveSegmentUsersCount(clientId: Long,segmentId:Long):Long
+
+    fun segmentValidator(segment:Segment?)
 }

@@ -12,6 +12,7 @@ import com.und.repository.jpa.UserRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.SegmentService
 import com.und.web.controller.exception.CustomException
+import com.und.web.model.DidEvents
 import com.und.web.model.PropertyFilter
 import com.und.web.model.Segment
 import com.und.model.jpa.Segment as JpaSegment
@@ -155,5 +156,18 @@ class LiveSegmentServiceImpl : LiveSegmentService {
 
     private fun getSimpleJsonStringOfObject(instance:Any):String{
         return objectMapper.writeValueAsString(instance)
+    }
+
+    override fun segmentValidator(segment: Segment?) {
+        if (segment == null) {
+            throw CustomException("Failed To save Segment. Segment not be null.")
+        } else {
+            if (segment.didEvents == null) {
+                segment.didEvents = DidEvents()
+            }
+            if (segment.didNotEvents==null){
+                segment.didNotEvents= DidEvents()
+            }
+        }
     }
 }
