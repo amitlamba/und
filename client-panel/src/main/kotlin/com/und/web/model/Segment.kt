@@ -29,7 +29,7 @@ class Segment : Serializable {
     var didNotEvents: DidEvents? = null
     var globalFilters: List<GlobalFilter> = listOf()
     var geographyFilters: List<Geography> = listOf()
-    var liveSegment: LiveSegment?=null
+    var liveSegment: WebLiveSegment?=null
 }
 
 class DidEvents : Serializable {

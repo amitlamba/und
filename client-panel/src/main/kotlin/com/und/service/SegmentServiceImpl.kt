@@ -1,8 +1,10 @@
 package com.und.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.und.common.utils.loggerFor
 import com.und.livesegment.model.jpa.LiveSegment
+import com.und.livesegment.model.webmodel.WebLiveSegment
 import com.und.livesegment.repository.jpa.LiveSegmentRepository
 import com.und.model.jpa.Segment
 import com.und.model.mongo.eventapi.EventUser
@@ -277,7 +279,7 @@ class SegmentServiceImpl : SegmentService {
         if (livSegment != null) {
             val webSegment = buildWebSegment(segment)
             with(webSegment) {
-                liveSegment = livSegment
+                liveSegment = buildLiveSegmentForWeb(livSegment)
             }
             return webSegment
         } else {
@@ -285,6 +287,21 @@ class SegmentServiceImpl : SegmentService {
         }
     }
 
+    private fun buildLiveSegmentForWeb(liveSegment:LiveSegment):WebLiveSegment{
+        val webLiveSegment= WebLiveSegment()
+        with(webLiveSegment){
+            id=liveSegment.id
+            clientId=liveSegment.clientID
+            liveSegmentType=liveSegment.liveSegmentType
+            startEvent=liveSegment.startEvent
+            endEvent=liveSegment.endEvent
+            startEventFilters=objectMapper.readValue(liveSegment.startEventFilter)
+            endEventFilters=objectMapper.readValue(liveSegment.endEventFilter)
+            interval=liveSegment.interval
+            endEventDone=liveSegment.endEventDone
+        }
+        return webLiveSegment
+    }
     private fun buildEventUserList(eventUserList: List<EventUser>): List<EventUserWeb> {
         var eventUserListWeb: List<EventUserWeb> = emptyList()
         val eventUserService = EventUserService()
