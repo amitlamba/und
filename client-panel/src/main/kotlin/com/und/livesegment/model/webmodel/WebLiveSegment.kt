@@ -18,9 +18,9 @@ class WebLiveSegment {
 
     var endEvent: String = ""
 
-    var startEventFilter  = emptyList<PropertyFilter>()
+    var startEventFilters  = emptyList<PropertyFilter>()
 
-    var endEventFilter  = emptyList<PropertyFilter>()
+    var endEventFilters  = emptyList<PropertyFilter>()
 
     var interval: Long = 0L
 
