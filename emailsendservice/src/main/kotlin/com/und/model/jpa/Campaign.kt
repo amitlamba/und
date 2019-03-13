@@ -69,9 +69,27 @@ class Campaign {
     @Column(name = "from_user")
     var fromUser: String? = null
 
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    var status:CampaignStatus = CampaignStatus.SCHEDULE_PENDING
+
+
     @Column(name="start_date")
     var startDate:LocalDateTime?=null
 
     @Column(name="end_date")
     var endDate:LocalDateTime?=null
+}
+
+enum class CampaignStatus {
+    PAUSED,
+    RESUMED,
+    CREATED,
+    ERROR,
+    SCHEDULE_PENDING,
+    SCHEDULE_ERROR,
+    DELETED,
+    STOPPED,
+    COMPLETED,
+    FORCE_PAUSED
 }

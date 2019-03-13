@@ -133,6 +133,12 @@ class Schedule {
     var recurring: ScheduleRecurring? = null
 }
 
+class LiveSchedule {
+    var nowOrLater: Now? = Now.Now
+    var startTime: CampaignTime? = null
+    var endTime: CampaignTime? = null
+}
+
 class ScheduleOneTime {
     var nowOrLater: Now? = Now.Later
     var campaignDateTime: CampaignTime? = null
@@ -189,6 +195,27 @@ class CampaignTime {
         return LocalDateTime.of(date, localTime)
     }
 }
+
+fun toCampaignTime(date:LocalDateTime?):CampaignTime?{
+    date?.let {
+        val minutes = date.minute
+        val hours = date.hour //24 hours
+        val dates = date.toLocalDate()
+        var aMpM = when (hours) {
+            in 0..11 -> AmPm.AM
+            else -> AmPm.PM
+        }
+        val campaignTime = CampaignTime()
+        campaignTime.ampm = aMpM
+        campaignTime.hours = hours
+        campaignTime.minutes = minutes
+        campaignTime.date = dates
+        print("minutes $minutes hours $hours date $dates")
+        return campaignTime
+    }
+    return null
+}
+
 enum class Now {
     Now,
     Later

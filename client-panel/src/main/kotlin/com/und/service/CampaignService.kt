@@ -91,9 +91,11 @@ class CampaignService {
             val persistedCampaign = campaignRepository.save(campaign)
 
             webCampaign.id = persistedCampaign.id
-            logger.info("sending request to scheduler ${campaign.name}")
-            val jobDescriptor = buildJobDescriptor(webCampaign, JobDescriptor.Action.CREATE)
-            val sendToKafka = sendToKafka(jobDescriptor)
+            if (webCampaign.schedule!=null) {
+                logger.info("sending request to scheduler ${campaign.name}")
+                val jobDescriptor = buildJobDescriptor(webCampaign, JobDescriptor.Action.CREATE)
+                val sendToKafka = sendToKafka(jobDescriptor)
+            }
             return persistedCampaign
         }catch (ex:ConstraintViolationException){
             logger.error("Exception In Campaign Save clientId ${campaign.clientID} constaintsName ${ex.constraintName} cause ${ex.cause?.message}")
@@ -209,17 +211,26 @@ class CampaignService {
                 }
 
             }
-
             if(webCampaign.schedule!=null) schedule =  objectMapper.writeValueAsString(webCampaign.schedule)
-        }
+            else{
+                var liveSchedule=webCampaign.liveSchedule
 
-        webCampaign.liveCampaignDates?.let{
-            var time=it.multipleDates?.campaignDateTimeList
-            var start=time?.get(0)?.toLocalDateTime()
-            var end=time?.get(1)?.toLocalDateTime()
-            campaign.startDate=start
-            campaign.endDate=end
-            campaign.schedule=objectMapper.writeValueAsString(it)
+                liveSchedule?.let {
+                    val startTime=when(it.nowOrLater){
+                        Now.Now -> LocalDateTime.now()
+                        else -> it.startTime!!.toLocalDateTime()
+                    }
+                    var endTime=when(it.nowOrLater){
+                        Now.Now -> LocalDateTime.MAX
+                        else -> it.endTime?.toLocalDateTime()
+                    }
+                    if(endTime==null) endTime = LocalDateTime.MAX
+                    campaign.startDate=startTime
+                    campaign.endDate=endTime
+                    campaign.status=CampaignStatus.CREATED
+                    campaign.schedule="{}"
+                }
+            }
         }
 
         when (webCampaign.campaignType) {
@@ -291,12 +302,16 @@ class CampaignService {
             conversionEvent=campaign.conversionEvent
             serviceProviderId=campaign.serviceProviderId
             fromUser=campaign.fromUser
-
-
-            if(campaign.startDate!=null) liveCampaignDates = objectMapper.readValue(campaign.schedule, Schedule::class.java)
-            else schedule = objectMapper.readValue(campaign.schedule, Schedule::class.java)
         }
 
+        if(campaign.startDate!=null) {
+            val liveSchedule=LiveSchedule()
+            liveSchedule.startTime= toCampaignTime(campaign.startDate)
+            liveSchedule.endTime= toCampaignTime(campaign.endDate)
+            webCampaign.liveSchedule=liveSchedule
+
+        }
+        else webCampaign.schedule = objectMapper.readValue(campaign.schedule, Schedule::class.java)
 
         if (campaign.emailCampaign != null) {
             val emailcampaign = campaign.emailCampaign
