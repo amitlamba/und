@@ -86,8 +86,12 @@ class SegmentServiceImpl : SegmentService {
             val segments = segmentRepository.findByClientID(clientID)
             val liveSegments = liveSegmentRepository.findByClientID(clientID)
             segments?.forEach {
-                val liveSegment = liveSegments.get().find { liveSegment -> liveSegment.segmentId == it.id }
-                websegments.add(buildWebSegmentWithLive(it, liveSegment))
+                if(liveSegments.isPresent) {
+                    val liveSegment = liveSegments.get().find { liveSegment -> liveSegment.segmentId == it.id }
+                    websegments.add(buildWebSegmentWithLive(it, liveSegment))
+                }else{
+                    websegments.add(buildWebSegmentWithLive(it, null))
+                }
             }
         }
 
