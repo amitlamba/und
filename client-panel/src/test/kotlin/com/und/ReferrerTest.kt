@@ -1,10 +1,13 @@
 package com.und
 
+import com.und.model.jpa.AmPm
+import com.und.model.jpa.CampaignTime
 import org.junit.Test
 import java.net.URI
 import java.util.regex.Pattern
 import java.net.URISyntaxException
-
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 
 class ReferrerTest {
@@ -47,5 +50,23 @@ class ReferrerTest {
         } catch (ex: URISyntaxException) {
             return false
         }
+    }
+
+    @Test
+    fun toCampaignTime() {
+        val date=LocalDateTime.of(2019,3,13,11,59)
+        val minutes=date.minute
+        val hours=date.hour //24 hours
+        val dates=date.toLocalDate()
+        var aMpM = when(hours){
+            in 0 .. 11 -> AmPm.AM
+            else -> AmPm.PM
+        }
+        val campaignTime=CampaignTime()
+        campaignTime.ampm= aMpM
+        campaignTime.hours=hours
+        campaignTime.minutes=minutes
+        campaignTime.date=dates
+        print("minutes $minutes hours $hours date $dates ampm $aMpM")
     }
 }

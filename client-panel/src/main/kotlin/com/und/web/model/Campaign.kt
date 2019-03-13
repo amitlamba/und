@@ -3,6 +3,7 @@ package com.und.web.model
 import com.und.model.CampaignStatus
 import com.und.model.jpa.CampaignType
 import com.und.model.jpa.Schedule
+import com.und.model.jpa.LiveSchedule
 import java.time.LocalDateTime
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
@@ -30,7 +31,7 @@ class Campaign {
     var serviceProviderId:Long?=null
     var fromUser:String?=null
     var clientEmailSettingId:Long?=null
-    var liveCampaignDates:Schedule?=null
+    var liveSchedule: LiveSchedule? = null
 
 }
 
