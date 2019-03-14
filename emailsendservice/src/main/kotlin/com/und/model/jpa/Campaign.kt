@@ -71,6 +71,7 @@ class Campaign {
 
     @Enumerated(EnumType.STRING)
     @NotNull
+    @Column(name="campaign_status")
     var status:CampaignStatus = CampaignStatus.SCHEDULE_PENDING
 
 

@@ -32,6 +32,7 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Component
+import java.time.ZoneId
 import java.util.*
 
 @Component
@@ -126,10 +127,10 @@ class LiveSegmentProcessingService {
     }
 
 //    @SendTo("scheduleLiveJobSend")
-    private fun sendToScheduleJob(event: EventMessage, liveSegment: LiveSegment): JobDescriptor{
+    private fun sendToScheduleJob(event: EventMessage, liveSegment: LiveSegment,timeZoneId: ZoneId): JobDescriptor{
         logger.info("Pushing scheduled job, details: $event for live-segment-id: ${liveSegment.id}")
-        eventStream.scheduleLiveJobSend().send(MessageBuilder.withPayload(buildJobDescriptor(event, liveSegment)).build())
-        return buildJobDescriptor(event, liveSegment)
+        eventStream.scheduleLiveJobSend().send(MessageBuilder.withPayload(buildJobDescriptor(event, liveSegment,timeZoneId)).build())
+        return buildJobDescriptor(event, liveSegment,timeZoneId)
     }
 
     private fun processStartEventChecks(event: EventMessage){
@@ -153,10 +154,11 @@ class LiveSegmentProcessingService {
                 return@forEach
             }
 
+            val timeZoneId=userSettingsService.getTimeZoneByClientId(event.clientId)
             if(liveSegment.endEvent.isBlank())
                 sendToLiveSegmentQueue(event, liveSegment)
             else
-                sendToScheduleJob(event, liveSegment)
+                sendToScheduleJob(event, liveSegment,timeZoneId)
         }
     }
 
@@ -281,7 +283,7 @@ class LiveSegmentProcessingService {
         return false
     }
 
-    private fun buildJobDescriptor(event: EventMessage, liveSegment: LiveSegment): JobDescriptor {
+    private fun buildJobDescriptor(event: EventMessage, liveSegment: LiveSegment,timeZoneId:ZoneId): JobDescriptor {
         val properties = LiveSegmentJobDetailProperties()
         properties.clientId = liveSegment.clientID.toString()
         properties.segmentId = liveSegment.id.toString()
@@ -300,6 +302,7 @@ class LiveSegmentProcessingService {
         jobDescriptor.action=JobDescriptor.Action.CREATE
         jobDescriptor.clientId = liveSegment.clientID.toString()
         jobDescriptor.jobDetail = jobDetail
+        jobDescriptor.timeZoneId= timeZoneId
         jobDescriptor.triggerDescriptors = listOf(buildTriggerDescriptor(event.creationTime, liveSegment.interval))
 
         return jobDescriptor
