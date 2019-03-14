@@ -16,6 +16,7 @@ interface CampaignRepository : JpaRepository<Campaign, Long> {
                       c.id,
                       c.segmentation_id,
                       c.campaign_type,
+                      c.campaign_status,
                       c.service_provider_id,
                       ec.email_template_id,
                       et.name as email_template_name,
@@ -23,6 +24,8 @@ interface CampaignRepository : JpaRepository<Campaign, Long> {
                       et.from_user as email_from_user,
                       st.from_user as sms_from_user,
                       c.client_id,
+                      c.start_date,
+                      c.end_date,
                       ac.template_id as android_template_id,
                       wc.template_id as web_template_id
                     from campaign c
