@@ -125,10 +125,10 @@ class LiveSegmentProcessingService {
     return LiveSegmentUser(liveSegment.id, liveSegment.segmentId, params.clientId.toLong(), params.userId, startEventTime)
     }
 
-//    @SendTo("scheduleJobSend")
+//    @SendTo("scheduleLiveJobSend")
     private fun sendToScheduleJob(event: EventMessage, liveSegment: LiveSegment): JobDescriptor{
         logger.info("Pushing scheduled job, details: $event for live-segment-id: ${liveSegment.id}")
-        eventStream.scheduleJobSend().send(MessageBuilder.withPayload(buildJobDescriptor(event, liveSegment)).build())
+        eventStream.scheduleLiveJobSend().send(MessageBuilder.withPayload(buildJobDescriptor(event, liveSegment)).build())
         return buildJobDescriptor(event, liveSegment)
     }
 
