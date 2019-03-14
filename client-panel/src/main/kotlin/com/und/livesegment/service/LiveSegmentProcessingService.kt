@@ -291,6 +291,7 @@ class LiveSegmentProcessingService {
         properties.userId = event.userId
 
         val jobDetail = JobDetail()
+        jobDetail.jobType=JobDetail.JobType.LIVESEGMENT
         jobDetail.jobName = "${liveSegment.id}-${event.eventId}-${event.userId}"
         jobDetail.jobGroupName = "${liveSegment.clientID}-${liveSegment.id}"
         jobDetail.properties = properties
