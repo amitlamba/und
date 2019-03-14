@@ -10,6 +10,9 @@ interface EventStream {
     @Input("scheduleJobReceive")
     fun scheduleJobReceive(): SubscribableChannel
 
+    @Input("scheduleLiveJobReceive")
+    fun scheduleLiveJobReceive(): SubscribableChannel
+
     @Output("scheduleJobAckSend")
     fun scheduleJobAck(): MessageChannel
 
@@ -18,5 +21,7 @@ interface EventStream {
 
     @Output("outJobForLiveSegmentCheck")
     fun outJobForLiveSegment(): MessageChannel
+
+
 
 }

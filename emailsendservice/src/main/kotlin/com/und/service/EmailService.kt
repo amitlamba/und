@@ -93,7 +93,8 @@ class EmailService {
         val (subject, body) = emailHelperService.subjectAndBody(emailToSend)
 
 
-        emailToSend.emailBody = body.addUrlTracking(mongoEmailId).addPixelTracking(mongoEmailId)
+        emailToSend.emailBody = body.addUrlTracking(mongoEmailId)
+//                .addPixelTracking(mongoEmailId)
         emailToSend.emailSubject = subject
 
 //        if (isSystemClient(email)) {

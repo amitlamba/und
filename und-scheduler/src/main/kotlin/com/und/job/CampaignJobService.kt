@@ -84,7 +84,30 @@ class CampaignJobService(private val jobService: JobService, private val eventSt
 
 
     }
+    @StreamListener("scheduleLiveJobReceive")
+    fun saveLiveSegmentJob(jobDescriptor: JobDescriptor){
+        val action = jobDescriptor.action
+        when (action) {
+            JobDescriptor.Action.CREATE -> {
+                val trigger = jobDescriptor.triggerDescriptors.first()
+                val fireTime = trigger.fireTime
+                val cron = trigger.cron
+                val fireTimes = trigger.fireTimes
+                if (cron === null && fireTime == null && fireTimes != null && fireTimes.isNotEmpty()) {
+                    multipleDateTrigger(fireTimes, jobDescriptor)
 
+                } else {
+                    performAction(jobDescriptor, jobService::createJob)
+                }
+            }
+            JobDescriptor.Action.NOTHING-> {
+                val status = jobActionStatus(jobDescriptor, action)
+                status.status = JobActionStatus.Status.NOTFOUND
+                status.message = "No action with this name can be performed"
+                status
+            }
+        }
+    }
     private fun multipleDateTrigger(fireTimes: List<LocalDateTime>, jobDescriptor: JobDescriptor): JobActionStatus {
         val trigger: TriggerDescriptor = jobDescriptor.triggerDescriptors.first()
         val actions = mutableListOf<JobActionStatus>()
