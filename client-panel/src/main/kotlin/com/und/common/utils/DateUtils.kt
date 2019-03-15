@@ -54,7 +54,10 @@ class DateUtils : Serializable {
         }
     }
 
-
+    fun formatDateToOffsetDate(dateToConvert:Date):String{
+        val systemDefaultOffset=OffsetDateTime.now(ZoneId.systemDefault()).offset
+        return dateToConvert.toInstant().atOffset(systemDefaultOffset).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+    }
     fun parseDateTime(date: String): LocalDateTime {
         return LocalDateTime.parse(date, dateTimeFormatter)
     }

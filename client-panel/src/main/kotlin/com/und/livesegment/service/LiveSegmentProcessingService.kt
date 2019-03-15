@@ -32,7 +32,10 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Component
+import java.time.OffsetDateTime
 import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Component
@@ -286,7 +289,8 @@ class LiveSegmentProcessingService {
         properties.segmentId = liveSegment.id.toString()
         properties.startEventId = event.eventId
         properties.startEventName = event.name
-        properties.startEventTime = this.dateUtils.convertDateToDateTime(event.creationTime).toString()
+//        properties.startEventTime = this.dateUtils.convertDateToDateTime(event.creationTime).toString()
+        properties.startEventTime= dateUtils.formatDateToOffsetDate(event.creationTime)
         properties.userId = event.userId
 
         val jobDetail = JobDetail()
