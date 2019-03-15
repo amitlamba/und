@@ -90,7 +90,8 @@ class CampaignListener {
                 segmentId = segmentId,
                 userId = userId
         )
-        liveSegmentTrackRepository.save(liveSegmentTrack)
+        mongoTemplate.save(liveSegmentTrack,"${clientId}_livesegmenttrack")
+        val v=liveSegmentTrackRepository.save(liveSegmentTrack)
     }
 
 
