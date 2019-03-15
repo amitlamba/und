@@ -6,8 +6,10 @@ import org.junit.Test
 import java.net.URI
 import java.util.regex.Pattern
 import java.net.URISyntaxException
-import java.time.LocalDate
-import java.time.LocalDateTime
+import java.sql.Timestamp
+import java.time.*
+import java.time.format.DateTimeFormatter
+import java.util.*
 
 
 class ReferrerTest {
@@ -68,5 +70,14 @@ class ReferrerTest {
         campaignTime.minutes=minutes
         campaignTime.date=dates
         print("minutes $minutes hours $hours date $dates ampm $aMpM")
+    }
+
+    @Test
+    fun testDateTimeFormatter(){
+        var v= OffsetDateTime.now(ZoneId.systemDefault()).offset
+        var date=Date().toInstant().atOffset(v).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        println(date)
+        val newDate=LocalDateTime.parse(date, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+
     }
 }

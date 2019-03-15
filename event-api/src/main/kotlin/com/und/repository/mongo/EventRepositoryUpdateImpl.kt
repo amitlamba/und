@@ -67,10 +67,11 @@ class EventRepositoryUpdateImpl : EventRepositoryUpdate {
             /***find all those event that are identified with this identity.
              * And put them in queue for live segment processing
              * **/
-            val query = Query().addCriteria(Criteria
-                    .where("deviceId").`is`(identity.deviceId)
-                    .and("userId").`is`(userId))
-            processEventForLiveSegment(query)
+            //FIXME we are processing same event two times.
+//            val query = Query().addCriteria(Criteria
+//                    .where("deviceId").`is`(identity.deviceId)
+//                    .and("userId").`is`(userId))
+//            processEventForLiveSegment(query)
         }
 
 
