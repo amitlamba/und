@@ -134,7 +134,7 @@ class Schedule {
 }
 
 class LiveSchedule {
-    var nowOrLater: Now? = Now.Now
+    var nowOrLater: Now? = Now.Later
     var startTime: CampaignTime? = null
     var endTime: CampaignTime? = null
 }

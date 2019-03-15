@@ -14,7 +14,7 @@ class CustomLiveSegmentUserTrackRepositoryImpl:CustomLiveSegmentUserTrackReposit
     private lateinit var mongoTemplate: MongoTemplate
 
     override fun findCountByClientIdAndLiveSegmentId(clientId: Long, liveSegmentId: Long): Long {
-        val matchOperation=Aggregation.match(Criteria.where("clientId").`is`(clientId).and("liveSegmentId").`is`(liveSegmentId))
+        val matchOperation=Aggregation.match(Criteria.where("clientID").`is`(clientId).and("liveSegmentId").`is`(liveSegmentId))
         val countOperation=Aggregation.count().`as`("count")
         val query=Aggregation.newAggregation(matchOperation,countOperation)
         val result= mongoTemplate.aggregate(query,"${clientId}_livesegmenttrack",UserCount::class.java).mappedResults
@@ -22,7 +22,7 @@ class CustomLiveSegmentUserTrackRepositoryImpl:CustomLiveSegmentUserTrackReposit
     }
 
     override fun findCountByClientIdAndSegmentId(clientId: Long, segmentId: Long): Long {
-        val matchOperation=Aggregation.match(Criteria.where("clientId").`is`(clientId).and("segmentId").`is`(segmentId))
+        val matchOperation=Aggregation.match(Criteria.where("clientID").`is`(clientId).and("segmentId").`is`(segmentId))
         val countOperation=Aggregation.count().`as`("count")
         val query=Aggregation.newAggregation(matchOperation,countOperation)
         val result= mongoTemplate.aggregate(query,"${clientId}_livesegmenttrack",UserCount::class.java).mappedResults
