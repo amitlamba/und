@@ -95,6 +95,12 @@ class LiveSegmentServiceImpl : LiveSegmentService {
         return liveSegmentUserRepository.findCountByClientIdAndSegmentId(clientId, segmentId)
     }
 
+    override fun getJpaLiveSegmentByClientIdAndId(clientId: Long, id: Long): LiveSegment {
+        val liveSegment=liveSegmentRepository.findByClientIDAndId(clientId, id)
+        if(liveSegment.isPresent) return liveSegment.get()
+        else throw CustomException("Live Segment with id $id clientId $clientId not found")
+    }
+
     private fun buildSegment(websegment: Segment, clientId: Long, appUserId:Long?): JpaSegment {
         val segment = JpaSegment()
         with(segment) {
