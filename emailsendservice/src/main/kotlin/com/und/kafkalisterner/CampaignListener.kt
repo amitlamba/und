@@ -90,8 +90,12 @@ class CampaignListener {
                 segmentId = segmentId,
                 userId = userId
         )
+        //TODO write it in dao layer.
         mongoTemplate.save(liveSegmentTrack,"${clientId}_livesegmenttrack")
-        val v=liveSegmentTrackRepository.save(liveSegmentTrack)
+        /**
+         * in below code collection name is not resolve because on system call #{tenantProvider.getTenant()} not available.
+         */
+//        val v=liveSegmentTrackRepository.save(liveSegmentTrack)
     }
 
 
