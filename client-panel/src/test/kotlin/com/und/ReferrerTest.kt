@@ -74,10 +74,12 @@ class ReferrerTest {
 
     @Test
     fun testDateTimeFormatter(){
+        println( LocalDateTime.now(ZoneId.of("UTC")).toString())
         var v= OffsetDateTime.now(ZoneId.systemDefault()).offset
         var date=Date().toInstant().atOffset(v).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
         println(date)
         val newDate=LocalDateTime.parse(date, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-
+                .plusSeconds(60).atOffset(v).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+        println(newDate)
     }
 }

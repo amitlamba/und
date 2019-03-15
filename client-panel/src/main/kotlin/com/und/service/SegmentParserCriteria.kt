@@ -661,11 +661,15 @@ class SegmentParserCriteria {
             DateOperator.Between -> {
                 var startDate = dateUtils.getStartOfDay(values.first(), tz)
                 var endDate = dateUtils.getMidnight(values.last(), tz)
+                println(startDate)
+                println(endDate)
                 Criteria.where(fieldName).gte(startDate).lte(endDate)
             }
             DateOperator.BetweenTime -> {
-                var startDateTime = dateUtils.parseDateTime(values.first())
-                var endDateTime = dateUtils.parseDateTime(values.last())
+//                var startDateTime = dateUtils.parseDateTime(values.first())
+//                var endDateTime = dateUtils.parseDateTime(values.last())
+                var startDateTime=dateUtils.convertDateTimeToDate(dateUtils.parseDateTime(values.first()))
+                var endDateTime=dateUtils.convertDateTimeToDate(dateUtils.parseDateTime(values.last()))
                 Criteria.where(fieldName).gte(startDateTime).lte(endDateTime)
             }
         //absolute comparison ends

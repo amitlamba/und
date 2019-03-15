@@ -235,6 +235,7 @@ class LiveSegmentProcessingService {
 
         val dateFilter = DateFilter()
         dateFilter.operator = DateOperator.AfterTime
+        //TODO fic date time
         dateFilter.values = listOf(dateUtils.convertDateToDateTime(event.creationTime).minusSeconds(liveSegment.interval).toString())
         startEvent.dateFilter = dateFilter
 
@@ -254,7 +255,10 @@ class LiveSegmentProcessingService {
 
         val dateFilter = DateFilter()
         dateFilter.operator = DateOperator.BetweenTime
-        dateFilter.values = listOf(params.startEventTime, dateUtils.parseDateTime(params.startEventTime).plusSeconds(liveSegment.interval).toString())
+        dateFilter.values = listOf(
+                params.startEventTime, /*dateUtils.parseDateTime(params.startEventTime).plusSeconds(liveSegment.interval)*/
+                dateUtils.addSecondsInOffsetTime(dateUtils.parseDateTime(params.startEventTime).plusSeconds(liveSegment.interval))
+        )
         endEvent.dateFilter = dateFilter
 
         return eventPropertiesMatched(endEvent, null, params.userId, params.clientId.toLong())
@@ -265,6 +269,8 @@ class LiveSegmentProcessingService {
         val propertyFilters = this.segmentParserCriteria.parsePropertyFilters(event, tz)
 
         val otherFilters = mutableListOf<Criteria>()
+        //TODO name not added in criteria
+        otherFilters.add(Criteria.where("name").`is`(event.name))
         otherFilters.add(Criteria.where("userId").`is`(userId))
 
 //        var objectId=ConvertOperators.ToObjectId.toObjectId(eventId)
