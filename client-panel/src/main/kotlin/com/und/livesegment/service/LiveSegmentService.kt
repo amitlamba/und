@@ -21,4 +21,6 @@ interface LiveSegmentService {
     fun getLiveSegmentUsersCount(clientId: Long,segmentId:Long):Long
 
     fun segmentValidator(segment:Segment?)
+
+    fun getJpaLiveSegmentByClientIdAndId(clientId: Long,id: Long):LiveSegment
 }

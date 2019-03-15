@@ -62,7 +62,7 @@ class CampaignListener {
 
             trackSegmentUser(clientId, liveSegmentId, segmentId, userId)
             //get all campaigns associated with live segmentid
-            /***FIXED findById return empty
+            /***FIXED findById return empty but user present for this userId
              *case 1 Id is String type in our repository but in real case its ObjectId in mongo.I try it but no success.
              *case 2 I think spring resolve it to id field as we see in jpa  but in mongo its _id This may be reason but not sure.
             **/
@@ -70,7 +70,7 @@ class CampaignListener {
             val user=mongoTemplate.find(Query().addCriteria(Criteria.where("_id").`is`(ObjectId(userId))),EventUser::class.java,"${clientId}_eventUser")
             if(user.isEmpty()) throw EventUserNotFoundException("User Not Found.")
             val campaignList = campaignService.findLiveSegmentCampaign(segmentId, clientId)
-            //FIXME if campaign list is empty then update the status of campaign to completed for this segment id.else make it running.
+            //FIXME if campaign list is empty then update the status of campaign to completed for this segment id.
             logger.debug("campaign live trigger with id $segmentId and $clientId and $userId")
             campaignList.forEach { campaign ->
                 logger.debug("campaign live trigger with id $segmentId and $clientId and $userId and campaign id $campaign.id")

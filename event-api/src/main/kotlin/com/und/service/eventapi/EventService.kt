@@ -118,7 +118,9 @@ class EventService {
         mongoEvent.id=id.toString()
         eventRepository.save(mongoEvent)
         val saved=eventRepository.findById(id.toString()).get()
+        mongoEvent.userId?.let {
         eventStream.outEventForLiveSegment().send(MessageBuilder.withPayload(buildEventForLiveSegment(saved)).build())
+        }
         return saved.id
     }
 
