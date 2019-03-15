@@ -91,6 +91,9 @@ class CampaignService {
             val persistedCampaign = campaignRepository.save(campaign)
 
             webCampaign.id = persistedCampaign.id
+            if(persistedCampaign!=null) {
+                campaignRepository.updateScheduleStatus(persistedCampaign.id!!, persistedCampaign.clientID!!, CampaignStatus.CREATED.name)
+            }
             if (webCampaign.schedule!=null) {
                 logger.info("sending request to scheduler ${campaign.name}")
                 val jobDescriptor = buildJobDescriptor(webCampaign, JobDescriptor.Action.CREATE)
@@ -227,6 +230,7 @@ class CampaignService {
                     if(endTime==null) endTime = LocalDateTime.MAX
                     campaign.startDate=startTime
                     campaign.endDate=endTime
+                    //FIXME not saved ?
                     campaign.status=CampaignStatus.CREATED
                     campaign.schedule="{}"
                 }
