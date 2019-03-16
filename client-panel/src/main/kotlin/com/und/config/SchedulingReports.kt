@@ -25,7 +25,7 @@ class SchedulingReports {
     @Autowired
     lateinit var eventService: EventService
     @Autowired
-    @Qualifier("reachabilityiservicempl")
+    @Qualifier("reachabilityserviceimpl")
     lateinit var segmentReachService: ReachabilityService
 
     @Autowired

@@ -31,7 +31,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.NoSuchElementException
 
-@Service("reachabilityiservicempl")
+@Service("reachabilityserviceimpl")
 class ReachabilityServiceImpl : ReachabilityService {
 
     companion object {
@@ -118,10 +118,10 @@ class ReachabilityServiceImpl : ReachabilityService {
             for (i in dateRange) {
                 result.add(SegmentTrendCount(date = i.toString(), count = dates.get(i) ?: 0))
             }
-            //TODO if end date is today and lastmodified time is > 2 hour update result.
+            //NOTE if end date is today and lastmodified time is > 2 hour update result.
             if(endDate.isEqual(LocalDate.now(ZoneId.of(sr.get().timeZone)))&& sr.get().lastModifiedTime.isBefore(LocalDateTime.now(ZoneId.of(sr.get().timeZone)).minusHours(2))){
                 val count=setReachabilityOfSegmentToday(segmentId, clientId)
-                result.add((result.size)-1,SegmentTrendCount(date=dateRange.last().toString(),count = count))
+                result.set((result.size)-1,SegmentTrendCount(date=dateRange.last().toString(),count = count))
             }
         }
         return result
