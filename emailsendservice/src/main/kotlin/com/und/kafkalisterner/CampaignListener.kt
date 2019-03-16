@@ -96,6 +96,7 @@ class CampaignListener {
         mongoTemplate.save(liveSegmentTrack,"${clientId}_livesegmenttrack")
         /**
          * in below code collection name is not resolve because on system call #{tenantProvider.getTenant()} not available.
+         * here collection name is _livesegmenttrack
          */
 //        val v=liveSegmentTrackRepository.save(liveSegmentTrack)
     }
