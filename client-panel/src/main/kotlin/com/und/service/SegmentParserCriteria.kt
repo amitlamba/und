@@ -650,7 +650,7 @@ class SegmentParserCriteria {
                 Criteria.where(fieldName).gte(end)
             }
             DateOperator.AfterTime -> {
-                val end = dateUtils.parseDateTime(values.first())
+                val end = dateUtils.convertDateTimeToDate(dateUtils.parseDateTime(values.first()))
                 Criteria.where(fieldName).gte(end)
             }
             DateOperator.On -> {

@@ -71,7 +71,6 @@ class LiveSegmentProcessingService {
 
     @StreamListener("inEventForLiveSegment")
     fun processEventMessage(event: EventMessage) {
-        //TODO handle userId null case in event api
         logger.info("Processing event: $event for segment checks")
 
         if (event.name.isEmpty()) {
@@ -235,8 +234,8 @@ class LiveSegmentProcessingService {
 
         val dateFilter = DateFilter()
         dateFilter.operator = DateOperator.AfterTime
-        //TODO fic date time
-        dateFilter.values = listOf(dateUtils.convertDateToDateTime(event.creationTime).minusSeconds(liveSegment.interval).toString())
+        val datetime=dateUtils.convertDateToDateTime(event.creationTime).minusSeconds(liveSegment.interval)  //zone id based
+        dateFilter.values = listOf(dateUtils.formatDateTimeToOffsetDate(datetime))
         startEvent.dateFilter = dateFilter
 
         return eventPropertiesMatched(startEvent, null, event.userId, event.clientId)

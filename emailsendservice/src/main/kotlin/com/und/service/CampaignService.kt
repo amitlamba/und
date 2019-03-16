@@ -3,6 +3,7 @@ package com.und.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.config.EventStream
 import com.und.model.jpa.Campaign
+import com.und.model.jpa.CampaignStatus
 import com.und.model.mongo.EventUser
 import com.und.model.utils.Email
 import com.und.model.utils.FcmMessage
@@ -64,8 +65,7 @@ class CampaignService {
 
     fun findLiveSegmentCampaign(segmentId: Long, clientId: Long): List<Campaign> {
         //FIXME if client panel and email send service are running in diff timezone then there is exact time matching problem.
-        val time=LocalDateTime.now()
-        return  campaignRepository.getCampaignByClientIDAndSegmentationIDAndEndDateAfter(segmentId, clientId,time)
+        return  campaignRepository.getCampaignByClientIDAndSegmentationIDAndEndDateAfter(segmentId, clientId)
     }
 
     private fun executeCampaignForUser(campaign: Campaign, user: EventUser, clientId: Long) {
@@ -209,6 +209,9 @@ class CampaignService {
         )
     }
 
+    fun updateCampaignStatus(status:CampaignStatus,clientId: Long,segmentId: Long){
+        campaignRepository.updateStatusOfCampaign(status.name,segmentId,clientId)
+    }
     fun getUsersData(segmentId: Long, clientId: Long): List<EventUser> {
         val segment = segmentService.getWebSegment(segmentId, clientId)
         return segmentService.getUserData(segment, clientId)

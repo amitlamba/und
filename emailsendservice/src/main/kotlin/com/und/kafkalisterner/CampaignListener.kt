@@ -1,6 +1,7 @@
 package com.und.kafkalisterner
 
 import com.und.exception.EventUserNotFoundException
+import com.und.model.jpa.CampaignStatus
 import com.und.model.livesegment.LiveSegmentUser
 import com.und.model.mongo.EventUser
 import com.und.model.mongo.LiveSegmentTrack
@@ -71,6 +72,7 @@ class CampaignListener {
             if(user.isEmpty()) throw EventUserNotFoundException("User Not Found.")
             val campaignList = campaignService.findLiveSegmentCampaign(segmentId, clientId)
             //FIXME if campaign list is empty then update the status of campaign to completed for this segment id.
+            campaignService.updateCampaignStatus(CampaignStatus.COMPLETED,clientId,segmentId)
             logger.debug("campaign live trigger with id $segmentId and $clientId and $userId")
             campaignList.forEach { campaign ->
                 logger.debug("campaign live trigger with id $segmentId and $clientId and $userId and campaign id $campaign.id")
@@ -90,8 +92,12 @@ class CampaignListener {
                 segmentId = segmentId,
                 userId = userId
         )
+        //TODO write it in dao layer.
         mongoTemplate.save(liveSegmentTrack,"${clientId}_livesegmenttrack")
-        val v=liveSegmentTrackRepository.save(liveSegmentTrack)
+        /**
+         * in below code collection name is not resolve because on system call #{tenantProvider.getTenant()} not available.
+         */
+//        val v=liveSegmentTrackRepository.save(liveSegmentTrack)
     }
 
 
