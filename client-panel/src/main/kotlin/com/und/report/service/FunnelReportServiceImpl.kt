@@ -16,6 +16,7 @@ import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.aggregation.*
+import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.ZoneId
@@ -126,10 +127,11 @@ class FunnelReportServiceImpl : FunnelReportService {
 
     private fun buildAggregation(funnelFilter: FunnelReport.FunnelReportFilter, filters: List<GlobalFilter>, tz: ZoneId): Aggregation {
 
+        val campaignId=funnelFilter.filters[0].values[0].toLong()
         val allfilters :MutableList<GlobalFilter> = mutableListOf()
 
         allfilters.addAll(filters)
-        allfilters.addAll(funnelFilter.filters)
+//        allfilters.addAll(funnelFilter.filters)
         val dateFilter = createDateFilter(tz, funnelFilter)
         allfilters.add(dateFilter)
         val filterGlobalQ = segmentParserCriteria.filterGlobalQ(allfilters, tz)
@@ -153,6 +155,12 @@ class FunnelReportServiceImpl : FunnelReportService {
 
         val aggregationOperations = mutableListOf<AggregationOperation>()
         aggregationOperations.add(matchOperation)
+        if(funnelFilter.filters.isNotEmpty()) {
+            var attributeMatch = Aggregation.match(Criteria().orOperator(Criteria().andOperator(
+                    Criteria.where("name").`is`(funnelFilter.steps[0].eventName),
+                    Criteria("attributes.campaign_id").`is`(campaignId)), Criteria("name").`is`(funnelFilter.steps[1].eventName)))
+            aggregationOperations.add(attributeMatch)
+        }
         aggregationOperations.add(sortOperation)
         aggregationOperations.add(projectionOperation)
         aggregationOperations.add(groupByOperation1)

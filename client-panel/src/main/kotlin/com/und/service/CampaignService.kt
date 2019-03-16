@@ -223,11 +223,12 @@ class CampaignService {
                         Now.Now -> LocalDateTime.now()
                         else -> it.startTime!!.toLocalDateTime()
                     }
-                    var endTime=when(it.nowOrLater){
-                        Now.Now -> LocalDateTime.MAX
-                        else -> it.endTime?.toLocalDateTime()
+
+                    var endTime:LocalDateTime?=null
+                    it.endTime?.let {
+                        endTime=it.toLocalDateTime()
                     }
-                    if(endTime==null) endTime = LocalDateTime.MAX
+                    if(endTime==null) endTime = LocalDateTime.now().plusYears(10)
                     campaign.startDate=startTime
                     campaign.endDate=endTime
                     //FIXME not saved ?

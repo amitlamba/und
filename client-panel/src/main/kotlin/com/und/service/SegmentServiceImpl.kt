@@ -313,6 +313,8 @@ class SegmentServiceImpl : SegmentService {
     }
 
     override fun segmentByClientId(clientId: Long): List<Segment> {
-        return segmentRepository.findByClientID(clientId) ?: emptyList()
+        //FIXED find only those segment which are behavioural type.
+        val segments=segmentRepository.findByClientIDAndType(clientId,"Behaviour")
+        return if(segments.isPresent)segments.get() else  emptyList()
     }
 }
