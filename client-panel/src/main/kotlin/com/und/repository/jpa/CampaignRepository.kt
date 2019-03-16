@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import java.util.*
 
 @Repository
@@ -19,7 +20,11 @@ interface CampaignRepository : JpaRepository<Campaign, Long> {
     fun findByClientIDAndCampaignType(clientID: Long, campaignType: CampaignType): List<Campaign>
     fun findByIdAndClientIDAndCampaignType(id: Long, clientID: Long, campaignType: CampaignType): Campaign
 
-
+    /*
+    * Before this annotation there is transaction required exception . But my record are saved in database.
+    * I think transaction annotation on saveCampaign method not working.
+    * */
+    @Transactional
     @Modifying(clearAutomatically = true)
     @Query("UPDATE campaign  SET campaign_status = :status, date_modified = now() WHERE client_id = :clientId and id=:campaignId", nativeQuery = true)
     fun updateScheduleStatus(@Param("campaignId") campaignId: Long,

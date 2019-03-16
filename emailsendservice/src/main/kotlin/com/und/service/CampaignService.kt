@@ -11,8 +11,10 @@ import com.und.model.utils.Sms
 import com.und.repository.jpa.*
 import com.und.utils.loggerFor
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.time.ZoneId
 import javax.mail.internet.InternetAddress

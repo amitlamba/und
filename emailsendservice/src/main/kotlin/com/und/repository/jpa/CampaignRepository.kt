@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.*
 
@@ -44,6 +45,7 @@ interface CampaignRepository : JpaRepository<Campaign, Long> {
     @Query("""select * from campaign c where c.client_id= :clientId and c.segmentation_id= :segmentId and c.campaign_status= 'CREATED' and c.end_date > current_timestamp """,nativeQuery = true)
     fun getCampaignByClientIDAndSegmentationIDAndEndDateAfter(@Param("segmentId")segmentId: Long, @Param("clientId")clientId: Long): List<Campaign>
 
+    @Transactional
     @Modifying
     @Query("""update campaign set campaign_status = :status where segmentation_id = :segmentId and client_id = :clientId""",nativeQuery = true)
     fun updateStatusOfCampaign(@Param("status")status:String,@Param("segmentId")segmentId: Long,@Param("clientId")clientId:Long)

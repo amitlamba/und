@@ -135,7 +135,6 @@ class LiveSegmentProcessingService {
 
     private fun processStartEventChecks(event: EventMessage) {
         val possibleLiveSegments = this.liveSegmentService.findByClientIDAndStartEvent(event.clientId, event.name)
-        //TODO use direct segment id to fetch
         possibleLiveSegments.forEach { liveSegment ->
             logger.info("Checking start event: $event for live-segment-id: ${liveSegment.id}")
             val segment = this.segmentService.persistedSegmentById(liveSegment.segmentId, liveSegment.clientID)
