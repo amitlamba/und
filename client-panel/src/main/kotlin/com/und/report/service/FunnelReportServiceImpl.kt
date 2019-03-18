@@ -70,7 +70,7 @@ class FunnelReportServiceImpl : FunnelReportService {
             val computedFunnels = awsFunnelLambdaInvoker.computeFunnels(funnelData)
 
             logger.debug("Funnel data computed: $computedFunnels")
-            return if(funnelFilter.filters.isEmpty()) fillMissingSteps(orderFunnelByStep(computedFunnels),funnelFilter.steps)
+            return if(funnelFilter.splitProperty==null) fillMissingSteps(orderFunnelByStep(computedFunnels),funnelFilter.steps)
             else orderFunnelByStep(computedFunnels)
         } ?: emptyList()
     }
@@ -127,7 +127,6 @@ class FunnelReportServiceImpl : FunnelReportService {
 
     private fun buildAggregation(funnelFilter: FunnelReport.FunnelReportFilter, filters: List<GlobalFilter>, tz: ZoneId): Aggregation {
 
-        val campaignId=funnelFilter.filters[0].values[0].toLong()
         val allfilters :MutableList<GlobalFilter> = mutableListOf()
 
         allfilters.addAll(filters)
@@ -135,7 +134,6 @@ class FunnelReportServiceImpl : FunnelReportService {
         val dateFilter = createDateFilter(tz, funnelFilter)
         allfilters.add(dateFilter)
         val filterGlobalQ = segmentParserCriteria.filterGlobalQ(allfilters, tz)
-
         val matchOperation = Aggregation.match(filterGlobalQ.first)
         val sortOperation = Aggregation.sort(Sort.by(AggregationQuerybuilder.Field.CreationTime.fName).ascending())
         val groupBys = mutableListOf<Field>()
@@ -154,12 +152,20 @@ class FunnelReportServiceImpl : FunnelReportService {
         val groupByOperation1 = Aggregation.group(Fields.from(*groupBys.toTypedArray())).push(AggregationQuerybuilder.Field.CreationTime.fName).`as`("chronology")
 
         val aggregationOperations = mutableListOf<AggregationOperation>()
-        aggregationOperations.add(matchOperation)
+
         if(funnelFilter.filters.isNotEmpty()) {
-            var attributeMatch = Aggregation.match(Criteria().orOperator(Criteria().andOperator(
+            val campaignId= funnelFilter.filters[0].values[0].toLong()
+            var listofCriteria= mutableListOf<Criteria>()
+            if(filters[0].name.equals("userId")){
+            listofCriteria.add(Criteria("userId").`in`(filters[0].values))
+            }
+            listofCriteria.add(Criteria().orOperator(Criteria().andOperator(
                     Criteria.where("name").`is`(funnelFilter.steps[0].eventName),
                     Criteria("attributes.campaign_id").`is`(campaignId)), Criteria("name").`is`(funnelFilter.steps[1].eventName)))
-            aggregationOperations.add(attributeMatch)
+            val matchOperation=Aggregation.match(Criteria().andOperator(*listofCriteria.toTypedArray()))
+            aggregationOperations.add(matchOperation)
+        }else{
+            aggregationOperations.add(matchOperation)
         }
         aggregationOperations.add(sortOperation)
         aggregationOperations.add(projectionOperation)

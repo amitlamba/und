@@ -67,7 +67,7 @@ class CampaignService {
 
     fun findLiveSegmentCampaign(segmentId: Long, clientId: Long): List<Campaign> {
         //FIXME if client panel and email send service are running in diff timezone then there is exact time matching problem.
-        return  campaignRepository.getCampaignByClientIDAndSegmentationIDAndEndDateAfter(segmentId, clientId)
+        return  campaignRepository.getCampaignByClientIDAndSegmentationIDAndStartDateBeforeAndEndDateAfter(segmentId, clientId)
     }
 
     private fun executeCampaignForUser(campaign: Campaign, user: EventUser, clientId: Long) {
