@@ -126,7 +126,7 @@ class UserEventAnalyticsServiceImpl : UserEventAnalyticsService {
 
         val tz = userSettingsService.getTimeZone()
         val filters = buildCommonfilters(requestFilter, entityType, clientID)
-        val aggregation = aggregationQuerybuilder.buildAggregation(filters, listOf(groupBy), null, emptyMap(), entityType, tz, clientID)
+        val aggregation = aggregationQuerybuilder.buildAggregation(filters, listOf(groupBy), null, emptyMap(), entityType, tz, clientID, true)
         return userAnalyticsRepository.getReachability(aggregation,clientID)
     }
 

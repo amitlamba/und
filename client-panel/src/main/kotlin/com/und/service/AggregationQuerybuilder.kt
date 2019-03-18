@@ -72,7 +72,7 @@ class AggregationQuerybuilder {
         else return "$fieldPath"
     }
 
-    fun buildAggregationPipeline(filters: List<GlobalFilter>, groupBys: List<GroupBy>, aggregateBy: AggregateBy?, paramValues: Map<String, Any> = emptyMap(), entityType: EventReport.EntityType, tz: ZoneId, clientId: Long): List<AggregationOperation> {
+    fun buildAggregationPipeline(filters: List<GlobalFilter>, groupBys: List<GroupBy>, aggregateBy: AggregateBy?, paramValues: Map<String, Any> = emptyMap(), entityType: EventReport.EntityType, tz: ZoneId, clientId: Long,reachability:Boolean=false): List<AggregationOperation> {
         //Possible pipelines
         /**
          * [match], [group]             (Event count using event-filters and event-groupBy)
@@ -242,6 +242,16 @@ class AggregationQuerybuilder {
 //            aggregationPipeline.add(Aggregation.group(Field.UserIdObject.fName))
 //            aggregationPipeline.add(Aggregation.project().and("_id").`as`(Field.UserIdObject.fName))
 
+            //at this point add group by
+            if(reachability) {
+                val groupOperation = Aggregation.group("userId", "userIdObject")
+                val projectOperation = Aggregation.project().and("\$_id.userId").`as`("userId").
+                        and("\$_id.userIdObject").`as`("userIdObject")
+                        .andExclude("_id")
+
+                aggregationPipeline.add(groupOperation)
+                aggregationPipeline.add(projectOperation)
+            }
             val lookupOperation = Aggregation.lookup("${clientId}_eventUser", "${Field.UserIdObject.fName}", "_id", USER_DOC)
             aggregationPipeline.add(lookupOperation)
 
@@ -392,8 +402,8 @@ class AggregationQuerybuilder {
         }
     }
 
-    fun buildAggregation(filters: List<GlobalFilter>, groupBys: List<GroupBy>, aggregateBy: AggregateBy?, paramValues: Map<String, Any> = emptyMap(), entityType: EventReport.EntityType, tz: ZoneId, clientId: Long): Aggregation {
-        return Aggregation.newAggregation(*buildAggregationPipeline(filters, groupBys, aggregateBy, paramValues, entityType, tz, clientId).toTypedArray())
+    fun buildAggregation(filters: List<GlobalFilter>, groupBys: List<GroupBy>, aggregateBy: AggregateBy?, paramValues: Map<String, Any> = emptyMap(), entityType: EventReport.EntityType, tz: ZoneId, clientId: Long,reachability: Boolean=false): Aggregation {
+        return Aggregation.newAggregation(*buildAggregationPipeline(filters, groupBys, aggregateBy, paramValues, entityType, tz, clientId,reachability).toTypedArray())
     }
 
 
