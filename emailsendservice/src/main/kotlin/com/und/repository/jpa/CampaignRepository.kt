@@ -42,8 +42,8 @@ interface CampaignRepository : JpaRepository<Campaign, Long> {
             nativeQuery = true)
     fun getCampaignByCampaignId(campaignId: Long, clientId: Long): Optional<Campaign>
 
-    @Query("""select * from campaign c where c.client_id= :clientId and c.segmentation_id= :segmentId and c.campaign_status= 'CREATED' and c.end_date > current_timestamp """,nativeQuery = true)
-    fun getCampaignByClientIDAndSegmentationIDAndEndDateAfter(@Param("segmentId")segmentId: Long, @Param("clientId")clientId: Long): List<Campaign>
+    @Query("""select * from campaign c where c.client_id= :clientId and c.segmentation_id= :segmentId and c.campaign_status= 'CREATED' and c.start_Date < current_timestamp and c.end_date > current_timestamp """,nativeQuery = true)
+    fun getCampaignByClientIDAndSegmentationIDAndStartDateBeforeAndEndDateAfter(@Param("segmentId")segmentId: Long, @Param("clientId")clientId: Long): List<Campaign>
 
     @Transactional
     @Modifying
