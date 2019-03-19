@@ -15,4 +15,6 @@ interface LiveSegmentRepository: JpaRepository<LiveSegment, Long> {
     fun findByClientID(clientId: Long):Optional<List<LiveSegment>>
 
     fun findByClientIDAndId(clientId:Long,id:Long):Optional<LiveSegment>
+
+    fun findByClientIDAndSegmentId(clientId: Long,segmentId:Long):Optional<LiveSegment>
 }

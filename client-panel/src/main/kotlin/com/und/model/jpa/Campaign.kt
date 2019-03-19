@@ -205,9 +205,16 @@ fun toCampaignTime(date:LocalDateTime?):CampaignTime?{
             in 0..11 -> AmPm.AM
             else -> AmPm.PM
         }
+
+        var hours1 = when (hours) {
+            0,12 -> 12
+            in 1..11 -> hours
+            else -> hours-12
+        }
+
         val campaignTime = CampaignTime()
         campaignTime.ampm = aMpM
-        campaignTime.hours = hours
+        campaignTime.hours = hours1
         campaignTime.minutes = minutes
         campaignTime.date = dates
         print("minutes $minutes hours $hours date $dates")
