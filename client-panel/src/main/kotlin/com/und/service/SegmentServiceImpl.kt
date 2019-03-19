@@ -6,6 +6,7 @@ import com.und.common.utils.loggerFor
 import com.und.livesegment.model.jpa.LiveSegment
 import com.und.livesegment.model.webmodel.WebLiveSegment
 import com.und.livesegment.repository.jpa.LiveSegmentRepository
+import com.und.livesegment.service.LiveSegmentService
 import com.und.model.jpa.Segment
 import com.und.model.mongo.eventapi.EventUser
 import com.und.repository.jpa.SegmentRepository
@@ -25,6 +26,7 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.aggregation.ConvertOperators
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
@@ -102,8 +104,14 @@ class SegmentServiceImpl : SegmentService {
 
     //@Cacheable(cacheNames = ["segment"], key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_segment_'+#id" )
     override fun segmentById(id: Long, clientId: Long?): WebSegment {
+        if(clientId==null) throw AccessDeniedException("Access Denied.")
         logger.debug("Fetching segment: $id")
-        return buildWebSegment(this.persistedSegmentById(id, clientId))
+        val segment=this.persistedSegmentById(id, clientId)
+        val livesegment=liveSegmentRepository.findByClientIDAndSegmentId(clientId!!,id)
+        if(livesegment.isPresent){
+            return  buildWebSegmentWithLive(segment,livSegment = livesegment.get())
+        }
+        return buildWebSegment(segment)
     }
 
     override fun persistedSegmentById(id: Long, clientID: Long?): Segment {
