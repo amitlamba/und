@@ -1,9 +1,9 @@
 package com.und.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.und.common.utils.BuildCampaignMessage
 import com.und.config.EventStream
-import com.und.model.jpa.Campaign
-import com.und.model.jpa.CampaignStatus
+import com.und.model.jpa.*
 import com.und.model.mongo.EventUser
 import com.und.model.utils.Email
 import com.und.model.utils.FcmMessage
@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.util.*
 import javax.mail.internet.InternetAddress
 
 @Service
@@ -46,6 +47,9 @@ class CampaignService {
     private lateinit var emailTemplateRepository: EmailTemplateRepository
     @Autowired
     private lateinit var eventStream: EventStream
+
+    @Autowired
+    private lateinit var buildCampaignMessage:BuildCampaignMessage
 
     fun executeCampaign(campaignId: Long, clientId: Long) {
 //        val campaignOption = campaignRepository.getCampaignByCampaignId(campaignId, clientId)
@@ -125,19 +129,10 @@ class CampaignService {
         if (!smsCampaign.isPresent) throw Exception("Sms Campaign not exist for clientId ${clientId} and campaignId ${campaign.id}")
         val smsTemplate=emailTemplateRepository.findByIdAndClientID(smsCampaign.get().templateId!!,clientId)
         if(!smsTemplate.isPresent) throw Exception("Sms Template for clientId ${clientId} , templateId ${smsCampaign.get().templateId} not exists.")
-        return Sms(
-                clientId,
-                campaign.fromUser,
-                user.identity.mobile,
-                smsBody = null,
-                smsTemplateId = smsCampaign.get().templateId ?: 0L,
-                smsTemplateName = smsTemplate.get().name,
-                eventUser = user,
-                serviceProviderId = campaign.serviceProviderId,
-                campaignId = campaign.id,
-                segmentId = campaign.segmentationID
-        )
+        return buildCampaignMessage.buildSms(clientId, campaign, user, smsCampaign.get(), smsTemplate.get())
     }
+
+
 
     private fun email(clientId: Long, campaign: Campaign, user: EventUser): Email {
         try {
@@ -148,68 +143,36 @@ class CampaignService {
 //        val clientEmailSettings= clientEmailSettingsRepository.
 //                findByClientIdAndEmailAndServiceProviderId(clientId,campaign.fromUser!!,campaign.serviceProviderId!!)
 //        if (!clientEmailSettings.isPresent) throw Exception("Client Email Settings not present for client ${clientId} fromAddress ${campaign.fromUser} sp ${campaign.serviceProviderId}")
-            return Email(
-                    clientID = clientId,
-                    fromEmailAddress = InternetAddress.parse(campaign.fromUser, false)[0],
-                    toEmailAddresses = InternetAddress.parse(user.identity.email, false),
-                    emailTemplateId = emailCampaign.get().templateId ?: 0L,
-                    emailTemplateName = emailTemplate.get().name,
-                    campaignId = campaign.id!!,
-                    eventUser = user,
-                    clientEmailSettingId = emailCampaign.get().clientSettingEmailId,
-                    segmentId = campaign.segmentationID
-            )
+            return buildCampaignMessage.buildEmail(clientId, campaign, user, emailCampaign.get(), emailTemplate.get())
         }catch (ex:Exception){
             throw ex
         }
     }
+
+
+
     private fun fcmAndroidMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
         //Todo passing data model
         val androidCampaign =androidCampaignRepository.findByCampaignId(campaign.id!!)
         if (!androidCampaign.isPresent) throw Exception("Android Campaign not exist for clientId ${clientId} and campaignId ${campaign.id}")
-        return FcmMessage(
-                clientId=clientId,
-                templateId = androidCampaign.get().templateId?:0L,
-                to = user.identity.androidFcmToken?:"",
-                type = "android",
-                campaignId = campaign.id!!,
-                userId = user.id,
-                eventUser = user,
-                serviceProviderId = campaign.serviceProviderId,
-                segmentId = campaign.segmentationID
-        )
+        return buildCampaignMessage.buildAndroidFcmMessage(clientId, androidCampaign.get(), user, campaign)
     }
+
 
     private fun fcmWebMessage(clientId: Long,campaign: Campaign,user: EventUser,token:String):FcmMessage{
         val webPushCampaign =webCampaignRepository.findByCampaignId(campaign.id!!)
         if (!webPushCampaign.isPresent) throw Exception("Web Campaign not exist for clientId ${clientId} and campaignId ${campaign.id}")
-        return FcmMessage(
-                clientId = clientId,
-                templateId = webPushCampaign.get().templateId?:0L,
-                to = token,
-                type = "web",
-                campaignId = campaign.id!!,
-                userId = user.id,
-                eventUser = user,
-                serviceProviderId = campaign.serviceProviderId,
-                segmentId = campaign.segmentationID
-        )
+        return buildCampaignMessage.buildWebFcmMessage(clientId, webPushCampaign.get(), token, campaign, user)
     }
+
+
+
     private fun fcmIosMessage(clientId: Long,campaign: Campaign,user: EventUser):FcmMessage{
 //        val iosCampaign =iosCampaignRepository.findByCampaignId(campaign.id!!)
-        return FcmMessage(
-                clientId = clientId,
-//                templateId = iosCampaign.get().templateId?:0L,
-                templateId = 0L,
-                to = user.identity.iosFcmToken?:"",
-                type = "ios",
-                campaignId = campaign.id!!,
-                userId = user.id,
-                eventUser = user,
-                serviceProviderId = campaign.serviceProviderId,
-                segmentId = campaign.segmentationID
-        )
+        return buildCampaignMessage.buildIosFcmMessage(clientId, user, campaign)
     }
+
+
 
     fun updateCampaignStatus(status:CampaignStatus,clientId: Long,segmentId: Long){
         campaignRepository.updateStatusOfCampaign(status.name,segmentId,clientId)

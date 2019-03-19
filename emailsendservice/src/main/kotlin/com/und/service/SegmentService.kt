@@ -50,5 +50,12 @@ class SegmentService {
         } else emptyList()
     }
 
+    fun getUserData(segmentId:Long,clientId: Long):List<EventUser>{
+        val token = userRepository.findSystemUser().key
+        return if (token != null) {
+            segmentUserServiceClient.users(segmentId, clientId, token)
+        } else emptyList()
+    }
+
 
 }

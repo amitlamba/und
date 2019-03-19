@@ -3,7 +3,6 @@ package com.und.service
 import com.und.model.jpa.AndroidTemplate
 import com.und.model.jpa.SmsTemplate
 import com.und.model.jpa.WebPushTemplate
-import com.und.model.mongo.EventUser
 import com.und.model.utils.Email
 import com.und.utils.loggerFor
 import freemarker.template.Configuration
@@ -59,7 +58,7 @@ class TemplateContentCreationService {
         return FreeMarkerTemplateUtils.processTemplateIntoString(getSmsBodyFreeMarkerTemplate(template),model)
     }
     @Cacheable(value = "sms-template-body",key = "'sms-template-body-'+#smsTemplate.id")
-    private fun getSmsBodyFreeMarkerTemplate(smsTemplate: SmsTemplate):Template{
+    fun getSmsBodyFreeMarkerTemplate(smsTemplate: SmsTemplate):Template{
         return Template("${smsTemplate.clientID}-a-t-${smsTemplate.id}",StringReader(smsTemplate.smsTemplateBody),freeMarkerConfiguration)
     }
     fun getContentFromTemplate(template:AndroidTemplate, model:MutableMap<String,Any>):String{
@@ -71,12 +70,12 @@ class TemplateContentCreationService {
     }
 
     @Cacheable(value = "android-template-body",key = "'android-template-body-'+ #androidTemplate.id")
-    private fun getAndroidBodyFreemarkerTemplate(androidTemplate: AndroidTemplate): Template {
+    fun getAndroidBodyFreemarkerTemplate(androidTemplate: AndroidTemplate): Template {
         var template = Template("${androidTemplate.clientId}-a-t-${androidTemplate.id}", StringReader(androidTemplate.body), freeMarkerConfiguration)
         return template
     }
     @Cacheable(value = "webpush-template-body",key = "'webpush-template-body'+#webTemplate.id")
-    private fun getWebpushBodyFreemarkerTemplate(webTemplate: WebPushTemplate):Template{
+    fun getWebpushBodyFreemarkerTemplate(webTemplate: WebPushTemplate):Template{
         return Template("${webTemplate.clientId}-web-t-${webTemplate.id}",StringReader(webTemplate.body),freeMarkerConfiguration)
     }
     fun getContentFromTemplate(templateName: String, model: MutableMap<String, Any>): String {
@@ -84,6 +83,25 @@ class TemplateContentCreationService {
         return FreeMarkerTemplateUtils.processTemplateIntoString(template, model)
     }
 
+    fun getTestEmailTemplateSubject(emailTemplateSubject: String,model: MutableMap<String, Any>):String{
+        val template= Template("emailTestCampaignSubject",StringReader(emailTemplateSubject),freeMarkerConfiguration)
+        return FreeMarkerTemplateUtils.processTemplateIntoString(template,model)
+    }
+
+    fun getTestEmailTemplateBody(emailTemplateBody: String,model: MutableMap<String, Any>):String{
+        val template= Template("emailTestCampaignBody",StringReader(emailTemplateBody),freeMarkerConfiguration)
+        return FreeMarkerTemplateUtils.processTemplateIntoString(template,model)
+    }
+
+    fun getTestSmsTemplateSubject(smsTemplateSubject: String,model: MutableMap<String, Any>):String{
+        val template= Template("smsTestCampaignSubject",StringReader(smsTemplateSubject),freeMarkerConfiguration)
+        return FreeMarkerTemplateUtils.processTemplateIntoString(template,model)
+    }
+
+    fun getTestSmsTemplateBody(smsTemplateBody: String,model: MutableMap<String, Any>):String{
+        val template= Template("smsTestCampaignBody",StringReader(smsTemplateBody),freeMarkerConfiguration)
+        return FreeMarkerTemplateUtils.processTemplateIntoString(template,model)
+    }
 
     private fun getContentFromTemplate(email: Email, contentType: EmailContent, model: MutableMap<String, Any>): String {
         var clientId=email.clientID

@@ -34,4 +34,7 @@ interface EventStream {
 
     @Output("outLiveSegment")
     fun outLiveSegment(): MessageChannel
+
+    @Output("outTestCampaign")
+    fun outTestCampaign():MessageChannel
 }

@@ -15,6 +15,7 @@ import com.und.web.controller.exception.ScheduleUpdateException
 import com.und.web.controller.exception.UndBusinessValidationException
 import com.und.web.model.ClientEmailSettIdFromAddrSrp
 import com.und.web.model.ClientFromAddressAndSrp
+import com.und.web.model.EmailTemplate
 import com.und.web.model.ValidationError
 import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
@@ -195,6 +196,85 @@ class CampaignService {
         return jobDetail
     }
 
+    fun runTestCampaign(clientId:Long){
+
+        val type= CampaignType.EMAIL
+            val testCampaign=when(type){
+                CampaignType.EMAIL -> buildTestEmailModel(clientId)
+                CampaignType.SMS -> buildTestSmsModel(clientId)
+                CampaignType.PUSH_ANDROID -> buildTestAndroidModel(clientId)
+                CampaignType.PUSH_WEB -> buildTestWebModel(clientId)
+                CampaignType.PUSH_IOS -> buildTestIosModel()
+            }
+        testCampaign(testCampaign,clientId)
+    }
+
+    fun buildTestEmailModel(clientId: Long):TestCampaign{
+        val testCampaign= TestCampaign()
+        //TODO build email template
+        val emailTemplate= EmailTemplate()
+        //TODO build campaign
+        val campaign= WebCampaign()
+
+        with(testCampaign){
+            this.clientId=clientId
+            this.campaign = campaign
+            type=CampaignType.EMAIL
+            this.emailTemplate=emailTemplate
+        }
+        return testCampaign
+    }
+
+    fun buildTestSmsModel(clientId: Long):TestCampaign{
+        val testCampaign= TestCampaign()
+        //TODO build sms template
+        val smsTemplate= SmsTemplate()
+        //TODO build campaign
+        val campaign= WebCampaign()
+
+        with(testCampaign){
+            this.clientId=clientId
+            this.campaign = campaign
+            type=CampaignType.SMS
+            this.smsTemplate=smsTemplate
+        }
+        return testCampaign
+    }
+    fun buildTestAndroidModel(clientId: Long):TestCampaign{
+        val testCampaign= TestCampaign()
+        //TODO build android template
+        val androidTemplate= AndroidTemplate()
+        //TODO build campaign
+        val campaign= WebCampaign()
+
+        with(testCampaign){
+            this.clientId=clientId
+            this.campaign = campaign
+            type=CampaignType.PUSH_ANDROID
+            this.androidTemplate= androidTemplate
+        }
+        return testCampaign
+    }
+    fun buildTestWebModel(clientId: Long):TestCampaign {
+        val testCampaign = TestCampaign()
+        //TODO build web template
+        val emailTemplate = WebPushTemplate()
+        //TODO build campaign
+        val campaign = WebCampaign()
+
+        with(testCampaign) {
+            this.clientId=clientId
+            this.campaign = campaign
+            type = CampaignType.PUSH_WEB
+            this.webTemplate = webTemplate
+        }
+        return testCampaign
+    }
+
+    fun buildTestIosModel():TestCampaign{
+        return TestCampaign()
+    }
+
     fun buildCampaign(webCampaign: WebCampaign): Campaign {
         val campaign = Campaign()
 
@@ -310,7 +390,7 @@ class CampaignService {
         }
 
         if(campaign.startDate!=null) {
-            val liveSchedule=LiveSchedule()
+            val liveSchedule= LiveSchedule()
             liveSchedule.startTime= toCampaignTime(campaign.startDate)
             liveSchedule.endTime= toCampaignTime(campaign.endDate)
             webCampaign.liveSchedule=liveSchedule
@@ -560,6 +640,11 @@ class CampaignService {
     fun getClientFromAddressAndSrp(clientId: Long): List<ClientEmailSettIdFromAddrSrp> {
 //        var result=clientSettingsEmailRepository.joinClientEmailSettingAndServicePtoivder(clientId)
         return clientFromAddrAndSrpRepository.joinClientEmailSettingAndServicePtoivder(clientId)
+    }
+
+    private fun testCampaign(campaign:TestCampaign,clientId: Long){
+        logger.info("Sending Test Campaign for client $clientId to queue.")
+        eventStream.outTestCampaign().send(MessageBuilder.withPayload(campaign).build())
     }
 
 }

@@ -5,9 +5,11 @@ import com.und.model.jpa.CampaignStatus
 import com.und.model.livesegment.LiveSegmentUser
 import com.und.model.mongo.EventUser
 import com.und.model.mongo.LiveSegmentTrack
+import com.und.model.utils.TestCampaign
 import com.und.repository.mongo.EventUserRepository
 import com.und.repository.mongo.LiveSegmentTrackRepository
 import com.und.service.CampaignService
+import com.und.service.TestCampaignService
 import com.und.utils.loggerFor
 import org.bson.types.ObjectId
 import org.slf4j.Logger
@@ -23,6 +25,9 @@ class CampaignListener {
 
     @Autowired
     private lateinit var campaignService: CampaignService
+
+    @Autowired
+    private lateinit var testCampaignService: TestCampaignService
 
     @Autowired
     private lateinit var eventUserRepository: EventUserRepository
@@ -51,6 +56,10 @@ class CampaignListener {
         }
     }
 
+    @StreamListener("inTestCampaign")
+    fun executeTestcampaign(testCampaign: TestCampaign){
+        testCampaignService.executeTestCampaign(testCampaign)
+    }
 
     @StreamListener(value = "inLiveSegment")
     fun executeLiveSegmentCampaign(liveSegmentUser: LiveSegmentUser) {

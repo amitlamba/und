@@ -9,10 +9,8 @@ import com.und.security.utils.AuthenticationUtils
 import com.und.service.*
 import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.UndBusinessValidationException
-import com.und.web.model.Campaign
-import com.und.web.model.ClientEmailSettIdFromAddrSrp
-import com.und.web.model.ClientFromAddressAndSrp
-import com.und.web.model.EmailTemplate
+import com.und.web.model.*
+import com.und.web.model.ResponseStatus
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -106,6 +104,13 @@ class CampaignController {
         return ResponseEntity(campaign,HttpStatus.EXPECTATION_FAILED)
     }
 
+    //TODO new endpoint for test campaign
+    fun runTestCampaign(): Response {
+        val clientId =AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        //one of segmentationid and to address must be present
+        campaignService.runTestCampaign(clientId)
+        return Response(ResponseStatus.SUCCESS)
+    }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/updateschedule/{campaignId}"])

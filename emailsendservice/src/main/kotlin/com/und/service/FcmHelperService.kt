@@ -124,11 +124,11 @@ class FcmHelperService {
         return templateContentCreationService.getWebpushBody(webtemplate,model)
     }
     @Cacheable("androidTemplate", key = "'client_'+#clientId+'_template_'+#templateId")
-    private fun fetchAndroidTemplate(clientId: Long, templateId: Long): AndroidTemplate {
+    fun fetchAndroidTemplate(clientId: Long, templateId: Long): AndroidTemplate {
         return androidRepository.findByClientIdAndId(clientId, templateId)
     }
     @Cacheable(value = "webpushTemplate",key = "'client_'+#message.clientId+'_template'+#message.templateId")
-    private fun fetchWebpushTemplate(message:UtilFcmMessage):WebPushTemplate{
+    fun fetchWebpushTemplate(message:UtilFcmMessage):WebPushTemplate{
         return webpushRepository.findByClientIdAndId(message.clientId, message.templateId)
     }
     fun buildWebFcmMessage(message: UtilFcmMessage): LegacyFcmMessage {
