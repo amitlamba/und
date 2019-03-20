@@ -72,6 +72,7 @@ class CampaignListener {
             if(user.isEmpty()) throw EventUserNotFoundException("User Not Found.")
             val campaignList = campaignService.findLiveSegmentCampaign(segmentId, clientId)
             //FIXME if campaign list is empty then update the status of campaign to completed for this segment id.
+            if(campaignList.isEmpty())
             campaignService.updateCampaignStatus(CampaignStatus.COMPLETED,clientId,segmentId)
             logger.debug("campaign live trigger with id $segmentId and $clientId and $userId")
             campaignList.forEach { campaign ->
