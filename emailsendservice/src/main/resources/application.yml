@@ -35,7 +35,7 @@
 #              #                  This property effect performance.
 #              commit:
 #                interval:
-#                  ms: 5000  #default value
+#                  ms: 2000  #default value
 #            max:
 #              poll:
 #                interval:
@@ -143,11 +143,29 @@
 #            consumer:
 #              configuration:
 #                client:
-#                  id: 7
+#                  id: 8
 #                group:
 #                  id: verificationEmailReceive
 #            group: verificationEmailReceive
 #            destination: verificationEmailStaging
+#          inLiveSegment:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 9
+#                group:
+#                  id: processLiveUserReceiveGroup
+#            group: processLiveUserReceiveGroup
+#            destination: processliveuser
+#          inTestCampaign:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 10
+#                group:
+#                  id: testCampaignReceiveGroup
+#            group: testCampaignReceiveGroup
+#            destination: testCampaignStaging
 #      bindings:
 #        emailEventSend:
 #          destination: emailEventStaging
@@ -175,6 +193,10 @@
 #          destination: emailFailureEventStaging
 #        VerificationEmailReceive:
 #          destination: verificationEmailStaging
+#        inLiveSegment:
+#          destination: processliveuser
+#        inTestCampaign:
+#          destination: testCampaignStaging
 #  mvc:
 #    view:
 #      prefix: /WEB-INF/views/
@@ -196,6 +218,9 @@
 #      max-wait: 10000
 #      max-active: 50
 #      test-on-borrow: true
+#    hikari:
+#      maximum-pool-size: 3
+#      idle-timeout: 10000
 #  data:
 #    mongodb:
 #      database: eventdbstaging

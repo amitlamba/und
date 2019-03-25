@@ -63,7 +63,7 @@ class WebPushServiceImp : WebPushService {
         return webPushRepository.isTemplateExistsForThisId(clientId, id)
     }
 
-    private fun buildJpaWebPushTemplate(template: WebTemplate): WebPushTemplate {
+    override fun buildJpaWebPushTemplate(template: WebTemplate): WebPushTemplate {
         var jpaTemplate = WebPushTemplate()
         with(jpaTemplate) {
             clientId = AuthenticationUtils.clientID

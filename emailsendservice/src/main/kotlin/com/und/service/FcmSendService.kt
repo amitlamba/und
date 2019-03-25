@@ -1,13 +1,11 @@
 package com.und.service
 
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.und.config.EventStream
 import com.und.exception.FcmFailureException
-import com.und.model.mongo.FcmMessage
 import com.und.model.mongo.FcmMessageStatus
 import com.und.model.utils.eventapi.Event
 import com.und.model.utils.eventapi.Identity
@@ -20,12 +18,11 @@ import org.springframework.http.ResponseEntity
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import java.io.*
-import java.net.HttpURLConnection
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
 @Service
-class FcmSendService {
+class FcmSendService:FcmService {
 
     companion object {
         protected val logger = loggerFor(FcmSendService::class.java)
@@ -224,7 +221,7 @@ class FcmSendService {
     }
      */
 
-    fun sendMessage(message: com.und.model.utils.FcmMessage) {
+    override fun sendMessage(message: com.und.model.utils.FcmMessage) {
         var fcmMessageToSend = buildFcmMessage(message)
         var credential = service.getCredentials(message.clientId,message.serviceProviderId,message.type)
         if (credential == null) {

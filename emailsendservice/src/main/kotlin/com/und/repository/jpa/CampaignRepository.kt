@@ -45,8 +45,17 @@ interface CampaignRepository : JpaRepository<Campaign, Long> {
     @Query("""select * from campaign c where c.client_id= :clientId and c.segmentation_id= :segmentId and c.campaign_status= 'CREATED' and c.start_Date < current_timestamp and c.end_date > current_timestamp """,nativeQuery = true)
     fun getCampaignByClientIDAndSegmentationIDAndStartDateBeforeAndEndDateAfter(@Param("segmentId")segmentId: Long, @Param("clientId")clientId: Long): List<Campaign>
 
+    @Query("""select * from campaign c where c.client_id= :clientId and c.segmentation_id= :segmentId and c.campaign_status= 'CREATED' and c.start_Date < current_timestamp """,nativeQuery = true)
+    fun findAllByClientIDAndSegmentationIDAndStartDateBefore(@Param("segmentId")segmentId: Long, @Param("clientId")clientId: Long):List<Campaign>
+
     @Transactional
     @Modifying
     @Query("""update campaign set campaign_status = :status where segmentation_id = :segmentId and client_id = :clientId""",nativeQuery = true)
     fun updateStatusOfCampaign(@Param("status")status:String,@Param("segmentId")segmentId: Long,@Param("clientId")clientId:Long)
+
+    @Transactional
+    @Modifying
+    @Query("""update campaign set campaign_status = :status where id = :campaignId and client_id = :clientId""",nativeQuery = true)
+    fun updateStatusOfCampaignById(@Param("status")status:String,@Param("campaignId")campaignId: Long,@Param("clientId")clientId:Long)
+
 }

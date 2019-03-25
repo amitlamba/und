@@ -50,4 +50,7 @@ interface EventStream {
     @Input("inLiveSegment")
     fun inLiveSegmentReceive():SubscribableChannel
 
+    @Input("inTestCampaign")
+    fun inTestCampaign():SubscribableChannel
+
 }

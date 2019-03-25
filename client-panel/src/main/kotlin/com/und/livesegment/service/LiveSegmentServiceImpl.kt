@@ -4,8 +4,11 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.und.livesegment.model.jpa.LiveSegment
+import com.und.livesegment.model.mongo.CountPerDay
+import com.und.livesegment.model.mongo.LiveSegmentReportCount
 import com.und.livesegment.model.webmodel.WebLiveSegment
 import com.und.livesegment.repository.jpa.LiveSegmentRepository
+import com.und.livesegment.repository.mongo.LiveSegmentResult
 import com.und.livesegment.repository.mongo.LiveSegmentUserTrackRepository
 import com.und.repository.jpa.SegmentRepository
 import com.und.repository.jpa.UserRepository
@@ -175,5 +178,22 @@ class LiveSegmentServiceImpl : LiveSegmentService {
                 segment.didNotEvents= DidEvents()
             }
         }
+    }
+
+    override fun getLiveSegmentReportByDateRange(startDate:String,endDate:String,segmentId: Long,clientId: Long):LiveSegmentReportCount{
+        val result=liveSegmentUserRepository.getLiveSegmentReportByDateRange(startDate, endDate, clientId, segmentId)
+        val list= mutableSetOf<String>()
+        val liveSegmentCount= mutableListOf<CountPerDay>()
+        var totalUsers:Int=0
+        result.forEach {
+            liveSegmentCount.add(CountPerDay(
+                    totalUsersPerDay = it.totalusersperday,
+                    uniqueUsersPerDay = it.uniqueusersperday,
+                    date = it.date))
+            list.addAll(it.users)
+            totalUsers += it.totalusersperday
+        }
+
+        return  LiveSegmentReportCount(liveSegmentCount,totalUsers,list.size)
     }
 }
