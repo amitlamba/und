@@ -1,6 +1,7 @@
 package com.und.service
 
 import com.netflix.discovery.converters.Auto
+import com.und.common.utils.SmsServiceUtility
 import com.und.model.mongo.Event
 import com.und.model.mongo.SmsStatus
 import com.und.model.utils.ServiceProviderCredentials
@@ -18,7 +19,7 @@ import org.springframework.stereotype.Service
 
 
 @Service
-class SmsService {
+class SmsService :CommonSmsService{
 
     companion object {
         protected val logger: Logger = loggerFor(EmailService::class.java)
@@ -40,16 +41,18 @@ class SmsService {
     private lateinit var userRepository:UserRepository
     @Autowired
     private lateinit var eventApiFeignClient:EventApiFeignClient
+    @Autowired
+    private lateinit var smsServiceUtility: SmsServiceUtility
 
 
-    fun sendSms(sms: Sms) {
+    override fun sendSms(sms: Sms) {
         val mongoSmsId = ObjectId().toString()
         val smsToSend = smsHelperService.updateBody(sms)
 
         smsHelperService.saveSmsInMongo(smsToSend, SmsStatus.NOT_SENT, mongoSmsId)
         //FIXME: cache the findByClientID clientSettings
         //val clientSettings = clientSettingsRepository.findByClientID(smsToSend.clientID)
-        val response = sendSmsWithoutTracking(smsToSend)
+        val response = smsServiceUtility.sendSmsWithoutTracking(smsToSend)
         if (response.status == 200) {
             smsHelperService.updateSmsStatus(mongoSmsId, SmsStatus.SENT, smsToSend.clientID, response.message)
 
@@ -71,49 +74,49 @@ class SmsService {
         }
     }
 
-    fun sendSmsWithoutTracking(sms: Sms): Response {
-        val serviceProviderCredential = serviceProviderCredentials(sms)
-        return try {
-            val smsData = buildSmsData(sms, serviceProviderCredential)
-            val response = smsLambdaInvoker.sendSms(smsData)
-            return response
-        } catch (e: Exception) {
-            logger.error("Couldn't build smsData to invoke sms api", e)
-            Response(400, "invalid input values for sms")
-        }
-
-    }
-
-    fun serviceProviderCredentials(sms: Sms): ServiceProviderCredentials {
-        synchronized(sms.clientID) {
-            //TODO: This code can be cached in Redis
-            if (!wspCredsMap.containsKey(sms.clientID)) {
-                val webServiceProviderCred = serviceProviderCredentialsService.getServiceProviderCredentials(sms.clientID,sms.serviceProviderId)
-                wspCredsMap[sms.clientID] = webServiceProviderCred
-            }
-        }
-        return wspCredsMap[sms.clientID]!!
-    }
-}
-
-fun buildSmsData(sms: Sms, serviceProviderCredentials: ServiceProviderCredentials): SmsData {
-    val credential = serviceProviderCredentials
-    return when (credential.serviceProvider) {
-        ServiceProviderCredentialsService.ServiceProvider.Exotel.desc -> {
-            //val serviceProviderType = credential.serviceProviderType
-            val sid = credential.credentialsMap["sid"]
-            val accessToken = credential.credentialsMap["token"]
-
-            SmsData(
-                    from = sms.fromSmsAddress!!,
-                    to = sms.toSmsAddresses!!,
-                    body = sms.smsBody!!,
-                    token = accessToken!!,
-                    sid = sid!!
-            )
-
-        }
-        else -> throw Exception("Not implemented")
-    }
+//    fun sendSmsWithoutTracking(sms: Sms): Response {
+//        val serviceProviderCredential = serviceProviderCredentials(sms)
+//        return try {
+//            val smsData = buildSmsData(sms, serviceProviderCredential)
+//            val response = smsLambdaInvoker.sendSms(smsData)
+//            return response
+//        } catch (e: Exception) {
+//            logger.error("Couldn't build smsData to invoke sms api", e)
+//            Response(400, "invalid input values for sms")
+//        }
+//
+//    }
+//
+//    fun serviceProviderCredentials(sms: Sms): ServiceProviderCredentials {
+//        synchronized(sms.clientID) {
+//            //TODO: This code can be cached in Redis
+//            if (!wspCredsMap.containsKey(sms.clientID)) {
+//                val webServiceProviderCred = serviceProviderCredentialsService.getServiceProviderCredentials(sms.clientID,sms.serviceProviderId)
+//                wspCredsMap[sms.clientID] = webServiceProviderCred
+//            }
+//        }
+//        return wspCredsMap[sms.clientID]!!
+//    }
+//}
+//
+//fun buildSmsData(sms: Sms, serviceProviderCredentials: ServiceProviderCredentials): SmsData {
+//    val credential = serviceProviderCredentials
+//    return when (credential.serviceProvider) {
+//        ServiceProviderCredentialsService.ServiceProvider.Exotel.desc -> {
+//            //val serviceProviderType = credential.serviceProviderType
+//            val sid = credential.credentialsMap["sid"]
+//            val accessToken = credential.credentialsMap["token"]
+//
+//            SmsData(
+//                    from = sms.fromSmsAddress!!,
+//                    to = sms.toSmsAddresses!!,
+//                    body = sms.smsBody!!,
+//                    token = accessToken!!,
+//                    sid = sid!!
+//            )
+//
+//        }
+//        else -> throw Exception("Not implemented")
+//    }
 
 }

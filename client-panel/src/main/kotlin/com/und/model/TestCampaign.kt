@@ -4,10 +4,10 @@ package com.und.model
 import com.und.model.jpa.AndroidTemplate
 import com.und.model.jpa.CampaignType
 import com.und.model.jpa.SmsTemplate
+import com.und.model.jpa.WebPushTemplate
 
 import com.und.web.model.Campaign
 import com.und.web.model.EmailTemplate
-import com.und.web.model.WebPushTemplate
 
 class TestCampaign {
     lateinit var campaign: Campaign //web //fromuser ,clientid,segmentid,serviceproviderid

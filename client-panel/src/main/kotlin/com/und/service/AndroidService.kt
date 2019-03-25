@@ -11,4 +11,5 @@ interface AndroidService {
     fun getAndroidTemplateById(clientId: Long,id:Long):WebAndroidTemplate
     fun getAllAndroidAction(clientId: Long):List<com.und.web.model.Action>
     fun getAndroidTemplatesById(clientId: Long,id: Long):List<AndroidTemplate>
+    fun buildJpaAndroidTemplate(template: WebAndroidTemplate): AndroidTemplate
 }

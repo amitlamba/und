@@ -1,6 +1,7 @@
 package com.und.livesegment.controller
 
 import com.und.livesegment.model.jpa.LiveSegment
+import com.und.livesegment.model.mongo.LiveSegmentReportCount
 import com.und.livesegment.model.webmodel.WebLiveSegment
 import com.und.livesegment.service.LiveSegmentService
 import com.und.security.utils.AuthenticationUtils
@@ -59,5 +60,15 @@ class LiveSegmentController {
     fun getLiveSegmentUserCount(@RequestParam("segmentId",required = true)segmentId:Long):Long{
         val clientId=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
         return liveSegmentService.getLiveSegmentUsersCount(clientId, segmentId)
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/report/{segmentId}")
+    fun getLiveSegmentReportCountInDateRange(
+            @RequestParam("startDate",required = true)startDate:String,
+            @RequestParam("endDate",required = true)endDate:String,
+            @PathVariable("segmentId",required = true)segmentId: Long):LiveSegmentReportCount{
+        val clientId=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        return liveSegmentService.getLiveSegmentReportByDateRange(startDate,endDate,segmentId,clientId)
     }
 }

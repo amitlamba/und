@@ -104,12 +104,36 @@ class CampaignController {
         return ResponseEntity(campaign,HttpStatus.EXPECTATION_FAILED)
     }
 
-    //TODO new endpoint for test campaign
-    fun runTestCampaign(): Response {
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/save/testcampaign")
+    fun runTestCampaign(@RequestBody testCampaign: TestCampaign): Response {
         val clientId =AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
-        //one of segmentationid and to address must be present
-        campaignService.runTestCampaign(clientId)
+        campaignService.runTestCampaign(clientId,testCampaign)
         return Response(ResponseStatus.SUCCESS)
+    }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/pause/livecampaign/{campaignId}")
+    fun pauseLiveCampaign(@PathVariable("campaignId",required = true)campaignId: Long){
+        val clientId=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        campaignService.pauseLiveCampaign(clientId,campaignId)
+    }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/resume/livecampaign/{campaignId}")
+    fun resumeLiveCampaign(@PathVariable("campaignId",required = true)campaignId: Long){
+        val clientId=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        campaignService.resumeLiveCampaign(clientId,campaignId)
+    }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/stop/livecampaign/{campaignId}")
+    fun stopLiveCampaign(@PathVariable("campaignId",required = true)campaignId: Long){
+        val clientId=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        campaignService.stopLiveCampaign(clientId,campaignId)
+    }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("/delete/livecampaign/{campaignId}")
+    fun deleteLiveCampaign(@PathVariable("campaignId",required = true)campaignId: Long){
+        val clientId=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        campaignService.deleteLiveCampaign(clientId,campaignId)
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

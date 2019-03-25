@@ -57,19 +57,50 @@ class BuildCampaignMessage {
         )
     }
 
+    fun buildTestCampaignSms(clientId: Long, campaign: WebCampaign, user: EventUser, sms: SmsTemplate): Sms {
+        return Sms(
+                clientId,
+                campaign.fromUser,
+                user.identity.mobile,
+                smsBody = sms.smsTemplateBody,
+                smsTemplateId =  0L,
+                smsTemplateName = "",
+                eventUser = user,
+                serviceProviderId = campaign.serviceProviderId,
+                campaignId = -1,
+                segmentId = campaign.segmentationID
+        )
+    }
+
     fun buildAndroidFcmMessage(clientId: Long, androidCampaign: AndroidCampaign, user: EventUser, campaign: Campaign): FcmMessage {
         return FcmMessage(
                 clientId = clientId,
                 templateId = androidCampaign.templateId ?: 0L,
                 to = user.identity.androidFcmToken ?: "",
                 type = "android",
-                campaignId = campaign.id!!,
+                campaignId = -1,
                 userId = user.id,
                 eventUser = user,
                 serviceProviderId = campaign.serviceProviderId,
                 segmentId = campaign.segmentationID
         )
     }
+
+    fun buildTestCampaignAndroidFcmMessage(clientId: Long, user: EventUser, campaign: Campaign,androidTemplate: AndroidTemplate): FcmMessage {
+        return FcmMessage(
+                clientId = clientId,
+                templateId = 0L,
+                to = user.identity.androidFcmToken ?: "",
+                type = "android",
+                campaignId = -1,
+                userId = user.id,
+                eventUser = user,
+                serviceProviderId = campaign.serviceProviderId,
+                segmentId = campaign.segmentationID,
+                androidTemplate = androidTemplate
+        )
+    }
+
     fun buildWebFcmMessage(clientId: Long, webPushCampaign: WebPushCampaign, token: String, campaign: Campaign, user: EventUser): FcmMessage {
         return FcmMessage(
                 clientId = clientId,
@@ -81,6 +112,21 @@ class BuildCampaignMessage {
                 eventUser = user,
                 serviceProviderId = campaign.serviceProviderId,
                 segmentId = campaign.segmentationID
+        )
+    }
+
+    fun buildTestCampaignWebFcmMessage(clientId: Long, token: String, campaign: Campaign, user: EventUser,webPushTemplate: WebPushTemplate): FcmMessage {
+        return FcmMessage(
+                clientId = clientId,
+                templateId = 0L,
+                to = token,
+                type = "web",
+                campaignId = -1,
+                userId = user.id,
+                eventUser = user,
+                serviceProviderId = campaign.serviceProviderId,
+                segmentId = campaign.segmentationID,
+                webPushTemplate = webPushTemplate
         )
     }
     fun buildIosFcmMessage(clientId: Long, user: EventUser, campaign: Campaign): FcmMessage {

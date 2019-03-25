@@ -50,14 +50,24 @@ class FcmHelperService {
 
     fun buildFcmAndroidMessage(message: UtilFcmMessage): LegacyFcmMessage {
 
-        var template = fetchAndroidTemplate(message.clientId, message.templateId)
-        var fcmMessage: LegacyFcmMessage = LegacyFcmMessage()
-
         var model = message.data
         message.eventUser?.let {
             model["user"] = it
         }
-        var body = updateTemplateBody(template, model)
+
+        val alreadyExistTemplate=message.androidTemplate
+        var templateAndBody = if(alreadyExistTemplate==null) {
+            val template=fetchAndroidTemplate(message.clientId, message.templateId)
+            val body = updateTemplateBody(template, model)
+            Pair(template,body)
+        } else {
+            Pair(alreadyExistTemplate,updateTestAndroidTemplateBody(alreadyExistTemplate.body,model))
+        }
+        var fcmMessage: LegacyFcmMessage = LegacyFcmMessage()
+
+
+        val template=templateAndBody.first
+        val body=templateAndBody.second
 
         var data = HashMap<String, String>()
 
@@ -119,10 +129,19 @@ class FcmHelperService {
         var body = templateContentCreationService.getAndroidBody(template, model)
         return body
     }
+    private fun updateTestAndroidTemplateBody(body: String, model: MutableMap<String, Any>): String {
+        var body = templateContentCreationService.getTestAndroidBody(body, model)
+        return body
+    }
 
     private fun updateWebTemplateBody(webtemplate:WebPushTemplate,model: MutableMap<String, Any>):String{
         return templateContentCreationService.getWebpushBody(webtemplate,model)
     }
+
+    private fun updateTestWebTemplateBody(body:String,model: MutableMap<String, Any>):String{
+        return templateContentCreationService.getTestWebPushBody(body,model)
+    }
+
     @Cacheable("androidTemplate", key = "'client_'+#clientId+'_template_'+#templateId")
     fun fetchAndroidTemplate(clientId: Long, templateId: Long): AndroidTemplate {
         return androidRepository.findByClientIdAndId(clientId, templateId)
@@ -132,16 +151,29 @@ class FcmHelperService {
         return webpushRepository.findByClientIdAndId(message.clientId, message.templateId)
     }
     fun buildWebFcmMessage(message: UtilFcmMessage): LegacyFcmMessage {
-        var template = fetchWebpushTemplate(message)
-        var fcmMessage = LegacyFcmMessage()
+
         var data=HashMap<String,String>()
         var model=message.data
         message.eventUser?.let {
             model["user"] = it
         }
-        var body=updateWebTemplateBody(template,model)
+
+        val alreadyExistTemplate=message.webPushTemplate
+        var templateAndBody = if(alreadyExistTemplate==null) {
+            val template=fetchWebpushTemplate(message)
+            val body = updateWebTemplateBody(template,model)
+            Pair(template,body)
+        } else {
+            Pair(alreadyExistTemplate,updateTestWebTemplateBody(alreadyExistTemplate.body,model))
+        }
+
+        val template=templateAndBody.first
+        val body=templateAndBody.second
+
+        var fcmMessage = LegacyFcmMessage()
+
         data.put("title",template.title)
-        data.put("body",template.body)
+        data.put("body",body)
         var badgeUrl=template.badgeUrl
         if(badgeUrl!=null&& badgeUrl.isNotBlank()) data.put("badge",badgeUrl)
         var customDataPair=template.customDataPair

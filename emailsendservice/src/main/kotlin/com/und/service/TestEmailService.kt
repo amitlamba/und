@@ -5,6 +5,7 @@ import com.und.model.mongo.EmailStatus
 import com.und.model.utils.Email
 import com.und.model.utils.eventapi.Event
 import com.und.model.utils.eventapi.Identity
+import com.und.repository.jpa.ClientSettingsRepository
 import org.apache.commons.lang.StringUtils
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,6 +21,12 @@ class TestEmailService:CommonEmailService {
     @Autowired
     private lateinit var templateContentCreationService: TemplateContentCreationService
 
+    @Autowired
+    private lateinit var clientSettingsRepository:ClientSettingsRepository
+
+    @Autowired
+    private lateinit var emailHelperService:EmailHelperService
+
     override fun sendEmail(email: Email) {
 
         val emailToSend = email.copy()
@@ -27,8 +34,13 @@ class TestEmailService:CommonEmailService {
         emailToSend.eventUser?.let {
             model["user"] = it
         }
+        //FIXME cache it
+        val clientSettings = clientSettingsRepository.findByClientID(emailToSend.clientID)
+        if (StringUtils.isNotBlank(clientSettings?.unSubscribeLink))
+            model["unsubscribeLink"] = emailHelperService.getUnsubscribeLink(clientSettings?.unSubscribeLink!!, emailToSend.clientID, "")
+        else model["unsubscribeLink"]=""
         emailToSend.emailSubject = templateContentCreationService.getTestEmailTemplateSubject(email.emailSubject?:"",model)
-        emailToSend.emailBody = templateContentCreationService.getTestEmailTemplateSubject(email.emailBody?:"",model)
+        emailToSend.emailBody = templateContentCreationService.getTestEmailTemplateBody(email.emailBody?:"",model)
         emailServiceUtility.sendEmailWithoutTracking(emailToSend)
 
     }

@@ -1,5 +1,7 @@
 package com.und.model.utils
 
+import com.und.model.jpa.AndroidTemplate
+import com.und.model.jpa.WebPushTemplate
 import com.und.model.mongo.EventUser
 
 data class FcmMessage(
@@ -12,5 +14,7 @@ data class FcmMessage(
         var eventUser:EventUser?=null,
         var data:MutableMap<String,Any> = mutableMapOf(),
         var serviceProviderId:Long?=null,
-        var segmentId:Long?=null
+        var segmentId:Long?=null,
+        var androidTemplate: AndroidTemplate?=null,
+        var webPushTemplate: WebPushTemplate?=null
 )

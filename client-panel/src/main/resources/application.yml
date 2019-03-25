@@ -31,6 +31,10 @@
 #                reset: earliest
 #        bindings:
 #          scheduleJobSend:
+#            producer:
+#              configuration:
+#                client:
+#                  id: 1
 #            group: scheduleJobGroup
 #            destination: scheduleJobStaging
 #          scheduleJobAckReceive:
@@ -49,6 +53,10 @@
 #            group: scheduleJobAckGroup
 #            destination: scheduleJobAckStaging
 #          clientEmailSend:
+#            producer:
+#              configuration:
+#                client:
+#                  id: 2
 #            group: clientEmailSendGroup
 #            destination: clientEmailStaging
 #          fcmFailureEventReceive:
@@ -81,6 +89,29 @@
 #                  id: 3
 #            group: emailFailureEventReceiveGroup
 #            destination: emailFailureEventStaging
+#          inEventForLiveSegment:
+#            consumer:
+#              configuration:
+#                group:
+#                  id: processLiveEventReceiveGroup
+#                client:
+#                  id: 4
+#            destination: processliveevent
+#          outLiveSegment:
+#            group: processLiveUserGroup
+#            destination: processliveuser
+#          inJobForLiveSegmentCheck:
+#            consumer:
+#              configuration:
+#                group:
+#                  id: liveUserCheckReceiveGroup
+#                client:
+#                  id: 5
+#            destination: liveusercheck
+#          scheduleLiveJobSend:
+#            destination: scheduleLiveJobStaging
+#          outTestCampaign:
+#            destinataion: testCampaignStaging
 #      bindings:
 #        scheduleJobSend:
 #          destination: scheduleJobStaging
@@ -92,6 +123,16 @@
 #          destination: fcmEventFailureStaging
 #        emailFailureEventReceive:
 #          destination: emailFailureEventStaging
+#        inEventForLiveSegment:
+#          destination: processliveevent
+#        outLiveSegment:
+#          destination: processliveuser
+#        inJobForLiveSegmentCheck:
+#          destination: liveusercheck
+#        scheduleLiveJobSend:
+#          destination: scheduleLiveJobStaging
+#        outTestCampaign:
+#          destinataion: testCampaignStaging
 #  mvc:
 #    view:
 #      prefix: /WEB-INF/views/
@@ -116,6 +157,9 @@
 #      max-wait: 10000
 #      max-active: 50
 #      test-on-borrow: true
+#    hikari:
+#      maximum-pool-size: 3
+#      idle-timeout: 10000
 #  data:
 #    mongodb:
 #      database: eventdbstaging
@@ -200,6 +244,7 @@
 #  url:
 #    event: http://userndot.com/event
 #    client: http://userndot.com/client
+#    clientui: http://userndot.com/
 #  auth-url: http://nestros.com:8080/auth
 #  from-email: shiv@userndot.com
 #  lambda:

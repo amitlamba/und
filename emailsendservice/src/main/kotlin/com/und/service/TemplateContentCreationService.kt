@@ -93,13 +93,18 @@ class TemplateContentCreationService {
         return FreeMarkerTemplateUtils.processTemplateIntoString(template,model)
     }
 
-    fun getTestSmsTemplateSubject(smsTemplateSubject: String,model: MutableMap<String, Any>):String{
-        val template= Template("smsTestCampaignSubject",StringReader(smsTemplateSubject),freeMarkerConfiguration)
+    fun getTestSmsTemplateBody(smsTemplateBody: String,model: MutableMap<String, Any>):String{
+        val template= Template("smsTestCampaignBody",StringReader(smsTemplateBody),freeMarkerConfiguration)
         return FreeMarkerTemplateUtils.processTemplateIntoString(template,model)
     }
 
-    fun getTestSmsTemplateBody(smsTemplateBody: String,model: MutableMap<String, Any>):String{
-        val template= Template("smsTestCampaignBody",StringReader(smsTemplateBody),freeMarkerConfiguration)
+    fun getTestAndroidBody(body:String,model: MutableMap<String, Any>):String{
+        val template=Template("",StringReader(body),freeMarkerConfiguration)
+        return FreeMarkerTemplateUtils.processTemplateIntoString(template,model)
+    }
+
+    fun getTestWebPushBody(body: String,model: MutableMap<String, Any>):String{
+        val template=Template("",StringReader(body),freeMarkerConfiguration)
         return FreeMarkerTemplateUtils.processTemplateIntoString(template,model)
     }
 

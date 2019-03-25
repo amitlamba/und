@@ -21,3 +21,14 @@ class TestCampaign {
     var fromUser:String?=null
     var clientEmailSettingId:Long?=null
 }
+
+//{
+//    "emailTemplate:EmailTemplate":{},
+//    "findByType":"EMAIL",
+//    "toAddresses":"",
+//    "campaignType": "EMAIL",
+//    "segmentationID":-2,
+//    "serviceProviderId":1,
+//    "fromUser":"",
+//    "clientEmailSettingId":3
+//}

@@ -71,7 +71,7 @@ class AndroidServiceImp : AndroidService {
         return androidRepository.isExistsByClientIdAndId(clientId, id)
     }
 
-    private fun buildJpaAndroidTemplate(template: WebAndroidTemplate): AndroidTemplate {
+    override fun buildJpaAndroidTemplate(template: WebAndroidTemplate): AndroidTemplate {
 
         var androidTemplate = AndroidTemplate()
         with(androidTemplate) {

@@ -28,10 +28,10 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.util.*
 import com.und.web.model.Campaign as WebCampaign
+import com.und.web.model.TestCampaign as WebTestCampaign
 
 
 @Service
-
 class CampaignService {
 
 
@@ -60,6 +60,12 @@ class CampaignService {
     private lateinit var objectMapper: ObjectMapper
 
     @Autowired
+    private lateinit var androidService: AndroidService
+
+    @Autowired
+    private lateinit var webPushService: WebPushService
+
+    @Autowired
     private lateinit var clientFromAddrAndSrpRepository: CustomFromAddrAndSrpRepository
 
     fun getCampaigns(): List<WebCampaign> {
@@ -70,12 +76,12 @@ class CampaignService {
         return campaigns?.map { buildWebCampaign(it) } ?: listOf()
     }
 
-    fun getCampaignById(campaignId: Long):WebCampaign{
-        var clientId=AuthenticationUtils.clientID?: throw AccessDeniedException("")
-        var campaign= campaignRepository.findByIdAndClientID(campaignId,clientId)
-        if(campaign.isPresent){
+    fun getCampaignById(campaignId: Long): WebCampaign {
+        var clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
+        var campaign = campaignRepository.findByIdAndClientID(campaignId, clientId)
+        if (campaign.isPresent) {
             return buildWebCampaign(campaign = campaign.get())
-        }else{
+        } else {
             throw ScheduleUpdateException("Campaign doesn't exist with id $campaignId and client : $clientId")
         }
     }
@@ -88,23 +94,23 @@ class CampaignService {
     @Transactional
     protected fun saveCampaign(webCampaign: com.und.web.model.Campaign): Campaign? {
         val campaign = buildCampaign(webCampaign)
-        try{
+        try {
             val persistedCampaign = campaignRepository.save(campaign)
 
             webCampaign.id = persistedCampaign.id
-            if(persistedCampaign!=null) {
+            if (persistedCampaign != null) {
                 campaignRepository.updateScheduleStatus(persistedCampaign.id!!, persistedCampaign.clientID!!, CampaignStatus.CREATED.name)
             }
-            if (webCampaign.schedule!=null) {
+            if (webCampaign.schedule != null) {
                 logger.info("sending request to scheduler ${campaign.name}")
                 val jobDescriptor = buildJobDescriptor(webCampaign, JobDescriptor.Action.CREATE)
                 val sendToKafka = sendToKafka(jobDescriptor)
             }
             return persistedCampaign
-        }catch (ex:ConstraintViolationException){
+        } catch (ex: ConstraintViolationException) {
             logger.error("Exception In Campaign Save clientId ${campaign.clientID} constaintsName ${ex.constraintName} cause ${ex.cause?.message}")
             throw CustomException("Campaign with this name already exists.${ex.message}")
-        }catch (ex:DataIntegrityViolationException){
+        } catch (ex: DataIntegrityViolationException) {
             logger.error("Exception In Campaign Save clientId ${campaign.clientID} cause ${ex.message}")
             throw CustomException("Campaign with this name already exists.${ex.message} ${ex.cause?.message}")
         }
@@ -184,7 +190,7 @@ class CampaignService {
         return jobDescriptor
     }
 
-    private fun buildJobDetail(campaignId: String, campaignName: String, clientId: String): JobDetail{
+    private fun buildJobDetail(campaignId: String, campaignName: String, clientId: String): JobDetail {
         val properties = CampaignJobDetailProperties()
         properties.campaignName = campaignName
         properties.campaignId = campaignId
@@ -196,82 +202,126 @@ class CampaignService {
         return jobDetail
     }
 
-    fun runTestCampaign(clientId:Long){
+    fun runTestCampaign(clientId: Long, testCampaign: WebTestCampaign) {
 
-        val type= CampaignType.EMAIL
-            val testCampaign=when(type){
-                CampaignType.EMAIL -> buildTestEmailModel(clientId)
-                CampaignType.SMS -> buildTestSmsModel(clientId)
-                CampaignType.PUSH_ANDROID -> buildTestAndroidModel(clientId)
-                CampaignType.PUSH_WEB -> buildTestWebModel(clientId)
-                CampaignType.PUSH_IOS -> buildTestIosModel()
-            }
-        testCampaign(testCampaign,clientId)
-    }
-
-    fun buildTestEmailModel(clientId: Long):TestCampaign{
-        val testCampaign= TestCampaign()
-        //TODO build email template
-        val emailTemplate= EmailTemplate()
-        //TODO build campaign
-        val campaign= WebCampaign()
-
-        with(testCampaign){
-            this.clientId=clientId
-            this.campaign = campaign
-            type=CampaignType.EMAIL
-            this.emailTemplate=emailTemplate
+        val type = testCampaign.campaignType
+        val testCampaign = when (type) {
+            CampaignType.EMAIL -> buildTestEmailModel(clientId, testCampaign)
+            CampaignType.SMS -> buildTestSmsModel(clientId, testCampaign)
+            CampaignType.PUSH_ANDROID -> buildTestAndroidModel(clientId, testCampaign)
+            CampaignType.PUSH_WEB -> buildTestWebModel(clientId, testCampaign)
+            CampaignType.PUSH_IOS -> buildTestIosModel()
         }
-        return testCampaign
+        testCampaign(testCampaign, clientId)
     }
 
-    fun buildTestSmsModel(clientId: Long):TestCampaign{
-        val testCampaign= TestCampaign()
-        //TODO build sms template
-        val smsTemplate= SmsTemplate()
-        //TODO build campaign
-        val campaign= WebCampaign()
-
-        with(testCampaign){
-            this.clientId=clientId
-            this.campaign = campaign
-            type=CampaignType.SMS
-            this.smsTemplate=smsTemplate
-        }
-        return testCampaign
-    }
-    fun buildTestAndroidModel(clientId: Long):TestCampaign{
-        val testCampaign= TestCampaign()
-        //TODO build android template
-        val androidTemplate= AndroidTemplate()
-        //TODO build campaign
-        val campaign= WebCampaign()
-
-        with(testCampaign){
-            this.clientId=clientId
-            this.campaign = campaign
-            type=CampaignType.PUSH_ANDROID
-            this.androidTemplate= androidTemplate
-        }
-        return testCampaign
-    }
-    fun buildTestWebModel(clientId: Long):TestCampaign {
+    fun buildTestEmailModel(clientId: Long, testWebCampaign: WebTestCampaign): TestCampaign {
         val testCampaign = TestCampaign()
-        //TODO build web template
-        val emailTemplate = WebPushTemplate()
-        //TODO build campaign
-        val campaign = WebCampaign()
+        val emailTemplate = testWebCampaign.emailTemplate
+        emailTemplate ?: throw CustomException("Template missing.")
+        testWebCampaign.segmentationID
+                ?: if (testWebCampaign.findByType == null || testWebCampaign.toAddresses == null) throw CustomException("")
+        val serviceProviderId = testWebCampaign.serviceProviderId
+        val fromUser = testWebCampaign.fromUser
+        testWebCampaign.clientEmailSettingId
+                ?: if (fromUser == null || serviceProviderId == null) throw CustomException("")
+                else {
+                    val clientSettingsEmail = clientSettingsEmailRepository.findByClientIdAndEmailAndServiceProviderId(clientId, fromUser, serviceProviderId)
+                    if (clientSettingsEmail.isPresent) testWebCampaign.clientEmailSettingId = clientSettingsEmail.get().id else throw CustomException("No client Email Setting found for email ${fromUser} and serviceProivder ${serviceProviderId}")
+                }
 
+        val campaign = WebCampaign()
+        with(campaign) {
+            segmentationID = testWebCampaign.segmentationID
+            clientEmailSettingId = testWebCampaign.clientEmailSettingId
+            campaignType = testWebCampaign.campaignType
+            this.fromUser=testWebCampaign.fromUser
+        }
         with(testCampaign) {
-            this.clientId=clientId
+            this.clientId = clientId
+            this.campaign = campaign
+            type = CampaignType.EMAIL
+            this.emailTemplate = emailTemplate
+            this.findByType = testWebCampaign.findByType
+            toAddresses = testWebCampaign.toAddresses?.split(",")?.toTypedArray()
+        }
+        return testCampaign
+    }
+
+    fun buildTestSmsModel(clientId: Long, testWebCampaign: WebTestCampaign): TestCampaign {
+        val testCampaign = TestCampaign()
+        val smsTemplate = testWebCampaign.smsTemplate
+        smsTemplate ?: throw CustomException("Template missing.")
+        testWebCampaign.segmentationID
+                ?: if (testWebCampaign.findByType == null || testWebCampaign.toAddresses == null) throw CustomException("")
+
+        val campaign = WebCampaign()
+        with(campaign) {
+            fromUser = testWebCampaign.fromUser
+            segmentationID = testWebCampaign.segmentationID
+            serviceProviderId = testWebCampaign.serviceProviderId
+            campaignType = testWebCampaign.campaignType
+        }
+        with(testCampaign) {
+            this.clientId = clientId
+            this.campaign = campaign
+            type = CampaignType.SMS
+            this.smsTemplate = smsTemplate
+            this.findByType = testWebCampaign.findByType
+            toAddresses = testWebCampaign.toAddresses?.split(",")?.toTypedArray()
+        }
+        return testCampaign
+    }
+
+    fun buildTestAndroidModel(clientId: Long, testWebCampaign: WebTestCampaign): TestCampaign {
+        val testCampaign = TestCampaign()
+        val template = testWebCampaign.androidTemplate
+        template ?: throw CustomException("Template missing.")
+        val androidTemplate = androidService.buildJpaAndroidTemplate(template)
+        testWebCampaign.segmentationID
+                ?: if (testWebCampaign.findByType == null || testWebCampaign.toAddresses == null) throw CustomException("")
+        val campaign = WebCampaign()
+        with(campaign) {
+            segmentationID = testWebCampaign.segmentationID
+            serviceProviderId = testWebCampaign.serviceProviderId
+            campaignType = testWebCampaign.campaignType
+        }
+        with(testCampaign) {
+            this.clientId = clientId
+            this.campaign = campaign
+            type = CampaignType.PUSH_ANDROID
+            this.androidTemplate = androidTemplate
+            this.findByType = testWebCampaign.findByType
+            toAddresses = testWebCampaign.toAddresses?.split(",")?.toTypedArray()
+        }
+        return testCampaign
+    }
+
+    fun buildTestWebModel(clientId: Long, testWebCampaign: WebTestCampaign): TestCampaign {
+        val testCampaign = TestCampaign()
+        val template = testWebCampaign.webPushTemplate
+        template ?: throw CustomException("Template missing.")
+        val webTemplate = webPushService.buildJpaWebPushTemplate(template)
+        testWebCampaign.segmentationID
+                ?: if (testWebCampaign.findByType == null || testWebCampaign.toAddresses == null) throw CustomException("")
+        val campaign = WebCampaign()
+        with(campaign) {
+            segmentationID = testWebCampaign.segmentationID
+            serviceProviderId = testWebCampaign.serviceProviderId
+            campaignType = testWebCampaign.campaignType
+        }
+        with(testCampaign) {
+            this.clientId = clientId
             this.campaign = campaign
             type = CampaignType.PUSH_WEB
             this.webTemplate = webTemplate
+            this.findByType = testWebCampaign.findByType
+            toAddresses = testWebCampaign.toAddresses?.split(",")?.toTypedArray()
         }
         return testCampaign
     }
 
-    fun buildTestIosModel():TestCampaign{
+    fun buildTestIosModel(): TestCampaign {
         return TestCampaign()
     }
 
@@ -285,35 +335,35 @@ class CampaignService {
             appuserID = AuthenticationUtils.principal.id
             campaignType = webCampaign.campaignType
             segmentationID = webCampaign.segmentationID
-            serviceProviderId=webCampaign.serviceProviderId
-            conversionEvent=webCampaign.conversionEvent
-            fromUser=webCampaign.fromUser
+            serviceProviderId = webCampaign.serviceProviderId
+            conversionEvent = webCampaign.conversionEvent
+            fromUser = webCampaign.fromUser
             webCampaign.schedule?.oneTime?.let { whenTo ->
                 if (whenTo.nowOrLater == Now.Now) {
                     whenTo.campaignDateTime = null
                 }
 
             }
-            if(webCampaign.schedule!=null) schedule =  objectMapper.writeValueAsString(webCampaign.schedule)
-            else{
-                var liveSchedule=webCampaign.liveSchedule
+            if (webCampaign.schedule != null) schedule = objectMapper.writeValueAsString(webCampaign.schedule)
+            else {
+                var liveSchedule = webCampaign.liveSchedule
 
                 liveSchedule?.let {
-                    val startTime=when(it.nowOrLater){
+                    val startTime = when (it.nowOrLater) {
                         Now.Now -> LocalDateTime.now()
                         else -> it.startTime!!.toLocalDateTime()
                     }
 
-                    var endTime:LocalDateTime?=null
+                    var endTime: LocalDateTime? = null
                     it.endTime?.let {
-                        endTime=it.toLocalDateTime()
+                        endTime = it.toLocalDateTime()
                     }
-                    if(endTime==null) endTime = LocalDateTime.now().plusYears(10)
-                    campaign.startDate=startTime
-                    campaign.endDate=endTime
+                    if (endTime == null) endTime = LocalDateTime.now().plusYears(10)
+                    campaign.startDate = startTime
+                    campaign.endDate = endTime
                     //FIXME not saved ?
-                    campaign.status=CampaignStatus.CREATED
-                    campaign.schedule="{}"
+                    campaign.status = CampaignStatus.CREATED
+                    campaign.schedule = "{}"
                 }
             }
         }
@@ -323,16 +373,16 @@ class CampaignService {
 //                if(webCampaign.fromUser.isNullOrEmpty()||webCampaign.serviceProviderId==null) throw CustomException("Email Campaign must have fromuser and serviceproviderid")
 //                val clientSettingsEmail=clientSettingsEmailRepository.findByClientIdAndEmailAndServiceProviderId(campaign.clientID!!,webCampaign.fromUser!!,webCampaign.serviceProviderId!!)
                 webCampaign.clientEmailSettingId?.let {
-                    val clientSettingsEmail=clientSettingsEmailRepository.findByClientIdAndId(campaign.clientID!!,it)
-                    if(!clientSettingsEmail.isPresent) throw CustomException("No client email setting found for client ${campaign.clientID} ,from email address ${webCampaign.fromUser} ,sp ${webCampaign.serviceProviderId}")
-                    else{
+                    val clientSettingsEmail = clientSettingsEmailRepository.findByClientIdAndId(campaign.clientID!!, it)
+                    if (!clientSettingsEmail.isPresent) throw CustomException("No client email setting found for client ${campaign.clientID} ,from email address ${webCampaign.fromUser} ,sp ${webCampaign.serviceProviderId}")
+                    else {
                         val emailcampaign = EmailCampaign()
                         emailcampaign.appuserId = campaign.appuserID
                         emailcampaign.clientID = campaign.clientID
                         emailcampaign.templateId = webCampaign.templateID
-                        emailcampaign.clientSettingEmailId=clientSettingsEmail.get().id
+                        emailcampaign.clientSettingEmailId = clientSettingsEmail.get().id
                         campaign.emailCampaign = emailcampaign
-                        campaign.serviceProviderId=clientSettingsEmail.get().serviceProviderId
+                        campaign.serviceProviderId = clientSettingsEmail.get().serviceProviderId
                     }
                 }
 
@@ -344,19 +394,19 @@ class CampaignService {
                 smscampaign.templateId = webCampaign.templateID
                 campaign.smsCampaign = smscampaign
             }
-            CampaignType.PUSH_ANDROID ->{
+            CampaignType.PUSH_ANDROID -> {
                 var androidCampaign = AndroidCampaign()
-                androidCampaign.appuserId=campaign.appuserID
-                androidCampaign.clientId=campaign.clientID
-                androidCampaign.templateId=webCampaign.templateID
-                campaign.androidCampaign=androidCampaign
+                androidCampaign.appuserId = campaign.appuserID
+                androidCampaign.clientId = campaign.clientID
+                androidCampaign.templateId = webCampaign.templateID
+                campaign.androidCampaign = androidCampaign
             }
-            CampaignType.PUSH_WEB ->{
+            CampaignType.PUSH_WEB -> {
                 var webPushCampaign = WebPushCampaign()
-                webPushCampaign.appuserId=campaign.appuserID
-                webPushCampaign.clientId=campaign.clientID
-                webPushCampaign.templateId=webCampaign.templateID
-                campaign.webCampaign=webPushCampaign
+                webPushCampaign.appuserId = campaign.appuserID
+                webPushCampaign.clientId = campaign.clientID
+                webPushCampaign.templateId = webCampaign.templateID
+                campaign.webCampaign = webPushCampaign
             }
 //            CampaignType.PUSH_IOS ->{
 //                var androidCampaign = AndroidCampaign()
@@ -384,19 +434,18 @@ class CampaignService {
             dateCreated = campaign.dateCreated
             dateModified = campaign.dateModified
             status = campaign.status
-            conversionEvent=campaign.conversionEvent
-            serviceProviderId=campaign.serviceProviderId
-            fromUser=campaign.fromUser
+            conversionEvent = campaign.conversionEvent
+            serviceProviderId = campaign.serviceProviderId
+            fromUser = campaign.fromUser
         }
 
-        if(campaign.startDate!=null) {
-            val liveSchedule= LiveSchedule()
-            liveSchedule.startTime= toCampaignTime(campaign.startDate)
-            liveSchedule.endTime= toCampaignTime(campaign.endDate)
-            webCampaign.liveSchedule=liveSchedule
+        if (campaign.startDate != null) {
+            val liveSchedule = LiveSchedule()
+            liveSchedule.startTime = toCampaignTime(campaign.startDate)
+            liveSchedule.endTime = toCampaignTime(campaign.endDate)
+            webCampaign.liveSchedule = liveSchedule
 
-        }
-        else webCampaign.schedule = objectMapper.readValue(campaign.schedule, Schedule::class.java)
+        } else webCampaign.schedule = objectMapper.readValue(campaign.schedule, Schedule::class.java)
 
         if (campaign.emailCampaign != null) {
             val emailcampaign = campaign.emailCampaign
@@ -406,15 +455,14 @@ class CampaignService {
             val smsCampaign = campaign.smsCampaign
             webCampaign.templateID = smsCampaign?.templateId
             webCampaign.campaignType = CampaignType.SMS
-        }else if(campaign.androidCampaign!=null){
-            val androidCampaign=campaign.androidCampaign
-            webCampaign.campaignType=CampaignType.PUSH_ANDROID
-            webCampaign.templateID=androidCampaign?.templateId
-        }
-        else if(campaign.webCampaign!=null){
-            val webPushCampaign=campaign.webCampaign
-            webCampaign.campaignType=CampaignType.PUSH_WEB
-            webCampaign.templateID=webPushCampaign?.templateId
+        } else if (campaign.androidCampaign != null) {
+            val androidCampaign = campaign.androidCampaign
+            webCampaign.campaignType = CampaignType.PUSH_ANDROID
+            webCampaign.templateID = androidCampaign?.templateId
+        } else if (campaign.webCampaign != null) {
+            val webPushCampaign = campaign.webCampaign
+            webCampaign.campaignType = CampaignType.PUSH_WEB
+            webCampaign.templateID = webPushCampaign?.templateId
         }
 //        else if(campaign.iosCampaign!=null){
 //            val iosCampaign=campaign.iosCampaign
@@ -491,6 +539,57 @@ class CampaignService {
         return handleSchedule(campaignId, JobDescriptor.Action.DELETE)
     }
 
+    fun pauseLiveCampaign(clientId: Long, campaignId: Long) {
+        val campaign = campaignRepository.findById(campaignId)
+        campaign.ifPresent {
+            if (it.startDate != null) {
+                val status = it.status.toString()
+                val order = LiveCampaignStatus.valueOf(status)
+                if (order.ordinal < LiveCampaignStatus.PAUSED.ordinal) {
+                    campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.PAUSED.name)
+                }
+            }
+        }
+    }
+
+    fun deleteLiveCampaign(clientId: Long, campaignId: Long) {
+        val campaign = campaignRepository.findById(campaignId)
+        campaign.ifPresent {
+            if (it.startDate != null) {
+                val status = it.status.toString()
+                val order = LiveCampaignStatus.valueOf(status)
+                if (order.ordinal >= LiveCampaignStatus.STOPPED.ordinal) {
+                    campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.DELETED.name)
+                }
+            }
+        }
+    }
+
+    fun resumeLiveCampaign(clientId: Long, campaignId: Long) {
+        val campaign = campaignRepository.findById(campaignId)
+        campaign.ifPresent {
+            if (it.startDate != null) {
+                val status = it.status.toString()
+                val order = LiveCampaignStatus.valueOf(status)
+                if (order.ordinal < LiveCampaignStatus.STOPPED.ordinal) {
+                    campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.CREATED.name)
+                }
+            }
+        }
+    }
+
+    fun stopLiveCampaign(clientId: Long, campaignId: Long) {
+        val campaign = campaignRepository.findById(campaignId)
+        campaign.ifPresent {
+            if (it.startDate != null) {
+                val status = it.status.toString()
+                val order = LiveCampaignStatus.valueOf(status)
+                if (order.ordinal < LiveCampaignStatus.COMPLETED.ordinal) {
+                    campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.STOPPED.name)
+                }
+            }
+        }
+    }
 
     private fun handleSchedule(campaignId: Long, action: JobDescriptor.Action): Long {
         val campaignOption = campaignRepository.findById(campaignId)
@@ -602,11 +701,11 @@ class CampaignService {
 
     fun getListOfCampaign(segmentId: Long): List<com.und.web.model.Campaign> {
 
-        var clientId=AuthenticationUtils.clientID ?: throw AccessDeniedException("")
-        var campaigns= campaignRepository.findByClientIDAndSegmentationID(clientId,segmentId)
-        var listOfCampaign= mutableListOf<com.und.web.model.Campaign>()
+        var clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
+        var campaigns = campaignRepository.findByClientIDAndSegmentationID(clientId, segmentId)
+        var listOfCampaign = mutableListOf<com.und.web.model.Campaign>()
         campaigns.forEach {
-            var campaign=buildWebCampaign(it)
+            var campaign = buildWebCampaign(it)
             listOfCampaign.add(campaign)
         }
         return listOfCampaign
@@ -642,7 +741,7 @@ class CampaignService {
         return clientFromAddrAndSrpRepository.joinClientEmailSettingAndServicePtoivder(clientId)
     }
 
-    private fun testCampaign(campaign:TestCampaign,clientId: Long){
+    private fun testCampaign(campaign: TestCampaign, clientId: Long) {
         logger.info("Sending Test Campaign for client $clientId to queue.")
         eventStream.outTestCampaign().send(MessageBuilder.withPayload(campaign).build())
     }

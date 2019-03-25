@@ -12,3 +12,17 @@ enum class CampaignStatus {
     COMPLETED,
     FORCE_PAUSED
 }
+
+enum class LiveCampaignStatus(order:Int){
+    CREATED(0),
+    PAUSED(1),
+    RESUMED(2),
+//    ERROR,
+//    SCHEDULE_PENDING,
+//    SCHEDULE_ERROR,
+
+    STOPPED(3),
+    COMPLETED(4),
+    DELETED(5)
+//    FORCE_PAUSED
+}

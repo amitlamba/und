@@ -74,6 +74,11 @@ class CampaignService {
         return  campaignRepository.getCampaignByClientIDAndSegmentationIDAndStartDateBeforeAndEndDateAfter(segmentId, clientId)
     }
 
+    fun findAllLiveSegmentCampaignBySegmentId(segmentId: Long, clientId: Long): List<Campaign> {
+        //FIXME if client panel and email send service are running in diff timezone then there is exact time matching problem.
+        return  campaignRepository.findAllByClientIDAndSegmentationIDAndStartDateBefore(segmentId, clientId)
+    }
+
     private fun executeCampaignForUser(campaign: Campaign, user: EventUser, clientId: Long) {
         try {
             //TODO: filter out unsubscribed and blacklisted users
@@ -176,6 +181,9 @@ class CampaignService {
 
     fun updateCampaignStatus(status:CampaignStatus,clientId: Long,segmentId: Long){
         campaignRepository.updateStatusOfCampaign(status.name,segmentId,clientId)
+    }
+    fun updateCampaignStatusByCampaignId(status:CampaignStatus,clientId: Long,campaignId: Long){
+        campaignRepository.updateStatusOfCampaign(status.name,campaignId,clientId)
     }
     fun getUsersData(segmentId: Long, clientId: Long): List<EventUser> {
         val segment = segmentService.getWebSegment(segmentId, clientId)
