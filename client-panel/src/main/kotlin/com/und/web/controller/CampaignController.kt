@@ -9,10 +9,8 @@ import com.und.security.utils.AuthenticationUtils
 import com.und.service.*
 import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.UndBusinessValidationException
-import com.und.web.model.Campaign
-import com.und.web.model.ClientEmailSettIdFromAddrSrp
-import com.und.web.model.ClientFromAddressAndSrp
-import com.und.web.model.EmailTemplate
+import com.und.web.model.*
+import com.und.web.model.ResponseStatus
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -106,6 +104,37 @@ class CampaignController {
         return ResponseEntity(campaign,HttpStatus.EXPECTATION_FAILED)
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/save/testcampaign")
+    fun runTestCampaign(@RequestBody testCampaign: TestCampaign): Response {
+        val clientId =AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        campaignService.runTestCampaign(clientId,testCampaign)
+        return Response(ResponseStatus.SUCCESS)
+    }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/pause/livecampaign/{campaignId}")
+    fun pauseLiveCampaign(@PathVariable("campaignId",required = true)campaignId: Long){
+        val clientId=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        campaignService.pauseLiveCampaign(clientId,campaignId)
+    }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/resume/livecampaign/{campaignId}")
+    fun resumeLiveCampaign(@PathVariable("campaignId",required = true)campaignId: Long){
+        val clientId=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        campaignService.resumeLiveCampaign(clientId,campaignId)
+    }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PutMapping("/stop/livecampaign/{campaignId}")
+    fun stopLiveCampaign(@PathVariable("campaignId",required = true)campaignId: Long){
+        val clientId=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        campaignService.stopLiveCampaign(clientId,campaignId)
+    }
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("/delete/livecampaign/{campaignId}")
+    fun deleteLiveCampaign(@PathVariable("campaignId",required = true)campaignId: Long){
+        val clientId=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        campaignService.deleteLiveCampaign(clientId,campaignId)
+    }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/updateschedule/{campaignId}"])

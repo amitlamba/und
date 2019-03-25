@@ -11,4 +11,5 @@ interface WebPushService {
     fun getAllTemplate():List<WebTemplate>
     fun findExistsTemplate(id:Long):List<WebPushTemplate>
     fun isTemplateExists(clientId:Long,templateName:String):Boolean
+    fun buildJpaWebPushTemplate(template: WebTemplate): WebPushTemplate
 }

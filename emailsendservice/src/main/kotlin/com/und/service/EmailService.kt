@@ -1,6 +1,7 @@
 package com.und.service
 
 import com.netflix.discovery.converters.Auto
+import com.und.common.utils.EmailServiceUtility
 import com.und.config.EventStream
 import com.und.exception.EmailError
 import com.und.exception.EmailFailureException
@@ -22,8 +23,8 @@ import javax.mail.internet.InternetAddress
 import com.amazonaws.services.simpleemail.model.Message as SESMessage
 
 
-@Service
-class EmailService {
+@Service("emailservice")
+class EmailService:CommonEmailService {
     companion object {
         protected val logger = loggerFor(EmailService::class.java)
     }
@@ -53,19 +54,22 @@ class EmailService {
     @Autowired
     private lateinit var userRepository:UserRepository
 
-    private var wspCredsMap: MutableMap<Long, ServiceProviderCredentials> = mutableMapOf()
+//    private var wspCredsMap: MutableMap<Long, ServiceProviderCredentials> = mutableMapOf()
+
+    @Autowired
+    private lateinit var emailServiceUtility:EmailServiceUtility
 
 
-    fun sendEmailBySMTP(emailSMTPConfig: EmailSMTPConfig, email: Email) {
-        emailSendService.sendEmailBySMTP(emailSMTPConfig, email)
-    }
+//    fun sendEmailBySMTP(emailSMTPConfig: EmailSMTPConfig, email: Email) {
+//        emailSendService.sendEmailBySMTP(emailSMTPConfig, email)
+//    }
+//
+//    fun sendEmailByAWSSDK(emailSESConfig: EmailSESConfig, email: Email) {
+//        emailSendService.sendEmailByAWSSDK(emailSESConfig, email)
+//    }
 
-    fun sendEmailByAWSSDK(emailSESConfig: EmailSESConfig, email: Email) {
-        emailSendService.sendEmailByAWSSDK(emailSESConfig, email)
-    }
 
-
-    fun sendEmail(email: Email) {
+    override fun sendEmail(email: Email) {
 
 
         fun String.addUrlTracking(uniqueTrackingId: String): String {
@@ -117,7 +121,7 @@ class EmailService {
 //            }
 //        }
         emailHelperService.saveMailInMongo(emailToSend, NOT_SENT, mongoEmailId)
-        sendEmailWithoutTracking(emailToSend)
+        emailServiceUtility.sendEmailWithoutTracking(emailToSend)
         emailHelperService.updateEmailStatus(mongoEmailId, SENT, emailToSend.clientID)
 
         //TODO this event is track only for campaign not for system emails
@@ -135,40 +139,40 @@ class EmailService {
         eventApiFeignClient.pushEvent(token,event)
     }
 
-    private fun isSystemClient(email: Email) = email.clientID == 1L
+//    private fun isSystemClient(email: Email) = email.clientID == 1L
 
-    fun sendEmailWithoutTracking(email: Email) {
-        val serviceProviderCredential = serviceProviderCredentials(email = email)
-//        val serviceProviderCredential= emailHelperService.getEmailServiceProviderCredentials(email.clientID,email.clientEmailSettingId!!)
-//        val spcrd=serviceProviderCredentialsService.buildWebServiceProviderCredentials(serviceProviderCredential)
-        sendEmail(serviceProviderCredential, email)
-    }
+//    fun sendEmailWithoutTracking(email: Email) {
+//        val serviceProviderCredential = serviceProviderCredentials(email = email)
+////        val serviceProviderCredential= emailHelperService.getEmailServiceProviderCredentials(email.clientID,email.clientEmailSettingId!!)
+////        val spcrd=serviceProviderCredentialsService.buildWebServiceProviderCredentials(serviceProviderCredential)
+//        sendEmail(serviceProviderCredential, email)
+//    }
 
-    private fun sendEmail(serviceProviderCredential: ServiceProviderCredentials, email: Email) {
-        when (serviceProviderCredential.serviceProvider) {
-            ServiceProviderCredentialsService.ServiceProvider.SMTP.desc,
-            ServiceProviderCredentialsService.ServiceProvider.AWS_SES_SMTP.desc -> {
-                val emailSMTPConfig = EmailSMTPConfig.build(serviceProviderCredential,email.clientEmailSettingId)
-                sendEmailBySMTP(emailSMTPConfig, email)
-            }
-            ServiceProviderCredentialsService.ServiceProvider.AWS_SES_API.desc -> {
-                val emailSESConfig = EmailSESConfig.build(serviceProviderCredential,email.clientEmailSettingId)
-                sendEmailByAWSSDK(emailSESConfig, email)
-            }
+//    private fun sendEmail(serviceProviderCredential: ServiceProviderCredentials, email: Email) {
+//        when (serviceProviderCredential.serviceProvider) {
+//            ServiceProviderCredentialsService.ServiceProvider.SMTP.desc,
+//            ServiceProviderCredentialsService.ServiceProvider.AWS_SES_SMTP.desc -> {
+//                val emailSMTPConfig = EmailSMTPConfig.build(serviceProviderCredential,email.clientEmailSettingId)
+//                sendEmailBySMTP(emailSMTPConfig, email)
+//            }
+//            ServiceProviderCredentialsService.ServiceProvider.AWS_SES_API.desc -> {
+//                val emailSESConfig = EmailSESConfig.build(serviceProviderCredential,email.clientEmailSettingId)
+//                sendEmailByAWSSDK(emailSESConfig, email)
+//            }
+//
+//        }
+//    }
 
-        }
-    }
-
-    private fun serviceProviderCredentials(email: Email): ServiceProviderCredentials {
-        synchronized(email.clientID) {
-            //TODO: This code can be cached in Redis
-            if (!wspCredsMap.containsKey(email.clientID)) {
-                val webServiceProviderCred = serviceProviderCredentialsService.getServiceProviderCredentials(email)
-                wspCredsMap[email.clientID] = webServiceProviderCred
-            }
-        }
-        return wspCredsMap[email.clientID]!!
-    }
+//    private fun serviceProviderCredentials(email: Email): ServiceProviderCredentials {
+//        synchronized(email.clientID) {
+//            //TODO: This code can be cached in Redis
+//            if (!wspCredsMap.containsKey(email.clientID)) {
+//                val webServiceProviderCred = serviceProviderCredentialsService.getServiceProviderCredentials(email)
+//                wspCredsMap[email.clientID] = webServiceProviderCred
+//            }
+//        }
+//        return wspCredsMap[email.clientID]!!
+//    }
 
     fun sendVerificationEmail(email: Email) {
         //update subject and body using template
@@ -176,7 +180,7 @@ class EmailService {
         var templateName = email.emailTemplateName
 
         //var emailToSend=emailHelperService.updateSubjectAndBody(email)
-        sendEmailWithoutTracking(email)
+        emailServiceUtility.sendEmailWithoutTracking(email)
     }
 
     fun toKafkaEmailError(emailError: EmailError): Boolean =
