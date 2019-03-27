@@ -99,8 +99,7 @@ class ReachabilityServiceImpl : ReachabilityService {
         return segmentReachabilityRepository.getReachabilityOfSegmentByDate(segmentId,getKey(date),date,clientId)
     }
 
-    override fun getReachabilityOfSegmentByDateRange(segmentId: Long, date1: String, date2: String): List<SegmentTrendCount> {
-        val clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
+    override fun getReachabilityOfSegmentByDateRange(clientId: Long,segmentId: Long, date1: String, date2: String): List<SegmentTrendCount> {
         var sr: Optional<SegmentReachability> = findSegmentReachability(clientId, segmentId)
         var startDate= LocalDate.parse(date1)
         var endDate= LocalDate.parse(date2)
@@ -126,8 +125,13 @@ class ReachabilityServiceImpl : ReachabilityService {
         }
         return result
     }
+    //TODO cache the segment
+    override fun checkTypeOfSegment(clientId: Long, segmentId: Long): Boolean {
+        val segment=segmentService.segmentById(segmentId,clientId)
+        if(segment.type.equals("Live")) return true else return false
+    }
 
-    private fun setReachabilityOfSegmentNow(objectIds:List<ObjectId>,segmentId: Long,clientId: Long){
+    private fun setReachabilityOfSegmentNow(objectIds:List<ObjectId>, segmentId: Long, clientId: Long){
 
         clientSetting.findByClientID(clientId)?.let {
             val timeZoneId= ZoneId.of(it.timezone)
