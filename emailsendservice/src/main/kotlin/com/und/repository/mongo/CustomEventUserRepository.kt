@@ -1,6 +1,7 @@
 package com.und.repository.mongo
 
 import com.und.model.mongo.EventUser
+import org.bson.types.ObjectId
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -19,4 +20,6 @@ interface CustomEventUserRepository {
     fun findByMobileIn(clientId: Long,mobile:Array<String>):List<EventUser>
     fun findByAndroidFcmTokenIn(clientId: Long,token:Array<String>):List<EventUser>
     fun findByWebFcmTokenIn(clientId: Long,token:Array<String>):List<EventUser>
+
+    fun findAllById(clientId: Long,ids:List<ObjectId>):List<EventUser>
 }

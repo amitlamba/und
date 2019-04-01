@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.common.utils.loggerFor
 import com.und.config.EventStream
 import com.und.model.*
+import com.und.model.TestCampaign
 import com.und.model.jpa.*
+import com.und.model.jpa.Campaign
 import com.und.repository.jpa.CampaignAuditLogRepository
 import com.und.repository.jpa.CampaignRepository
 import com.und.repository.jpa.ClientSettingsEmailRepository
@@ -13,10 +15,10 @@ import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.ScheduleUpdateException
 import com.und.web.controller.exception.UndBusinessValidationException
-import com.und.web.model.ClientEmailSettIdFromAddrSrp
-import com.und.web.model.ClientFromAddressAndSrp
+import com.und.web.model.*
+import com.und.web.model.AbCampaign
 import com.und.web.model.EmailTemplate
-import com.und.web.model.ValidationError
+import com.und.web.model.Variant
 import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
@@ -29,7 +31,8 @@ import java.time.LocalDateTime
 import java.util.*
 import com.und.web.model.Campaign as WebCampaign
 import com.und.web.model.TestCampaign as WebTestCampaign
-
+import com.und.model.jpa.AbCampaign as JpaAbCampaign
+import com.und.model.jpa.Variant as JpaVariant
 
 @Service
 class CampaignService {
@@ -91,6 +94,42 @@ class CampaignService {
         return if (persistedCampaign != null) buildWebCampaign(persistedCampaign) else WebCampaign()
     }
 
+    fun saveAbCampaign(abCampaign: AbCampaign){
+        val jpaAbCampaign = buildJpaAbCampaign(abCampaign)
+        val jpaVariant = buildJpaVariant(abCampaign.variants)
+        val campaign = abCampaign.campaign
+        campaign.abCampaign = jpaAbCampaign
+        campaign.variants = jpaVariant
+        saveCampaign(campaign)
+    }
+
+    private fun buildJpaAbCampaign(abCampaign: AbCampaign):JpaAbCampaign{
+        val campaign = JpaAbCampaign()
+        with(campaign){
+            sampleSize = abCampaign.sampleSize
+            runType = abCampaign.runType
+            rewind = abCampaign.remind
+            waitTime = abCampaign.waitTime
+            liveSampleSize = abCampaign.liveSampleSize
+        }
+        return campaign
+    }
+
+    private fun buildJpaVariant(variants:List<Variant>):List<JpaVariant>{
+        val jpaVariants = mutableListOf<JpaVariant>()
+        variants.forEach {
+            var variant = JpaVariant()
+            with(variant){
+                percentage = it.percentage
+                templateId = it.templateId
+                name = it.name
+                users = it.users
+            }
+            jpaVariants.add(variant)
+        }
+        return jpaVariants
+    }
+
     @Transactional
     protected fun saveCampaign(webCampaign: com.und.web.model.Campaign): Campaign? {
         val campaign = buildCampaign(webCampaign)
@@ -103,8 +142,7 @@ class CampaignService {
             }
             if (webCampaign.schedule != null) {
                 logger.info("sending request to scheduler ${campaign.name}")
-                val jobDescriptor = buildJobDescriptor(webCampaign, JobDescriptor.Action.CREATE)
-                val sendToKafka = sendToKafka(jobDescriptor)
+                scheduleJob(webCampaign)
             }
             return persistedCampaign
         } catch (ex: ConstraintViolationException) {
@@ -115,6 +153,11 @@ class CampaignService {
             throw CustomException("Campaign with this name already exists.${ex.message} ${ex.cause?.message}")
         }
         return null
+    }
+
+    private fun scheduleJob(webCampaign: com.und.web.model.Campaign) {
+        val jobDescriptor = buildJobDescriptor(webCampaign, JobDescriptor.Action.CREATE)
+        val sendToKafka = sendToKafka(jobDescriptor)
     }
 
     @Transactional
@@ -180,7 +223,9 @@ class CampaignService {
         jobDescriptor.clientId = AuthenticationUtils.clientID.toString()
         jobDescriptor.action = action
 
-        jobDescriptor.jobDetail = buildJobDetail(campaign.id.toString(), campaign.name, jobDescriptor.clientId)
+        if(campaign.typeOfCampaign.equals(TypeOfCampaign.AB_TEST))
+        jobDescriptor.jobDetail = buildJobDetail(campaign.id.toString(), campaign.name, jobDescriptor.clientId,true)
+        else jobDescriptor.jobDetail = buildJobDetail(campaign.id.toString(), campaign.name, jobDescriptor.clientId)
 
 
         val triggerDescriptors = arrayListOf<TriggerDescriptor>()
@@ -190,10 +235,12 @@ class CampaignService {
         return jobDescriptor
     }
 
-    private fun buildJobDetail(campaignId: String, campaignName: String, clientId: String): JobDetail {
+    private fun buildJobDetail(campaignId: String, campaignName: String, clientId: String,abType:Boolean=false): JobDetail {
         val properties = CampaignJobDetailProperties()
         properties.campaignName = campaignName
         properties.campaignId = campaignId
+        if (abType) properties.typeOfCampaign = "AB_TEST"
+
 
         val jobDetail = JobDetail()
         jobDetail.jobName = "${campaignId}-${campaignName}"
@@ -338,6 +385,10 @@ class CampaignService {
             serviceProviderId = webCampaign.serviceProviderId
             conversionEvent = webCampaign.conversionEvent
             fromUser = webCampaign.fromUser
+            typeOfCampaign = webCampaign.typeOfCampaign
+            abCampaign = webCampaign.abCampaign
+            variants = webCampaign.variants
+
             webCampaign.schedule?.oneTime?.let { whenTo ->
                 if (whenTo.nowOrLater == Now.Now) {
                     whenTo.campaignDateTime = null
@@ -437,6 +488,7 @@ class CampaignService {
             conversionEvent = campaign.conversionEvent
             serviceProviderId = campaign.serviceProviderId
             fromUser = campaign.fromUser
+
         }
 
         if (campaign.startDate != null) {
@@ -645,7 +697,7 @@ class CampaignService {
         val campaignId = action.campaignId.toLong()
         val campignName = action.campaignName
         val actionPerformed = action.action
-
+        //TODO add new Action AB_COMPLETED
         when {
             status == JobActionStatus.Status.COMPLETED -> {
                 campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.COMPLETED.name)

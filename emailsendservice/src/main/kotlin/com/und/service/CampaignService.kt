@@ -1,15 +1,20 @@
 package com.und.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.netflix.discovery.converters.Auto
 import com.und.common.utils.BuildCampaignMessage
 import com.und.config.EventStream
 import com.und.model.jpa.*
+import com.und.model.jpa.Campaign
 import com.und.model.mongo.EventUser
-import com.und.model.utils.Email
-import com.und.model.utils.FcmMessage
-import com.und.model.utils.Sms
+import com.und.model.mongo.EventUserRecord
+import com.und.model.utils.*
 import com.und.repository.jpa.*
+import com.und.repository.jpa.security.UserRepository
+import com.und.repository.mongo.EventUserRecordRepository
+import com.und.repository.mongo.EventUserRepository
 import com.und.utils.loggerFor
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.messaging.support.MessageBuilder
@@ -49,15 +54,93 @@ class CampaignService {
     private lateinit var eventStream: EventStream
 
     @Autowired
+    private lateinit var eventUserRepository: EventUserRepository
+
+    @Autowired
+    private  lateinit var clientSettingsRepository: ClientSettingsRepository
+
+    @Autowired
     private lateinit var buildCampaignMessage:BuildCampaignMessage
 
+    @Autowired
+    private lateinit var segmentUserServiceClient: SegmentUserServiceClient
+
+    @Autowired
+    private lateinit var eventUserRecordRepository: EventUserRecordRepository
+
+    @Autowired
+    private lateinit var userRepository: UserRepository
+
     fun executeCampaign(campaignId: Long, clientId: Long) {
-//        val campaignOption = campaignRepository.getCampaignByCampaignId(campaignId, clientId)
         val campaign = findCampaign(campaignId, clientId)
-        val usersData = getUsersData(campaign.segmentationID!!, clientId)
-        usersData.forEach { user ->
-            executeCampaignForUser(campaign, user, clientId)
+        when(campaign.typeOfCampaign){
+            TypeOfCampaign.AB_TEST -> {
+                runAbTest(campaign,clientId)
+            }
+            TypeOfCampaign.SPLIT -> {
+                runSplitCampaign(campaign,clientId)
+            }
+            else-> {
+                val usersData = getUsersData(campaign.segmentationID!!, clientId)
+                usersData.forEach { user ->
+                    executeCampaignForUser(campaign, user, clientId)
+                }
+            }
         }
+    }
+
+    fun runAbTest(campaign: Campaign,clientId: Long){
+        val ids=multiTemplateCampaign(campaign,clientId)
+
+        val record=EventUserRecord()
+        with(record){
+            id ="${campaign.id}$clientId"
+            this.clientId =clientId
+            campaignId = campaign.id
+            usersId=ids
+        }
+        eventUserRecordRepository.save(record)
+
+        val time=LocalDateTime.now().plusMinutes(campaign.abCampaign?.waitTime?.toLong()?:1)
+        val descriptor=buildJobDescriptor(campaign,"AB_${campaign.id}",JobDescriptor.Action.CREATE,time)
+        eventStream.scheduleJobSend().send(MessageBuilder.withPayload(descriptor).build())
+    }
+    fun runSplitCampaign(campaign: Campaign,clientId: Long){
+        multiTemplateCampaign(campaign, clientId)
+    }
+    private fun multiTemplateCampaign(campaign: Campaign, clientId: Long):List<ObjectId> {
+        val ids= mutableListOf<ObjectId>()
+        var listOfVariant = campaign.variants
+        val usersData = getUsersData(campaign.segmentationID!!, clientId)
+        var start = 0
+        var startIndex = 0
+        listOfVariant.forEach {
+            val users = it.users ?: 0
+            for (i in start..(start + users) step 1) {
+                executeCampaignForUser(campaign, usersData[i], clientId, it.templateId?.toLong())
+            }
+            startIndex = start+users
+            start = users
+        }
+
+        usersData.listIterator(startIndex).forEach {
+            ids.add(ObjectId(it.id))
+        }
+        return ids
+    }
+
+    fun executeCampaignForAb(campaignId: Long,clientId: Long){
+        val token = userRepository.findSystemUser().key ?: throw java.lang.Exception("Not Able to get system token.")
+        val templateId=segmentUserServiceClient.getWinnerTemplate(campaignId,clientId,token)
+        val campaign = findCampaign(campaignId, clientId)
+        val ids=eventUserRecordRepository.findById("$campaignId$clientId")
+        ids.ifPresent {
+            val usersData = eventUserRepository.findAllById(clientId,ids.get().usersId)
+            usersData.forEach { user ->
+                executeCampaignForUser(campaign, user, clientId,templateId)
+            }
+        }
+        eventUserRecordRepository.deleteById("$campaignId$clientId")
     }
 
     fun executeLiveCampaign(campaign: Campaign, clientId: Long, user: EventUser) {
@@ -79,7 +162,7 @@ class CampaignService {
         return  campaignRepository.findAllByClientIDAndSegmentationIDAndStartDateBefore(segmentId, clientId)
     }
 
-    private fun executeCampaignForUser(campaign: Campaign, user: EventUser, clientId: Long) {
+    private fun executeCampaignForUser(campaign: Campaign, user: EventUser, clientId: Long,templateId:Long?=null) {
         try {
             //TODO: filter out unsubscribed and blacklisted users
             //TODO: How to skip transactional Messages
@@ -88,15 +171,15 @@ class CampaignService {
 
                 if (user.communication?.email?.dnd == true)
                     return //Local lambda return
-                val email: Email = email(clientId, campaign, user)
-                toKafka(email)
+                    val email: Email = email(clientId, campaign, user,templateId)
+                    toKafka(email)
             }
             //check mode of communication is sms
             if (campaign.campaignType == "SMS") {
 
                 if (user.communication?.mobile?.dnd == true)
                     return //Local lambda return
-                val sms: Sms = sms(clientId, campaign, user)
+                val sms: Sms = sms(clientId, campaign, user,templateId)
                 toKafka(sms)
             }
     //                check mode of communication is mobile push
@@ -128,22 +211,24 @@ class CampaignService {
         }
     }
 
-
-    private fun sms(clientId: Long, campaign: Campaign, user: EventUser): Sms {
+    private fun sms(clientId: Long, campaign: Campaign, user: EventUser,smsTemplateId:Long?=null): Sms {
         val smsCampaign=smsCampaignRepository.findByCampaignId(campaign.id!!)
         if (!smsCampaign.isPresent) throw Exception("Sms Campaign not exist for clientId ${clientId} and campaignId ${campaign.id}")
-        val smsTemplate=emailTemplateRepository.findByIdAndClientID(smsCampaign.get().templateId!!,clientId)
+        val smsTemplate=if (smsTemplateId!=null) emailTemplateRepository.findByIdAndClientID(smsTemplateId,clientId)
+        else emailTemplateRepository.findByIdAndClientID(smsCampaign.get().templateId!!,clientId)
         if(!smsTemplate.isPresent) throw Exception("Sms Template for clientId ${clientId} , templateId ${smsCampaign.get().templateId} not exists.")
         return buildCampaignMessage.buildSms(clientId, campaign, user, smsCampaign.get(), smsTemplate.get())
     }
 
 
 
-    private fun email(clientId: Long, campaign: Campaign, user: EventUser): Email {
+    private fun email(clientId: Long, campaign: Campaign, user: EventUser,templateId:Long?=null): Email {
         try {
             val emailCampaign = emailCampaignRepository.findByCampaignId(campaign.id!!)
             if (!emailCampaign.isPresent) throw Exception("Email Campaign not exist for clientId ${clientId} and campaignId ${campaign.id}")
-            val emailTemplate = emailTemplateRepository.findByIdAndClientID(emailCampaign.get().templateId!!, clientId)
+
+            val emailTemplate =  if(templateId!=null) emailTemplateRepository.findByIdAndClientID(templateId, clientId)
+            else emailTemplateRepository.findByIdAndClientID(emailCampaign.get().templateId!!, clientId)
             if (!emailTemplate.isPresent) throw Exception("Email Template for clientId ${clientId} , templateId ${emailCampaign.get().templateId} not exists.")
 //        val clientEmailSettings= clientEmailSettingsRepository.
 //                findByClientIdAndEmailAndServiceProviderId(clientId,campaign.fromUser!!,campaign.serviceProviderId!!)
@@ -199,5 +284,41 @@ class CampaignService {
     fun toKafka(sms: Sms): Boolean =
             eventStream.smsEventSend().send(MessageBuilder.withPayload(sms).build())
 
+
+    private fun buildJobDescriptor(campaign: Campaign,name:String, action: JobDescriptor.Action,time:LocalDateTime): JobDescriptor {
+
+        fun buildTriggerDescriptor(time: LocalDateTime): TriggerDescriptor {
+            val triggerDescriptor = TriggerDescriptor()
+            with(triggerDescriptor) {
+                fireTime = time
+            }
+        return triggerDescriptor
+    }
+
+        val jobDescriptor = JobDescriptor()
+        jobDescriptor.timeZoneId = ZoneId.of(clientSettingsRepository.findByClientID(campaign.clientID!!)?.timezone?:"UTC")
+        jobDescriptor.clientId = campaign.clientID.toString()
+        jobDescriptor.action = action
+        jobDescriptor.jobDetail = buildJobDetail(campaign.id.toString(), name, jobDescriptor.clientId)
+
+        val triggerDescriptors = arrayListOf<TriggerDescriptor>()
+        triggerDescriptors.add(buildTriggerDescriptor(time))
+        jobDescriptor.triggerDescriptors = triggerDescriptors
+        return jobDescriptor
+    }
+
+    private fun buildJobDetail(campaignId: String, campaignName: String, clientId: String): JobDetail {
+        val properties = CampaignJobDetailProperties()
+        properties.campaignName = campaignName
+        properties.campaignId = campaignId
+        properties.abCompleted = "COMPLETED"
+
+
+        val jobDetail = JobDetail()
+        jobDetail.jobName = "${campaignId}-${campaignName}"
+        jobDetail.jobGroupName = "${clientId}-${campaignId}"
+        jobDetail.properties = properties
+        return jobDetail
+    }
 
 }

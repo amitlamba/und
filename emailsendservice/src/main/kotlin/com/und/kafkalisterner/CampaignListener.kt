@@ -3,6 +3,7 @@ package com.und.kafkalisterner
 import com.und.exception.EventUserNotFoundException
 import com.und.model.jpa.Campaign
 import com.und.model.jpa.CampaignStatus
+import com.und.model.jpa.TypeOfCampaign
 import com.und.model.livesegment.LiveSegmentUser
 import com.und.model.mongo.EventUser
 import com.und.model.mongo.LiveSegmentTrack
@@ -58,6 +59,19 @@ class CampaignListener {
         }
     }
 
+    @StreamListener("abCampaignTriggerReceive")
+    fun executeAbCampaign(campaignData: Pair<Long, Long>){
+        try {
+            val (campaignId, clientId) = campaignData
+            logger.debug("campaign trigger with id $campaignId and $clientId")
+            campaignService.executeCampaignForAb(campaignId, clientId)
+        } catch (ex: Exception) {
+            logger.error("error occurred", ex)
+        } finally {
+            logger.info("complete")
+        }
+    }
+
     @StreamListener("inTestCampaign")
     fun executeTestCampaign(testCampaign: TestCampaign){
         testCampaignService.executeTestCampaign(testCampaign)
@@ -105,7 +119,18 @@ class CampaignListener {
             logger.debug("campaign live trigger with id $segmentId and $clientId and $userId")
             filteredCampaigns.forEach { campaign ->
                 logger.debug("campaign live trigger with id $segmentId and $clientId and $userId and campaign id $campaign.id")
-                campaignService.executeLiveCampaign(campaign, clientId, user[0])
+                when(campaign.typeOfCampaign){
+                    TypeOfCampaign.AB_TEST ->{
+                        campaignService.executeAbTestLiveCampaign(campaign,clientId,user[0])
+                    }
+                    TypeOfCampaign.SPLIT -> {
+                        campaignService.executeSplitLiveCampaign(campaign,clientId,user[0])
+                    }
+                    else ->{
+                        campaignService.executeLiveCampaign(campaign, clientId, user[0])
+                    }
+                }
+
             }
         } catch (ex: Exception) {
             logger.error("error occurred", ex)

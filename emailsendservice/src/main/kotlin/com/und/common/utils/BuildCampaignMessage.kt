@@ -32,7 +32,7 @@ class BuildCampaignMessage {
                 clientID = clientId,
                 fromEmailAddress = InternetAddress.parse(campaign.fromUser, false)[0],
                 toEmailAddresses = InternetAddress.parse(user.identity.email, false),
-                emailTemplateId = emailCampaign.templateId ?: 0L,
+                emailTemplateId = emailTemplate.id ?: 0L,
                 emailTemplateName = emailTemplate.name,
                 campaignId = campaign.id!!,
                 eventUser = user,

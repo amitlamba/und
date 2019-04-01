@@ -2,6 +2,7 @@ package com.und.model.jpa
 
 
 import com.und.model.CampaignStatus
+import com.und.web.model.TypeOfCampaign
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
 import java.time.LocalDate
@@ -116,6 +117,17 @@ class Campaign {
 
     @Column(name="end_date")
     var endDate:LocalDateTime?=null
+
+    @Column(name="type_campaign",nullable = false)  //live,normal,split,ab_test
+    lateinit var typeOfCampaign:TypeOfCampaign
+
+    @OneToOne(mappedBy = "campaign",cascade = [CascadeType.ALL])  //bi directional
+    @Column(name="ab_campaign")
+    var abCampaign:AbCampaign?=null
+
+    @OneToMany(cascade = [CascadeType.ALL])
+    @JoinColumn(name="campaign_id")
+    var variants:List<Variant> = emptyList()
 }
 
 enum class CampaignType {

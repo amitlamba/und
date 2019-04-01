@@ -105,7 +105,7 @@ class CampaignController {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping("/save/testcampaign")
+    @PostMapping("/send/testcampaign")
     fun runTestCampaign(@RequestBody testCampaign: TestCampaign): Response {
         val clientId =AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
         campaignService.runTestCampaign(clientId,testCampaign)
@@ -206,6 +206,12 @@ class CampaignController {
     fun getClientFromAddressAndSrp(): List<ClientEmailSettIdFromAddrSrp> {
         val clientId=AuthenticationUtils.clientID?:throw AccessDeniedException("Access denied")
         return campaignService.getClientFromAddressAndSrp(clientId)
+    }
+
+    fun saveAbCampaign(abCampaign: AbCampaign):Response{
+        val clientID=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+
+        return Response(status = ResponseStatus.SUCCESS)
     }
 
 }

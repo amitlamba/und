@@ -1,4 +1,4 @@
-package com.und.model
+package com.und.model.utils
 
 import javax.validation.constraints.NotBlank
 
@@ -10,6 +10,6 @@ class CampaignJobDetailProperties: JobDetailProperties() {
     @NotBlank
     var campaignName: String? = null
 
-    var typeOfCampaign:String?=null
+    var abCompleted:String?=null
 
 }

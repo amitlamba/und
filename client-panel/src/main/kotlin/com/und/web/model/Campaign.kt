@@ -8,7 +8,8 @@ import java.time.LocalDateTime
 import javax.validation.constraints.NotNull
 import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
-
+import com.und.model.jpa.Variant as JpaVariant
+import com.und.model.jpa.AbCampaign as JpaAbCampaign
 
 class Campaign {
     var id: Long? = null
@@ -32,6 +33,15 @@ class Campaign {
     var fromUser:String?=null
     var clientEmailSettingId:Long?=null
     var liveSchedule: LiveSchedule? = null
+    var typeOfCampaign:TypeOfCampaign = TypeOfCampaign.NORMAL   //split,ab_test,live,normal
+    var abCampaign:JpaAbCampaign?=null //jpa
+    var variants:List<JpaVariant> = emptyList() //jpa variants
+}
 
+enum class TypeOfCampaign {
+    NORMAL,
+    LIVE,
+    SPLIT,
+    AB_TEST
 }
 

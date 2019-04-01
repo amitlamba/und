@@ -80,6 +80,71 @@ class Campaign {
 
     @Column(name="end_date")
     var endDate:LocalDateTime?=null
+
+    @Column(name="type_campaign",nullable = false)  //live,normal,split,ab_test
+    var typeOfCampaign:TypeOfCampaign?=null
+
+    @OneToOne(mappedBy = "campaign",cascade = [CascadeType.ALL])  //bi directional
+    @Column(name="ab_campaign")
+    var abCampaign:AbCampaign?=null
+
+    @OneToMany(cascade = [CascadeType.ALL])
+    @JoinColumn(name="campaign_id")
+    var variants:List<Variant> = emptyList()
+
+
+}
+
+enum class TypeOfCampaign {
+    NORMAL,
+    LIVE,
+    SPLIT,
+    AB_TEST
+}
+
+@Entity
+@Table(name="ab_campaign")
+class AbCampaign {
+
+    @Id
+    var id:Long?=null
+    @Column(name="campaign_id",nullable = false)
+
+    @JoinColumn(name = "campaign_id")
+    lateinit var campaign:Campaign  //one to one
+    @Column(name = "run_type")
+    var runType:RunType = RunType.AUTO
+    @Column(name="rewind")
+    var rewind:Boolean =false
+    @Column(name="wait_time")
+    var waitTime:Int?=null     //in minutes
+    @Column(name="sample_size")
+    var sampleSize:Int?=null
+    @Column(name="live_sample_size")
+    var liveSampleSize:Int?=null   //optional we are taking this info in variant also
+
+}
+
+@Entity
+@Table(name="variant")
+class Variant {
+    @Id
+    var id:Long?=null
+    @Column(name="percentage",nullable = false)
+    var percentage:Int?=null
+    @Column(name="name")
+    var name:String?=null
+    @Column(name="users")
+    var users:Int?=null
+    @Column(name="winner")
+    var winner:Boolean=false
+    @Column(name="template_id",nullable = false)
+    var templateId:Int?=null
+}
+
+enum class RunType{
+    MANUAL,
+    AUTO
 }
 
 enum class CampaignStatus {

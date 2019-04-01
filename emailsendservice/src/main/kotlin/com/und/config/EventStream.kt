@@ -53,4 +53,10 @@ interface EventStream {
     @Input("inTestCampaign")
     fun inTestCampaign():SubscribableChannel
 
+    @Input("abCampaignTriggerReceive")
+    fun abCampaignReceive():SubscribableChannel
+
+    @Output("scheduleJobSend")
+    fun scheduleJobSend(): MessageChannel
+
 }
