@@ -1,5 +1,6 @@
 package com.und.report.web.controller
 
+import com.und.model.jpa.Campaign
 import com.und.report.service.FunnelReportService
 import com.und.report.web.model.FunnelReport
 import com.und.report.web.model.FunnelStepAndFilter
@@ -50,18 +51,7 @@ class FunnelController {
 
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @GetMapping("/winner/template")
-    fun winnerTemplate(@RequestParam("")campaignId:Long,@RequestParam("clientId")clientId:Long):Long{
-        //find variant from campaign
-        //get all variant result
-        //use template id as filter along with campaign id.
-        val variant1= listOf(FunnelReport.FunnelStep(FunnelReport.Step(1,"event"),0,"all"))
-        val variant2= listOf(FunnelReport.FunnelStep(FunnelReport.Step(1,"event"),0,"all"))
-        var variant1StepsCount=variant1.find {
-            it.step.order == variant1.size
-        }
-        var variant2StepsCount=variant2.find {
-            it.step.order == variant2.size
-        }
-        //find winner update in table.
+    fun winnerTemplate(@RequestParam("campaignId")campaignId:Long,@RequestParam("clientId")clientId:Long):Long{
+        return funnelReportService.getWinnerTemplate(clientId,campaignId)
     }
 }

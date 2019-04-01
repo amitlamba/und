@@ -2,23 +2,27 @@ package com.und.report.service
 
 import com.mongodb.BasicDBObject
 import com.und.common.utils.loggerFor
+import com.und.model.jpa.Campaign
+import com.und.model.jpa.Variant
 import com.und.report.model.FunnelData
+import com.und.report.model.WinnerTemplate
 import com.und.report.repository.mongo.UserAnalyticsRepository
 import com.und.report.web.model.FunnelReport
+import com.und.repository.jpa.CampaignRepository
 import com.und.security.utils.AuthenticationUtils
-import com.und.service.AggregationQuerybuilder
-import com.und.service.SegmentParserCriteria
-import com.und.service.SegmentService
-import com.und.service.UserSettingsService
+import com.und.service.*
 import com.und.web.model.*
+import com.und.web.model.Unit
 import org.hibernate.internal.util.collections.CollectionHelper
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.crossstore.ChangeSetPersister
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.aggregation.*
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
@@ -48,6 +52,9 @@ class FunnelReportServiceImpl : FunnelReportService {
     @Autowired
     private lateinit var awsFunnelLambdaInvoker: AWSFunnelLambdaInvoker
 
+    @Autowired
+    private lateinit var campaignRepository:CampaignRepository
+
 
     override fun funnel(funnelFilter: FunnelReport.FunnelReportFilter): List<FunnelReport.FunnelStep> {
         logger.debug("Funnel data for funnelFilter : $funnelFilter")
@@ -73,6 +80,103 @@ class FunnelReportServiceImpl : FunnelReportService {
             return if(funnelFilter.splitProperty==null) fillMissingSteps(orderFunnelByStep(computedFunnels),funnelFilter.steps)
             else orderFunnelByStep(computedFunnels)
         } ?: emptyList()
+    }
+
+    override fun getWinnerTemplate(clientId: Long, campaignId: Long): Long {
+
+        val campaign=campaignRepository.findByIdAndClientID(campaignId,clientId)
+        if(campaign.isPresent) {
+            val it=campaign.get()
+            val conversionStep =it.conversionEvent?:"Charged"
+            var noOfVariant=0
+            var noOfSteps = 3
+            val segmentId=it.segmentationID!!
+            val dateCreated=it.dateCreated
+            val listOfFunnelResult = mutableListOf<List<FunnelReport.FunnelStep>>()
+            val days=(LocalDateTime.now().dayOfYear - dateCreated.dayOfYear).toLong()
+            val conversionTime=(days*24*60*60).toInt()
+            campaign.get().variants.forEach {
+                val filters= buildFilters(campaignId,it.templateId!!)
+                listOfFunnelResult.add(funnel(buildConversionFunnelRequest(conversionStep,conversionTime,days,filters,segmentId)))
+                noOfVariant++;
+            }
+
+            var map= mutableMapOf<Int, WinnerTemplate>()
+            map.put(0, WinnerTemplate())
+            map.put(1, WinnerTemplate())
+            listOfFunnelResult.forEachIndexed { index, v ->
+
+                for (i in 0..(noOfSteps - 2) step 1) {
+                    var percentageOfClick= (v[i+1].count*100)/v[0].count
+
+                    val value=map[i]!!
+                    if(value.percentage<percentageOfClick){
+                        map.put(i, WinnerTemplate(percentageOfClick,index+1))
+                    }
+
+                }
+            }
+
+//        map.forEach { t, u ->
+//            println("index $t ${u.percentage} + ${u.varient}")
+//        }
+            var winner=1
+            for(i in (noOfSteps-2) downTo 0){
+                val value=map.get(i)!!
+                if(value.varient!=0) {winner=value.varient ; break}
+            }
+            return it.variants[winner-1].templateId?.toLong()?:0
+        }else{
+            logger.error("No campaign present for campaignid $campaignId and clientId $clientId to calculate winner Template.")
+            return 0
+        }
+    }
+
+    private fun buildConversionFunnelRequest(conversionStep:String,conversionTime:Int,days:Long,filters:List<GlobalFilter>,segmentId:Long):FunnelReport.FunnelReportFilter{
+        val funnelReportFilter=FunnelReport.FunnelReportFilter(
+                conversionTime = conversionTime,
+                days = days,
+                segmentid = segmentId,
+                funnelOrder = FunnelReport.FunnelOrder.default,
+                steps = buildStep(conversionStep),
+                filters = filters,
+                splitProperty = null,
+                splitPropertyType = GlobalFilterType.EventAttributeProperties
+        )
+
+        return funnelReportFilter
+    }
+
+    private fun buildStep(conversionStep:String):List<FunnelReport.Step>{
+        return listOf(
+                FunnelReport.Step(1, "Notification Received"),
+                FunnelReport.Step(2, "Notification Clicked"),
+                FunnelReport.Step(3, conversionStep)
+        )
+    }
+
+    private fun buildFilters(campaignId: Long,templateId:Int):List<GlobalFilter>{
+
+        val filter1= GlobalFilter()
+        with(filter1){
+            globalFilterType=GlobalFilterType.EventAttributeProperties
+            name="campaign_id"
+            type=DataType.number
+            operator="Equals"
+            values = listOf(campaignId.toString())
+            valueUnit =Unit.NONE
+        }
+
+        val filter2= GlobalFilter()
+        with(filter2){
+            globalFilterType=GlobalFilterType.EventAttributeProperties
+            name="template_id"
+            type=DataType.number
+            operator="Equals"
+            values = listOf(templateId.toString())
+            valueUnit =Unit.NONE
+        }
+        return listOf(filter1,filter2)
     }
     private fun orderFunnelByStep(result:List<FunnelReport.FunnelStep>):List<FunnelReport.FunnelStep>{
         var funnelResult=result.toMutableList()

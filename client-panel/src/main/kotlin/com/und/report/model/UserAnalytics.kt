@@ -32,3 +32,5 @@ data class FunnelData(var userData: List<UserData> = emptyList(),  var eventsOrd
 
 data class SegmentTrendCount(var date:String,var count:Int)
 
+data class WinnerTemplate(var percentage:Long=0,var varient:Int=0)
+

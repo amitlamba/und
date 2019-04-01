@@ -134,6 +134,8 @@ class Variant {
     var percentage:Int?=null
     @Column(name="name")
     var name:String?=null
+    @Column(name="counter")
+    var counter:Int?=null
     @Column(name="users")
     var users:Int?=null
     @Column(name="winner")
