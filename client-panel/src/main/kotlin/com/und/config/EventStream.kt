@@ -37,4 +37,7 @@ interface EventStream {
 
     @Output("outTestCampaign")
     fun outTestCampaign():MessageChannel
+
+    @Output("triggerManualCampaign")
+    fun triggerManualCampaign():MessageChannel
 }

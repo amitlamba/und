@@ -59,4 +59,7 @@ interface EventStream {
     @Output("scheduleJobSend")
     fun scheduleJobSend(): MessageChannel
 
+    @Input("receiveManualTriggerCampaign")
+    fun runManualCampaign():SubscribableChannel
+
 }

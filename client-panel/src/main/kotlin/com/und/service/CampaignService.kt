@@ -94,7 +94,7 @@ class CampaignService {
         return if (persistedCampaign != null) buildWebCampaign(persistedCampaign) else WebCampaign()
     }
 
-    fun saveAbCampaign(abCampaign: AbCampaign){
+    fun saveAbCampaign(abCampaign: AbCampaign,clientId: Long){
         val jpaAbCampaign = buildJpaAbCampaign(abCampaign)
         val jpaVariant = buildJpaVariant(abCampaign.variants)
         val campaign = abCampaign.campaign
@@ -110,7 +110,7 @@ class CampaignService {
             runType = abCampaign.runType
             rewind = abCampaign.remind
             waitTime = abCampaign.waitTime
-            liveSampleSize = abCampaign.liveSampleSize
+            sampleSize = abCampaign.sampleSize
         }
         return campaign
     }
@@ -141,6 +141,7 @@ class CampaignService {
                 campaignRepository.updateScheduleStatus(persistedCampaign.id!!, persistedCampaign.clientID!!, CampaignStatus.CREATED.name)
             }
             if (webCampaign.schedule != null) {
+                //In case of live campaign its not scheduled.
                 logger.info("sending request to scheduler ${campaign.name}")
                 scheduleJob(webCampaign)
             }
@@ -796,6 +797,10 @@ class CampaignService {
     private fun testCampaign(campaign: TestCampaign, clientId: Long) {
         logger.info("Sending Test Campaign for client $clientId to queue.")
         eventStream.outTestCampaign().send(MessageBuilder.withPayload(campaign).build())
+    }
+
+    fun runManualCampaign(campaignId: Long,clientId: Long){
+        eventStream.triggerManualCampaign().send(MessageBuilder.withPayload(Pair(campaignId,clientId)).build())
     }
 
 }

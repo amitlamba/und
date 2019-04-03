@@ -13,17 +13,16 @@ class AbCampaign {
     @Column(name="campaign_id",nullable = false)
     @JoinColumn(name = "campaign_id")
     lateinit var campaign:Campaign  //one to one
+    @NotNull
     @Column(name = "run_type")
     var runType:RunType = RunType.AUTO
+    @NotNull
     @Column(name="rewind")
     var rewind:Boolean =false
     @Column(name="wait_time")
     var waitTime:Int?=null     //in minutes
     @Column(name="sample_size")
     var sampleSize:Int?=null            //need to check we use it or not.
-    @Column(name="live_sample_size")
-    var liveSampleSize:Int?=null   //optional we are taking this info in variant also
-
 }
 
 
@@ -42,6 +41,7 @@ class Variant {
     @Column(name="users")
     var users:Int?=null
     @Column(name="winner")
+    @NotNull
     var winner:Boolean=false
     @NotNull
     @Column(name="template_id",nullable = false)

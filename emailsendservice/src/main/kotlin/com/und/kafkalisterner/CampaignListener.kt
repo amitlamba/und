@@ -59,12 +59,25 @@ class CampaignListener {
         }
     }
 
+    @StreamListener("receiveManualTriggerCampaign")
+    fun runManualCampaign(data:Pair<Long,Long>){
+        try{
+            val (campaignId,clientId) = data
+            campaignService.executeCampaignForAbManual(campaignId, clientId)
+            //TODO update status of campaign
+        }catch (ex:Exception){
+            logger.error("error occurred", ex)
+        } finally {
+            logger.info("complete")
+        }
+    }
     @StreamListener("abCampaignTriggerReceive")
     fun executeAbCampaign(campaignData: Pair<Long, Long>){
         try {
             val (campaignId, clientId) = campaignData
             logger.debug("campaign trigger with id $campaignId and $clientId")
             campaignService.executeCampaignForAb(campaignId, clientId)
+            //TODO update status of campaign  dont update status in schedular there update ab complete status
         } catch (ex: Exception) {
             logger.error("error occurred", ex)
         } finally {
@@ -86,7 +99,7 @@ class CampaignListener {
             val userId = liveSegmentUser.userId
 
 
-            trackSegmentUser(clientId, liveSegmentId, segmentId, userId)
+//            trackSegmentUser(clientId, liveSegmentId, segmentId, userId)
             /***FIXED findById return empty but user present for this userId
              *case 1 Id is String type in our repository but in real case its ObjectId in mongo.I try it but no success.
              *case 2 I think spring resolve it to id field as we see in jpa  but in mongo its _id This may be reason but not sure.
@@ -99,7 +112,6 @@ class CampaignListener {
             //refresh cache I m thinking aboout schedulae ajob which update the status of live campaign
             //a stop cam newer start again
             val campaignList=campaignService.findAllLiveSegmentCampaignBySegmentId(segmentId, clientId)
-            //FIXME if campaign list is empty then update the status of campaign to completed for this segment id.
 
             //we imporve it find all cmapign with this segmentid if there endTime is passed mark it completed here if
             //we have two campaign with this id then and one is completed then we are not updating it.
@@ -137,22 +149,6 @@ class CampaignListener {
         } finally {
             logger.info("complete")
         }
-    }
-
-    private fun trackSegmentUser(clientId: Long, liveSegmentId: Long, segmentId: Long, userId: String) {
-        val liveSegmentTrack = LiveSegmentTrack(
-                clientID = clientId,
-                liveSegmentId = liveSegmentId,
-                segmentId = segmentId,
-                userId = userId
-        )
-        //TODO write it in dao layer.
-        mongoTemplate.save(liveSegmentTrack,"${clientId}_livesegmenttrack")
-        /**
-         * in below code collection name is not resolve because on system call #{tenantProvider.getTenant()} not available.
-         * here collection name is _livesegmenttrack
-         */
-//        val v=liveSegmentTrackRepository.save(liveSegmentTrack)
     }
 
 

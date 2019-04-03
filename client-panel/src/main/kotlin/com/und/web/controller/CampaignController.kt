@@ -208,9 +208,18 @@ class CampaignController {
         return campaignService.getClientFromAddressAndSrp(clientId)
     }
 
-    fun saveAbCampaign(abCampaign: AbCampaign):Response{
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(value=["/save/ab"])
+    fun saveAbCampaign(@Valid abCampaign: AbCampaign):Response{
         val clientID=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        campaignService.saveAbCampaign(abCampaign,clientID)
+        return Response(status = ResponseStatus.SUCCESS)
+    }
 
+    @GetMapping(value = ["run/manually/{campaignId}"])
+    fun triggerCampaignManually(@PathVariable(value = "campaignId",required = true) campaignId: Long):Response{
+        val clientID=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        campaignService.runManualCampaign(campaignId,clientID)
         return Response(status = ResponseStatus.SUCCESS)
     }
 
