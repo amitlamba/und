@@ -224,12 +224,16 @@ class SegmentServiceImpl : SegmentService {
             userAggregation = segmentParserCriteria.getUserSpecificAggOperation(websegment, tz, didNotIdList, true)
         }
 //        var userAggregation = segmentParserCriteria.getUserSpecificAggOperation(websegment, tz, idList)
+
         if (type.equals("userId")) {
             //Adding aggregation to return  only id of user instead of user profile.
-            if (type.equals("userId")) {
-                var convertor = ConvertOperators.ConvertOperatorFactory("_id").convertToString()
-                userAggregation.add(Aggregation.project().and(convertor).`as`("_id"))
-                userAggregation.add(Aggregation.group().push("_id").`as`("userId"))
+            if (userAggregation.isNotEmpty()) {
+                if (type.equals("userId")) {
+                    var convertor = ConvertOperators.ConvertOperatorFactory("_id").convertToString()
+                    userAggregation.add(Aggregation.project().and(convertor).`as`("_id"))
+                    userAggregation.add(Aggregation.group().addToSet("_id").`as`("userId"))
+
+                }
             }
             val result = eventUserRepository.usersIdFromEventUser(userAggregation, clientId)
             return Pair(emptyList(), result)

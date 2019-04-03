@@ -130,6 +130,7 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
         if(query.isNotEmpty()){
             val agg=Aggregation.newAggregation(query)
             var result=mongoTemplate.aggregate(agg, "${clientId}_eventUser",Result::class.java).mappedResults
+
             return if(result.isNotEmpty()) result[0].userId else emptyList()
         }
         return emptyList()
