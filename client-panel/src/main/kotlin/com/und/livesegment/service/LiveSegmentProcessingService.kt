@@ -6,10 +6,7 @@ import com.und.common.utils.DateUtils
 import com.und.common.utils.loggerFor
 import com.und.config.EventStream
 import com.und.exception.UndException
-import com.und.livesegment.model.EventMessage
-import com.und.livesegment.model.LiveSegmentJobDetailProperties
-import com.und.livesegment.model.LiveSegmentUser
-import com.und.livesegment.model.LiveSegmentUserCheck
+import com.und.livesegment.model.*
 import com.und.livesegment.model.jpa.LiveSegment
 import com.und.model.JobDescriptor
 import com.und.model.JobDetail
@@ -26,6 +23,7 @@ import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
+import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.ConvertOperators
 import org.springframework.data.mongodb.core.query.Criteria
@@ -69,6 +67,9 @@ class LiveSegmentProcessingService {
     @Autowired
     private lateinit var eventStream: EventStream
 
+    @Autowired
+    private lateinit var mongoTemplate:MongoTemplate
+
     @StreamListener("inEventForLiveSegment")
     fun processEventMessage(event: EventMessage) {
         logger.info("Processing event: $event for segment checks")
@@ -106,6 +107,7 @@ class LiveSegmentProcessingService {
 
         val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, params.clientId.toLong(), params.userId)
         if (userPresentInSegment) {
+//            trackSegmentUser(params.clientId.toLong(), params.segmentId.toLong(), liveSegment.segmentId, params.userId)
             sendJobToLiveSegmentQueue(params, liveSegment)
         }
     }
@@ -152,8 +154,10 @@ class LiveSegmentProcessingService {
                 return@forEach
             }
             val timeZoneId = userSettingsService.getTimeZoneByClientId(event.clientId)
-            if (liveSegment.endEvent.isBlank())
+            if (liveSegment.endEvent.isBlank()){
+//                trackSegmentUser(event.clientId, liveSegment.id, liveSegment.segmentId, event.userId)
                 sendToLiveSegmentQueue(event, liveSegment)
+            }
             else{
                 if(!liveSegment.endEventDone)
                 sendToScheduleJob(event, liveSegment, timeZoneId)
@@ -320,5 +324,20 @@ class LiveSegmentProcessingService {
         return triggerDescriptor
     }
 
+    private fun trackSegmentUser(clientId: Long, liveSegmentId: Long, segmentId: Long, userId: String) {
+        val liveSegmentTrack = LiveSegmentTrack(
+                clientID = clientId,
+                liveSegmentId = liveSegmentId,
+                segmentId = segmentId,
+                userId = userId
+        )
+        //TODO write it in dao layer.
+        mongoTemplate.save(liveSegmentTrack,"${clientId}_livesegmenttrack")
+        /**
+         * in below code collection name is not resolve because on system call #{tenantProvider.getTenant()} not available.
+         * here collection name is _livesegmenttrack
+         */
+//        val v=liveSegmentTrackRepository.save(liveSegmentTrack)
+    }
 
 }

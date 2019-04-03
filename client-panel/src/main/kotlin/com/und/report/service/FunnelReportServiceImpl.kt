@@ -74,7 +74,6 @@ class FunnelReportServiceImpl : FunnelReportService {
             else orderFunnelByStep(computedFunnels)
         } ?: emptyList()
     }
-    //This code should be synchronized its possible that two thread invoke that method at same time
     private fun orderFunnelByStep(result:List<FunnelReport.FunnelStep>):List<FunnelReport.FunnelStep>{
         var funnelResult=result.toMutableList()
         for (i in 0..(funnelResult.size - 1) step 1) {

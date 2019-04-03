@@ -52,7 +52,10 @@ class SegmentPageReportController {
     fun getSegmentReachabilityByDateRangle(@RequestParam (value = "start" ,required = true)startDate: String,
                                            @RequestParam (value = "end" ,required = true)endDate: String,
                                            @PathVariable (required = true) segmentId: Long):List<SegmentTrendCount>{
-        return reachabilityService.getReachabilityOfSegmentByDateRange(segmentId,startDate,endDate)
+        val clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("Access Denied.")
+        val isLive=reachabilityService.checkTypeOfSegment(clientId,segmentId)
+        if(isLive) return emptyList()
+        return reachabilityService.getReachabilityOfSegmentByDateRange(clientId,segmentId,startDate,endDate)
     }
 
 }
