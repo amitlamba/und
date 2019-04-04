@@ -57,8 +57,10 @@ class CustomLiveSegmentUserTrackRepositoryImpl:CustomLiveSegmentUserTrackReposit
             var identified=0L
             var notIdentified=0L
             for(i in 0 until (result.size) step 1){
-                if(result[i]._id) identified = result[i].count
-                else notIdentified = result[i].count
+                result[i]._id?.let {
+                    if(it) identified = result[i].count
+                    else notIdentified = result[i].count
+                }
             }
             return Pair(identified,notIdentified)
         }else return Pair(0,0)
