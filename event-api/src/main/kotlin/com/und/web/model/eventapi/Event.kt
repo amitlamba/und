@@ -86,7 +86,8 @@ data class EventMessage(
         var clientId: Long,
         var userId: String?,
         var name: String,
-        var creationTime: Date
+        var creationTime: Date,
+        var userIdentified:Boolean
 )
 
 /* {

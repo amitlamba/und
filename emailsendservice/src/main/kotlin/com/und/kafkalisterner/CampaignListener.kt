@@ -71,8 +71,8 @@ class CampaignListener {
             val clientId = liveSegmentUser.clientId
             val userId = liveSegmentUser.userId
 
-
-            trackSegmentUser(clientId, liveSegmentId, segmentId, userId)
+        //TODO handle userIDentified true case
+//            trackSegmentUser(clientId, liveSegmentId, segmentId, userId)
             /***FIXED findById return empty but user present for this userId
              *case 1 Id is String type in our repository but in real case its ObjectId in mongo.I try it but no success.
              *case 2 I think spring resolve it to id field as we see in jpa  but in mongo its _id This may be reason but not sure.
@@ -84,6 +84,7 @@ class CampaignListener {
 //            val campaignList = campaignService.findLiveSegmentCampaign(segmentId, clientId)
             //refresh cache I m thinking aboout schedulae ajob which update the status of live campaign
             //a stop cam newer start again
+
             val campaignList=campaignService.findAllLiveSegmentCampaignBySegmentId(segmentId, clientId)
             //FIXME if campaign list is empty then update the status of campaign to completed for this segment id.
 
