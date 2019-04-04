@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.und.livesegment.model.jpa.LiveSegment
 import com.und.livesegment.model.mongo.CountPerDay
 import com.und.livesegment.model.mongo.LiveSegmentReportCount
+import com.und.livesegment.model.webmodel.LiveSegmentCount
 import com.und.livesegment.model.webmodel.WebLiveSegment
 import com.und.livesegment.repository.jpa.LiveSegmentRepository
 import com.und.livesegment.repository.mongo.LiveSegmentResult
@@ -94,8 +95,9 @@ class LiveSegmentServiceImpl : LiveSegmentService {
         }else throw CustomException("Live Segment for client $clientId and id $id not exists.")
     }
 
-    override fun getLiveSegmentUsersCount(clientId: Long, segmentId: Long): Long {
-        return liveSegmentUserRepository.findCountByClientIdAndSegmentId(clientId, segmentId)
+    override fun getLiveSegmentUsersCount(clientId: Long, segmentId: Long): LiveSegmentCount {
+        val result=liveSegmentUserRepository.findCountByClientIdAndSegmentId(clientId, segmentId)
+        return LiveSegmentCount(known = result.first,unknown = result.second)
     }
 
     override fun getJpaLiveSegmentByClientIdAndId(clientId: Long, id: Long): LiveSegment {

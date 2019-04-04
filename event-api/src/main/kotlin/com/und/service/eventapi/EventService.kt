@@ -20,6 +20,9 @@ import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
+import java.time.Instant
+import java.time.ZoneId
+import java.util.*
 import java.util.regex.Pattern
 import javax.servlet.http.HttpServletRequest
 import com.und.model.mongo.eventapi.Event as MongoEvent
@@ -116,6 +119,34 @@ class EventService {
 //        val saved = eventRepository.insert(mongoEvent)
         val id=ObjectId()
         mongoEvent.id=id.toString()
+        if(!mongoEvent.userId.isNullOrBlank()){
+            mongoEvent.userIdentified=true
+        }else{
+            //creating anonymous event user
+            val userId=ObjectId().toString()
+            //associate event with anonymous user
+            mongoEvent.userId = userId
+            val eventUser=EventUser()
+            val identity = com.und.model.mongo.eventapi.Identity()
+            with(identity){
+                undId = userId
+            }
+            val standardInfo=StandardInfo()
+            with(standardInfo){
+                country = mongoEvent.geogrophy?.country
+                state = mongoEvent.geogrophy?.state
+                city = mongoEvent.geogrophy?.city
+            }
+            with(eventUser){
+                this.id = userId
+                this.identity = identity
+                this.clientId=mongoEvent.clientId.toInt()
+                this.standardInfo = standardInfo
+                this.creationTime = mongoEvent.creationTime
+            }
+            eventUserRepository.save(eventUser)
+
+        }
         eventRepository.save(mongoEvent)
         val saved=eventRepository.findById(id.toString()).get()
         mongoEvent.userId?.let {
@@ -187,7 +218,7 @@ class EventService {
     fun buildEventForLiveSegment(fromEvent: com.und.model.mongo.eventapi.Event): EventMessage {
         val eventId = fromEvent.id
         if (eventId != null) {
-            return EventMessage(eventId, fromEvent.clientId, fromEvent.userId, fromEvent.name, fromEvent.creationTime)
+            return EventMessage(eventId, fromEvent.clientId, fromEvent.userId, fromEvent.name, fromEvent.creationTime,fromEvent.userIdentified)
         } else {
             throw EventNotFoundException("Event with null id")
         }
