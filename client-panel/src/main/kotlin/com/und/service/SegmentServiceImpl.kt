@@ -7,6 +7,7 @@ import com.und.livesegment.model.jpa.LiveSegment
 import com.und.livesegment.model.webmodel.WebLiveSegment
 import com.und.livesegment.repository.jpa.LiveSegmentRepository
 import com.und.livesegment.service.LiveSegmentService
+import com.und.model.IncludeUsers
 import com.und.model.jpa.Segment
 import com.und.model.mongo.eventapi.EventUser
 import com.und.repository.jpa.SegmentRepository
@@ -126,39 +127,39 @@ class SegmentServiceImpl : SegmentService {
     }
 
 
-    override fun segmentUserIds(segmentId: Long, clientId: Long): List<String> {
+    override fun segmentUserIds(segmentId: Long, clientId: Long,includeUsers: IncludeUsers): List<String> {
         val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
         return if (segmentOption.isPresent) {
             val segment = segmentOption.get()
-            getSegmentUsers(segment, clientId, "userId").second
+            getSegmentUsers(segment, clientId, "userId",includeUsers).second
         } else emptyList()
     }
 
-    override fun segmentUsers(segmentId: Long, clientId: Long): List<EventUser> {
+    override fun segmentUsers(segmentId: Long, clientId: Long,includeUsers: IncludeUsers): List<EventUser> {
         if (segmentId == -2L) {
             return getTestSEgmentUsers(clientId)
         }
         val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
         return if (segmentOption.isPresent) {
             val segment = segmentOption.get()
-            getSegmentUsersList(segment, clientId)
+            getSegmentUsersList(segment, clientId,includeUsers)
         } else emptyList()
     }
 
-    override fun segmentUsers(segment: WebSegment, clientId: Long): List<EventUserWeb> {
+    override fun segmentUsers(segment: WebSegment, clientId: Long,includeUsers: IncludeUsers): List<EventUserWeb> {
         val segmentJpa = buildSegment(segment)
-        val eventUsers = getSegmentUsersList(segmentJpa, clientId)
+        val eventUsers = getSegmentUsersList(segmentJpa, clientId,includeUsers)
         return buildEventUserList(eventUsers)
     }
 
-    override fun isUserPresentInSegment(segment: Segment, clientId: Long, userId: String): Boolean {
-        return checkUserInSegment(segment, clientId, userId)
+    override fun isUserPresentInSegment(segment: Segment, clientId: Long, userId: String,includeUsers: IncludeUsers): Boolean {
+        return checkUserInSegment(segment, clientId, userId,includeUsers)
     }
 
-    private fun checkUserInSegment(segment: Segment, clientId: Long, userId: String): Boolean {
+    private fun checkUserInSegment(segment: Segment, clientId: Long, userId: String,includeUsers: IncludeUsers): Boolean {
         val tz = userSettingsService.getTimeZoneByClientId(clientId)
         val websegment = buildWebSegment(segment)
-        val queries = segmentParserCriteria.segmentQueries(websegment, tz)
+        val queries = segmentParserCriteria.segmentQueries(websegment, tz,includeUsers)
 
         val (didQueries, joincondition) = queries.didq
         if (didQueries.isNotEmpty()) {
@@ -193,8 +194,8 @@ class SegmentServiceImpl : SegmentService {
         return true
     }
 
-    private fun getSegmentUsersList(segment: Segment, clientId: Long): List<EventUser> {
-        return getSegmentUsers(segment, clientId).first
+    private fun getSegmentUsersList(segment: Segment, clientId: Long,includeUsers: IncludeUsers): List<EventUser> {
+        return getSegmentUsers(segment, clientId,includeUsers = includeUsers).first
     }
 
     private fun getTestSEgmentUsers(clientId: Long): List<EventUser> {
@@ -207,10 +208,15 @@ class SegmentServiceImpl : SegmentService {
     * eg. we add geo filter in first stage it mean after this stage we are not performing geo specific match so we can drop that field here.
     * Its decrease the size of document for next stage.
     * */
-    private fun getSegmentUsers(segment: Segment, clientId: Long, type: String = "eventuser"): Pair<List<EventUser>, List<String>> {
+    private fun getSegmentUsers(segment: Segment, clientId: Long, type: String = "eventuser",includeUsers: IncludeUsers): Pair<List<EventUser>, List<String>> {
+        val userIdentified = when(includeUsers){
+            IncludeUsers.KNOWN -> true
+            IncludeUsers.UNKNOWN -> false
+            IncludeUsers.ALL -> null
+        }
         val tz = userSettingsService.getTimeZoneByClientId(clientId)
         val websegment = buildWebSegment(segment)
-        var eventAggregation = segmentParserCriteria.getEventSpecificAggOperation(websegment, tz)
+        var eventAggregation = segmentParserCriteria.getEventSpecificAggOperation(websegment, tz,userIdentified)
         val idList = eventRepository.usersFromEvent(eventAggregation.first, clientId)
         val didNotIdList = eventRepository.usersFromEvent(eventAggregation.second, clientId)
         var userAggregation: MutableList<AggregationOperation>

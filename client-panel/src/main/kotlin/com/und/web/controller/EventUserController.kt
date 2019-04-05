@@ -1,5 +1,6 @@
 package com.und.web.controller
 
+import com.und.model.IncludeUsers
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.EventUserService
 import com.und.service.SegmentService
@@ -13,6 +14,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import javax.servlet.http.HttpServletRequest
 
 
 @CrossOrigin
@@ -72,9 +74,10 @@ class EventUserController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/user-list/segment"])
-    fun findEventUsersBySegment(@RequestBody segment: Segment): ResponseEntity<List<EventUser>> {
+    fun findEventUsersBySegment(@RequestBody segment: Segment,request:HttpServletRequest): ResponseEntity<List<EventUser>> {
         val clientId = getClientId()
-        val eventUserList = segmentService.segmentUsers(segment, clientId)
+        val includeUsers=request.getParameter("include")?:"ALL"
+        val eventUserList = segmentService.segmentUsers(segment, clientId,IncludeUsers.valueOf(includeUsers))
         return if (eventUserList.isEmpty()) {
             throw EventUserListBySegmentNotFoundException("Event user list not found")
         } else {

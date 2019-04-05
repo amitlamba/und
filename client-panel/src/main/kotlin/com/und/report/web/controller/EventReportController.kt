@@ -2,6 +2,7 @@ package com.und.report.web.controller
 
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.und.model.IncludeUsers
 import com.und.report.service.UserEventAnalyticsService
 import com.und.report.web.model.AggregateBy
 import com.und.report.web.model.EventReport
@@ -46,7 +47,7 @@ class EventReportController {
                    groupBy: GroupBy): List<EventCount> {
 
         requestFilter.propFilter=propFilter
-        return userAnalyticsService.countTrend(requestFilter, entityType, groupBy)
+        return userAnalyticsService.countTrend(requestFilter, entityType, groupBy, IncludeUsers.KNOWN)
     }
 
 
@@ -58,7 +59,7 @@ class EventReportController {
 
         requestFilter.propFilter=propFilter
 //        return userAnalyticsService.countTrend(requestFilter, entityType, groupBy)
-        return userAnalyticsService.eventReachability(requestFilter,entityType,groupBy)
+        return userAnalyticsService.eventReachability(requestFilter,entityType,groupBy,IncludeUsers.KNOWN)
 
     }
 
@@ -71,7 +72,7 @@ class EventReportController {
                         @RequestBody propFilter: List<GlobalFilter>,
                         @RequestParam(name = "period") period: EventReport.PERIOD, requestFilter: EventReport.EventReportFilter): List<EventReport.EventPeriodCount> {
         requestFilter.propFilter=propFilter
-        return userAnalyticsService.timePeriodTrend(requestFilter, entityType, period)
+        return userAnalyticsService.timePeriodTrend(requestFilter, entityType, period,IncludeUsers.KNOWN)
     }
 
 
@@ -84,7 +85,7 @@ class EventReportController {
                        @RequestBody propFilter: List<GlobalFilter>): List<EventReport.EventUserFrequency> {
 
         requestFilter.propFilter=propFilter
-        return userAnalyticsService.eventUserTrend(requestFilter)
+        return userAnalyticsService.eventUserTrend(requestFilter,IncludeUsers.KNOWN)
     }
 
 
@@ -96,7 +97,7 @@ class EventReportController {
                        @RequestBody propFilter: List<GlobalFilter>): List<EventReport.EventTimeFrequency> {
 
         requestFilter.propFilter=propFilter
-        return userAnalyticsService.eventTimeTrend(requestFilter)
+        return userAnalyticsService.eventTimeTrend(requestFilter,IncludeUsers.KNOWN)
     }
 
     //aggregate on a property on time scale of days, week, month  if property is amount than revenue report,
@@ -105,6 +106,6 @@ class EventReportController {
                        aggregateBy: AggregateBy, requestFilter: EventReport.EventReportFilter,
                        @RequestBody propFilter: List<GlobalFilter>): List<EventReport.Aggregate> {
         requestFilter.propFilter=propFilter
-        return userAnalyticsService.aggregateTrend(requestFilter, period, aggregateBy)
+        return userAnalyticsService.aggregateTrend(requestFilter, period, aggregateBy,IncludeUsers.KNOWN)
     }
 }

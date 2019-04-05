@@ -1,5 +1,6 @@
 package com.und.report.web.controller
 
+import com.und.model.IncludeUsers
 import com.und.report.service.FunnelReportService
 import com.und.report.web.model.FunnelReport
 import com.und.report.web.model.FunnelStepAndFilter
@@ -44,6 +45,7 @@ class FunnelController {
         if((funnelFilter.splitProperty?.isEmpty())?:true) funnelFilter.splitProperty=null
         funnelFilter.steps=body.steps
         funnelFilter.filters=body.filters
-        return funnelReportService.funnel(funnelFilter)
+        //FIXME All user make more sense then known.
+        return funnelReportService.funnel(funnelFilter,IncludeUsers.KNOWN)
     }
 }

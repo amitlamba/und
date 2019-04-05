@@ -1,5 +1,6 @@
 package com.und.report.web.controller
 
+import com.und.model.IncludeUsers
 import com.und.report.service.UserEventAnalyticsService
 import com.und.report.web.model.*
 import com.und.web.model.EventUser
@@ -25,7 +26,7 @@ class DashBoardController {
     //groupBy = event-name, country, state, city, os, browser, device
     fun liveUsers(@RequestParam("segmentid", required = true, defaultValue = "1") segmentId: Long,
                    @RequestParam("interval", required = true, defaultValue = "5") interval: Long, groupBy: GroupBy): List<UserCountForProperty> {
-        return userAnalyticsService.liveUsers(segmentId, groupBy, interval)
+        return userAnalyticsService.liveUsers(segmentId, groupBy, interval,IncludeUsers.KNOWN)
     }
 
 
@@ -39,7 +40,7 @@ class DashBoardController {
     fun liveUserTrend(@RequestParam("segmentid", required = true, defaultValue = "1") segmentId: Long,
                    @RequestParam("dates", required = true, defaultValue = "today") dates: List<String>,
                    @RequestParam("interval", required = true, defaultValue = "5") interval: Long):List<UserCountTrendForDate> {
-        return userAnalyticsService.liveUserTrend(segmentId, dates, interval)
+        return userAnalyticsService.liveUserTrend(segmentId, dates, interval,IncludeUsers.KNOWN)
     }
 
     /**
@@ -49,7 +50,7 @@ class DashBoardController {
     fun liveUserByTypeTrend(@RequestParam("segmentid", required = true, defaultValue = "1") segmentId: Long,
                    @RequestParam("dates", required = true, defaultValue = "today") date: List<String>,
                    @RequestParam("interval", required = true, defaultValue = "5") interval: Long):List<UserTypeTrendForDate> {
-        return userAnalyticsService.liveUserByTypeTrend(segmentId, date, interval)
+        return userAnalyticsService.liveUserByTypeTrend(segmentId, date, interval,IncludeUsers.KNOWN)
     }
 
 
@@ -57,7 +58,7 @@ class DashBoardController {
     //select name, count(distinct(userId)).....
     fun userCountByEvent(@RequestParam("segmentid", required = true, defaultValue = "1") segmentId: Long,
                    @RequestParam("dates", required = true, defaultValue = "today") dates: List<String>):List<UserCountByEventForDate> {
-        return userAnalyticsService.userCountByEvent(segmentId, dates)
+        return userAnalyticsService.userCountByEvent(segmentId, dates,IncludeUsers.KNOWN)
     }
 
 

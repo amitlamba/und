@@ -131,7 +131,7 @@ class MongoQueryUtil {
         filters.add(userIdFilter)
         filters.add(creationTimeFilter)
 
-        val filterGlobalQ = segmentParserCriteria.filterGlobalQ(filters, tz)
+        val filterGlobalQ = segmentParserCriteria.filterGlobalQ(filters, tz,true)
         val matchOperation = Aggregation.match(filterGlobalQ.first)
 
 
@@ -150,7 +150,7 @@ class MongoQueryUtil {
         var filters = mutableListOf<GlobalFilter>()
         val userIdFilter = buildFilter(GlobalFilterType.EventProperties, Field.UserId.fName, DataType.string, StringOperator.Contains.name, userIds, null)
         filters.add(userIdFilter)
-        val filterCriterias = segmentParserCriteria.filterGlobalQ(filters, tz)
+        val filterCriterias = segmentParserCriteria.filterGlobalQ(filters, tz,true)
         val matchOperation = Aggregation.match(filterCriterias.first)
 
         //project
@@ -162,7 +162,7 @@ class MongoQueryUtil {
         filters = mutableListOf<GlobalFilter>()
         val dateValFilter = buildFilter(GlobalFilterType.EventComputedProperties, Field.DateVal.fName, DataType.string, StringOperator.Contains.name, dates, null)
         filters.add(dateValFilter)
-        val dateCriteria = segmentParserCriteria.filterGlobalQ(filters, tz)
+        val dateCriteria = segmentParserCriteria.filterGlobalQ(filters, tz,true)
         val dateMatch = Aggregation.match(dateCriteria.first)
 
         //group
@@ -190,7 +190,7 @@ class MongoQueryUtil {
         val userGroupByPresent = isUserCollection(groupBy.groupFilterType)
 
         //event match
-        val eventFilterCriterias = segmentParserCriteria.filterGlobalQ(allFilters.first, tz)
+        val eventFilterCriterias = segmentParserCriteria.filterGlobalQ(allFilters.first, tz,true)
         val eventMatchOperation = Aggregation.match(eventFilterCriterias.first)
 
         //join with user collection if needed
@@ -216,7 +216,7 @@ class MongoQueryUtil {
             joinWithUserPipeline.add(unwindOperation)
 
             if(userFilterPresent){
-                val userFilterCriterias = segmentParserCriteria.filterGlobalQ(allFilters.second, tz)
+                val userFilterCriterias = segmentParserCriteria.filterGlobalQ(allFilters.second, tz,true)
                 val userMatchOperation = Aggregation.match(userFilterCriterias.second)
                 joinWithUserPipeline.add(userMatchOperation)
             }

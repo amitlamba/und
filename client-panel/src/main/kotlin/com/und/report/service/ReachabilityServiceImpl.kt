@@ -3,6 +3,7 @@ package com.und.report.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.und.common.utils.loggerFor
+import com.und.model.IncludeUsers
 import com.und.model.mongo.SegmentReachability
 import com.und.report.model.SegmentTrendCount
 import com.und.report.repository.mongo.ReachabilityRepository
@@ -159,7 +160,7 @@ class ReachabilityServiceImpl : ReachabilityService {
 
     private fun usersInSegment(segmentId: Long, clientId: Long): List<ObjectId> {
         val objectIds = if (segmentId != allUser) {
-            val segmentUsers = segmentService.segmentUserIds(segmentId, clientId)
+            val segmentUsers = segmentService.segmentUserIds(segmentId, clientId,IncludeUsers.KNOWN)
             segmentUsers.map {
                 ObjectId(it)
             }
