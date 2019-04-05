@@ -88,10 +88,10 @@ class AggregationQuerybuilderTest {
         val userIdFilter = buildFilter(GlobalFilterType.EventProperties, Field.UserId.fName, DataType.string, StringOperator.Contains.name, listOf("5b767f5bcfd0d1139b8659eb"), null)
         filters.add(userIdFilter)
 
-        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3)
+        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForEventFilterAndEventGroupBy EventCount: $eventAggregation")
 
-        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3)
+        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForEventFilterAndEventGroupBy UserCount: $userAggregation")
     }
 
@@ -100,10 +100,10 @@ class AggregationQuerybuilderTest {
         val groupBys = getEventGroup1()
         val filters = getEventFilters()
 
-        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3)
+        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForEventFilterAndEventGroupBy EventCount: $eventAggregation")
 
-        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3)
+        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForEventFilterAndEventGroupBy UserCount: $userAggregation")
     }
 
@@ -112,10 +112,10 @@ class AggregationQuerybuilderTest {
         val groupBys = getUserGroup1()
         val filters = getEventFilters()
 
-        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3)
+        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForEventFilterAndUserGroupBy EventCount: $eventAggregation")
 
-        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3)
+        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForEventFilterAndUserGroupBy UserCount: $userAggregation")
     }
 
@@ -124,10 +124,10 @@ class AggregationQuerybuilderTest {
         val groupBys = getEventGroup1()
         val filters = getUserFilters()
 
-        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3)
+        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForUserFilterAndEventGroupBy EventCount: $eventAggregation")
 
-        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3)
+        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForUserFilterAndEventGroupBy UserCount: $userAggregation")
     }
 
@@ -136,10 +136,10 @@ class AggregationQuerybuilderTest {
         val groupBys = getUserGroup1()
         val filters = getUserFilters()
 
-        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3)
+        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForUserFilterAndUserGroupBy EventCount: $eventAggregation")
 
-        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3)
+        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForUserFilterAndUserGroupBy UserCount: $userAggregation")
     }
 
@@ -151,10 +151,10 @@ class AggregationQuerybuilderTest {
         filters.addAll(getEventFilters())
         filters.addAll(getUserFilters())
 
-        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3)
+        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForBothFilterAndEventGroupBy EventCount: $eventAggregation")
 
-        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3)
+        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForBothFilterAndEventGroupBy UserCount: $userAggregation")
     }
 
@@ -167,10 +167,10 @@ class AggregationQuerybuilderTest {
         filters.addAll(getEventFilters())
         filters.addAll(getUserFilters())
 
-        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3)
+        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForBothFilterAndUserGroupBy EventCount: $eventAggregation")
 
-        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3)
+        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForBothFilterAndUserGroupBy UserCount: $userAggregation")
     }
 
@@ -191,10 +191,10 @@ class AggregationQuerybuilderTest {
         filters.addAll(getEventFilters())
         filters.addAll(getUserFilters())
 
-        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3)
+        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForBothFilterAndEventGroupBy EventCount: $eventAggregation")
 
-        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3)
+        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForBothFilterAndEventGroupBy UserCount: $userAggregation")
     }
 
@@ -219,7 +219,7 @@ class AggregationQuerybuilderTest {
         filters.addAll(getEventFilters())
         filters.addAll(getUserFilters())
 
-        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, aggregateBy, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3)
+        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, aggregateBy, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForBothFilterAndEventGroupBy EventCount: $eventAggregation")
 
         val userAggregateBy = AggregateBy()
@@ -227,7 +227,7 @@ class AggregationQuerybuilderTest {
         userAggregateBy.name = "countryCode"
         userAggregateBy.globalFilterType = GlobalFilterType.UserProperties
 
-        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, userAggregateBy, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3)
+        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, userAggregateBy, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForBothFilterAndEventGroupBy UserCount: $userAggregation")
     }
 
@@ -252,10 +252,10 @@ class AggregationQuerybuilderTest {
         filters.addAll(getEventFilters())
         filters.addAll(getUserFilters())
 
-        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3)
+        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForBothFilterAndEventGroupBy EventCount: $eventAggregation")
 
-        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3)
+        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForBothFilterAndEventGroupBy UserCount: $userAggregation")
     }
 
@@ -284,7 +284,7 @@ class AggregationQuerybuilderTest {
         filters.add(dateFilter)
 
 
-        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3)
+        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForEventFilterAndEventGroupBy EventCount: $eventAggregation")
     }
 
@@ -298,11 +298,11 @@ class AggregationQuerybuilderTest {
                 buildGroupBy("gender", GlobalFilterType.Demographics))
 
         val propertyValues = mapOf(NUM_OF_MINUTES to 10)
-        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, propertyValues, EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3)
+        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, propertyValues, EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testLiveUSerByTypeTrend1 UserCount: $userAggregation")
 
 
-        val buildAggregationPipeline = agregationQuerybuilder.buildAggregationPipeline(filters, groupBys, null, propertyValues, EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3)
+        val buildAggregationPipeline = agregationQuerybuilder.buildAggregationPipeline(filters, groupBys, null, propertyValues, EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         val projectionOperation = Aggregation.project().and("${Field.DateVal.fName}").`as`(Field.DateVal.fName)
                 .and("${Field.MinutesPeriod.fName}").`as`(Field.MinutesPeriod.fName)
                 .and(agregationQuerybuilder.getAggregationExpression(Field.UserType.fName, propertyValues)).`as`(Field.UserType.fName)
@@ -326,10 +326,10 @@ class AggregationQuerybuilderTest {
         filters.add(eventNameFilter)
         filters.addAll(getUserFilters())
 
-        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3)
+        val eventAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.event, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForBothFilterAndBothGroupBy EventCount: $eventAggregation")
 
-        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3)
+        val userAggregation =  agregationQuerybuilder.buildAggregation(filters, groupBys, null, emptyMap (), EventReport.EntityType.user, ZoneId.of("Europe/Paris"), 3,userIdentified = true)
         println("testCountTrendForBothFilterAndBothGroupBy UserCount: $userAggregation")
     }
 
