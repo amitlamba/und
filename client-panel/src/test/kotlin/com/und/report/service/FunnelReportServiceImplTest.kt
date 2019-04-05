@@ -31,7 +31,7 @@ class FunnelReportServiceImplTest {
                 funnelOrder = FunnelReport.FunnelOrder.default, splitProperty = null, splitPropertyType = GlobalFilterType.Technographics,
                 steps = listOf("Search", "View").map { it -> FunnelReport.Step(eventName = it, order = 1) })
 
-        val eventAggregation =  funnelReportService.buildAggregation(funnelFilter, 3, listOf("5b767f5bcfd0d1139b8659eb", "5b767f5ccfd0d1139b8659ed", "5b767f5dcfd0d1139b8659f1"), ZoneId.of("Europe/Paris"))
+        val eventAggregation =  funnelReportService.buildAggregation(funnelFilter, 3, listOf("5b767f5bcfd0d1139b8659eb", "5b767f5ccfd0d1139b8659ed", "5b767f5dcfd0d1139b8659f1"), ZoneId.of("Europe/Paris"),true)
 
         println("test eventAggregation: $eventAggregation")
     }
@@ -43,7 +43,7 @@ class FunnelReportServiceImplTest {
                 funnelOrder = FunnelReport.FunnelOrder.default, splitProperty = "os", splitPropertyType = GlobalFilterType.Technographics,
                 steps = listOf("Search", "View").map { it -> FunnelReport.Step(eventName = it, order = 1) })
 
-        val eventAggregation =  funnelReportService.buildAggregation(funnelFilter, 3, listOf("5b767f5bcfd0d1139b8659eb", "5b767f5ccfd0d1139b8659ed", "5b767f5dcfd0d1139b8659f1"), ZoneId.of("Europe/Paris"))
+        val eventAggregation =  funnelReportService.buildAggregation(funnelFilter, 3, listOf("5b767f5bcfd0d1139b8659eb", "5b767f5ccfd0d1139b8659ed", "5b767f5dcfd0d1139b8659f1"), ZoneId.of("Europe/Paris"),true)
 
         println("test eventAggregation: $eventAggregation")
     }
