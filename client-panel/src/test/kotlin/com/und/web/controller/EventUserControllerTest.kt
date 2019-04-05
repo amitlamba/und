@@ -1,6 +1,7 @@
 package com.und.web.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.und.model.IncludeUsers
 import com.und.repository.jpa.CampaignRepository
 import com.und.service.SegmentService
 import com.und.service.SegmentServiceImpl
@@ -49,7 +50,7 @@ class EventUserControllerTest {
         //make a web model segment
         var segment=objetMapper.readValue(segment1,Segment::class.java)
 
-        var eventUserList=segmentService.segmentUsers(segment,clientId = clientId)
+        var eventUserList=segmentService.segmentUsers(segment,clientId = clientId,includeUsers = IncludeUsers.KNOWN)
         println(eventUserList.size)
         assertEquals(segment1ExpectedUser,eventUserList.size)
     }
