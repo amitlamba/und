@@ -8,6 +8,7 @@ import com.und.config.EventStream
 import com.und.exception.UndException
 import com.und.livesegment.model.*
 import com.und.livesegment.model.jpa.LiveSegment
+import com.und.model.IncludeUsers
 import com.und.model.JobDescriptor
 import com.und.model.JobDetail
 import com.und.model.TriggerDescriptor
@@ -105,7 +106,7 @@ class LiveSegmentProcessingService {
             return
         }
 
-        val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, params.clientId.toLong(), params.userId)
+        val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, params.clientId.toLong(), params.userId,IncludeUsers.ALL)
         if (userPresentInSegment) {
             val event=eventRepository.findEventByObjectId(ObjectId(params.startEventId),params.clientId.toLong())
             if(event.isPresent){
@@ -151,7 +152,7 @@ class LiveSegmentProcessingService {
                 return@forEach
             }
 
-            val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, event.clientId, event.userId)
+            val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, event.clientId, event.userId,IncludeUsers.ALL)
             if (!userPresentInSegment) {
                 logger.info("User checks not matched with $event for live-segment-id: ${liveSegment.id}")
                 return@forEach
@@ -195,7 +196,7 @@ class LiveSegmentProcessingService {
                 return@forEach
             }
 
-            val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, event.clientId, event.userId)
+            val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, event.clientId, event.userId,IncludeUsers.ALL)
             if (userPresentInSegment){
                 //Tracking user
                 trackSegmentUser(event.clientId, liveSegment.id, liveSegment.segmentId, event.userId,event.userIdentified)

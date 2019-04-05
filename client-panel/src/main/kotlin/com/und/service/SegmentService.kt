@@ -1,6 +1,7 @@
 package com.und.service
 
 //import com.und.model.jpa.Segment
+import com.und.model.IncludeUsers
 import com.und.model.jpa.Segment
 import com.und.model.mongo.eventapi.EventUser
 import org.springframework.stereotype.Service
@@ -18,13 +19,13 @@ interface SegmentService {
 
     fun persistedSegmentById(id:Long,clientId: Long?): Segment
 
-    fun segmentUserIds(segmentId: Long, clientId: Long): List<String>
+    fun segmentUserIds(segmentId: Long, clientId: Long,includeUsers: IncludeUsers): List<String>
 
-    fun segmentUsers(segmentId: Long, clientId: Long): List<EventUser>
+    fun segmentUsers(segmentId: Long, clientId: Long,includeUsers: IncludeUsers): List<EventUser>
 
-    fun segmentUsers(segment: WebSegment, clientId: Long): List<EventUserWeb>
+    fun segmentUsers(segment: WebSegment, clientId: Long,includeUsers: IncludeUsers): List<EventUserWeb>
 
-    fun isUserPresentInSegment(segment: Segment, clientId: Long, userId: String): Boolean
+    fun isUserPresentInSegment(segment: Segment, clientId: Long, userId: String,includeUsers: IncludeUsers): Boolean
 
     fun segmentByClientId(clientId: Long):List<Segment>
 }
