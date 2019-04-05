@@ -1,8 +1,10 @@
 package com.und.service
 
 import com.mongodb.MongoClient
+import com.und.model.jpa.Campaign
 import com.und.report.web.model.AggregateBy
 import com.und.report.web.model.EventReport
+import com.und.report.web.model.FunnelReport
 import com.und.report.web.model.GroupBy
 import com.und.web.model.*
 import com.und.web.model.Unit

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.und.model.IncludeUsers
 import com.und.web.model.Segment
 import org.hamcrest.MatcherAssert
 import org.junit.Before
@@ -60,7 +61,7 @@ class SegmentParserCriteriaTest {
 
         val testData = readFileText("$testDataBase/test1.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"),IncludeUsers.KNOWN)
         println(q.didq.first)
         println(q.didq.second)
         println(q.userQuery)
@@ -72,7 +73,7 @@ class SegmentParserCriteriaTest {
 
         val testData = readFileText("$testDataBase/test1-withuser.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"),IncludeUsers.KNOWN)
         println(q.didq.first)
         println(q.didq.second)
         println(q.userQuery)
@@ -85,7 +86,7 @@ class SegmentParserCriteriaTest {
 
         val testData = readFileText("$testDataBase/test2.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"),IncludeUsers.KNOWN)
         println(q.didq.first)
         println(q.didq.second)
         MatcherAssert.assertThat(2, Is(2))
@@ -98,7 +99,7 @@ class SegmentParserCriteriaTest {
         val segment = mapper.readValue(testData, Segment::class.java)
 
 
-        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"),IncludeUsers.KNOWN)
         println(q.didq.first)
         println(q.didq.second)
         //val users = segmentServiceImpl.segmentUsers(37,2)
@@ -110,7 +111,7 @@ class SegmentParserCriteriaTest {
 
         val testData = readFileText("$testDataBase/test4.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"),IncludeUsers.KNOWN)
         println(q.didq.first)
         println(q.didq.second)
         MatcherAssert.assertThat(2, Is(2))
@@ -121,7 +122,7 @@ class SegmentParserCriteriaTest {
 
         val testData = readFileText("$testDataBase/test5.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"),IncludeUsers.KNOWN)
         println(q.didq.first)
         println(q.didq.second)
 
@@ -134,7 +135,7 @@ class SegmentParserCriteriaTest {
 
         val testData = readFileText("$testDataBase/test6.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"),IncludeUsers.KNOWN)
         println(q.didq.first)
         println(q.didq.second)
         MatcherAssert.assertThat(2, Is(2))
@@ -146,7 +147,7 @@ class SegmentParserCriteriaTest {
 
         val testData = readFileText("$testDataBase/test6-withuser.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"),IncludeUsers.KNOWN)
         println(q.didq.first)
         println(q.didq.second)
         println(q.userQuery)
@@ -159,7 +160,7 @@ class SegmentParserCriteriaTest {
 
         val testData = readFileText("$testDataBase/test7.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
+        val q =  segmentParser.segmentQueries(segment, ZoneId.of("UTC"),IncludeUsers.KNOWN)
         println(q.didq.first)
         println(q.didq.second)
         MatcherAssert.assertThat(2, Is(2))
@@ -171,7 +172,7 @@ class SegmentParserCriteriaTest {
 
         val testData = readFileText("$testDataBase/JsonTestData12.json")
         val segment = mapper.readValue(testData, Segment::class.java)
-         segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
+         segmentParser.segmentQueries(segment, ZoneId.of("UTC"),IncludeUsers.KNOWN)
         MatcherAssert.assertThat(2, Is(2))
 
     }
@@ -187,7 +188,7 @@ class SegmentParserCriteriaTest {
             println("****$it**${count++}******")
             println("************")
 
-             segmentParser.segmentQueries(segment, ZoneId.of("UTC"))
+             segmentParser.segmentQueries(segment, ZoneId.of("UTC"),IncludeUsers.KNOWN)
             println("************")
             println("************")
 
