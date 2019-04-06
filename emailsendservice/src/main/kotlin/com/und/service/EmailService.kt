@@ -132,6 +132,7 @@ class EmailService:CommonEmailService {
             clientId=emailToSend.clientID
             notificationId=mongoEmailId
             attributes.put("campaign_id",emailToSend.campaignId)
+            attributes.put("template_id",emailToSend.emailTemplateId)
             userIdentified=true
             identity= Identity(userId = email.eventUser?.id,clientId = emailToSend.clientID.toInt())
 

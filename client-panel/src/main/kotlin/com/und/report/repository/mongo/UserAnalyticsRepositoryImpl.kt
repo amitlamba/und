@@ -26,7 +26,7 @@ class UserAnalyticsRepositoryImpl: UserAnalyticsRepository{
         logger.debug("Fetching aggregation results for query : $query, clientId: $clientId")
 
         val aggregate = mongoTemplate.aggregate<Document>(query, "${clientId}_event", Document::class.java)
-        val result=if(aggregate.mappedResults.isNotEmpty() && aggregate.mappedResults[0]["_id"] !=null)
+        val result=if(aggregate.mappedResults.isNotEmpty() && (aggregate.mappedResults[0]["_id"] !=null || aggregate.mappedResults[0].containsKey("_id")))
         {
             aggregate.mappedResults.filter {it["_id"] != null }
         }
