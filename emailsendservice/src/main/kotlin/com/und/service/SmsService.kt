@@ -63,6 +63,7 @@ class SmsService :CommonSmsService{
                 clientId=smsToSend.clientID
                 notificationId=mongoSmsId
                 attributes.put("campaign_id",sms.campaignId?:-1)
+                attributes.put("template_id",sms.smsTemplateId)
                 userIdentified=true
                 identity= Identity(userId = sms.eventUser?.id,clientId = smsToSend.clientID.toInt())
 
