@@ -1,5 +1,6 @@
 package com.und.config
 
+import com.und.model.IncludeUsers
 import com.und.report.service.ReachabilityService
 import com.und.report.service.ReachabilityServiceImpl
 import com.und.service.ClientService
@@ -76,7 +77,7 @@ class SchedulingReports {
                     val segments= segmentService.segmentByClientId(it)
                     segments.forEach {
                         it.id?.let {
-                            segmentReachService.setReachabilityOfSegmentToday(it,clientId)
+                            segmentReachService.setReachabilityOfSegmentTodayAll(it,clientId)
                         }
                     }
                 }

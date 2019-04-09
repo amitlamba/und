@@ -19,7 +19,8 @@ import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
-import javax.mail.internet.InternetAddress
+import java.util.regex.Pattern
+import org.springframework.cache.annotation.Cacheable
 import com.amazonaws.services.simpleemail.model.Message as SESMessage
 
 
@@ -71,6 +72,16 @@ class EmailService:CommonEmailService {
 
     override fun sendEmail(email: Email) {
 
+        val variable=getVariableFromTemplate(email)
+
+        email.eventUser?.let {
+            val user=it
+            variable.forEach {
+                when(it){
+                    "" -> user.
+                }
+            }
+        }
 
         fun String.addUrlTracking(uniqueTrackingId: String): String {
             return emailHelperService.trackAllURLs(this, email.clientID, uniqueTrackingId)
@@ -138,6 +149,32 @@ class EmailService:CommonEmailService {
 
         }
         eventApiFeignClient.pushEvent(token,event)
+    }
+
+    @Cacheable(key = "'template_variable'+#email.clientID+'_'+#email.emailTemplateId" )
+    fun getVariableFromTemplate(email: Email):Set<String>{
+        val listOfVariable = mutableSetOf<String>()
+
+        val template=emailTemplateRepository.findByIdAndClientID(email.emailTemplateId,email.clientID)
+        if(template.isPresent){
+            val tem=template.get()
+            val subject=tem.emailTemplateSubject?.template ?: ""
+            val body=tem.emailTemplateBody?.template ?: ""
+            val pattern = Pattern.compile("(?<group>\\$\\{.*?\\})")
+            val subjectMatcher = pattern.matcher(subject)
+            val bodyMatcher = pattern.matcher(body)
+            val subjectGroupMatch=subjectMatcher.groupCount()
+            val bodyGroupMatch = bodyMatcher.groupCount()
+            for(i in 0..subjectGroupMatch-1 step 1){
+                listOfVariable.add(subjectMatcher.group(i+1))
+            }
+            for(i in 0..bodyGroupMatch-1 step 1){
+                listOfVariable.add(bodyMatcher.group(i+1))
+            }
+
+        }
+
+        return listOfVariable
     }
 
 //    private fun isSystemClient(email: Email) = email.clientID == 1L

@@ -1,11 +1,14 @@
 package com.und.service
 
+import com.und.model.utils.Email
 import com.und.model.utils.EmailSMTPConfig
 import org.junit.Before
 import org.junit.Test
 import org.mockito.InjectMocks
 import org.mockito.MockitoAnnotations
 import org.springframework.test.util.ReflectionTestUtils
+import java.util.regex.Pattern
+import javax.mail.internet.InternetAddress
 
 class EmailSendServiceTest {
 
@@ -48,6 +51,30 @@ class EmailSendServiceTest {
         assert(content2 == finalContent2)
     }
 
+    @Test
+    fun getVariableFromTemplate(){
+        var emailSubject = "\${user.identity.firstName} hello \${user.identity.lastName}"
+        val emailBody = "\${user.identity.firstName}"
+        val listOfVariable = mutableSetOf<String>()
+        val pattern = Pattern.compile("(?<group>\\\$\\{.*?\\})")
+        val subjectMatcher = pattern.matcher(emailSubject)
+        val bodyMatcher = pattern.matcher(emailBody)
+        val subjectGroupMatch = subjectMatcher.groupCount()
+        val bodyGroupMatch = bodyMatcher.groupCount()
+        println("No fo variable in subject $subjectGroupMatch")
+        println("No of variable in body $bodyGroupMatch")
+        if(subjectMatcher.matches()){
+            for (i in 0..(subjectGroupMatch - 1) step 1) {
+                listOfVariable.add(subjectMatcher.group(i + 1))
+            }
+        }
+        if (bodyMatcher.matches()) {
+            for (i in 0..(bodyGroupMatch - 1) step 1) {
+                listOfVariable.add(bodyMatcher.group(i + 1))
+            }
+        }
+        println("list Of variables $listOfVariable")
+    }
 
 
 }

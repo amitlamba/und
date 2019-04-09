@@ -1,6 +1,7 @@
 package com.und.report.web.controller
 
 
+import com.und.model.IncludeUsers
 import com.und.report.model.SegmentTrendCount
 import com.und.report.service.ReachabilityService
 import com.und.report.web.model.Reachability
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import javax.servlet.http.HttpServletRequest
 
 @RestController("/report/segment")
 @RequestMapping("/report/segment")
@@ -24,7 +26,7 @@ class SegmentPageReportController {
     @GetMapping("/reachability")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     fun reachability(@RequestParam(name = "segmentid") segmentId: Long): Reachability {
-        return reachabilityService.getReachabilityBySegmentId(segmentId)
+        return reachabilityService.getReachabilityBySegmentId(segmentId,IncludeUsers.ALL)
     }
 
 
@@ -36,9 +38,10 @@ class SegmentPageReportController {
 
     @GetMapping("/set/{segmentId}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    fun setSegmentReachability(@PathVariable (required = true)segmentId: Long){
+    fun setSegmentReachability(@PathVariable (required = true)segmentId: Long,request:HttpServletRequest){
         val clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
-        reachabilityService.setReachabilityOfSegmentToday(segmentId,clientId)
+        val includeUsers:IncludeUsers = IncludeUsers.valueOf(request.getParameter("include")?:"ALL")
+        reachabilityService.setReachabilityOfSegmentToday(segmentId,clientId,includeUsers)
     }
 
     @GetMapping("/get/{segmentId}/{date}")

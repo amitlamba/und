@@ -31,6 +31,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.NoSuchElementException
+import kotlin.collections.HashMap
 
 @Service("reachabilityserviceimpl")
 class ReachabilityServiceImpl : ReachabilityService {
@@ -100,7 +101,7 @@ class ReachabilityServiceImpl : ReachabilityService {
         return segmentReachabilityRepository.getReachabilityOfSegmentByDate(segmentId,getKey(date),date,clientId)
     }
 
-    override fun getReachabilityOfSegmentByDateRange(clientId: Long,segmentId: Long, date1: String, date2: String): List<SegmentTrendCount> {
+    override fun getReachabilityOfSegmentByDateRange(clientId: Long,segmentId: Long, date1: String, date2: String,): List<SegmentTrendCount> {
         var sr: Optional<SegmentReachability> = findSegmentReachability(clientId, segmentId)
         var startDate= LocalDate.parse(date1)
         var endDate= LocalDate.parse(date2)
@@ -120,7 +121,7 @@ class ReachabilityServiceImpl : ReachabilityService {
             }
             //NOTE if end date is today and lastmodified time is > 2 hour update result.
             if(endDate.isEqual(LocalDate.now(ZoneId.of(sr.get().timeZone)))&& sr.get().lastModifiedTime.isBefore(LocalDateTime.now(ZoneId.of(sr.get().timeZone)).minusHours(2))){
-                val count=setReachabilityOfSegmentToday(segmentId, clientId)
+                val count=setReachabilityOfSegmentToday(segmentId, clientId,IncludeUsers.ALL)
                 result.set((result.size)-1,SegmentTrendCount(date=dateRange.last().toString(),count = count))
             }
         }
@@ -152,15 +153,43 @@ class ReachabilityServiceImpl : ReachabilityService {
         }
     }
 
-    override fun setReachabilityOfSegmentToday(segmentId: Long,clientId: Long):Int {
-        val objectIds = usersInSegment(segmentId, clientId)
+    private fun setAllUsersReachabilityOfSegmentNow(count:Map<String,Int>, segmentId: Long, clientId: Long){
+
+        clientSetting.findByClientID(clientId)?.let {
+            val timeZoneId= ZoneId.of(it.timezone)
+            val todayDate=LocalDate.now(timeZoneId).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            val modifiedTime=LocalDateTime.now(timeZoneId)
+//        var sr: Optional<SegmentReachability> = findSegmentReachability(clientId, segmentId)
+//        if(sr.isPresent && isPresent(sr.get(), todayDate)) {
+//            return
+//        }else{
+//            var segmentReachability:SegmentReachability
+//            if(!sr.isPresent) segmentReachability=SegmentReachability() else segmentReachability=sr.get()
+//            segmentReachabilityRepository.save(buildSegmentReachability(clientId, segmentId, objectIds.size,segmentReachability))
+//        }
+
+
+            segmentReachabilityRepository.updateAllUsersSegmentReachability(segmentId,getKey(todayDate),count,clientId,modifiedTime,it.timezone)
+        }
+    }
+
+    override fun setReachabilityOfSegmentToday(segmentId: Long,clientId: Long,includeUsers: IncludeUsers):Int {
+        val objectIds = usersInSegment(segmentId, clientId,includeUsers)
         setReachabilityOfSegmentNow(objectIds,segmentId, clientId)
         return objectIds.size
     }
 
-    private fun usersInSegment(segmentId: Long, clientId: Long): List<ObjectId> {
+    override fun setReachabilityOfSegmentTodayAll(segmentId: Long, clientId: Long) {
+        val knownIds = usersInSegment(segmentId, clientId,IncludeUsers.KNOWN).size
+        val unKnownIds = usersInSegment(segmentId, clientId,IncludeUsers.UNKNOWN).size
+        val totalUsers=knownIds+unKnownIds
+        val count= mapOf(Pair("total",totalUsers), Pair("known",knownIds), Pair("unknown",unKnownIds))
+        setAllUsersReachabilityOfSegmentNow(count,segmentId, clientId)
+    }
+
+    private fun usersInSegment(segmentId: Long, clientId: Long, includeUsers: IncludeUsers): List<ObjectId> {
         val objectIds = if (segmentId != allUser) {
-            val segmentUsers = segmentService.segmentUserIds(segmentId, clientId,IncludeUsers.KNOWN)
+            val segmentUsers = segmentService.segmentUserIds(segmentId, clientId,includeUsers)
             segmentUsers.map {
                 ObjectId(it)
             }
