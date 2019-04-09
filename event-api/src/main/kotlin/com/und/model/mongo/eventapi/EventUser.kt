@@ -24,6 +24,8 @@ class EventUser {
 
 class Identity {
     var email: String? = null
+    var identified:Boolean =false
+    var deviceId:String?=null
     var uid: String? = null
     var undId: String? = null
     var fbId: String? = null
