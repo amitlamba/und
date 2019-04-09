@@ -111,7 +111,9 @@ fun com.und.model.mongo.eventapi.EventUser.copyNonNull(eventUser: EventUser): co
     copyEventUser.clientId = if (id == null) eventUser.clientId else clientId
     copyEventUser.creationTime = creationTime
 
+
     copyEventUser.identity = Identity()
+    copyEventUser.identity.identified=if(eventUser.identity.idf==1) true else false
     copyEventUser.identity.uid = unchanged(eventUser.uid, identity.uid)
     copyEventUser.identity.fbId = unchanged(eventUser.fbId, identity.fbId)
     copyEventUser.identity.googleId = unchanged(eventUser.googleId, identity.googleId)
@@ -144,6 +146,49 @@ fun com.und.model.mongo.eventapi.EventUser.copyNonNull(eventUser: EventUser): co
     copyEventUser.communication=getCommunication(this,eventUser)
     return copyEventUser
 }
+
+fun com.und.model.mongo.eventapi.EventUser.copyNonNullMongo(eventUser: com.und.model.mongo.eventapi.EventUser): com.und.model.mongo.eventapi.EventUser {
+    fun unchanged(new: String?, old: String?): String? = when {
+        new == old -> old
+        old == null -> new
+        new == null -> old
+        else -> new
+    }
+
+    val copyEventUser = com.und.model.mongo.eventapi.EventUser()
+
+    copyEventUser.id = id
+    copyEventUser.additionalInfo.putAll(additionalInfo)
+    copyEventUser.additionalInfo.putAll(eventUser.additionalInfo)
+    copyEventUser.clientId = if (id == null) eventUser.clientId else clientId
+    copyEventUser.creationTime = creationTime
+
+    copyEventUser.identity = Identity()
+    copyEventUser.identity.uid = identity.uid
+    copyEventUser.identity.fbId = unchanged(eventUser.identity.fbId, identity.fbId)
+    copyEventUser.identity.googleId = unchanged(eventUser.identity.googleId, identity.googleId)
+    copyEventUser.identity.mobile = unchanged(eventUser.identity.mobile, identity.mobile)
+    copyEventUser.identity.email = unchanged(eventUser.identity.email, identity.email)
+    copyEventUser.identity.undId = unchanged(eventUser.identity.undId, identity.undId)
+    copyEventUser.identity.androidFcmToken=unchanged(eventUser.identity.androidFcmToken,identity.androidFcmToken)
+    copyEventUser.identity.webFcmToken= addWebFcmToken(this,eventUser)
+    copyEventUser.identity.iosFcmToken=unchanged(eventUser.identity.iosFcmToken,identity.iosFcmToken)
+
+    copyEventUser.standardInfo = StandardInfo()
+    copyEventUser.standardInfo.firstname = unchanged(eventUser.standardInfo.firstname, standardInfo.firstname)
+    copyEventUser.standardInfo.lastname = unchanged(eventUser.standardInfo.lastname, standardInfo.lastname)
+    copyEventUser.standardInfo.gender = unchanged(eventUser.standardInfo.gender, standardInfo.gender)
+    copyEventUser.standardInfo.dob = if(standardInfo.dob==null && eventUser.standardInfo.dob!=null) eventUser.standardInfo.dob
+    else if (standardInfo.dob!=null) standardInfo.dob else null
+
+    copyEventUser.standardInfo.country = unchanged(eventUser.standardInfo.country, standardInfo.country)
+    copyEventUser.standardInfo.city = unchanged(eventUser.standardInfo.city, standardInfo.city)
+    copyEventUser.standardInfo.state= unchanged(eventUser.standardInfo.state,standardInfo.state)
+    copyEventUser.standardInfo.address = unchanged(eventUser.standardInfo.address, standardInfo.address)
+    copyEventUser.standardInfo.countryCode = unchanged(eventUser.standardInfo.countryCode, standardInfo.countryCode)
+    copyEventUser.communication=getCommunication(this,eventUser)
+    return copyEventUser
+}
 /*
 * here we adding the webFcmToken into list of webFcmToken
 * */
@@ -161,6 +206,24 @@ private fun addWebFcmToken(existingEventUser:MongoEventUser,newEventUser:EventUs
             }
         }else{
             webtoken?.add(it)
+        }
+    }
+    return webtoken
+}
+private fun addWebFcmToken(existingEventUser:MongoEventUser,newEventUser:MongoEventUser):ArrayList<String>?{
+    var webtoken=existingEventUser.identity.webFcmToken
+    var newwebtoken=newEventUser.identity.webFcmToken
+    if(webtoken==null && newwebtoken!=null){
+        webtoken = newwebtoken
+    }else if(webtoken!=null && newwebtoken!=null){
+        newwebtoken.forEach {
+            val token=it
+            var result=webtoken.find {
+                it.equals(token)
+            }
+            if(result==null){
+                webtoken.add(token)
+            }
         }
     }
     return webtoken
@@ -201,6 +264,45 @@ private fun getCommunication(existingEventUser: MongoEventUser,newEventUser: Eve
             newEventUser.iosFcmToken?.let {
                 communication.ios= CommunicationDetails(value = it,dnd = false)
             }
+    }
+    return communication
+}
+
+private fun getCommunication(existingEventUser: MongoEventUser,newEventUser: MongoEventUser):Communication{
+    var communication = Communication()
+    var existingCommunication=existingEventUser.communication
+    if(existingCommunication==null){
+        newEventUser.identity.email?.let {
+            communication.email= CommunicationDetails(value = it,dnd = false)
+        }
+        newEventUser.identity.mobile?.let {
+            communication.mobile= CommunicationDetails(value = it,dnd = false)
+        }
+        newEventUser.identity.androidFcmToken?.let {
+            communication.android= CommunicationDetails(value = it,dnd = false)
+        }
+        newEventUser.identity.webFcmToken?.let {
+            communication.webpush= CommunicationDetails(value = it.last(),dnd = false)
+        }
+        newEventUser.identity.iosFcmToken?.let {
+            communication.ios= CommunicationDetails(value = it,dnd = false)
+        }
+    }else{
+        newEventUser.identity.email?.let {
+            communication.email= CommunicationDetails(value = it,dnd = false)
+        }
+        newEventUser.identity.mobile?.let {
+            communication.mobile= CommunicationDetails(value = it,dnd = false)
+        }
+        newEventUser.identity.androidFcmToken?.let {
+            communication.android= CommunicationDetails(value = it,dnd = false)
+        }
+        newEventUser.identity.webFcmToken?.let {
+            communication.webpush= CommunicationDetails(value = it.last(),dnd = false)
+        }
+        newEventUser.identity.iosFcmToken?.let {
+            communication.ios= CommunicationDetails(value = it,dnd = false)
+        }
     }
     return communication
 }

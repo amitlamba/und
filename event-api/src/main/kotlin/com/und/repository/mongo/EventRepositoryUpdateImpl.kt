@@ -2,6 +2,7 @@ package com.und.repository.mongo
 
 import com.und.config.EventStream
 import com.und.eventapi.utils.logger
+import com.und.model.UpdateIdentity
 import com.und.model.mongo.eventapi.Event
 import com.und.service.eventapi.EventService
 import com.und.web.model.eventapi.Identity
@@ -85,6 +86,14 @@ class EventRepositoryUpdateImpl : EventRepositoryUpdate {
         }
 
 
+    }
+
+    override fun updateEventsWithIdentityMatching(identity: UpdateIdentity) {
+        if(identity.find.isNotEmpty()){
+            val query = Query().addCriteria(Criteria.where("userId").`is`(identity.find))
+            val update = Update.update("userId", identity.update).set("userIdentified", true)
+            mongoTemplate.updateMulti(query,update,"${identity.clientId}_event")
+        }
     }
 
     //FIXME must be in transaction

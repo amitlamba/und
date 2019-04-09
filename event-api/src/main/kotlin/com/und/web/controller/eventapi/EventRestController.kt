@@ -20,12 +20,12 @@ import org.springframework.web.bind.annotation.*
 import javax.servlet.http.HttpServletRequest
 import javax.validation.Valid
 
-@CrossOrigin(origins = ["*"],methods = [RequestMethod.GET,RequestMethod.POST,RequestMethod.OPTIONS])
+@CrossOrigin(origins = ["*"], methods = [RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS])
 @RestController
 class EventRestController {
 
     @Autowired
-    private lateinit  var eventService: EventService
+    private lateinit var eventService: EventService
 
     @Autowired
     private lateinit var eventUserService: EventUserService
@@ -34,11 +34,9 @@ class EventRestController {
     private lateinit var tenantProvider: TenantProvider
 
 
-
     //@PreAuthorize("hasRole('ROLE_EVENT')")
-    @PostMapping(value = ["/event/initialize"], produces = ["application/json"], consumes =["application/json"])
-    fun initialize(@Valid @RequestBody identity: Identity?): ResponseEntity<Response<Identity>> {
-
+    @PostMapping(value = ["/event/initialize"], produces = ["application/json"], consumes = ["application/json"])
+    fun initialize(@Valid @RequestBody identity: Identity?, request: HttpServletRequest): ResponseEntity<Response<Identity>> {
         return ResponseEntity.ok(Response(
                 status = ResponseStatus.SUCCESS,
                 data = Data(eventUserService.initialiseIdentity(identity))
@@ -62,35 +60,45 @@ class EventRestController {
 
         //if only uid or userid present find if it exists
         //if exists do below
-        val userId = eventUser.identity.userId
+//        val userId = eventUser.identity.userId
         val uid = eventUser.uid
-        val mongoUser = when {
-            userId != null && uid == null -> {
-                eventUserService.getEventUserByEventUserId(userId)
-            }
-            userId == null && uid != null -> {
-                eventUserService.getEventUserByUid(uid)
-            }
-            userId != null && uid != null -> {
 
-                eventUserService.getEventUserByEventUserIdAndUid(userId, uid)
-            }
-            else -> null
+//        val mongoUser = when {
+//            userId != null && uid == null -> {
+//                eventUserService.getEventUserByEventUserId(userId)
+//            }
+//            userId == null && uid != null -> {
+//                eventUserService.getEventUserByUid(uid)
+//            }
+//            userId != null && uid != null -> {
+//
+//                eventUserService.getEventUserByEventUserIdAndUid(userId, uid)
+//            }
+//            else -> null
+//
+//        }
 
-        }
-
-        if (mongoUser != null) {
-            identityInit.userId = mongoUser.id
-            eventUser.uid = mongoUser.identity.uid
-        } else {
-            identityInit.userId = identityInit.userId ?: ObjectId.get().toString()
-            eventUser.undId=identityInit.userId
-        }
-
+//        if (mongoUser != null) {
+//            identityInit.userId = mongoUser.id
+//            identityInit.idf = 1
+//            eventUser.uid = mongoUser.identity.uid
+//        } else {
+//            identityInit.userId = identityInit.userId ?: ObjectId.get().toString()
+//            eventUser.undId=identityInit.userId
+//        }
 
 
         identityInit.clientId = tenantProvider.tenant.toInt()
-        eventUser.identity = identityInit
+//        eventUser.identity = identityInit
+
+
+        if (uid != null && uid.isNotEmpty()) {
+            val user = eventUserService.getEventUserByUid(uid)
+            if (user != null) {
+                identityInit.userId = user.id
+            }
+            identityInit.idf = 1
+        }
         eventUserService.toKafka(eventUser)
         //don't send event back rather send instance id, and status, also send a new instance id if user id changes
         return ResponseEntity.ok(Response(
