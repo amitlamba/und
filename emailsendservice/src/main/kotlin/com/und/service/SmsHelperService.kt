@@ -1,12 +1,15 @@
 package com.und.service
 
+import com.und.common.utils.ReplaceNullPropertyOfEventUser
 import com.und.model.mongo.EventUser
 import com.und.model.mongo.SmsStatus
 import com.und.model.utils.Sms
 import com.und.repository.jpa.SmsTemplateRepository
 import com.und.repository.mongo.SmsSentRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
+import java.util.regex.Pattern
 
 @Service
 class SmsHelperService {
@@ -23,8 +26,10 @@ class SmsHelperService {
 
         val smsToSend = sms.copy()
         val smsTemplate = smsTemplateRepository.findByIdAndClientID(sms.smsTemplateId, sms.clientID)
+        val variable = getSmsTemplateVariable(sms)
+        val user = ReplaceNullPropertyOfEventUser.replaceNullPropertyOfEventUser(sms.eventUser,variable)
         val model=sms.data
-        sms.eventUser?.let {
+        user?.let {
             model["user"] = it
         }
         smsToSend.smsBody = smsTemplate?.let { templateContentCreationService.getSmsBody(smsTemplate,model)}
@@ -62,5 +67,27 @@ class SmsHelperService {
 
     }
 
+    @Cacheable(value = ["templateVariable"],key = "'sms_template_variable'+#email.clientID+'_'+#email.smsTemplateId" )
+    fun getSmsTemplateVariable(email: Sms):Set<String>{
+        val listOfVariable = mutableSetOf<String>()
+
+        val template=smsTemplateRepository.findByIdAndClientID(email.smsTemplateId,email.clientID)
+        template?.let{
+            val tem=it
+
+            val body=tem.smsTemplateBody
+            val regex="(\\$\\{.*?\\})"
+            val pattern = Pattern.compile(regex)
+
+            val bodyMatcher = pattern.matcher(body)
+            var i=0
+            while (bodyMatcher.find()){
+                listOfVariable.add(bodyMatcher.group(i+1))
+            }
+
+        }
+
+        return listOfVariable
+    }
 
 }
