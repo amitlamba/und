@@ -16,25 +16,25 @@ class CustomSegmentReachabilityRepositoryImpl:CustomSegmentReachabilityRepositor
     @Autowired
     private lateinit var mongoTemplate:MongoTemplate
 
-    override fun updateSegmentReachability(segmentId:Long,key:String,objectIds:Int,clientID:Long,modifiedTime:LocalDateTime,timezone:String) {
-//        //TODO create a segmentreachability document when a segment created. we can use this to update a single hash key on specific date
-//        val exist=mongoTemplate.exists(Query(Criteria.where("_id").`is`(segmentId).and("clientId").`is`(clientID)),"segmentreachability")
-//        if(exist) {
-//            mongoTemplate.updateFirst(Query(Criteria.where("_id").`is`(segmentId).and("clientId").`is`(clientID)), Update.update(key, objectIds).set("lastModifiedTime",modifiedTime), "segmentreachability")
-//        }else {
-//            val reachability=SegmentReachability()
-//            with(reachability){
-//                id=segmentId
-//                clientId=clientID
-//                dates= mutableMapOf(Pair(key.split(".")[1].toInt(),objectIds))
-//                lastModifiedTime=modifiedTime
-//                timeZone=timezone
-//            }
-//            mongoTemplate.save(reachability,"segmentreachability")
-//        }
+    override fun updateSegmentReachability(segmentId:Long,key:String,count:Map<String,Int>,clientID:Long,modifiedTime:LocalDateTime,timezone:String) {
+        //TODO create a segmentreachability document when a segment created. we can use this to update a single hash key on specific date
+        val exist=mongoTemplate.exists(Query(Criteria.where("_id").`is`(segmentId).and("clientId").`is`(clientID)),"segmentreachability")
+        if(exist) {
+            mongoTemplate.updateFirst(Query(Criteria.where("_id").`is`(segmentId).and("clientId").`is`(clientID)), Update.update(key, count).set("lastModifiedTime",modifiedTime), "segmentreachability")
+        }else {
+            val reachability=SegmentReachability()
+            with(reachability){
+                id=segmentId
+                clientId=clientID
+                dates= mutableMapOf(Pair(key.split(".")[1].toInt(),count))
+                lastModifiedTime=modifiedTime
+                timeZone=timezone
+            }
+            mongoTemplate.save(reachability,"segmentreachability")
+        }
     }
 
-    override fun getReachabilityOfSegmentByDate(segmentId: Long,key: String,date:String,clientId: Long): Int {
+    override fun getReachabilityOfSegmentByDate(segmentId: Long,key: String,date:String,clientId: Long): Map<String,Int> {
         var match= Aggregation.match(Criteria("_id").`is`(segmentId).and("clientId").`is`(clientId))
         var project1= Aggregation.project(key).andExclude("_id")
         var project2= Aggregation.project().and(date.replace("-","")).`as`("key")

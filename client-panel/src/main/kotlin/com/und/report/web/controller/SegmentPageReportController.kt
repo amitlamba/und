@@ -38,15 +38,14 @@ class SegmentPageReportController {
 
     @GetMapping("/set/{segmentId}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    fun setSegmentReachability(@PathVariable (required = true)segmentId: Long,request:HttpServletRequest){
+    fun setSegmentReachability(@PathVariable (required = true)segmentId: Long){
         val clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
-        val includeUsers:IncludeUsers = IncludeUsers.valueOf(request.getParameter("include")?:"ALL")
-        reachabilityService.setReachabilityOfSegmentToday(segmentId,clientId,includeUsers)
+        reachabilityService.setReachabilityOfSegmentToday(segmentId,clientId)
     }
 
     @GetMapping("/get/{segmentId}/{date}")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    fun getSegmentReachabilityByDate(@PathVariable (required = true)date: String,@PathVariable(required = true) segmentId: Long):Int?{
+    fun getSegmentReachabilityByDate(@PathVariable (required = true)date: String,@PathVariable(required = true) segmentId: Long):Map<String,Int>?{
         return reachabilityService.getReachabilityOfSegmentByDate(segmentId,date)
     }
 

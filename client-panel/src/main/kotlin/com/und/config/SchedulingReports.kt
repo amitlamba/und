@@ -77,7 +77,7 @@ class SchedulingReports {
                     val segments= segmentService.segmentByClientId(it)
                     segments.forEach {
                         it.id?.let {
-                            segmentReachService.setReachabilityOfSegmentTodayAll(it,clientId)
+                            segmentReachService.setReachabilityOfSegmentToday(it,clientId)
                         }
                     }
                 }

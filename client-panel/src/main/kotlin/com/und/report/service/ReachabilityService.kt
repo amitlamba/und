@@ -7,10 +7,9 @@ import org.springframework.stereotype.Service
 
 @Service
 interface ReachabilityService {
-    fun getReachabilityBySegmentId(segmentId:Long):Reachability
-    fun getReachabilityOfSegmentByDate(segmentId: Long,date:String):Int?
+    fun getReachabilityBySegmentId(segmentId:Long,includeUsers: IncludeUsers):Reachability
+    fun getReachabilityOfSegmentByDate(segmentId: Long,date:String):Map<String,Int>?
     fun getReachabilityOfSegmentByDateRange(clientId: Long,segmentId: Long,date1:String,date2:String):List<SegmentTrendCount>
-    fun setReachabilityOfSegmentToday(segmentId: Long,clientId:Long,includeUsers: IncludeUsers):Int
-    fun setReachabilityOfSegmentTodayAll(segmentId: Long,clientId:Long)
+    fun setReachabilityOfSegmentToday(segmentId: Long,clientId:Long):Map<String,Int>
     fun checkTypeOfSegment(clientId: Long,segmentId: Long):Boolean
 }

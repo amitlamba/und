@@ -155,7 +155,6 @@ class SegmentParserCriteria {
         /*
         * Geography based aggregation
         * */
-        //TODO add user Identified filter here  Added
         val geoCriteria = if (segment.geographyFilters.isNotEmpty()) segment.geographyFilters.let { geoFilter -> filterGeography(geoFilter, segment.userId,userIdentified) } else null
         geoCriteria?.let {
             var geoCriteriaAgg = Aggregation.match(it)
@@ -164,7 +163,6 @@ class SegmentParserCriteria {
         /*
         * divide global filter into event and user and find criteria
         * */
-        //TODO add user Identified filter here if geo filter are empty Added
         val gFilters = segment.globalFilters
         val (eventPropertyMatch, userPropertyMatch) = filterGlobalQWithUserId(gFilters, tz, segment.userId,userIdentified)
         //adding event globalCriteria aggregation
@@ -172,11 +170,9 @@ class SegmentParserCriteria {
             listOfAggregation.add(Aggregation.match(eventPropertyMatch))
         //add did
         if (geoCriteria == null && eventPropertyMatch == null && listOfAggregation.isEmpty()) {
-            //TODO add userIDentified filter here    Added
             addDidAggregationWithoutFacet(segment, listOfAggregation, tz,userIdentified)
 //            addDidAggregation(segment, listOfAggregation, tz)
         } else {
-            //TODO add userIDentified filter here Added  no need because here we already add it.
             addDidAggregation(segment, listOfAggregation, tz,null)
         }
         //project and group only unique userId instead of whole event document and repetition of userid.
@@ -187,12 +183,11 @@ class SegmentParserCriteria {
         }
         //add didnot
         var didnotAggOperation= mutableListOf<AggregationOperation>()
-        //TODO add userIDentified filter here  Added
         addDidNotAggregation(segment, didnotAggOperation, tz,userIdentified)
         return Pair(listOfAggregation,didnotAggOperation)
     }
 
-    fun getUserSpecificAggOperation(segment: Segment, tz: ZoneId, idList: List<String>,didNot:Boolean=false): MutableList<AggregationOperation> {
+    fun getUserSpecificAggOperation(segment: Segment, tz: ZoneId, idList: List<String>,didNot:Boolean=false,fromCampaign:String?): MutableList<AggregationOperation> {
         var listOfAggregation = mutableListOf<AggregationOperation>()
         var objectIds = mutableSetOf<ObjectId>()
         idList.forEach {
@@ -208,11 +203,25 @@ class SegmentParserCriteria {
         }
         val gFilters = segment.globalFilters
         val (eventPropertyMatch, userPropertyMatch) = filterGlobalQWithUserId(gFilters, tz, segment.userId,null)
-        //adding user globalcriteria aggregation
         if (userPropertyMatch != null) {
             listOfAggregation.add(Aggregation.match(userPropertyMatch))
         }
+        fromCampaign?.let {
+            val criteria = getCriteriaSpecificToCampaignType(it)
+            listOfAggregation.add(Aggregation.match(criteria))
+        }
         return listOfAggregation
+    }
+
+    private fun getCriteriaSpecificToCampaignType(type:String):Criteria{
+        return when(type){
+            "EMAIL"-> Criteria.where("identity.email").exists(true).and("communication.email.dnd").`is`(false)
+            "SMS" -> Criteria.where("identity.mobile").exists(true).and("communication.mobile.dnd").`is`(false)
+            "PUSH_ANDROID" -> Criteria.where("identity.androidFcmToken").exists(true).and("communication.android.dnd").`is`(false)
+            "PUSH_WEB" -> Criteria.where("identity.webFcmToken").exists(true).and("communication.webpush.dnd").`is`(false)
+            "PUSH_IOS" -> Criteria.where("identity.iosFcmToken").exists(true).and("communication.ios.dnd").`is`(false)
+            else -> Criteria()
+        }
     }
 
 
