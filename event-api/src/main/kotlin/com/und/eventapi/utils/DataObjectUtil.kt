@@ -169,7 +169,7 @@ fun com.und.model.mongo.eventapi.EventUser.copyNonNullMongo(eventUser: com.und.m
     copyEventUser.identity.googleId = unchanged(eventUser.identity.googleId, identity.googleId)
     copyEventUser.identity.mobile = unchanged(eventUser.identity.mobile, identity.mobile)
     copyEventUser.identity.email = unchanged(eventUser.identity.email, identity.email)
-    copyEventUser.identity.undId = unchanged(eventUser.identity.undId, identity.undId)
+//    copyEventUser.identity.undId = unchanged(eventUser.identity.undId, identity.undId)
     copyEventUser.identity.androidFcmToken=unchanged(eventUser.identity.androidFcmToken,identity.androidFcmToken)
     copyEventUser.identity.webFcmToken= addWebFcmToken(this,eventUser)
     copyEventUser.identity.iosFcmToken=unchanged(eventUser.identity.iosFcmToken,identity.iosFcmToken)

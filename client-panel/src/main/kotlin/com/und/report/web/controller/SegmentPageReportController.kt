@@ -25,8 +25,9 @@ class SegmentPageReportController {
 
     @GetMapping("/reachability")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    fun reachability(@RequestParam(name = "segmentid") segmentId: Long): Reachability {
-        return reachabilityService.getReachabilityBySegmentId(segmentId,IncludeUsers.ALL)
+    fun reachability(@RequestParam(name = "segmentid") segmentId: Long,request: HttpServletRequest): Reachability {
+        val includeUsers=IncludeUsers.valueOf(request.getParameter("include")?:"ALL")
+        return reachabilityService.getReachabilityBySegmentId(segmentId,includeUsers)
     }
 
 
