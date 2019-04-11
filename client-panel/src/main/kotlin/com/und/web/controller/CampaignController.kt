@@ -105,7 +105,7 @@ class CampaignController {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PostMapping("/save/testcampaign")
+    @PostMapping("/send/testcampaign")
     fun runTestCampaign(@RequestBody testCampaign: TestCampaign): Response {
         val clientId =AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
         campaignService.runTestCampaign(clientId,testCampaign)
