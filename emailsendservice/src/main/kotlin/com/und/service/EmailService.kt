@@ -97,7 +97,7 @@ class EmailService:CommonEmailService {
         }
         if (StringUtils.isNotBlank(clientSettings?.unSubscribeLink))
             model["unsubscribeLink"] = emailHelperService.getUnsubscribeLink(clientSettings?.unSubscribeLink!!, emailToSend.clientID, mongoEmailId)
-
+        else model["unsubscribeLink"]=""
         model["pixelTrackingPlaceholder"] = """<div><img src="""" + emailHelperService.getImageUrl(emailToSend.clientID, mongoEmailId) + """">"""
 
         val (subject, body) = emailHelperService.subjectAndBody(emailToSend)
