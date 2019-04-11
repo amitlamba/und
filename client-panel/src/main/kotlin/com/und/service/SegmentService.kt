@@ -21,7 +21,7 @@ interface SegmentService {
 
     fun segmentUserIds(segmentId: Long, clientId: Long,includeUsers: IncludeUsers): List<String>
 
-    fun segmentUsers(segmentId: Long, clientId: Long,includeUsers: IncludeUsers): List<EventUser>
+    fun segmentUsers(segmentId: Long, clientId: Long,includeUsers: IncludeUsers,campaign:String?): List<EventUser>
 
     fun segmentUsers(segment: WebSegment, clientId: Long,includeUsers: IncludeUsers): List<EventUserWeb>
 

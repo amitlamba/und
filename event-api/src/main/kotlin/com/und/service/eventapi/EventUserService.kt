@@ -196,7 +196,7 @@ class EventUserService {
                 this.id = userId
                 this.identity = identity_
                 this.clientId = clientId
-                this.creationTime = Date.from(Instant.ofEpochMilli(System.currentTimeMillis()).atZone(ZoneId.of(timeZone)).toInstant())
+//                this.creationTime = Date.from(Instant.ofEpochMilli(System.currentTimeMillis()).atZone(ZoneId.of(timeZone)).toInstant())
             }
             eventUserRepository.save(eventUser)
         }

@@ -47,14 +47,14 @@ class SegmentService {
         val token = userRepository.findSystemUser().key
         val segmentId = webSegment.id
         return if (segmentId != null && token != null) {
-            segmentUserServiceClient.users(segmentId, clientId, token,IncludeUsers.KNOWN)
+            segmentUserServiceClient.users(segmentId, clientId, token,IncludeUsers.ALL,webSegment.type)
         } else emptyList()
     }
 
-    fun getUserData(segmentId:Long,clientId: Long):List<EventUser>{
+    fun getUserData(segmentId:Long,clientId: Long,type:String):List<EventUser>{
         val token = userRepository.findSystemUser().key
         return if (token != null) {
-            segmentUserServiceClient.users(segmentId, clientId, token,IncludeUsers.KNOWN)
+            segmentUserServiceClient.users(segmentId, clientId, token,IncludeUsers.ALL,type)
         } else emptyList()
     }
 

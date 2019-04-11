@@ -2,11 +2,13 @@ package com.und.service
 
 import com.netflix.discovery.converters.Auto
 import com.und.common.utils.EmailServiceUtility
+import com.und.common.utils.ReplaceNullPropertyOfEventUser
 import com.und.config.EventStream
 import com.und.exception.EmailError
 import com.und.exception.EmailFailureException
 import com.und.model.mongo.EmailStatus.NOT_SENT
 import com.und.model.mongo.EmailStatus.SENT
+import com.und.model.mongo.EventUser
 import com.und.model.utils.*
 import com.und.model.utils.eventapi.Event
 import com.und.model.utils.eventapi.Identity
@@ -19,7 +21,8 @@ import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
-import javax.mail.internet.InternetAddress
+import java.util.regex.Pattern
+import org.springframework.cache.annotation.Cacheable
 import com.amazonaws.services.simpleemail.model.Message as SESMessage
 
 
@@ -71,6 +74,9 @@ class EmailService:CommonEmailService {
 
     override fun sendEmail(email: Email) {
 
+        val variable=getVariableFromTemplate(email)
+
+        val user:EventUser? = ReplaceNullPropertyOfEventUser.replaceNullPropertyOfEventUser(email.eventUser, variable)
 
         fun String.addUrlTracking(uniqueTrackingId: String): String {
             return emailHelperService.trackAllURLs(this, email.clientID, uniqueTrackingId)
@@ -86,8 +92,8 @@ class EmailService:CommonEmailService {
         val clientSettings = clientSettingsRepository.findByClientID(emailToSend.clientID)
         val mongoEmailId = ObjectId().toString()
         emailToSend.mongoNotificationId=mongoEmailId
-        emailToSend.eventUser?.let {
-            model["user"] = it
+        user?.let {
+            model["user"]=it
         }
         if (StringUtils.isNotBlank(clientSettings?.unSubscribeLink))
             model["unsubscribeLink"] = emailHelperService.getUnsubscribeLink(clientSettings?.unSubscribeLink!!, emailToSend.clientID, mongoEmailId)
@@ -138,6 +144,35 @@ class EmailService:CommonEmailService {
 
         }
         eventApiFeignClient.pushEvent(token,event)
+    }
+
+
+    @Cacheable(value = ["templateVariable"],key = "'email_template_variable'+#email.clientID+'_'+#email.emailTemplateId" )
+    fun getVariableFromTemplate(email: Email):Set<String>{
+        val listOfVariable = mutableSetOf<String>()
+
+        val template=emailTemplateRepository.findByIdAndClientID(email.emailTemplateId,email.clientID)
+        if(template.isPresent){
+            val tem=template.get()
+            val subject=tem.emailTemplateSubject?.template ?: ""
+            val body=tem.emailTemplateBody?.template ?: ""
+            val regex="(\\$\\{.*?\\})"
+            val pattern = Pattern.compile(regex)
+
+            val subjectMatcher = pattern.matcher(subject)
+            val bodyMatcher = pattern.matcher(body)
+            var i=0
+            while (subjectMatcher.find()){
+                listOfVariable.add(subjectMatcher.group(i+1))
+            }
+            i=0
+            while (bodyMatcher.find()){
+                listOfVariable.add(bodyMatcher.group(i+1))
+            }
+
+        }
+
+        return listOfVariable
     }
 
 //    private fun isSystemClient(email: Email) = email.clientID == 1L

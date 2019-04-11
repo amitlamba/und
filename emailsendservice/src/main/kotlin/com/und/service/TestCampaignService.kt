@@ -49,7 +49,7 @@ class TestCampaignService {
         var userList :List<EventUser> ?=null
 
         campaign.segmentationID?.let {
-            userList = segmentService.getUserData(it,clientId)
+            userList = segmentService.getUserData(it,clientId,testCampaign.type.name)
         }
 
         if(userList == null){

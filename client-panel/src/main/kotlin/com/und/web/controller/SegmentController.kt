@@ -68,7 +68,7 @@ class SegmentController {
     fun segmentUsers(@PathVariable("segmentId") segmentId: Long,request:HttpServletRequest): List<EventUser> {
         val clientId = AuthenticationUtils.clientID?:-1
         val includeUsers=request.getParameter("include")?:"KNOWN"
-        val segmentUsers = segmentService.segmentUsers(segmentId, clientId,IncludeUsers.valueOf(includeUsers))
+        val segmentUsers = segmentService.segmentUsers(segmentId, clientId,IncludeUsers.valueOf(includeUsers),null)
         return segmentUsers
     }
 
@@ -76,7 +76,8 @@ class SegmentController {
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
     fun segmentUsers(@PathVariable("segmentId") segmentId: Long,  @PathVariable("clientId") clientId:Long,request:HttpServletRequest): List<EventUser> {
         val includeUsers=request.getParameter("include")?:"KNOWN"
-        val segmentUsers = segmentService.segmentUsers(segmentId, clientId,IncludeUsers.valueOf(includeUsers))
+        val forCampaign = request.getParameter("fromCampaign")
+        val segmentUsers = segmentService.segmentUsers(segmentId, clientId,IncludeUsers.valueOf(includeUsers),forCampaign)
         return segmentUsers
     }
 

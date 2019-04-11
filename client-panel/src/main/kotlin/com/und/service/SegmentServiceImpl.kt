@@ -91,10 +91,10 @@ class SegmentServiceImpl : SegmentService {
             val segments = segmentRepository.findByClientID(clientID)
             val liveSegments = liveSegmentRepository.findByClientID(clientID)
             segments?.forEach {
-                if(liveSegments.isPresent) {
+                if (liveSegments.isPresent) {
                     val liveSegment = liveSegments.get().find { liveSegment -> liveSegment.segmentId == it.id }
                     websegments.add(buildWebSegmentWithLive(it, liveSegment))
-                }else{
+                } else {
                     websegments.add(buildWebSegmentWithLive(it, null))
                 }
             }
@@ -105,12 +105,12 @@ class SegmentServiceImpl : SegmentService {
 
     //@Cacheable(cacheNames = ["segment"], key = "'client_'+T(com.und.security.utils.AuthenticationUtils).INSTANCE.getClientID()+'_segment_'+#id" )
     override fun segmentById(id: Long, clientId: Long?): WebSegment {
-        if(clientId==null) throw AccessDeniedException("Access Denied.")
+        if (clientId == null) throw AccessDeniedException("Access Denied.")
         logger.debug("Fetching segment: $id")
-        val segment=this.persistedSegmentById(id, clientId)
-        val livesegment=liveSegmentRepository.findByClientIDAndSegmentId(clientId!!,id)
-        if(livesegment.isPresent){
-            return  buildWebSegmentWithLive(segment,livSegment = livesegment.get())
+        val segment = this.persistedSegmentById(id, clientId)
+        val livesegment = liveSegmentRepository.findByClientIDAndSegmentId(clientId!!, id)
+        if (livesegment.isPresent) {
+            return buildWebSegmentWithLive(segment, livSegment = livesegment.get())
         }
         return buildWebSegment(segment)
     }
@@ -127,39 +127,39 @@ class SegmentServiceImpl : SegmentService {
     }
 
 
-    override fun segmentUserIds(segmentId: Long, clientId: Long,includeUsers: IncludeUsers): List<String> {
+    override fun segmentUserIds(segmentId: Long, clientId: Long, includeUsers: IncludeUsers): List<String> {
         val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
         return if (segmentOption.isPresent) {
             val segment = segmentOption.get()
-            getSegmentUsers(segment, clientId, "userId",includeUsers).second
+            getSegmentUsers(segment, clientId, "userId", includeUsers, null).second
         } else emptyList()
     }
 
-    override fun segmentUsers(segmentId: Long, clientId: Long,includeUsers: IncludeUsers): List<EventUser> {
+    override fun segmentUsers(segmentId: Long, clientId: Long, includeUsers: IncludeUsers, campaign: String?): List<EventUser> {
         if (segmentId == -2L) {
             return getTestSEgmentUsers(clientId)
         }
         val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
         return if (segmentOption.isPresent) {
             val segment = segmentOption.get()
-            getSegmentUsersList(segment, clientId,includeUsers)
+            getSegmentUsersList(segment, clientId, includeUsers, campaign)
         } else emptyList()
     }
 
-    override fun segmentUsers(segment: WebSegment, clientId: Long,includeUsers: IncludeUsers): List<EventUserWeb> {
+    override fun segmentUsers(segment: WebSegment, clientId: Long, includeUsers: IncludeUsers): List<EventUserWeb> {
         val segmentJpa = buildSegment(segment)
-        val eventUsers = getSegmentUsersList(segmentJpa, clientId,includeUsers)
+        val eventUsers = getSegmentUsersList(segmentJpa, clientId, includeUsers, null)
         return buildEventUserList(eventUsers)
     }
 
-    override fun isUserPresentInSegment(segment: Segment, clientId: Long, userId: String,includeUsers: IncludeUsers): Boolean {
-        return checkUserInSegment(segment, clientId, userId,includeUsers)
+    override fun isUserPresentInSegment(segment: Segment, clientId: Long, userId: String, includeUsers: IncludeUsers): Boolean {
+        return checkUserInSegment(segment, clientId, userId, includeUsers)
     }
 
-    private fun checkUserInSegment(segment: Segment, clientId: Long, userId: String,includeUsers: IncludeUsers): Boolean {
+    private fun checkUserInSegment(segment: Segment, clientId: Long, userId: String, includeUsers: IncludeUsers): Boolean {
         val tz = userSettingsService.getTimeZoneByClientId(clientId)
         val websegment = buildWebSegment(segment)
-        val queries = segmentParserCriteria.segmentQueries(websegment, tz,includeUsers)
+        val queries = segmentParserCriteria.segmentQueries(websegment, tz, includeUsers)
 
         val (didQueries, joincondition) = queries.didq
         if (didQueries.isNotEmpty()) {
@@ -194,8 +194,8 @@ class SegmentServiceImpl : SegmentService {
         return true
     }
 
-    private fun getSegmentUsersList(segment: Segment, clientId: Long,includeUsers: IncludeUsers): List<EventUser> {
-        return getSegmentUsers(segment, clientId,includeUsers = includeUsers).first
+    private fun getSegmentUsersList(segment: Segment, clientId: Long, includeUsers: IncludeUsers, campaign: String?): List<EventUser> {
+        return getSegmentUsers(segment, clientId, includeUsers = includeUsers, campaign = campaign).first
     }
 
     private fun getTestSEgmentUsers(clientId: Long): List<EventUser> {
@@ -208,15 +208,16 @@ class SegmentServiceImpl : SegmentService {
     * eg. we add geo filter in first stage it mean after this stage we are not performing geo specific match so we can drop that field here.
     * Its decrease the size of document for next stage.
     * */
-    private fun getSegmentUsers(segment: Segment, clientId: Long, type: String = "eventuser",includeUsers: IncludeUsers): Pair<List<EventUser>, List<String>> {
-        val userIdentified = when(includeUsers){
+    private fun getSegmentUsers(segment: Segment, clientId: Long, type: String = "eventuser", includeUsers: IncludeUsers, campaign: String?): Pair<List<EventUser>, List<String>> {
+
+        val userIdentified = when (includeUsers) {
             IncludeUsers.KNOWN -> true
             IncludeUsers.UNKNOWN -> false
             IncludeUsers.ALL -> null
         }
         val tz = userSettingsService.getTimeZoneByClientId(clientId)
         val websegment = buildWebSegment(segment)
-        var eventAggregation = segmentParserCriteria.getEventSpecificAggOperation(websegment, tz,userIdentified)
+        var eventAggregation = segmentParserCriteria.getEventSpecificAggOperation(websegment, tz, userIdentified)
         val idList = eventRepository.usersFromEvent(eventAggregation.first, clientId)
         val didNotIdList = eventRepository.usersFromEvent(eventAggregation.second, clientId)
         var userAggregation: MutableList<AggregationOperation>
@@ -225,9 +226,9 @@ class SegmentServiceImpl : SegmentService {
             didNotIdList.forEach {
                 filteredResult.remove(it)
             }
-            userAggregation = segmentParserCriteria.getUserSpecificAggOperation(websegment, tz, filteredResult.toList())
+            userAggregation = segmentParserCriteria.getUserSpecificAggOperation(websegment, tz, filteredResult.toList(),fromCampaign= campaign)
         } else {
-            userAggregation = segmentParserCriteria.getUserSpecificAggOperation(websegment, tz, didNotIdList, true)
+            userAggregation = segmentParserCriteria.getUserSpecificAggOperation(websegment, tz, didNotIdList, true,fromCampaign = campaign)
         }
 //        var userAggregation = segmentParserCriteria.getUserSpecificAggOperation(websegment, tz, idList)
 
@@ -238,7 +239,6 @@ class SegmentServiceImpl : SegmentService {
                     var convertor = ConvertOperators.ConvertOperatorFactory("_id").convertToString()
                     userAggregation.add(Aggregation.project().and(convertor).`as`("_id"))
                     userAggregation.add(Aggregation.group().addToSet("_id").`as`("userId"))
-
                 }
             }
             val result = eventUserRepository.usersIdFromEventUser(userAggregation, clientId)
@@ -305,21 +305,22 @@ class SegmentServiceImpl : SegmentService {
         }
     }
 
-    private fun buildLiveSegmentForWeb(liveSegment:LiveSegment):WebLiveSegment{
-        val webLiveSegment= WebLiveSegment()
-        with(webLiveSegment){
-            id=liveSegment.id
-            clientId=liveSegment.clientID
-            liveSegmentType=liveSegment.liveSegmentType
-            startEvent=liveSegment.startEvent
-            endEvent=liveSegment.endEvent
-            startEventFilters=objectMapper.readValue(liveSegment.startEventFilter)
-            endEventFilters=objectMapper.readValue(liveSegment.endEventFilter)
-            interval=liveSegment.interval
-            endEventDone=liveSegment.endEventDone
+    private fun buildLiveSegmentForWeb(liveSegment: LiveSegment): WebLiveSegment {
+        val webLiveSegment = WebLiveSegment()
+        with(webLiveSegment) {
+            id = liveSegment.id
+            clientId = liveSegment.clientID
+            liveSegmentType = liveSegment.liveSegmentType
+            startEvent = liveSegment.startEvent
+            endEvent = liveSegment.endEvent
+            startEventFilters = objectMapper.readValue(liveSegment.startEventFilter)
+            endEventFilters = objectMapper.readValue(liveSegment.endEventFilter)
+            interval = liveSegment.interval
+            endEventDone = liveSegment.endEventDone
         }
         return webLiveSegment
     }
+
     private fun buildEventUserList(eventUserList: List<EventUser>): List<EventUserWeb> {
         var eventUserListWeb: List<EventUserWeb> = emptyList()
         val eventUserService = EventUserService()
@@ -332,7 +333,7 @@ class SegmentServiceImpl : SegmentService {
 
     override fun segmentByClientId(clientId: Long): List<Segment> {
         //FIXED find only those segment which are behavioural type.
-        val segments=segmentRepository.findByClientIDAndType(clientId,"Behaviour")
-        return if(segments.isPresent)segments.get() else  emptyList()
+        val segments = segmentRepository.findByClientIDAndType(clientId, "Behaviour")
+        return if (segments.isPresent) segments.get() else emptyList()
     }
 }

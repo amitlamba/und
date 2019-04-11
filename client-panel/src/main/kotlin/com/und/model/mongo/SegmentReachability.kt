@@ -31,7 +31,7 @@ class SegmentReachability {
     var id:Long?=null
     var timeZone:String="UTC"
     var clientId:Long?=null
-   var dates :MutableMap<Int,Int> = mutableMapOf()
+   var  dates :MutableMap<Int,Map<String,Int>> = mutableMapOf()
     var lastModifiedTime:LocalDateTime = LocalDateTime.now(ZoneId.of("UTC"))
 
 }
