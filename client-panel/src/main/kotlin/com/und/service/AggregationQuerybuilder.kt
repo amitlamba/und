@@ -98,7 +98,7 @@ class AggregationQuerybuilder {
         val eventProjectionRequired = allFilters.eventComputedFilters.isNotEmpty() || allGroupBys.eventComputedGroupBys.isNotEmpty()
                 || (aggregateBy != null && !isUserCollection(aggregateBy.globalFilterType))
         if (eventProjectionRequired) {
-            //TODO add userIdentified projection
+            //Added userIdentified projection
             var projectOperation = Aggregation.project(Field.UserId.fName).and("userIdentified").`as`("userIdentified")
 
             allFilters.eventComputedFilters.forEach {

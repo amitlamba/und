@@ -42,12 +42,12 @@ class SegmentService {
         return buildWebSegment(segment)
     }
 
-    fun getUserData(webSegment: WebSegment, clientId: Long): List<EventUser> {
+    fun getUserData(webSegment: WebSegment, clientId: Long,campaignType:String): List<EventUser> {
         //TODO: Write the definition to get data from Mongo here
         val token = userRepository.findSystemUser().key
         val segmentId = webSegment.id
         return if (segmentId != null && token != null) {
-            segmentUserServiceClient.users(segmentId, clientId, token,IncludeUsers.ALL,webSegment.type)
+            segmentUserServiceClient.users(segmentId, clientId, token,IncludeUsers.ALL,campaignType)
         } else emptyList()
     }
 

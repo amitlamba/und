@@ -64,10 +64,10 @@ enum class PropertyFilterType {
 }
 
 class WhereFilter {
-    var whereFilterName: WhereFilterName = WhereFilterName.Count
+    var whereFilterName: WhereFilterName? = WhereFilterName.Count
     var propertyName: String = ""
     var operator: NumberOperator = NumberOperator.Between
-    var values: List<Long> = listOf()
+    var values: List<Long>? = listOf()
 }
 
 enum class WhereFilterName {
@@ -94,7 +94,8 @@ enum class NumberOperator {
     LessThan,
     NotEquals,
     Exists,
-    DoesNotExist
+    DoesNotExist,
+    NONE
 }
 
 enum class StringOperator {
