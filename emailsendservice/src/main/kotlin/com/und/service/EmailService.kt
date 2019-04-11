@@ -19,6 +19,7 @@ import com.und.utils.loggerFor
 import org.apache.commons.lang.StringUtils
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import java.util.regex.Pattern
@@ -71,6 +72,8 @@ class EmailService:CommonEmailService {
 //        emailSendService.sendEmailByAWSSDK(emailSESConfig, email)
 //    }
 
+    @Value("\${und.url.event}")
+    private lateinit var unsubscribeLink:String
 
     override fun sendEmail(email: Email) {
 
@@ -97,7 +100,7 @@ class EmailService:CommonEmailService {
         }
         if (StringUtils.isNotBlank(clientSettings?.unSubscribeLink))
             model["unsubscribeLink"] = emailHelperService.getUnsubscribeLink(clientSettings?.unSubscribeLink!!, emailToSend.clientID, mongoEmailId)
-        else model["unsubscribeLink"]=""
+        else model["unsubscribeLink"]="$unsubscribeLink/email/unsubscribe"
         model["pixelTrackingPlaceholder"] = """<div><img src="""" + emailHelperService.getImageUrl(emailToSend.clientID, mongoEmailId) + """">"""
 
         val (subject, body) = emailHelperService.subjectAndBody(emailToSend)
