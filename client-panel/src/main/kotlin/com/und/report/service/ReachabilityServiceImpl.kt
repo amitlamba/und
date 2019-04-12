@@ -186,7 +186,6 @@ class ReachabilityServiceImpl : ReachabilityService {
     override fun setReachabilityOfSegmentToday(segmentId: Long,clientId: Long):Map<String,Int> {
         val known = usersInSegment(segmentId, clientId,IncludeUsers.KNOWN).size
         val unknown = usersInSegment(segmentId, clientId,IncludeUsers.UNKNOWN).size
-        val all =known+unknown
         val count = mutableMapOf<String,Int>()
         count.put("known",known)
         count.put("unknown",unknown)
