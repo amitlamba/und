@@ -74,7 +74,8 @@ data class Identity(
         var sessionId: String = "",
         // id of event user, this id is assigned when a user profile is identified.
         var userId: String? = null,
-        var clientId: Int? = -1
+        var clientId: Int? = -1,
+        var idf:Int = 0
 )
 
 class date : Event() {
@@ -86,7 +87,8 @@ data class EventMessage(
         var clientId: Long,
         var userId: String?,
         var name: String,
-        var creationTime: Date
+        var creationTime: Date,
+        var userIdentified:Boolean
 )
 
 /* {

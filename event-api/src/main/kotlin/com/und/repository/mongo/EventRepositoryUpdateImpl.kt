@@ -2,9 +2,11 @@ package com.und.repository.mongo
 
 import com.und.config.EventStream
 import com.und.eventapi.utils.logger
+import com.und.model.UpdateIdentity
 import com.und.model.mongo.eventapi.Event
 import com.und.service.eventapi.EventService
 import com.und.web.model.eventapi.Identity
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.find
@@ -32,49 +34,77 @@ class EventRepositoryUpdateImpl : EventRepositoryUpdate {
     }
 
     override fun updateEventsWithIdentityMatching(identity: Identity) {
-        val userId = identity.userId
-        val query = Query().addCriteria(Criteria
-                .where("deviceId").`is`(identity.deviceId)
-                .and("sessionId").`is`(identity.sessionId)
-                .and("userId").exists(false)
-        )
+        identity.userId?.let {
 
-        if(userId!= null) {
-            val update = Update.update("userId", userId).set("userIdentified",true)
-            mongoTemplate.updateMulti(query, update, Event::class.java)
-            /***find all those event that are identified with this identity.
-             * And put them in queue for live segment processing
-             * **/
             val query = Query().addCriteria(Criteria
                     .where("deviceId").`is`(identity.deviceId)
                     .and("sessionId").`is`(identity.sessionId)
-                    .and("userId").`is`(userId))
+                    .and("userIdentified").`is`(false)
+//                    .and("userId").exists(false)
+            )
 
-            processEventForLiveSegment(query)
+            val events = mongoTemplate.find(query, Event::class.java)
+            if (events.isNotEmpty()) {
+                val update = Update.update("userId", it).set("userIdentified", true)
+                updateAndDelete(query, update, events)
+                /***find all those event that are identified with this identity.
+                 * And put them in queue for live segment processing
+                 * **/
+//                val query1 = Query().addCriteria(Criteria
+//                        .where("deviceId").`is`(identity.deviceId)
+//                        .and("sessionId").`is`(identity.sessionId)
+//                        .and("userId").`is`(it))
+//
+//                processEventForLiveSegment(query1)
+            } else {
+
+                val queryWithoutSession = Query().addCriteria(Criteria
+                        .where("deviceId").`is`(identity.deviceId)
+                        .and("sessionId").exists(false)
+                        .and("userIdentified").`is`(false)
+//                        .and("userId").exists(false)
+                )
+
+                val events = mongoTemplate.find(query, Event::class.java)
+                if (events.isNotEmpty()) {
+                    val updateSession = Update.update("sessionId", identity.sessionId)
+                    updateSession.set("userId", it)
+                    updateSession.set("userIdentified",true)
+                    updateAndDelete(queryWithoutSession, updateSession, events)
+                    /***find all those event that are identified with this identity.
+                     * And put them in queue for live segment processing
+                     * **/
+//                    val query = Query().addCriteria(Criteria
+//                            .where("deviceId").`is`(identity.deviceId)
+//                            .and("userId").`is`(it))
+//                    //TODO all event have userId NO need
+//                    processEventForLiveSegment(query)
+                }
+            }
+
+
         }
 
 
-        val queryWithoutSession = Query().addCriteria(Criteria
-                .where("deviceId").`is`(identity.deviceId)
-                .and("sessionId").exists(false)
-                .and("userId").exists(false)
-        )
+    }
 
-        val updateSession = Update.update("sessionId", identity.sessionId)
-        if(userId != null) {
-            updateSession.set("userId", userId)
-            mongoTemplate.updateMulti(queryWithoutSession, updateSession, Event::class.java)
-            /***find all those event that are identified with this identity.
-             * And put them in queue for live segment processing
-             * **/
-            //FIXME we are processing same event two times.
-//            val query = Query().addCriteria(Criteria
-//                    .where("deviceId").`is`(identity.deviceId)
-//                    .and("userId").`is`(userId))
-//            processEventForLiveSegment(query)
+    override fun updateEventsWithIdentityMatching(identity: UpdateIdentity) {
+        if(identity.find.isNotEmpty()){
+            val query = Query().addCriteria(Criteria.where("userId").`is`(identity.find))
+            val update = Update.update("userId", identity.update).set("userIdentified", true)
+            mongoTemplate.updateMulti(query,update,"${identity.clientId}_event")
+        }
+    }
+
+    //FIXME must be in transaction
+    private fun updateAndDelete(query: Query, update: Update, events: MutableList<Event>) {
+        mongoTemplate.updateMulti(query, update, Event::class.java)
+        val ids = events.map {
+            ObjectId(it.userId)
         }
 
-
+        val removeQuery = Query().addCriteria(Criteria("_id").`in`(ids))
+        mongoTemplate.remove(removeQuery, "${events[0].clientId}_eventUser")
     }
 
     private fun processEventForLiveSegment(query: Query) {

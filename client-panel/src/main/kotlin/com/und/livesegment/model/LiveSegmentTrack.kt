@@ -15,5 +15,6 @@ data class LiveSegmentTrack(
         var time: LocalTime = LocalTime.now(ZoneId.of("UTC")),
         var segmentId: Long,
         var liveSegmentId: Long,
-        var userId: String
+        var userId: String,
+        var userIdentified:Boolean
 )

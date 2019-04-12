@@ -2,8 +2,15 @@ package com.und.report.service
 
 import com.mongodb.BasicDBObject
 import com.und.common.utils.loggerFor
+import com.und.report.web.model.FunnelReport
+import com.und.web.model.GlobalFilter
+
+
 import com.und.model.jpa.Campaign
 import com.und.model.jpa.Variant
+
+import com.und.model.IncludeUsers
+
 import com.und.report.model.FunnelData
 import com.und.report.model.WinnerTemplate
 import com.und.report.repository.mongo.UserAnalyticsRepository
@@ -56,19 +63,23 @@ class FunnelReportServiceImpl : FunnelReportService {
     private lateinit var campaignRepository:CampaignRepository
 
 
-    override fun funnel(funnelFilter: FunnelReport.FunnelReportFilter): List<FunnelReport.FunnelStep> {
+    override fun funnel(funnelFilter: FunnelReport.FunnelReportFilter,includeUsers: IncludeUsers): List<FunnelReport.FunnelStep> {
         logger.debug("Funnel data for funnelFilter : $funnelFilter")
         val clientID = AuthenticationUtils.clientID
-
+        val userIdentified = when(includeUsers){
+            IncludeUsers.KNOWN -> true
+            IncludeUsers.UNKNOWN -> false
+            IncludeUsers.ALL -> null
+        }
 
         return clientID?.let {
 
             val tz = userSettingsService.getTimeZone()
             val aggregation = if (funnelFilter.segmentid == allUser) {
-                buildAggregationAllUsers(funnelFilter, clientID, tz)
+                buildAggregationAllUsers(funnelFilter, clientID, tz,userIdentified)
             } else {
-                val segmentUserIds = segmentService.segmentUserIds(funnelFilter.segmentid, clientID)
-                buildAggregation(funnelFilter, clientID, segmentUserIds, tz)
+                val segmentUserIds = segmentService.segmentUserIds(funnelFilter.segmentid, clientID,includeUsers)
+                buildAggregation(funnelFilter, clientID, segmentUserIds, tz,userIdentified)
             }
 
             val userData = userAnalyticsRepository.funnelData(aggregation, clientID)
@@ -210,25 +221,25 @@ class FunnelReportServiceImpl : FunnelReportService {
         return result
     }
 
-    fun buildAggregationAllUsers(funnelFilter: FunnelReport.FunnelReportFilter, clientID: Long, tz: ZoneId): Aggregation {
+    fun buildAggregationAllUsers(funnelFilter: FunnelReport.FunnelReportFilter, clientID: Long, tz: ZoneId,userIdentified: Boolean?): Aggregation {
 
         val filters = listOf(
                 ReportUtil.buildFilter(GlobalFilterType.EventProperties, AggregationQuerybuilder.Field.EventName.fName, DataType.string, StringOperator.Contains.name, funnelFilter.steps.map { it -> it.eventName }, null)
         )
-        return buildAggregation(funnelFilter, filters, tz)
+        return buildAggregation(funnelFilter, filters, tz,userIdentified)
     }
 
 
-    fun buildAggregation(funnelFilter: FunnelReport.FunnelReportFilter, clientID: Long, segmentUserIds: List<String>, tz: ZoneId): Aggregation {
+    fun buildAggregation(funnelFilter: FunnelReport.FunnelReportFilter, clientID: Long, segmentUserIds: List<String>, tz: ZoneId,userIdentified: Boolean?): Aggregation {
         val filters = listOf(
                 ReportUtil.buildFilter(GlobalFilterType.EventProperties, AggregationQuerybuilder.Field.UserId.fName, DataType.string, StringOperator.Contains.name, segmentUserIds, null),
                 ReportUtil.buildFilter(GlobalFilterType.EventProperties, AggregationQuerybuilder.Field.EventName.fName, DataType.string, StringOperator.Contains.name, funnelFilter.steps.map { it -> it.eventName }, null)
         )
 
-        return buildAggregation(funnelFilter, filters, tz)
+        return buildAggregation(funnelFilter, filters, tz,userIdentified)
     }
 
-    private fun buildAggregation(funnelFilter: FunnelReport.FunnelReportFilter, filters: List<GlobalFilter>, tz: ZoneId): Aggregation {
+    private fun buildAggregation(funnelFilter: FunnelReport.FunnelReportFilter, filters: List<GlobalFilter>, tz: ZoneId,userIdentified:Boolean?): Aggregation {
 
         val allfilters :MutableList<GlobalFilter> = mutableListOf()
 
@@ -236,7 +247,8 @@ class FunnelReportServiceImpl : FunnelReportService {
 //        allfilters.addAll(funnelFilter.filters)
         val dateFilter = createDateFilter(tz, funnelFilter)
         allfilters.add(dateFilter)
-        val filterGlobalQ = segmentParserCriteria.filterGlobalQ(allfilters, tz)
+
+        val filterGlobalQ = segmentParserCriteria.filterGlobalQ(allfilters, tz,userIdentified)
         val matchOperation = Aggregation.match(filterGlobalQ.first)
         val sortOperation = Aggregation.sort(Sort.by(AggregationQuerybuilder.Field.CreationTime.fName).ascending())
         val groupBys = mutableListOf<Field>()

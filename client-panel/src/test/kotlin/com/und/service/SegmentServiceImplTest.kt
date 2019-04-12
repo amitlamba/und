@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.mongodb.MongoClient
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.anyVararg
+import com.und.model.IncludeUsers
 import com.und.model.mongo.eventapi.EventUser
 import com.und.repository.jpa.SegmentRepository
 import com.und.repository.mongo.*
@@ -210,7 +211,7 @@ class SegmentServiceImplTest {
         val tz = ZoneId.of("Asia/Kolkata")
         val allResult = mutableListOf<Set<String>>()
         //val websegment = buildWebSegment(segment)
-        val queries = segmentParserCriteria.segmentQueries(websegment, tz)
+        val queries = segmentParserCriteria.segmentQueries(websegment, tz,IncludeUsers.KNOWN)
         val (didQueries, joincondition) = queries.didq
         if (didQueries.isNotEmpty()) {
             val userDidList = retrieveUsers(didQueries, joincondition, clientId)

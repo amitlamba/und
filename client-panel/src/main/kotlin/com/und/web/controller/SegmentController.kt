@@ -1,5 +1,6 @@
 package com.und.web.controller
 
+import com.und.model.IncludeUsers
 import com.und.model.mongo.CommonMetadata
 import com.und.model.mongo.EventMetadata
 import com.und.model.mongo.eventapi.EventUser
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import javax.servlet.http.HttpServletRequest
 import javax.validation.Valid
 
 @RestController("segment")
@@ -63,16 +65,19 @@ class SegmentController {
 
     @GetMapping(value = ["/segmentusers/{segmentId}"])
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    fun segmentUsers(@PathVariable("segmentId") segmentId: Long): List<EventUser> {
+    fun segmentUsers(@PathVariable("segmentId") segmentId: Long,request:HttpServletRequest): List<EventUser> {
         val clientId = AuthenticationUtils.clientID?:-1
-        val segmentUsers = segmentService.segmentUsers(segmentId, clientId)
+        val includeUsers=request.getParameter("include")?:"KNOWN"
+        val segmentUsers = segmentService.segmentUsers(segmentId, clientId,IncludeUsers.valueOf(includeUsers),null)
         return segmentUsers
     }
 
     @GetMapping(value = ["/users/{segmentId}/{clientId}"])
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
-    fun segmentUsers(@PathVariable("segmentId") segmentId: Long,  @PathVariable("clientId") clientId:Long): List<EventUser> {
-        val segmentUsers = segmentService.segmentUsers(segmentId, clientId)
+    fun segmentUsers(@PathVariable("segmentId") segmentId: Long,  @PathVariable("clientId") clientId:Long,request:HttpServletRequest): List<EventUser> {
+        val includeUsers=request.getParameter("include")?:"KNOWN"
+        val forCampaign = request.getParameter("fromCampaign")
+        val segmentUsers = segmentService.segmentUsers(segmentId, clientId,IncludeUsers.valueOf(includeUsers),forCampaign)
         return segmentUsers
     }
 

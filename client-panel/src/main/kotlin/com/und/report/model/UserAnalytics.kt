@@ -30,7 +30,9 @@ data class UserData(@Id var userId: String = "", var chronologies: List<EventChr
 
 data class FunnelData(var userData: List<UserData> = emptyList(),  var eventsOrder: List<String> = emptyList(), var maxInterval: Int = 0)
 
-data class SegmentTrendCount(var date:String,var count:Int)
+data class SegmentTrendCount(var date:String,var count:Count)
+
+data class Count(val known:Int,val unknown:Int,val all:Int)
 
 data class WinnerTemplate(var percentage:Long=0,var varient:Int=0)
 

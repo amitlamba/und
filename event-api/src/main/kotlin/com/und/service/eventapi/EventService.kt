@@ -4,6 +4,7 @@ import com.und.common.utils.MetadataUtil
 import com.und.eventapi.utils.copyToMongo
 import com.und.eventapi.utils.ipAddr
 import com.und.config.EventStream
+import com.und.model.UpdateIdentity
 import com.und.model.mongo.eventapi.*
 import com.und.repository.mongo.*
 import com.und.security.utils.AuthenticationUtils
@@ -20,6 +21,9 @@ import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
+import java.time.Instant
+import java.time.ZoneId
+import java.util.*
 import java.util.regex.Pattern
 import javax.servlet.http.HttpServletRequest
 import com.und.model.mongo.eventapi.Event as MongoEvent
@@ -71,7 +75,7 @@ class EventService {
         tenantProvider.setTenat(clientId.toString())
         val mongoEvent = event.copyToMongo()
         mongoEvent.clientTime.hour
-        var agentString = event.agentString?:""
+        var agentString = event.agentString ?: ""
         var pattern = Pattern.compile("^(Mobile-Agent).*")
         var matcher = pattern.matcher(agentString)
         //No need to check is empty
@@ -88,15 +92,15 @@ class EventService {
 
             mongoEvent.system = system
 
-            var appFileds=AppField()
-            with(appFileds){
-                make=agent[9]
-                model=agent[6]
-                sdkversion=agent[10]
-                appversion=agent[8]
-                os=agent[1]
+            var appFileds = AppField()
+            with(appFileds) {
+                make = agent[9]
+                model = agent[6]
+                sdkversion = agent[10]
+                appversion = agent[8]
+                os = agent[1]
             }
-            mongoEvent.appfield=appFileds
+            mongoEvent.appfield = appFileds
 
         }
         if (event.country == null || event.state == null || event.city == null) {
@@ -114,12 +118,15 @@ class EventService {
         userMetadataRepository.updateAppFields(clientId, appFieldsMetadata)
         //FIXME add to metadata
 //        val saved = eventRepository.insert(mongoEvent)
-        val id=ObjectId()
-        mongoEvent.id=id.toString()
+        val id = ObjectId()
+        mongoEvent.id = id.toString()
+        if (event.identity.idf == 1) {
+            mongoEvent.userIdentified = true
+        }
         eventRepository.save(mongoEvent)
-        val saved=eventRepository.findById(id.toString()).get()
+        val saved = eventRepository.findById(id.toString()).get()
         mongoEvent.userId?.let {
-        eventStream.outEventForLiveSegment().send(MessageBuilder.withPayload(buildEventForLiveSegment(saved)).build())
+            eventStream.outEventForLiveSegment().send(MessageBuilder.withPayload(buildEventForLiveSegment(saved)).build())
         }
         return saved.id
     }
@@ -167,15 +174,14 @@ class EventService {
     }
 
 
-    fun updateEventWithUser(identity: Identity) {
+    fun updateEventWithUserIdentity(identity: UpdateIdentity) {
         tenantProvider.setTenat(identity.clientId.toString())
         eventRepository.updateEventsWithIdentityMatching(identity)
-
     }
 
     fun buildEvent(fromEvent: Event, request: HttpServletRequest): Event {
         with(fromEvent) {
-            if(fromEvent.clientId!=-1L) clientId =fromEvent.clientId else clientId =tenantProvider.tenant.toLong()
+            if (fromEvent.clientId != -1L) clientId = fromEvent.clientId else clientId = tenantProvider.tenant.toLong()
             ipAddress = request.ipAddr()
             timeZone = AuthenticationUtils.principal.timeZoneId
             var agent = request.getHeader("User-Agent")
@@ -187,7 +193,7 @@ class EventService {
     fun buildEventForLiveSegment(fromEvent: com.und.model.mongo.eventapi.Event): EventMessage {
         val eventId = fromEvent.id
         if (eventId != null) {
-            return EventMessage(eventId, fromEvent.clientId, fromEvent.userId, fromEvent.name, fromEvent.creationTime)
+            return EventMessage(eventId, fromEvent.clientId, fromEvent.userId, fromEvent.name, fromEvent.creationTime, fromEvent.userIdentified)
         } else {
             throw EventNotFoundException("Event with null id")
         }

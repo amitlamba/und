@@ -99,6 +99,8 @@ class CampaignListener {
             val userId = liveSegmentUser.userId
 
 
+        //TODO handle userIDentified true case
+
 //            trackSegmentUser(clientId, liveSegmentId, segmentId, userId)
             /***FIXED findById return empty but user present for this userId
              *case 1 Id is String type in our repository but in real case its ObjectId in mongo.I try it but no success.
@@ -111,6 +113,7 @@ class CampaignListener {
 //            val campaignList = campaignService.findLiveSegmentCampaign(segmentId, clientId)
             //refresh cache I m thinking aboout schedulae ajob which update the status of live campaign
             //a stop cam newer start again
+
             val campaignList=campaignService.findAllLiveSegmentCampaignBySegmentId(segmentId, clientId)
 
             //we imporve it find all cmapign with this segmentid if there endTime is passed mark it completed here if

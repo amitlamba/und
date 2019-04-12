@@ -3,6 +3,7 @@ package com.und.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.model.jpa.Segment
 import com.und.model.mongo.EventUser
+import com.und.model.utils.IncludeUsers
 import com.und.repository.jpa.SegmentRepository
 import com.und.repository.jpa.security.UserRepository
 import org.springframework.beans.factory.annotation.Autowired
@@ -41,19 +42,19 @@ class SegmentService {
         return buildWebSegment(segment)
     }
 
-    fun getUserData(webSegment: WebSegment, clientId: Long): List<EventUser> {
+    fun getUserData(webSegment: WebSegment, clientId: Long,campaignType:String): List<EventUser> {
         //TODO: Write the definition to get data from Mongo here
         val token = userRepository.findSystemUser().key
         val segmentId = webSegment.id
         return if (segmentId != null && token != null) {
-            segmentUserServiceClient.users(segmentId, clientId, token)
+            segmentUserServiceClient.users(segmentId, clientId, token,IncludeUsers.ALL,campaignType)
         } else emptyList()
     }
 
-    fun getUserData(segmentId:Long,clientId: Long):List<EventUser>{
+    fun getUserData(segmentId:Long,clientId: Long,type:String):List<EventUser>{
         val token = userRepository.findSystemUser().key
         return if (token != null) {
-            segmentUserServiceClient.users(segmentId, clientId, token)
+            segmentUserServiceClient.users(segmentId, clientId, token,IncludeUsers.ALL,type)
         } else emptyList()
     }
 

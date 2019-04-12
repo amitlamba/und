@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.netflix.discovery.converters.Auto
+import com.und.common.utils.ReplaceNullPropertyOfEventUser
 import com.und.model.jpa.AndroidTemplate
 import com.und.model.jpa.ServiceProviderCredentials
 import com.und.model.jpa.WebAction
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Service
 import org.springframework.util.StringUtils
+import java.util.regex.Pattern
 
 @Service
 class FcmHelperService {
@@ -50,8 +52,12 @@ class FcmHelperService {
 
     fun buildFcmAndroidMessage(message: UtilFcmMessage): LegacyFcmMessage {
 
+        var variables:Set<String> = getAndroidTemplateVariable(message.templateId,message.androidTemplate,message.clientId)
+
+        val user:EventUser?=ReplaceNullPropertyOfEventUser.replaceNullPropertyOfEventUser(message.eventUser,variables)
+
         var model = message.data
-        message.eventUser?.let {
+        user?.let {
             model["user"] = it
         }
 
@@ -125,6 +131,58 @@ class FcmHelperService {
         return fcmMessage
     }
 
+    @Cacheable(value = ["templateVariable"],key = "'android_template_variable'+#clientId+'_'+#templateId",condition = "#androidTemplate!=null")
+    fun getAndroidTemplateVariable(templateId: Long?,androidTemplate:AndroidTemplate?,clientId: Long):Set<String>{
+        val listOfVariable = mutableSetOf<String>()
+
+        val template = if(androidTemplate!=null) androidTemplate else androidRepository.findByClientIdAndId(clientId,templateId?:-1)
+
+            val tem=template
+            val subject=tem.title
+            val body=tem.body
+            val regex="(\\$\\{.*?\\})"
+            val pattern = Pattern.compile(regex)
+
+            val subjectMatcher = pattern.matcher(subject)
+            val bodyMatcher = pattern.matcher(body)
+            var i=0
+            while (subjectMatcher.find()){
+                listOfVariable.add(subjectMatcher.group(i+1))
+            }
+            i=0
+            while (bodyMatcher.find()){
+                listOfVariable.add(bodyMatcher.group(i+1))
+            }
+
+        return listOfVariable
+    }
+
+    @Cacheable(value = ["templateVariable"],key = "'web_template_variable'+#clientId+'_'+#templateId",condition = "#webTemplate!=null")
+    fun getWebTemplateVariable(templateId: Long?,webTemplate:WebPushTemplate?,clientId: Long):Set<String>{
+        val listOfVariable = mutableSetOf<String>()
+
+        val template = if(webTemplate!=null) webTemplate else webpushRepository.findByClientIdAndId(clientId,templateId?:-1)
+
+        val tem=template
+        val subject=tem.title
+        val body=tem.body
+        val regex="(\\$\\{.*?\\})"
+        val pattern = Pattern.compile(regex)
+
+        val subjectMatcher = pattern.matcher(subject)
+        val bodyMatcher = pattern.matcher(body)
+        var i=0
+        while (subjectMatcher.find()){
+            listOfVariable.add(subjectMatcher.group(i+1))
+        }
+        i=0
+        while (bodyMatcher.find()){
+            listOfVariable.add(bodyMatcher.group(i+1))
+        }
+
+        return listOfVariable
+    }
+
     private fun updateTemplateBody(template: AndroidTemplate, model: MutableMap<String, Any>): String {
         var body = templateContentCreationService.getAndroidBody(template, model)
         return body
@@ -153,8 +211,13 @@ class FcmHelperService {
     fun buildWebFcmMessage(message: UtilFcmMessage): LegacyFcmMessage {
 
         var data=HashMap<String,String>()
-        var model=message.data
-        message.eventUser?.let {
+
+        var variables:Set<String> = getWebTemplateVariable(message.templateId,message.webPushTemplate,message.clientId)
+
+        val user:EventUser?=ReplaceNullPropertyOfEventUser.replaceNullPropertyOfEventUser(message.eventUser,variables)
+
+        var model = message.data
+        user?.let {
             model["user"] = it
         }
 

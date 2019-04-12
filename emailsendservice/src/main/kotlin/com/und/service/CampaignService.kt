@@ -78,6 +78,7 @@ class CampaignService {
 
     fun executeCampaign(campaignId: Long, clientId: Long) {
         val campaign = findCampaign(campaignId, clientId)
+//  HEAD
         when(campaign.typeOfCampaign){
             TypeOfCampaign.AB_TEST -> {
                 runAbTest(campaign,clientId)
@@ -153,6 +154,11 @@ class CampaignService {
                 //TODO if its manual then write end point to trigger rest of campaign manually.
 
             }
+//=======
+//        val usersData = getUsersData(campaign.segmentationID!!, clientId,campaign.campaignType)
+//        usersData.forEach { user ->
+//            executeCampaignForUser(campaign, user, clientId)
+//>>>>>>> origin/dev
         }
 
     }
@@ -375,9 +381,9 @@ class CampaignService {
     fun updateCampaignStatusByCampaignId(status:CampaignStatus,clientId: Long,campaignId: Long){
         campaignRepository.updateStatusOfCampaignById(status.name,campaignId,clientId)
     }
-    fun getUsersData(segmentId: Long, clientId: Long): List<EventUser> {
+    fun getUsersData(segmentId: Long, clientId: Long,campaignType:String): List<EventUser> {
         val segment = segmentService.getWebSegment(segmentId, clientId)
-        return segmentService.getUserData(segment, clientId)
+        return segmentService.getUserData(segment, clientId,campaignType)
     }
     fun toKafka(fcmMessage: FcmMessage){
             eventStream.fcmEventSend().send(MessageBuilder.withPayload(fcmMessage).build())

@@ -1,6 +1,7 @@
 package com.und.service
 
 import com.und.common.utils.EmailServiceUtility
+import com.und.common.utils.ReplaceNullPropertyOfEventUser
 import com.und.model.mongo.EmailStatus
 import com.und.model.utils.Email
 import com.und.model.utils.eventapi.Event
@@ -11,6 +12,7 @@ import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils
+import java.util.regex.Pattern
 
 @Service("testemailservice")
 class TestEmailService:CommonEmailService {
@@ -27,11 +29,16 @@ class TestEmailService:CommonEmailService {
     @Autowired
     private lateinit var emailHelperService:EmailHelperService
 
+    @Autowired
+    private lateinit var emailService: EmailService
+
     override fun sendEmail(email: Email) {
 
         val emailToSend = email.copy()
         val model = emailToSend.data
-        emailToSend.eventUser?.let {
+        val variable= getVariableFromTemplate(email.emailSubject?:"",email.emailBody?:"")
+        val user=ReplaceNullPropertyOfEventUser.replaceNullPropertyOfEventUser(email.eventUser,variable)
+        user?.let {
             model["user"] = it
         }
         //FIXME cache it
@@ -44,4 +51,23 @@ class TestEmailService:CommonEmailService {
         emailServiceUtility.sendEmailWithoutTracking(emailToSend)
 
     }
+
+    fun getVariableFromTemplate(subject:String,body:String):Set<String>{
+        val listOfVariable = mutableSetOf<String>()
+            val regex="(\\$\\{.*?\\})"
+            val pattern = Pattern.compile(regex)
+
+            val subjectMatcher = pattern.matcher(subject)
+            val bodyMatcher = pattern.matcher(body)
+            var i=0
+            while (subjectMatcher.find()){
+                listOfVariable.add(subjectMatcher.group(i+1))
+            }
+            i=0
+            while (bodyMatcher.find()){
+                listOfVariable.add(bodyMatcher.group(i+1))
+            }
+        return listOfVariable
+    }
+
 }

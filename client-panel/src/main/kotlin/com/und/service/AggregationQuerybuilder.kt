@@ -72,7 +72,7 @@ class AggregationQuerybuilder {
         else return "$fieldPath"
     }
 
-    fun buildAggregationPipeline(filters: List<GlobalFilter>, groupBys: List<GroupBy>, aggregateBy: AggregateBy?, paramValues: Map<String, Any> = emptyMap(), entityType: EventReport.EntityType, tz: ZoneId, clientId: Long,reachability:Boolean=false): List<AggregationOperation> {
+    fun buildAggregationPipeline(filters: List<GlobalFilter>, groupBys: List<GroupBy>, aggregateBy: AggregateBy?, paramValues: Map<String, Any> = emptyMap(), entityType: EventReport.EntityType, tz: ZoneId, clientId: Long,reachability:Boolean=false,userIdentified:Boolean?): List<AggregationOperation> {
         //Possible pipelines
         /**
          * [match], [group]             (Event count using event-filters and event-groupBy)
@@ -87,7 +87,7 @@ class AggregationQuerybuilder {
         val aggregationPipeline = mutableListOf<AggregationOperation>()
 
         //event match
-        val eventFilterCriterias = segmentParserCriteria.filterGlobalQ(allFilters.eventSimpleFilters, tz)
+        val eventFilterCriterias = segmentParserCriteria.filterGlobalQ(allFilters.eventSimpleFilters, tz,userIdentified)
         eventFilterCriterias.first?.let { criteria ->
             val eventMatchOperation = Aggregation.match(criteria)
             aggregationPipeline.add(eventMatchOperation)
@@ -98,32 +98,33 @@ class AggregationQuerybuilder {
         val eventProjectionRequired = allFilters.eventComputedFilters.isNotEmpty() || allGroupBys.eventComputedGroupBys.isNotEmpty()
                 || (aggregateBy != null && !isUserCollection(aggregateBy.globalFilterType))
         if (eventProjectionRequired) {
-            var projectOperation = Aggregation.project(Field.UserId.fName)
+            //Added userIdentified projection
+            var projectOperation = Aggregation.project(Field.UserId.fName).and("userIdentified").`as`("userIdentified")
 
             allFilters.eventComputedFilters.forEach {
-                projectOperation = projectOperation.and(getAggregationExpression(it.name, paramValues)).`as`(it.name)
+                projectOperation = projectOperation.and(getAggregationExpression(it.name, paramValues)).`as`(it.name).and("userIdentified").`as`("userIdentified")
             }
 
             allGroupBys.eventSimpleGroupBys.forEach {
                 val scopedName = getCompleteScopedName(it.groupName, it.groupFilterType)
-                projectOperation = projectOperation.and(scopedName).`as`(scopedName)
+                projectOperation = projectOperation.and(scopedName).`as`(scopedName).and("userIdentified").`as`("userIdentified")
             }
 
             //add those computed event groupBy only which are not in computed event filters
             allGroupBys.eventComputedGroupBys.filter { group -> !allFilters.eventComputedFilters.map { it.name }.contains(group.groupName) }.forEach {
-                projectOperation = projectOperation.and(getAggregationExpression(it.groupName, paramValues)).`as`(it.groupName)
+                projectOperation = projectOperation.and(getAggregationExpression(it.groupName, paramValues)).`as`(it.groupName).and("userIdentified").`as`("userIdentified")
             }
 
             if (aggregateBy != null && !isUserCollection(aggregateBy.globalFilterType)) {
                 val scopedName = getCompleteScopedName(aggregateBy.name, aggregateBy.globalFilterType)
-                projectOperation = projectOperation.and(scopedName).`as`(scopedName)
+                projectOperation = projectOperation.and(scopedName).`as`(scopedName).and("userIdentified").`as`("userIdentified")
             }
 
             aggregationPipeline.add(projectOperation)
 
             if (allFilters.eventComputedFilters.isNotEmpty()) {
 
-                val eventComputedFilterCriterias = segmentParserCriteria.filterGlobalQ(allFilters.eventComputedFilters, tz)
+                val eventComputedFilterCriterias = segmentParserCriteria.filterGlobalQ(allFilters.eventComputedFilters, tz,userIdentified)
                 eventComputedFilterCriterias.first?.let { criteria ->
                     val eventComputedMatchOperation = Aggregation.match(criteria)
                     aggregationPipeline.add(eventComputedMatchOperation)
@@ -263,7 +264,7 @@ class AggregationQuerybuilder {
 
             if (userFilterPresent) {
                 //TODO handling for computed user filters
-                val userFilterCriterias = segmentParserCriteria.joinAwareFilterGlobalQ(allFilters.userSimpleFilters, tz, null, true)
+                val userFilterCriterias = segmentParserCriteria.joinAwareFilterGlobalQ(allFilters.userSimpleFilters, tz, null, true,true)
                 userFilterCriterias.second?.let { criteria ->
                     val userMatchOperation = Aggregation.match(criteria)
                     aggregationPipeline.add(userMatchOperation)
@@ -402,8 +403,8 @@ class AggregationQuerybuilder {
         }
     }
 
-    fun buildAggregation(filters: List<GlobalFilter>, groupBys: List<GroupBy>, aggregateBy: AggregateBy?, paramValues: Map<String, Any> = emptyMap(), entityType: EventReport.EntityType, tz: ZoneId, clientId: Long,reachability: Boolean=false): Aggregation {
-        return Aggregation.newAggregation(*buildAggregationPipeline(filters, groupBys, aggregateBy, paramValues, entityType, tz, clientId,reachability).toTypedArray())
+    fun buildAggregation(filters: List<GlobalFilter>, groupBys: List<GroupBy>, aggregateBy: AggregateBy?, paramValues: Map<String, Any> = emptyMap(), entityType: EventReport.EntityType, tz: ZoneId, clientId: Long,reachability: Boolean=false,userIdentified:Boolean?): Aggregation {
+        return Aggregation.newAggregation(*buildAggregationPipeline(filters, groupBys, aggregateBy, paramValues, entityType, tz, clientId,reachability,userIdentified).toTypedArray())
     }
 
 

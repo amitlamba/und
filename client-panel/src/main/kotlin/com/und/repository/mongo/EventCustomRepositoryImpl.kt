@@ -2,6 +2,7 @@ package com.und.repository.mongo
 
 import com.und.model.mongo.eventapi.Event
 import org.bson.Document
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation
@@ -50,6 +51,16 @@ class EventCustomRepositoryImpl : EventCustomRepository {
     override fun findEventsListById(id: String, clientId: Long): List<Event>{
         val q = Query(Criteria.where("userId").`is`(id))
         return queryEventsList(q, clientId)
+    }
+
+    override fun findEventByObjectId(id: ObjectId, clientId: Long): Optional<Event> {
+        val q=Query(Criteria.where("_id").`is`(id))
+        val eventDetails = mongoTemplate.findOne(q, Event::class.java, "${clientId}_event")
+        return if (eventDetails == null) {
+            Optional.empty()
+        } else {
+            Optional.of(eventDetails)
+        }
     }
 
     private fun queryEvent(q: Query, clientId: Long): Optional<Event> {

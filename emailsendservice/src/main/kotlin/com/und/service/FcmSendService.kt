@@ -241,6 +241,7 @@ class FcmSendService:FcmService {
             var mongoFcmId = ObjectId().toString()
             fcmMessageToSend.data.put("mongo_id", mongoFcmId)
             fcmMessageToSend.data.put("campaign_id", message.campaignId.toString())
+            fcmMessageToSend.data.put("template_id", message.templateId.toString())
             fcmMessageToSend.data.put("client_id", message.clientId.toString())
             service.saveInMongo(message, FcmMessageStatus.NOT_SENT, mongoFcmId, credential.serviceProvider)
             var credentialMap = parseStringToMap(credential.credentialsMap)
@@ -260,6 +261,7 @@ class FcmSendService:FcmService {
                         clientId=message.clientId
                         notificationId=mongoFcmId
                         attributes.put("campaign_id",message.campaignId)
+                        attributes.put("template_id",message.templateId)
                         userIdentified=true
                         identity= Identity(userId = message.userId,clientId = message.clientId.toInt())
 

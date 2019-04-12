@@ -1,8 +1,6 @@
 package com.und.livesegment.model.mongo
 
-class UserCount {
- var count:Long=0
-}
+data class UserCount ( var _id:Boolean?, var count:Long=0 )
 
 data class CountPerDay(val totalUsersPerDay:Int,val uniqueUsersPerDay:Int,val date:String)
 

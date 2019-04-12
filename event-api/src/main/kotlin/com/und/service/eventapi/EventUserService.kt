@@ -3,17 +3,22 @@ package com.und.service.eventapi
 import com.und.common.utils.MetadataUtil
 import com.und.config.EventStream
 import com.und.eventapi.utils.copyNonNull
+import com.und.eventapi.utils.copyNonNullMongo
+import com.und.model.UpdateIdentity
 import com.und.model.mongo.eventapi.*
 import com.und.repository.mongo.CommonMetadataRepository
 import com.und.repository.mongo.EventUserRepository
+import com.und.security.utils.AuthenticationUtils
 import com.und.security.utils.TenantProvider
 import com.und.web.model.eventapi.EventUser
 import com.und.web.model.eventapi.Identity
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
+import java.lang.System
 import java.time.Instant
 import java.time.ZoneId
 import java.util.*
@@ -37,9 +42,9 @@ class EventUserService {
     @Autowired
     private lateinit var eventStream: EventStream
 
-    fun checkUserExistOrNot(uId:String):String?{
-        var eventUser=eventUserRepository.findByIdentityUid(uId)
-        if(eventUser.isPresent) {
+    fun checkUserExistOrNot(uId: String): String? {
+        var eventUser = eventUserRepository.findByIdentityUid(uId)
+        if (eventUser.isPresent) {
             return eventUser.get().id
         }
         return null
@@ -49,7 +54,7 @@ class EventUserService {
         val clientId = eventUser.clientId
         tenantProvider.setTenat(clientId.toString())
         //FIXME save to user profile metadata
-         val userProfileMetadta = buildMetadata(eventUser)
+        val userProfileMetadta = buildMetadata(eventUser)
         commonMetadataRepository.save(userProfileMetadta)
         return eventUserRepository.save(eventUser)
     }
@@ -67,71 +72,91 @@ class EventUserService {
 
     fun getEventUserByEventUserId(id: String): MongoEventUser? {
         var mongoEventUser: MongoEventUser? = null
-        eventUserRepository.findById(id).ifPresent{eu -> mongoEventUser = eu}
+        eventUserRepository.findById(id).ifPresent { eu -> mongoEventUser = eu }
         return mongoEventUser
     }
 
     fun getEventUserByUid(uid: String): MongoEventUser? {
         var mongoEventUser: MongoEventUser? = null
-        eventUserRepository.findByIdentityUid(uid).ifPresent{eu -> mongoEventUser = eu}
+        eventUserRepository.findByIdentityUid(uid).ifPresent { eu -> mongoEventUser = eu }
         return mongoEventUser
     }
 
-    fun getEventUserByEventUserIdOrUid(id: String, uid:String): MongoEventUser? {
+    fun getEventUserByEventUserIdOrUid(id: String, uid: String): MongoEventUser? {
         var mongoEventUser: MongoEventUser? = null
-        eventUserRepository.findByIdOrIdentityUid(id, uid).ifPresent{eu -> mongoEventUser = eu}
-        return mongoEventUser
-    }
-
-    fun getEventUserByEventUserIdAndUid(id: String, uid:String): MongoEventUser? {
-        var mongoEventUser: MongoEventUser? = null
-        eventUserRepository.findByIdAndIdentityUid(id, uid).ifPresent{eu -> mongoEventUser = eu}
+        eventUserRepository.findByIdOrIdentityUid(id, uid).ifPresent { eu -> mongoEventUser = eu }
         return mongoEventUser
     }
 
     @StreamListener("inEventUser")
     @SendTo("outProcessEventUserProfile")
-    fun processIdentity(eventUser: EventUser): Identity {
+    fun processIdentity(eventUser: EventUser): UpdateIdentity {
         tenantProvider.setTenat(eventUser.identity.clientId.toString())
-        eventUser.clientId = eventUser.identity.clientId?:-1
-
+        eventUser.clientId = eventUser.identity.clientId ?: -1
+        var tst: UpdateIdentity = UpdateIdentity()
         val identity = eventUser.identity
         fun copyChangedValues(userId: String): MongoEventUser {
             val uid = eventUser.uid
-            val existingEventUser = if(uid != null) {
-                 eventUserRepository.findByIdOrIdentityUid(userId, uid)
+            var existingEventUser: com.und.model.mongo.eventapi.EventUser
+            if (uid != null && uid.isNotEmpty()) {
+                var user = eventUserRepository.findByIdentityUid(uid)
+                if (!user.isPresent) {
+                    user = eventUserRepository.findById(userId)
+                    existingEventUser = user.get()
+                    tst = UpdateIdentity(find = userId, update = userId, clientId = eventUser.clientId)
+                } else {
+                    existingEventUser = user.get()
+                    val anonymous = eventUserRepository.findById(userId)
+                    existingEventUser = existingEventUser.copyNonNullMongo(anonymous.get())
+                    eventUserRepository.deleteById(userId)
+                    tst = UpdateIdentity(find = userId, update = existingEventUser.id!!, clientId = eventUser.clientId)
+                }
+                eventUser.identity.idf = 1
+
             } else {
-                eventUserRepository.findById(userId)
+                existingEventUser = eventUserRepository.findById(userId).get()
             }
-            val existingUser = if (existingEventUser.isPresent) existingEventUser.get() else {
-                val user = MongoEventUser()
-                user.creationTime = Date.from(Instant.ofEpochMilli(eventUser.creationDate).atZone(ZoneId.of("UTC")).toInstant())
-                user
-            }
+//            val existingUser = /*if (existingEventUser.isPresent)*/ existingEventUser.get()
+//            else {
+//                val user = MongoEventUser()
+//                user.creationTime = Date.from(Instant.ofEpochMilli(eventUser.creationDate).atZone(ZoneId.of("UTC")).toInstant())
+//                user
+//            }
 //            eventUser.creationTime?.let {
 ////                existingUser.creationTime=Date.from(Instant.ofEpochSecond(it).atZone(ZoneId.of("UTC")).toInstant())
 //                existingUser.creationTime=Date.from(Instant.ofEpochMilli(it))
 //            }
 //            existingUser.creationTime=Date.from(Instant.ofEpochMilli(eventUser.creationDate).atZone(ZoneId.of("UTC")).toInstant())
-            return existingUser.copyNonNull(eventUser)
+            return existingEventUser.copyNonNull(eventUser)
         }
 
         val userId = identity.userId
         if(userId != null) {
-            val eventUserCopied = copyChangedValues(userId)
-            val persistedUser = save(eventUserCopied)
-            return Identity(userId = persistedUser.id, deviceId = identity.deviceId, sessionId = identity.sessionId, clientId = identity.clientId)
+        val eventUserCopied = copyChangedValues(userId)
+        val persistedUser = save(eventUserCopied)
+        return tst
+//            return Identity(userId = persistedUser.id, deviceId = identity.deviceId, sessionId = identity.sessionId, clientId = identity.clientId,idf = identity.idf)
         }else{
             throw IllegalArgumentException("user id should have been preset found null")
         }
     }
 
 
+//    @StreamListener("inProcessEventUserProfile")
+//    fun processedEventUserProfile(identity: Identity) {
+//        tenantProvider.setTenat(identity.clientId.toString())
+//        //println(identity)
+//        eventService.updateEventWithUser(identity)
+//        //update all events where session id, machine id matches and userid is absent
+//        //eventUserRepository.
+//        //save(identity.eventUser )
+//    }
+
     @StreamListener("inProcessEventUserProfile")
-    fun processedEventUserProfile(identity: Identity) {
+    fun processedEventUserProfile(identity: UpdateIdentity) {
         tenantProvider.setTenat(identity.clientId.toString())
         //println(identity)
-        eventService.updateEventWithUser(identity)
+        eventService.updateEventWithUserIdentity(identity)
         //update all events where session id, machine id matches and userid is absent
         //eventUserRepository.
         //save(identity.eventUser )
@@ -147,15 +172,37 @@ class EventUserService {
      */
     fun initialiseIdentity(identity: Identity?): Identity {
         val identityCopy = identity?.copy() ?: Identity()
-
+        val clientId= AuthenticationUtils.principal.clientId?.toInt() ?: -1
+        val timeZone = AuthenticationUtils.principal.timeZoneId
         with(identityCopy) {
             deviceId = if (deviceId.isNullOrEmpty()) UUID.randomUUID().toString() else deviceId
             sessionId = if (sessionId.isNullOrEmpty()) UUID.randomUUID().toString() else sessionId
+            this.clientId = clientId
         }
-        //TODO verify old data exists if device id, session id is not null
+
+        //creating anonymous user
+        if (identityCopy.userId == null) {
+
+            val userId = ObjectId().toString()
+            identityCopy.userId = userId
+
+            val eventUser = com.und.model.mongo.eventapi.EventUser()
+            val identity_ = com.und.model.mongo.eventapi.Identity()
+
+            with(identity_) {
+                undId = userId
+            }
+            with(eventUser) {
+                this.id = userId
+                this.identity = identity_
+                this.clientId = clientId
+//                this.creationTime = Date.from(Instant.ofEpochMilli(System.currentTimeMillis()).atZone(ZoneId.of(timeZone)).toInstant())
+            }
+            eventUserRepository.save(eventUser)
+        }
+
         return identityCopy
     }
-
 
 
     fun logout(identity: Identity?): Identity {

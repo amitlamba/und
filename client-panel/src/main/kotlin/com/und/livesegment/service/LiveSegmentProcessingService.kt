@@ -8,6 +8,7 @@ import com.und.config.EventStream
 import com.und.exception.UndException
 import com.und.livesegment.model.*
 import com.und.livesegment.model.jpa.LiveSegment
+import com.und.model.IncludeUsers
 import com.und.model.JobDescriptor
 import com.und.model.JobDetail
 import com.und.model.TriggerDescriptor
@@ -70,6 +71,7 @@ class LiveSegmentProcessingService {
     @Autowired
     private lateinit var mongoTemplate: MongoTemplate
 
+
     @StreamListener("inEventForLiveSegment")
     fun processEventMessage(event: EventMessage) {
         logger.info("Processing event: $event for segment checks")
@@ -105,11 +107,14 @@ class LiveSegmentProcessingService {
             return
         }
 
-        val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, params.clientId.toLong(), params.userId)
+        val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, params.clientId.toLong(), params.userId,IncludeUsers.ALL)
         if (userPresentInSegment) {
-            //Tracking users in segment
-            trackSegmentUser(params.clientId.toLong(), params.segmentId.toLong(), liveSegment.segmentId, params.userId)
+
+            val event=eventRepository.findEventByObjectId(ObjectId(params.startEventId),params.clientId.toLong())
+            if(event.isPresent){
+            trackSegmentUser(params.clientId.toLong(), params.segmentId.toLong(), liveSegment.segmentId, params.userId,event.get().userIdentified)
             sendJobToLiveSegmentQueue(params, liveSegment)
+            }
         }
     }
 
@@ -149,16 +154,19 @@ class LiveSegmentProcessingService {
                 return@forEach
             }
 
-            val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, event.clientId, event.userId)
+            val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, event.clientId, event.userId,IncludeUsers.ALL)
             if (!userPresentInSegment) {
                 logger.info("User checks not matched with $event for live-segment-id: ${liveSegment.id}")
                 return@forEach
             }
             val timeZoneId = userSettingsService.getTimeZoneByClientId(event.clientId)
             if (liveSegment.endEvent.isBlank()){
-                //Tracking user in live segment
-                trackSegmentUser(event.clientId, liveSegment.id, liveSegment.segmentId, event.userId)
-                sendToLiveSegmentQueue(event, liveSegment)
+
+                //Tracking user
+                trackSegmentUser(event.clientId, liveSegment.id, liveSegment.segmentId, event.userId,event.userIdentified)
+                //Fixed send only if userIdentified is true
+                if(event.userIdentified) sendToLiveSegmentQueue(event, liveSegment)
+
             }
             else{
                 if(!liveSegment.endEventDone)
@@ -191,8 +199,13 @@ class LiveSegmentProcessingService {
                 return@forEach
             }
 
-            val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, event.clientId, event.userId)
-            if (userPresentInSegment) sendToLiveSegmentQueue(event, liveSegment)
+            val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, event.clientId, event.userId,IncludeUsers.ALL)
+            if (userPresentInSegment){
+                //Tracking user
+                trackSegmentUser(event.clientId, liveSegment.id, liveSegment.segmentId, event.userId,event.userIdentified)
+                //Fixed send to campaign queue if user is identified only
+                if (event.userIdentified) sendToLiveSegmentQueue(event, liveSegment)
+            }
         }
     }
 
@@ -326,13 +339,13 @@ class LiveSegmentProcessingService {
         return triggerDescriptor
     }
 
-
-    private fun trackSegmentUser(clientId: Long, liveSegmentId: Long, segmentId: Long, userId: String) {
+    private fun trackSegmentUser(clientId: Long, liveSegmentId: Long, segmentId: Long, userId: String,userIdentified:Boolean) {
         val liveSegmentTrack = LiveSegmentTrack(
                 clientID = clientId,
                 liveSegmentId = liveSegmentId,
                 segmentId = segmentId,
-                userId = userId
+                userId = userId,
+                userIdentified = userIdentified
         )
         //TODO write it in dao layer.
         mongoTemplate.save(liveSegmentTrack,"${clientId}_livesegmenttrack")

@@ -3,7 +3,9 @@ package com.und.report.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.und.common.utils.loggerFor
+import com.und.model.IncludeUsers
 import com.und.model.mongo.SegmentReachability
+import com.und.report.model.Count
 import com.und.report.model.SegmentTrendCount
 import com.und.report.repository.mongo.ReachabilityRepository
 import com.und.report.web.model.Reachability
@@ -30,6 +32,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.*
 import kotlin.NoSuchElementException
+import kotlin.collections.HashMap
 
 @Service("reachabilityserviceimpl")
 class ReachabilityServiceImpl : ReachabilityService {
@@ -54,9 +57,9 @@ class ReachabilityServiceImpl : ReachabilityService {
     @Autowired
     private lateinit var clientSetting:ClientSettingsRepository
 
-    override fun getReachabilityBySegmentId(segmentId: Long): Reachability {
-        val clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
-        val objectIds = usersInSegment(segmentId, clientId)
+    override fun getReachabilityBySegmentId(segmentId: Long,includeUsers: IncludeUsers): Reachability {
+        val clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("Access Denied.")
+        val objectIds = usersInSegment(segmentId, clientId,includeUsers)
         val result = reachabilityRepository.getReachabilityOfSegment(clientId, segmentId, objectIds)
 
             val reachability = Reachability()
@@ -88,7 +91,7 @@ class ReachabilityServiceImpl : ReachabilityService {
         return sr.dates.contains(parseInt(date.replace("-","")))
     }
 
-    override fun getReachabilityOfSegmentByDate(segmentId: Long, date: String): Int? {
+    override fun getReachabilityOfSegmentByDate(segmentId: Long, date: String): Map<String,Int>? {
         val clientId = AuthenticationUtils.clientID ?: throw AccessDeniedException("")
 //        var sr: Optional<SegmentReachability> = findSegmentReachability(clientId, segmentId)
 //        if(sr.isPresent){
@@ -115,15 +118,25 @@ class ReachabilityServiceImpl : ReachabilityService {
         if(sr.isPresent) {
             var dates = sr.get().dates
             for (i in dateRange) {
-                result.add(SegmentTrendCount(date = i.toString(), count = dates.get(i) ?: 0))
+                result.add(SegmentTrendCount(date = i.toString(), count = buildCount(dates.get(i))))
             }
             //NOTE if end date is today and lastmodified time is > 2 hour update result.
             if(endDate.isEqual(LocalDate.now(ZoneId.of(sr.get().timeZone)))&& sr.get().lastModifiedTime.isBefore(LocalDateTime.now(ZoneId.of(sr.get().timeZone)).minusHours(2))){
                 val count=setReachabilityOfSegmentToday(segmentId, clientId)
-                result.set((result.size)-1,SegmentTrendCount(date=dateRange.last().toString(),count = count))
+                result.set((result.size)-1,SegmentTrendCount(date=dateRange.last().toString(),count = buildCount(count)))
             }
         }
         return result
+    }
+
+    fun buildCount(count:Map<String,Int>?):Count{
+        count?.let {
+            val known = count["known"] ?: 0
+            val unknown = count["unknown"] ?: 0
+            val all = known + unknown
+            return Count(known = known, unknown = unknown, all = all)
+        }
+        return Count(0,0,0)
     }
     //TODO cache the segment
     override fun checkTypeOfSegment(clientId: Long, segmentId: Long): Boolean {
@@ -131,7 +144,7 @@ class ReachabilityServiceImpl : ReachabilityService {
         if(segment.type.equals("Live")) return true else return false
     }
 
-    private fun setReachabilityOfSegmentNow(objectIds:List<ObjectId>, segmentId: Long, clientId: Long){
+    private fun setReachabilityOfSegmentNow(count: Map<String, Int>, segmentId: Long, clientId: Long){
 
         clientSetting.findByClientID(clientId)?.let {
             val timeZoneId= ZoneId.of(it.timezone)
@@ -147,19 +160,42 @@ class ReachabilityServiceImpl : ReachabilityService {
 //        }
 
 
-            segmentReachabilityRepository.updateSegmentReachability(segmentId,getKey(todayDate),objectIds.size,clientId,modifiedTime,it.timezone)
+            segmentReachabilityRepository.updateSegmentReachability(segmentId,getKey(todayDate),count,clientId,modifiedTime,it.timezone)
         }
     }
 
-    override fun setReachabilityOfSegmentToday(segmentId: Long,clientId: Long):Int {
-        val objectIds = usersInSegment(segmentId, clientId)
-        setReachabilityOfSegmentNow(objectIds,segmentId, clientId)
-        return objectIds.size
+    private fun setAllUsersReachabilityOfSegmentNow(count:Map<String,Int>, segmentId: Long, clientId: Long){
+
+        clientSetting.findByClientID(clientId)?.let {
+            val timeZoneId= ZoneId.of(it.timezone)
+            val todayDate=LocalDate.now(timeZoneId).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            val modifiedTime=LocalDateTime.now(timeZoneId)
+//        var sr: Optional<SegmentReachability> = findSegmentReachability(clientId, segmentId)
+//        if(sr.isPresent && isPresent(sr.get(), todayDate)) {
+//            return
+//        }else{
+//            var segmentReachability:SegmentReachability
+//            if(!sr.isPresent) segmentReachability=SegmentReachability() else segmentReachability=sr.get()
+//            segmentReachabilityRepository.save(buildSegmentReachability(clientId, segmentId, objectIds.size,segmentReachability))
+//        }
+
+
+            segmentReachabilityRepository.updateAllUsersSegmentReachability(segmentId,getKey(todayDate),count,clientId,modifiedTime,it.timezone)
+        }
+    }
+    override fun setReachabilityOfSegmentToday(segmentId: Long,clientId: Long):Map<String,Int> {
+        val known = usersInSegment(segmentId, clientId,IncludeUsers.KNOWN).size
+        val unknown = usersInSegment(segmentId, clientId,IncludeUsers.UNKNOWN).size
+        val count = mutableMapOf<String,Int>()
+        count.put("known",known)
+        count.put("unknown",unknown)
+        setReachabilityOfSegmentNow(count,segmentId, clientId)
+        return count
     }
 
-    private fun usersInSegment(segmentId: Long, clientId: Long): List<ObjectId> {
+    private fun usersInSegment(segmentId: Long, clientId: Long, includeUsers: IncludeUsers): List<ObjectId> {
         val objectIds = if (segmentId != allUser) {
-            val segmentUsers = segmentService.segmentUserIds(segmentId, clientId)
+            val segmentUsers = segmentService.segmentUserIds(segmentId, clientId,includeUsers)
             segmentUsers.map {
                 ObjectId(it)
             }
@@ -184,5 +220,5 @@ class ReachabilityServiceImpl : ReachabilityService {
 }
 
 class SegmentResult{
-    var key:Int=0
+    var key:Map<String,Int> = mutableMapOf()
 }
