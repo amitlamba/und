@@ -89,7 +89,7 @@ class EventRestController {
 
 
         identityInit.clientId = tenantProvider.tenant.toInt()
-//        eventUser.identity = identityInit
+        eventUser.identity = identityInit
 
 
         if (uid != null && uid.isNotEmpty()) {
