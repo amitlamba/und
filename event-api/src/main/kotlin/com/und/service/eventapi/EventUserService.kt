@@ -61,7 +61,7 @@ class EventUserService {
 
 
     private fun buildMetadata(eventUser: MongoEventUser): CommonMetadata {
-        val propertyName = "userProperties"
+        val propertyName = "UserProperties"
         val metadata = commonMetadataRepository.findByName(propertyName) ?: CommonMetadata()
         metadata.name = propertyName
         val properties = MetadataUtil.buildMetadata(eventUser.additionalInfo, metadata.properties)
