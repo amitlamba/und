@@ -263,7 +263,7 @@ class FcmSendService:FcmService {
                         attributes.put("campaign_id",message.campaignId)
                         attributes.put("template_id",message.templateId)
                         userIdentified=true
-                        identity= Identity(userId = message.userId,clientId = message.clientId.toInt())
+                        identity= Identity(userId = message.userId,clientId = message.clientId.toInt(),idf=1)
 
                     }
                     eventApiFeignClient.pushEvent(token,event)

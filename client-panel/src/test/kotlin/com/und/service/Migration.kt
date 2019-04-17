@@ -20,11 +20,11 @@ class Migration {
         fun main(args: Array<String>) {
             var migration = Migration()
             //Migrating event
-            migration.migrateEvent(1004)
+            migration.migrateEvent(1018)
             //Migrate eventUser
-            migration.migrateEventUser(1004)
+//            migration.migrateEventUser(1018)
             //Migrate SegmentReport
-            migration.migrateSegmentReport(1004)
+//            migration.migrateSegmentReport(1018)
         }
     }
 
@@ -59,7 +59,7 @@ class Migration {
 
         groupByEvent.forEach { t, u ->
             //create an event user for each group and assign that event user id to those event.
-            val userId = ObjectId().toString()
+            var userId = ObjectId().toString()
 
             val eventUser = com.und.model.mongo.eventapi.EventUser()
             val identity_ = com.und.model.mongo.eventapi.Identity()
@@ -72,14 +72,27 @@ class Migration {
                 this.identity = identity_
                 this.clientId = u[0].clientId
             }
-            mongoTemplate.insert(eventUser,"${clientId}_eventUser")
+
 //            u.forEach {
 //                it.userId =userId
 //                mongoTemplate.save(it,"${clientId}_event")
 //            }
+
             var query = Query.query(Criteria.where("deviceId").`is`(u[0].deviceId).and("sessionId").`is`(u[0].sessionId))
-            var update=Update().set("userId",userId).set("userIdentified",false)
-            mongoTemplate.updateMulti(query,update,"${clientId}_event")
+            //if a user is already present with this deviceid and sessionid use that user instead of new user
+            //arrayOf(find all event with this deviceid and session id where userid is exists)
+            val query1= Query.query(Criteria.where("deviceId").`is`(u[0].deviceId).and("sessionId").`is`(u[0].sessionId).and("userId").exists(true))
+            val eventsWithuser=mongoTemplate.find<Event>(query1,"${clientId}_event")
+            if(eventsWithuser.isNotEmpty()){
+                userId = eventsWithuser[0].userId!!
+                var update=Update().set("userId",userId).set("userIdentified",true)
+                mongoTemplate.updateMulti(query,update,"${clientId}_event")
+            }else{
+                mongoTemplate.insert(eventUser,"${clientId}_eventUser")
+                var update=Update().set("userId",userId).set("userIdentified",false)
+                mongoTemplate.updateMulti(query,update,"${clientId}_event")
+            }
+
         }
     }
 
