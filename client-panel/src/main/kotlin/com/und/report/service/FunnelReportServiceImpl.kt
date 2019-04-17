@@ -14,7 +14,6 @@ import com.und.model.IncludeUsers
 import com.und.report.model.FunnelData
 import com.und.report.model.WinnerTemplate
 import com.und.report.repository.mongo.UserAnalyticsRepository
-import com.und.report.web.model.FunnelReport
 import com.und.repository.jpa.CampaignRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.*
@@ -93,7 +92,7 @@ class FunnelReportServiceImpl : FunnelReportService {
         } ?: emptyList()
     }
 
-    override fun getWinnerTemplate(clientId: Long, campaignId: Long): Long {
+    override fun getWinnerTemplate(clientId: Long, campaignId: Long,includeUsers: IncludeUsers): Long {
 
         val campaign=campaignRepository.findByIdAndClientID(campaignId,clientId)
         if(campaign.isPresent) {
@@ -108,7 +107,7 @@ class FunnelReportServiceImpl : FunnelReportService {
             val conversionTime=(days*24*60*60).toInt()
             campaign.get().variants.forEach {
                 val filters= buildFilters(campaignId,it.templateId!!)
-                listOfFunnelResult.add(funnel(buildConversionFunnelRequest(conversionStep,conversionTime,days,filters,segmentId)))
+                listOfFunnelResult.add(funnel(buildConversionFunnelRequest(conversionStep,conversionTime,days,filters,segmentId),includeUsers))
                 noOfVariant++;
             }
 

@@ -20,22 +20,22 @@ class Migration {
         fun main(args: Array<String>) {
             var migration = Migration()
             //Migrating event
-            migration.migrateEvent(1004)
+            migration.migrateEvent(1026)
             //Migrate eventUser
-            migration.migrateEventUser(1004)
+//            migration.migrateEventUser(1026)
             //Migrate SegmentReport
-            migration.migrateSegmentReport(1004)
+//            migration.migrateSegmentReport(1026)
         }
     }
 
     fun migrateEventUser(clientId: Long){
         var mongoTemplate = mongoClient()
         var query=Query.query(Criteria().and("identity.uid").exists(true))
-        var update = Update().set("identity.identified",true).unset("identity.indentified")
+        var update = Update().set("identity.identified",true).unset("identity.identified")
         mongoTemplate.updateMulti(query,update,"${clientId}_eventUser")
 
         var query1=Query.query(Criteria().and("identity.uid").exists(false))
-        var update1 = Update().set("identity.identified",false).unset("identity.indentified")
+        var update1 = Update().set("identity.identified",false).unset("identity.identified")
         mongoTemplate.updateMulti(query1,update1,"${clientId}_eventUser")
 
     }
@@ -115,7 +115,9 @@ class Migration {
 
     private fun mongoClient():MongoTemplate{
         var mongoClient = MongoClient("192.168.0.109",27017)
-        var mongoTemplate=MongoTemplate(mongoClient,"eventdbstaging")
+//        var mongoTemplate=MongoTemplate(mongoClient,"eventdbstaging")
+        var mongoClientprod = MongoClient("172.31.22.48",27017)
+        var mongoTemplate=MongoTemplate(mongoClientprod,"eventdb")
         return mongoTemplate
     }
 

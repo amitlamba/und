@@ -41,15 +41,15 @@ class CampaignJob : Job {
         val campaignName = context.jobDetail.jobDataMap["campaignName"] as String
         val isAbType = context.jobDetail.jobDataMap.containsKey("typeOfCampaign")
         val abCompleted = context.jobDetail.jobDataMap.containsKey("abCompleted")
+        val runType = context.jobDetail.jobDataMap.get("runType")?:""
         val nextFireTime = jobGroupNextDate(context.jobDetail.key.group)
         //val keys = scheduler.get(GroupMatcher.groupEquals(JobUtil.getGroupName(clientId,campaignId)))
 
-        if (nextFireTime.isEmpty() && !isAbType) {
-
+        if (nextFireTime.isEmpty()&& !isAbType) {
             val status = markCompleted(clientId, campaignId, campaignName, JobDescriptor.Action.COMPLETED)
             eventStream.scheduleJobAck().send(MessageBuilder.withPayload(status).build())
-        }else{
-            val status = markCompleted(clientId, campaignId, campaignName, JobDescriptor.Action.COMPLETED,true)
+        }else if(nextFireTime.isEmpty() && isAbType && runType.equals("AUTO")){
+            val status = markCompleted(clientId, campaignId, campaignName, JobDescriptor.Action.COMPLETED)
             eventStream.scheduleJobAck().send(MessageBuilder.withPayload(status).build())
         }
         logger.info("Job ** ${context.jobDetail.key.name} ** fired @ ${context.fireTime} for client $clientId with campaign $campaignName : $campaignId")

@@ -12,4 +12,6 @@ class CampaignJobDetailProperties: JobDetailProperties() {
 
     var abCompleted:String?=null
 
+    var runType:String?=null
+
 }

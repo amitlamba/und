@@ -7,6 +7,7 @@ import com.und.model.*
 import com.und.model.TestCampaign
 import com.und.model.jpa.*
 import com.und.model.jpa.Campaign
+import com.und.model.redis.LiveSegmentCampaign
 import com.und.repository.jpa.CampaignAuditLogRepository
 import com.und.repository.jpa.CampaignRepository
 import com.und.repository.jpa.ClientSettingsEmailRepository
@@ -21,6 +22,8 @@ import com.und.web.model.EmailTemplate
 import com.und.web.model.Variant
 import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.messaging.support.MessageBuilder
@@ -132,6 +135,7 @@ class CampaignService {
 
     @Transactional
     protected fun saveCampaign(webCampaign: com.und.web.model.Campaign): Campaign? {
+
         val campaign = buildCampaign(webCampaign)
         try {
             val persistedCampaign = campaignRepository.save(campaign)
@@ -144,6 +148,10 @@ class CampaignService {
                 //In case of live campaign its not scheduled.
                 logger.info("sending request to scheduler ${campaign.name}")
                 scheduleJob(webCampaign)
+            }else{
+                //TODO cache the campaign if its associated with live segment.
+                updateLiveSegmentCampaigns(campaign.clientID,campaign.segmentationID,persistedCampaign)
+
             }
             return persistedCampaign
         } catch (ex: ConstraintViolationException) {
@@ -156,6 +164,30 @@ class CampaignService {
         return null
     }
 
+    @CachePut(value = ["liveSegmentCampaigns"],key = "'clientId_'+#clientId+'segmentId_'+#segmentId")
+    fun updateLiveSegmentCampaigns(clientId: Long?,segmentId: Long?,campaign: Campaign):List<LiveSegmentCampaign>{
+        var liveSegmentCampaigns= getLiveSegmentCampaigns(campaign.clientID,campaign.segmentationID,campaign).toMutableList()
+        var liveSegmentCampaign=LiveSegmentCampaign()
+        with(liveSegmentCampaign){
+            campaignId=campaign.id !!
+            startDate = campaign.startDate!!
+            endDate = campaign.endDate!!
+            status = "CREATED"
+        }
+        liveSegmentCampaigns.add(liveSegmentCampaign)
+        return liveSegmentCampaigns
+    }
+    @Cacheable(value = ["liveSegmentCampaigns"],key = "'clientId_'+#clientId+'segmentId_'+#segmentId")
+    fun getLiveSegmentCampaigns(clientId: Long?,segmentId: Long?,campaign: Campaign):List<LiveSegmentCampaign>{
+        var liveSegmentCampaign=LiveSegmentCampaign()
+        with(liveSegmentCampaign){
+            campaignId=campaign.id !!
+            startDate = campaign.startDate !!
+            endDate = campaign.endDate !!
+            status = "CREATED"
+        }
+        return listOf(liveSegmentCampaign)
+    }
     private fun scheduleJob(webCampaign: com.und.web.model.Campaign) {
         val jobDescriptor = buildJobDescriptor(webCampaign, JobDescriptor.Action.CREATE)
         val sendToKafka = sendToKafka(jobDescriptor)
@@ -599,6 +631,8 @@ class CampaignService {
                 val status = it.status.toString()
                 val order = LiveCampaignStatus.valueOf(status)
                 if (order.ordinal < LiveCampaignStatus.PAUSED.ordinal) {
+                    //TODO update status in cache also
+                    //check in both cache if its present in active cache take it and put in queue cache
                     campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.PAUSED.name)
                 }
             }
@@ -612,6 +646,8 @@ class CampaignService {
                 val status = it.status.toString()
                 val order = LiveCampaignStatus.valueOf(status)
                 if (order.ordinal >= LiveCampaignStatus.STOPPED.ordinal) {
+                    //TODO update status in cache also
+                    //remove from both cache and update delete satatus
                     campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.DELETED.name)
                 }
             }
@@ -625,6 +661,8 @@ class CampaignService {
                 val status = it.status.toString()
                 val order = LiveCampaignStatus.valueOf(status)
                 if (order.ordinal < LiveCampaignStatus.STOPPED.ordinal) {
+                    //TODO update status in cache also
+                    //check in queue cache and update status to create if start time is less then put in active also.
                     campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.CREATED.name)
                 }
             }
@@ -638,6 +676,8 @@ class CampaignService {
                 val status = it.status.toString()
                 val order = LiveCampaignStatus.valueOf(status)
                 if (order.ordinal < LiveCampaignStatus.COMPLETED.ordinal) {
+                    //TODO update status in cache also
+                    //remove from both queue and update status in db
                     campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.STOPPED.name)
                 }
             }

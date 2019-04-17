@@ -7,6 +7,7 @@ import com.und.model.jpa.TypeOfCampaign
 import com.und.model.livesegment.LiveSegmentUser
 import com.und.model.mongo.EventUser
 import com.und.model.mongo.LiveSegmentTrack
+import com.und.model.redis.LiveSegmentCampaign
 import com.und.model.utils.TestCampaign
 import com.und.repository.mongo.EventUserRepository
 import com.und.repository.mongo.LiveSegmentTrackRepository
@@ -16,6 +17,7 @@ import com.und.utils.loggerFor
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
@@ -64,7 +66,7 @@ class CampaignListener {
         try{
             val (campaignId,clientId) = data
             campaignService.executeCampaignForAbManual(campaignId, clientId)
-            //TODO update status of campaign
+            //TODO update status of campaign to complete but we updated it already.
         }catch (ex:Exception){
             logger.error("error occurred", ex)
         } finally {
@@ -99,7 +101,6 @@ class CampaignListener {
             val userId = liveSegmentUser.userId
 
 
-        //TODO handle userIDentified true case
 
 //            trackSegmentUser(clientId, liveSegmentId, segmentId, userId)
             /***FIXED findById return empty but user present for this userId
@@ -114,6 +115,8 @@ class CampaignListener {
             //refresh cache I m thinking aboout schedulae ajob which update the status of live campaign
             //a stop cam newer start again
 
+            //TODO we maintain two cache where we store all campaign associate with live segment.
+            getCampaigns(clientId,segmentId)
             val campaignList=campaignService.findAllLiveSegmentCampaignBySegmentId(segmentId, clientId)
 
             //we imporve it find all cmapign with this segmentid if there endTime is passed mark it completed here if
@@ -154,5 +157,17 @@ class CampaignListener {
         }
     }
 
+    fun getCampaigns(clientId:Long,segmentId:Long):List<Campaign>{
+        val campaigns = getCampaignList(clientId,segmentId)
+        val campaignIds = campaigns.map {
+            it.campaignId
+        }
+        //TODO cache campaign by id
+        return campaignService.findCampaignByIds(campaignIds)
+    }
+    @Cacheable(value = ["activeLiveSegmentCampaigns"],key = "'clientId_'+#clientId+'segmentId_'+#segmentId")
+    fun getCampaignList(clientId: Long,segmentId: Long):List<LiveSegmentCampaign>{
+        return emptyList()
+    }
 
 }
