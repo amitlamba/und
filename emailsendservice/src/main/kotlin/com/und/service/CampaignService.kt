@@ -61,9 +61,30 @@ class CampaignService {
     }
 
     fun executeLiveCampaign(campaign: Campaign, clientId: Long, user: EventUser) {
-            executeCampaignForUser(campaign, user, clientId)
+        val present=communicationChannelPresent(campaign,user)
+        if(present) executeCampaignForUser(campaign, user, clientId)
     }
 
+    private fun communicationChannelPresent(campaign: Campaign,user: EventUser):Boolean{
+        return when (campaign.campaignType) {
+            "EMAIL" -> {
+                user.identity.email != null
+            }
+            "SMS" -> {
+                user.identity.mobile != null
+            }
+            "PUSH_ANDROID" -> {
+                user.identity.androidFcmToken != null
+            }
+            "PUSH_WEB" -> {
+                user.identity.webFcmToken != null
+            }
+            "PUSH_IOS" -> {
+                user.identity.iosFcmToken != null
+            }
+            else -> false
+        }
+    }
     private fun findCampaign(campaignId: Long, clientId: Long): Campaign {
         val campaignOption = campaignRepository.findById(campaignId)
         return campaignOption.orElseThrow { IllegalStateException("campaign not found for campaign id $campaignId and client $clientId") }
