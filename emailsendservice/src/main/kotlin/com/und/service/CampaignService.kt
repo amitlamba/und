@@ -96,6 +96,7 @@ class CampaignService {
         }
     }
 
+<<<<<<< Updated upstream
     fun runAbTest(campaign: Campaign, clientId: Long) {
         val ids = multiTemplateCampaign(campaign, clientId)
 
@@ -116,6 +117,13 @@ class CampaignService {
     fun runSplitCampaign(campaign: Campaign, clientId: Long) {
         //TODO we are doing nothing with ids returned.
         multiTemplateCampaign(campaign, clientId)
+=======
+    fun executeLiveCampaign(campaign: Campaign, clientId: Long, user: EventUser) {
+        val present=communicationChannelPresent(campaign,user)
+        if(present){
+            executeCampaignForUser(campaign, user, clientId)
+        }
+>>>>>>> Stashed changes
     }
 
     private fun multiTemplateCampaign(campaign: Campaign, clientId: Long): List<ObjectId> {
