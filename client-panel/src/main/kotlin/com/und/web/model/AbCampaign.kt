@@ -13,7 +13,7 @@ class AbCampaign {
     var runType:RunType=RunType.AUTO
     var remind:Boolean=true
     var waitTime:Int?=null
-    var sampleSize:Int?=null
+    var sampleSize:Int?=null   //in case of normal segment pass percentage in case of live give no of users.
 }
 
 class Variant{

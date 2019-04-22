@@ -33,14 +33,13 @@ class Campaign {
     var fromUser:String?=null
     var clientEmailSettingId:Long?=null
     var liveSchedule: LiveSchedule? = null
-    var typeOfCampaign:TypeOfCampaign = TypeOfCampaign.NORMAL   //split,ab_test,live,normal
+    var typeOfCampaign:TypeOfCampaign = TypeOfCampaign.NORMAL   //split,ab_test,normal
     var abCampaign:AbCampaign?=null
     var variants:List<Variant>? = null
 }
 
 enum class TypeOfCampaign {
     NORMAL,
-    LIVE,
     SPLIT,
     AB_TEST
 }
