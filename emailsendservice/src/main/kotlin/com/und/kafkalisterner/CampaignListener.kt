@@ -66,7 +66,7 @@ class CampaignListener {
         try{
             val (campaignId,clientId) = data
             campaignService.executeCampaignForAbManual(campaignId, clientId)
-            //TODO update status of campaign to complete but we updated it already.
+            //TODO update status of campaign to complete but we updated it already. update it here.
         }catch (ex:Exception){
             logger.error("error occurred", ex)
         } finally {

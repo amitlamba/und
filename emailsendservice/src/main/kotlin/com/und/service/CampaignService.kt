@@ -24,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 import javax.mail.internet.InternetAddress
 import kotlin.reflect.jvm.internal.impl.load.kotlin.JvmType
 
@@ -78,13 +79,11 @@ class CampaignService {
 
     fun executeCampaign(campaignId: Long, clientId: Long) {
         val campaign = findCampaign(campaignId, clientId)
-//  HEAD
-        when (campaign.typeOfCampaign) {
-            TypeOfCampaign.AB_TEST  && -> {
-                //
+        when {
+            (campaign.typeOfCampaign == TypeOfCampaign.AB_TEST )  && (campaign.variants.find { it.winner == true } == null) -> {
                 runAbTest(campaign, clientId)
             }
-            TypeOfCampaign.SPLIT -> {
+            campaign.typeOfCampaign==TypeOfCampaign.SPLIT -> {
                 runSplitCampaign(campaign, clientId)
             }
             else -> {
@@ -96,7 +95,6 @@ class CampaignService {
         }
     }
 
-<<<<<<< Updated upstream
     fun runAbTest(campaign: Campaign, clientId: Long) {
         val ids = multiTemplateCampaign(campaign, clientId)
 
@@ -115,15 +113,15 @@ class CampaignService {
     }
 
     fun runSplitCampaign(campaign: Campaign, clientId: Long) {
-        //TODO we are doing nothing with ids returned.
+        //FIXME in case of behavioural type segment it may be possible that no of user at a time of campaign creation and execution time are diff.
         multiTemplateCampaign(campaign, clientId)
-=======
+    }
     fun executeLiveCampaign(campaign: Campaign, clientId: Long, user: EventUser) {
         val present=communicationChannelPresent(campaign,user)
         if(present){
             executeCampaignForUser(campaign, user, clientId)
         }
->>>>>>> Stashed changes
+
     }
 
     private fun multiTemplateCampaign(campaign: Campaign, clientId: Long): List<ObjectId> {
@@ -134,7 +132,7 @@ class CampaignService {
         var startIndex = 0
         listOfVariant.forEach {
             val users = it.users ?: 0
-            for (i in start..(start + users) step 1) {
+            for (i in start..(start + users-1) step 1) {
                 executeCampaignForUser(campaign, usersData[i], clientId, it.templateId?.toLong())
             }
             startIndex = start + users
@@ -164,18 +162,15 @@ class CampaignService {
             }
             RunType.MANUAL -> {
                 //TODO if its manual then write end point to trigger rest of campaign manually.
-
+                //Send reminder if ask
             }
-//=======
-//        val usersData = getUsersData(campaign.segmentationID!!, clientId,campaign.campaignType)
-//        usersData.forEach { user ->
-//            executeCampaignForUser(campaign, user, clientId)
-//>>>>>>> origin/dev
         }
 
     }
 
     fun executeCampaignForAbManual(campaignId: Long, clientId: Long) {
+
+        //TODO we should refactor this code
         val campaign = findCampaign(campaignId, clientId)
         val variant = campaign.variants.find {
             it.winner == true
@@ -191,9 +186,7 @@ class CampaignService {
         eventUserRecordRepository.deleteById("$campaignId$clientId")
     }
 
-    fun executeLiveCampaign(campaign: Campaign, clientId: Long, user: EventUser) {
-        executeCampaignForUser(campaign, user, clientId)
-    }
+
 
     fun executeSplitLiveCampaign(campaign: Campaign, clientId: Long, user: EventUser) {
         //TODO handle ab test campaign associated with live segment
@@ -201,7 +194,7 @@ class CampaignService {
         //FIXME dump redis into mongo after some time interval.redis not support to dump its state in a database
         // but we dump redis state in a file which is used by redis only.
         val variants = redisTemplalte.opsForList().range("$clientId:${campaign.id}", 0, -1)//get list of template
-        if (variants == null) {
+        if (variants == null || variants.isEmpty()) {
             val listOfTemplateId = mutableListOf<Int>()
             campaign.variants.forEach {
                 listOfTemplateId.add(it.templateId!!)
@@ -226,9 +219,12 @@ class CampaignService {
         try {
             redisTemplalte.multi()      //starting transaction
             var counter = redisTemplalte.opsForHash<String, Int>().get("$clientId:${campaign.id}:${templateId}", "count")
+            val newCounter = AtomicInteger(counter)
             // sending notification to this template id
             executeCampaignForUser(campaign, user, clientId, templateId.toLong())
             counter--
+            //TODO we can replace it with atomic operation
+            //redisTemplalte.opsForHash<String,Int>().increment("$clientId:${campaign.id}:${templateId}","count",-1)
             if (counter == 0) {
                 redisTemplalte.opsForList().leftPop("$clientId:${campaign.id}")
                 redisTemplalte.opsForList().rightPush("$clientId:${campaign.id}", templateId)
@@ -294,6 +290,26 @@ class CampaignService {
         }
     }
 
+    private fun communicationChannelPresent(campaign: Campaign,user: EventUser):Boolean{
+        return when (campaign.campaignType) {
+            "EMAIL" -> {
+                user.identity.email != null
+            }
+            "SMS" -> {
+                user.identity.mobile != null
+            }
+            "PUSH_ANDROID" -> {
+                user.identity.androidFcmToken != null
+            }
+            "PUSH_WEB" -> {
+                user.identity.webFcmToken != null
+            }
+            "PUSH_IOS" -> {
+                user.identity.iosFcmToken != null
+            }
+            else -> false
+        }
+    }
     private fun findCampaign(campaignId: Long, clientId: Long): Campaign {
         val campaignOption = campaignRepository.findById(campaignId)
         return campaignOption.orElseThrow { IllegalStateException("campaign not found for campaign id $campaignId and client $clientId") }
@@ -315,7 +331,7 @@ class CampaignService {
             //TODO: How to skip transactional Messages
             //check mode of communication is email
             if (campaign.campaignType == "EMAIL") {
-
+                //TODO check whats happen if email not exists
                 if (user.communication?.email?.dnd == true)
                     return //Local lambda return
                 val email: Email = email(clientId, campaign, user, templateId)
@@ -460,6 +476,7 @@ class CampaignService {
         properties.campaignName = campaignName
         properties.campaignId = campaignId
         properties.abCompleted = "COMPLETED"
+        properties.typeOfCampaign = "AB_TEST"
         runType?.let {
             properties.runType = it.name
         }

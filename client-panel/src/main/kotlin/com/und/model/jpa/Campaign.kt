@@ -119,15 +119,19 @@ class Campaign {
     var endDate:LocalDateTime?=null
 
     @Column(name="type_campaign",nullable = false)  //live,normal,split,ab_test
+    @Enumerated(EnumType.STRING)
     lateinit var typeOfCampaign:TypeOfCampaign
 
-    @OneToOne(mappedBy = "campaign",cascade = [CascadeType.ALL])  //bi directional
-    @Column(name="ab_campaign")
+    @OneToOne(mappedBy = "campaign",cascade = [CascadeType.ALL])
     var abCampaign:AbCampaign?=null
+    set(value) {
+        field = value
+        field?.campaign = this
+    }
 
     @OneToMany(cascade = [CascadeType.ALL])
     @JoinColumn(name="campaign_id")
-    var variants:List<Variant> = emptyList()
+    var variants:List<Variant> ?= null
 }
 
 enum class CampaignType {

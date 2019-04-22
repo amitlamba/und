@@ -1,7 +1,6 @@
 package com.und.web.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.netflix.discovery.converters.Auto
 import com.und.common.utils.loggerFor
 import com.und.model.jpa.CampaignType
 import com.und.model.jpa.Schedule
@@ -210,8 +209,9 @@ class CampaignController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value=["/save/ab"])
-    fun saveAbCampaign(@Valid abCampaign: AbCampaign):Response{
+    fun saveAbCampaign(@Valid @RequestBody abCampaign: AbCampaign):Response{
         val clientID=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        //TODO check template and segment exists.
         campaignService.saveAbCampaign(abCampaign,clientID)
         return Response(status = ResponseStatus.SUCCESS)
     }

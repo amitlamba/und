@@ -65,7 +65,7 @@ class SmsService :CommonSmsService{
                 attributes.put("campaign_id",sms.campaignId?:-1)
                 attributes.put("template_id",sms.smsTemplateId)
                 userIdentified=true
-                identity= Identity(userId = sms.eventUser?.id,clientId = smsToSend.clientID.toInt())
+                identity= Identity(userId = sms.eventUser?.id,clientId = smsToSend.clientID.toInt(),idf = 1)
 
             }
             eventApiFeignClient.pushEvent(token,event)

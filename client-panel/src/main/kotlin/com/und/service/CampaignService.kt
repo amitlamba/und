@@ -98,12 +98,12 @@ class CampaignService {
     }
 
     fun saveAbCampaign(abCampaign: AbCampaign,clientId: Long){
-        val jpaAbCampaign = buildJpaAbCampaign(abCampaign)
-        val jpaVariant = buildJpaVariant(abCampaign.variants)
+        //val jpaAbCampaign = buildJpaAbCampaign(abCampaign)
+        //val jpaVariant = buildJpaVariant(abCampaign.variants)
         val campaign = abCampaign.campaign
-        campaign.abCampaign = jpaAbCampaign
-        campaign.variants = jpaVariant
-        saveCampaign(campaign)
+        campaign?.abCampaign = abCampaign
+        campaign?.variants = abCampaign.variants
+        campaign?.let { saveCampaign(it)}
     }
 
     private fun buildJpaAbCampaign(abCampaign: AbCampaign):JpaAbCampaign{
@@ -111,9 +111,8 @@ class CampaignService {
         with(campaign){
             sampleSize = abCampaign.sampleSize
             runType = abCampaign.runType
-            rewind = abCampaign.remind
+            remind = abCampaign.remind
             waitTime = abCampaign.waitTime
-            sampleSize = abCampaign.sampleSize
         }
         return campaign
     }
@@ -137,6 +136,7 @@ class CampaignService {
     protected fun saveCampaign(webCampaign: com.und.web.model.Campaign): Campaign? {
 
         val campaign = buildCampaign(webCampaign)
+        //campaign.abCampaign?.campaign = campaign
         try {
             val persistedCampaign = campaignRepository.save(campaign)
 
@@ -272,7 +272,7 @@ class CampaignService {
         val properties = CampaignJobDetailProperties()
         properties.campaignName = campaignName
         properties.campaignId = campaignId
-        if (abType) properties.typeOfCampaign = "AB_TEST"
+        if (abType) properties.typeOfCampaign = TypeOfCampaign.AB_TEST.name
 
 
         val jobDetail = JobDetail()
@@ -419,8 +419,8 @@ class CampaignService {
             conversionEvent = webCampaign.conversionEvent
             fromUser = webCampaign.fromUser
             typeOfCampaign = webCampaign.typeOfCampaign
-            abCampaign = webCampaign.abCampaign
-            variants = webCampaign.variants
+            webCampaign.abCampaign?.let { abCampaign = buildJpaAbCampaign(it)}
+            webCampaign.variants?.let {  variants = buildJpaVariant(it)}
 
             webCampaign.schedule?.oneTime?.let { whenTo ->
                 if (whenTo.nowOrLater == Now.Now) {
@@ -521,6 +521,8 @@ class CampaignService {
             conversionEvent = campaign.conversionEvent
             serviceProviderId = campaign.serviceProviderId
             fromUser = campaign.fromUser
+            //Migrate db
+            typeOfCampaign=campaign.typeOfCampaign
 
         }
 
@@ -554,9 +556,50 @@ class CampaignService {
 //            iosCampaign.campaignType=CampaignType.PUSH_IOS
 //            iosCampaign.templateID=iosCampaign?.templateId
 //        }
+
+        //adding ab campaign
+        campaign.abCampaign?.let {
+            webCampaign.abCampaign = buildAbCampaign(it)
+        }
+        //adding variant
+        campaign.variants?.let {
+            webCampaign.variants = buildVariants(it)
+        }
+
+
         return webCampaign
     }
 
+    private fun buildAbCampaign(abCampaign: com.und.model.jpa.AbCampaign):AbCampaign{
+        val abCampaign = AbCampaign()
+        with(abCampaign){
+            id = abCampaign.id
+            runType = abCampaign.runType
+            remind = abCampaign.remind
+            waitTime = abCampaign.waitTime
+            sampleSize= abCampaign.sampleSize
+        }
+        return abCampaign
+    }
+
+    private fun buildVariants(variants: List<JpaVariant>):List<Variant>{
+        val webVariants = mutableListOf<Variant>()
+        variants.forEach {
+            val variant = Variant()
+
+            with(variant){
+                id = it.id
+                percentage = it.percentage
+                users = it.users
+                name = it.name
+                winner = it.winner
+                templateId = it.templateId
+
+            }
+            webVariants.add(variant)
+        }
+        return webVariants
+    }
     fun buildWebCampaignForList(campaign: Campaign): WebCampaign {
         val webCampaign = WebCampaign()
         with(webCampaign) {

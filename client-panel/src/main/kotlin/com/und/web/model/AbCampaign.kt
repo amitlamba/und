@@ -6,7 +6,7 @@ class AbCampaign {
     var id:Long?=null
     var campaignId:Long?=null
     @NotNull
-    lateinit var campaign:Campaign
+    var campaign:Campaign?=null
     @NotNull
     var variants:List<Variant> = emptyList()
     @NotNull
@@ -22,7 +22,7 @@ class Variant{
     @NotNull
     var percentage:Int?=null
     @NotNull
-    var name:String?=null
+    lateinit var name:String
     @NotNull
     var users:Int?=null
     var winner:Boolean=false

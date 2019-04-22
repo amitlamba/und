@@ -2,7 +2,6 @@ package com.und.report.model
 
 import com.und.web.model.GlobalFilterType
 import org.springframework.data.annotation.Id
-import sun.awt.EventListenerAggregate
 import java.io.Serializable
 import java.time.LocalDate
 import java.util.*

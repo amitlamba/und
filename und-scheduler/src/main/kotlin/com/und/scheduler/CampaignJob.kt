@@ -51,6 +51,11 @@ class CampaignJob : Job {
         }else if(nextFireTime.isEmpty() && isAbType && runType.equals("AUTO")){
             val status = markCompleted(clientId, campaignId, campaignName, JobDescriptor.Action.COMPLETED)
             eventStream.scheduleJobAck().send(MessageBuilder.withPayload(status).build())
+        }else if(isAbType && runType==""){
+            val status = markCompleted(clientId, campaignId, campaignName, JobDescriptor.Action.COMPLETED,isAbType)
+            eventStream.scheduleJobAck().send(MessageBuilder.withPayload(status).build())
+        }else{
+            //upda
         }
         logger.info("Job ** ${context.jobDetail.key.name} ** fired @ ${context.fireTime} for client $clientId with campaign $campaignName : $campaignId")
         Pair(campaignId, clientId)

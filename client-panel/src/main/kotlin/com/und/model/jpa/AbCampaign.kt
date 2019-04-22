@@ -5,24 +5,27 @@ import javax.persistence.*
 import javax.validation.constraints.NotNull
 
 @Entity
-@Table(name="ab_camapign")
+@Table(name="ab_campaign")
 class AbCampaign {
 
     @Id
+    @Column(name="id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "abcampaign_seq_generator")
+    @SequenceGenerator(name="abcampaign_seq_generator",sequenceName = "ab_campaign_seq_id")
     var id:Long?=null
-    @Column(name="campaign_id",nullable = false)
-    @JoinColumn(name = "campaign_id")
-    lateinit var campaign:Campaign  //one to one
+    @OneToOne(cascade = [CascadeType.ALL])
+    @JoinColumn(name="campaign_id")
+    var campaign:Campaign?=null
     @NotNull
     @Column(name = "run_type")
     var runType:RunType = RunType.AUTO
     @NotNull
-    @Column(name="rewind")
-    var rewind:Boolean =false
+    @Column(name="remind")
+    var remind:Boolean = true
     @Column(name="wait_time")
     var waitTime:Int?=null     //in minutes
     @Column(name="sample_size")
-    var sampleSize:Int?=null            //need to check we use it or not.
+    var sampleSize:Int?=null
 }
 
 
@@ -30,14 +33,16 @@ class AbCampaign {
 @Table(name="variant")
 class Variant {
     @Id
+    @Column(name="id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "variant_seq_generator")
+    @SequenceGenerator(name="variant_seq_generator",sequenceName = "variant_seq_id")
     var id:Long?=null
-    //add campaign id if you want bi directional mapping
     @NotNull
     @Column(name="percentage",nullable = false)
     var percentage:Int?=null
     @NotNull
-    @Column(name="name")
-    var name:String?=null
+    @Column(name="name",nullable = false)
+    lateinit var name:String
     @Column(name="users")
     var users:Int?=null
     @Column(name="winner")

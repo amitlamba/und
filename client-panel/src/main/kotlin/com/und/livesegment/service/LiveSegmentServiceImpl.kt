@@ -24,6 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.lang.Exception
+import java.time.LocalDate
+import java.util.*
+import kotlin.Comparator
 
 @Service
 class LiveSegmentServiceImpl : LiveSegmentService {
@@ -187,6 +190,7 @@ class LiveSegmentServiceImpl : LiveSegmentService {
         val result=liveSegmentUserRepository.getLiveSegmentReportByDateRange(startDate, endDate, clientId, segmentId)
         val list= mutableSetOf<String>()
         val liveSegmentCount= mutableListOf<CountPerDay>()
+
         var totalUsers:Int=0
         result.forEach {
             liveSegmentCount.add(CountPerDay(
@@ -196,7 +200,18 @@ class LiveSegmentServiceImpl : LiveSegmentService {
             list.addAll(it.users)
             totalUsers += it.totalusersperday
         }
-
-        return  LiveSegmentReportCount(liveSegmentCount,totalUsers,list.size)
+        return  LiveSegmentReportCount(sortingByDate(liveSegmentCount),totalUsers,list.size)
     }
+
+    fun sortingByDate(liveSegmentCount:List<CountPerDay>):List<CountPerDay>{
+        Collections.sort(liveSegmentCount,object :Comparator<CountPerDay>{
+            override fun compare(o1: CountPerDay?, o2: CountPerDay?): Int {
+                val date1=LocalDate.parse(o1?.date)
+                val date2=LocalDate.parse(o2?.date)
+                return date1.compareTo(date2)
+            }
+        })
+        return liveSegmentCount
+    }
+
 }

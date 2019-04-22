@@ -24,7 +24,7 @@ class Campaign {
     @NotNull
     var segmentationID: Long?=null
     @NotNull
-    var templateID: Long?=null
+    var templateID: Long?= -1
     var status: CampaignStatus? = null
     var dateCreated: LocalDateTime? = null
     var dateModified: LocalDateTime? = null
@@ -34,8 +34,8 @@ class Campaign {
     var clientEmailSettingId:Long?=null
     var liveSchedule: LiveSchedule? = null
     var typeOfCampaign:TypeOfCampaign = TypeOfCampaign.NORMAL   //split,ab_test,live,normal
-    var abCampaign:JpaAbCampaign?=null //jpa
-    var variants:List<JpaVariant> = emptyList() //jpa variants
+    var abCampaign:AbCampaign?=null
+    var variants:List<Variant>? = null
 }
 
 enum class TypeOfCampaign {

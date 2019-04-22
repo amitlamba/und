@@ -105,7 +105,7 @@ class FunnelReportServiceImpl : FunnelReportService {
             val listOfFunnelResult = mutableListOf<List<FunnelReport.FunnelStep>>()
             val days=(LocalDateTime.now().dayOfYear - dateCreated.dayOfYear).toLong()
             val conversionTime=(days*24*60*60).toInt()
-            campaign.get().variants.forEach {
+            campaign.get().variants?.forEach {
                 val filters= buildFilters(campaignId,it.templateId!!)
                 listOfFunnelResult.add(funnel(buildConversionFunnelRequest(conversionStep,conversionTime,days,filters,segmentId),includeUsers))
                 noOfVariant++;
@@ -135,7 +135,9 @@ class FunnelReportServiceImpl : FunnelReportService {
                 val value=map.get(i)!!
                 if(value.varient!=0) {winner=value.varient ; break}
             }
-            return it.variants[winner-1].templateId?.toLong()?:0
+
+            val variants =it.variants
+            return if(variants!=null) variants[winner-1].templateId?.toLong()?:0 else 0
         }else{
             logger.error("No campaign present for campaignid $campaignId and clientId $clientId to calculate winner Template.")
             return 0
