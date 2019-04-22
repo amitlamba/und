@@ -80,7 +80,7 @@ class CampaignService {
     fun executeCampaign(campaignId: Long, clientId: Long) {
         val campaign = findCampaign(campaignId, clientId)
         when {
-            (campaign.typeOfCampaign == TypeOfCampaign.AB_TEST )  && (campaign.variants.find { it.winner == true } == null) -> {
+            (campaign.typeOfCampaign == TypeOfCampaign.AB_TEST )  && (campaign.variants?.find { it.winner == true } == null) -> {
                 runAbTest(campaign, clientId)
             }
             campaign.typeOfCampaign==TypeOfCampaign.SPLIT -> {
@@ -113,7 +113,6 @@ class CampaignService {
     }
 
     fun runSplitCampaign(campaign: Campaign, clientId: Long) {
-        //FIXME in case of behavioural type segment it may be possible that no of user at a time of campaign creation and execution time are diff.
         multiTemplateCampaign(campaign, clientId)
     }
     fun executeLiveCampaign(campaign: Campaign, clientId: Long, user: EventUser) {
@@ -128,17 +127,28 @@ class CampaignService {
         val ids = mutableListOf<ObjectId>()
         var listOfVariant = campaign.variants
         val usersData = getUsersData(campaign.segmentationID!!, clientId, campaign.campaignType)
+        //Finding sample size of users
+        val usersSize = try {
+            Math.abs(usersData.size * (campaign.abCampaign?.sampleSize ?: 0).div(100))
+        } catch (ex: Exception) {
+            0
+        }
         var start = 0
         var startIndex = 0
-        listOfVariant.forEach {
-            val users = it.users ?: 0
+        listOfVariant?.forEach {
+            //calculating the no of users for this variant from sample size
+            val users = try {
+                Math.abs((it.percentage ?: 0) * usersSize.div(100))
+            } catch (ex: Exception) {
+                0
+            }
+
             for (i in start..(start + users-1) step 1) {
                 executeCampaignForUser(campaign, usersData[i], clientId, it.templateId?.toLong())
             }
             startIndex = start + users
             start = users
         }
-
         usersData.listIterator(startIndex).forEach {
             ids.add(ObjectId(it.id))
         }
@@ -151,116 +161,180 @@ class CampaignService {
         val campaign = findCampaign(campaignId, clientId)
         when (campaign.abCampaign?.runType) {
             RunType.AUTO -> {
-                val ids = eventUserRecordRepository.findById("$campaignId$clientId")
-                ids.ifPresent {
-                    val usersData = eventUserRepository.findAllById(clientId, ids.get().usersId)
-                    usersData.forEach { user ->
-                        executeCampaignForUser(campaign, user, clientId, templateId)
-                    }
-                }
-                eventUserRecordRepository.deleteById("$campaignId$clientId")
+                executeRestOfCampaign(campaignId,clientId,campaign, templateId)
             }
             RunType.MANUAL -> {
                 //TODO if its manual then write end point to trigger rest of campaign manually.
-                //Send reminder if ask
+                if(campaign.abCampaign?.remind?:false){
+                    //TODO send reminder to client
+                }
             }
         }
 
     }
 
     fun executeCampaignForAbManual(campaignId: Long, clientId: Long) {
-
-        //TODO we should refactor this code
         val campaign = findCampaign(campaignId, clientId)
-        val variant = campaign.variants.find {
+        val variant = campaign.variants?.find {
             it.winner == true
         }
+        executeRestOfCampaign(campaignId, clientId, campaign, variant?.templateId?.toLong())
+    }
+
+    private fun executeRestOfCampaign(campaignId: Long, clientId: Long, campaign: Campaign, templateId: Long?) {
         val ids = eventUserRecordRepository.findById("$campaignId$clientId")
         ids.ifPresent {
             val usersData = eventUserRepository.findAllById(clientId, ids.get().usersId)
             usersData.forEach { user ->
-                executeCampaignForUser(campaign, user, clientId, variant?.templateId?.toLong())
+                executeCampaignForUser(campaign, user, clientId, templateId)
             }
         }
-        //TODO we are deleting when campaign execute successfully.if any error occur then we dont have any record to how many users we send campaign.
+        //we are deleting the reset of users when campaign execute successfully for them.
         eventUserRecordRepository.deleteById("$campaignId$clientId")
     }
 
 
-
     fun executeSplitLiveCampaign(campaign: Campaign, clientId: Long, user: EventUser) {
-        //TODO handle ab test campaign associated with live segment
-        //TODo handle run type also but in live segment run type not play role.
-        //FIXME dump redis into mongo after some time interval.redis not support to dump its state in a database
-        // but we dump redis state in a file which is used by redis only.
-        val variants = redisTemplalte.opsForList().range("$clientId:${campaign.id}", 0, -1)//get list of template
-        if (variants == null || variants.isEmpty()) {
+//        //FIXME dump redis into mongo after some time interval.redis not support to dump its state in a database
+//        // but we dump redis state in a file which is used by redis only.
+//        val variants = redisTemplalte.opsForList().range("$clientId:${campaign.id}", 0, -1)//get list of template
+//
+//        if (variants == null || variants.isEmpty()) {
+//            val listOfTemplateId = mutableListOf<Int>()
+//            campaign.variants.forEach {
+//                listOfTemplateId.add(it.templateId!!)
+//                redisTemplalte.opsForHash<String, Int>().put("$clientId:${campaign.id}:${it.templateId}", "users", it.percentage!!*10.div(100))
+//                redisTemplalte.opsForHash<String, Int>().put("$clientId:${campaign.id}:${it.templateId}", "count", it.percentage!!*10.div(100))
+//            }
+//            val templateId = campaign?.variants[0].templateId ?: return
+//            redisTemplalte.opsForList().leftPushAll("$clientId:${campaign.id}", listOfTemplateId)
+//            sendCampaign(clientId, campaign, templateId, user)
+//
+//        } else {
+//            val templateId = variants.get(0)
+//            sendCampaign(clientId, campaign, templateId, user)
+//
+//        }
+
+
+    }
+
+    fun newExecuteSplitLiveCampaign(campaign: Campaign,clientId: Long,user: EventUser){
+        var templateId = redisTemplalte.opsForList().leftPop("$clientId:${campaign.id}")
+
+        if(templateId==null){
             val listOfTemplateId = mutableListOf<Int>()
-            campaign.variants.forEach {
-                listOfTemplateId.add(it.templateId!!)
-                redisTemplalte.opsForHash<String, Int>().put("$clientId:${campaign.id}:${it.templateId}", "users", it.users)
-                redisTemplalte.opsForHash<String, Int>().put("$clientId:${campaign.id}:${it.templateId}", "count", it.counter)
+            campaign.variants?.forEach {
+                val size = it.percentage!!*10.div(100)
+                for(i in size downTo 1 step 1){
+                    listOfTemplateId.add(it.templateId?:0)
+                }
             }
-            val templateId = campaign.variants[0].templateId ?: return
+
             redisTemplalte.opsForList().leftPushAll("$clientId:${campaign.id}", listOfTemplateId)
-            sendCampaign(clientId, campaign, templateId, user)
+            templateId = redisTemplalte.opsForList().leftPop("$clientId:${campaign.id}")?:0
+        }
+        try{
+            //send campaign to this template id
+            executeCampaignForUser(campaign, user,clientId,templateId.toLong())
+            //right push that template id
+            redisTemplalte.opsForList().rightPush("$clientId:${campaign.id}",templateId)
+        }catch (ex:Exception){
+            //left push that template id
+            redisTemplalte.opsForList().leftPush("$clientId:${campaign.id}",templateId)
+        }
+    }
+
+    fun newExecuteAbTestLiveCampaign(campaign: Campaign, clientId: Long, user: EventUser){
+        val winnerTemplate = redisTemplalte.opsForValue().get("$clientId:${campaign.id}:winner")
+        if (winnerTemplate == null) {
+            var templateId = redisTemplalte.opsForList().leftPop("$clientId:${campaign.id}")
+
+            if (templateId == null) {
+                val listOfTemplateId = mutableListOf<Int>()
+                campaign.variants?.forEach {
+                    val size = it.percentage!! * 10.div(100)
+                    for (i in size downTo 1 step 1) {
+                        listOfTemplateId.add(it.templateId ?: 0)
+                    }
+                }
+                redisTemplalte.opsForValue().set("$clientId:${campaign.id}:sampleSize",campaign.abCampaign?.sampleSize?:0)
+                redisTemplalte.opsForList().leftPushAll("$clientId:${campaign.id}", listOfTemplateId)
+                templateId = redisTemplalte.opsForList().leftPop("$clientId:${campaign.id}")?:0
+            }
+
+            try{
+                //send campaign to this template id
+                executeCampaignForUser(campaign, user,clientId,templateId.toLong())
+            }catch (ex:Exception){
+                //left push that template id
+                redisTemplalte.opsForList().leftPush("$clientId:${campaign.id}",templateId)
+            }
+            //right push that template id
+            redisTemplalte.opsForList().rightPush("$clientId:${campaign.id}",templateId)
+            //decrement counter of sample size
+            redisTemplalte.opsForValue().increment("$clientId:${campaign.id}:sampleSize",-1)
+            val sampleSize  = redisTemplalte.opsForValue().get("$clientId:${campaign.id}:sampleSize")?:0
+            if(sampleSize<=0){
+                //find winner template
+                val token = userRepository.findSystemUser().key
+                        ?: throw java.lang.Exception("Not Able to get system token.")
+                val templateId = segmentUserServiceClient.getWinnerTemplate(campaign.id!!, clientId, token, "ALL")
+                //TODO update ab complate status here for live ab test
+                redisTemplalte.opsForValue().set("$clientId:${campaign.id}:winner", templateId.toInt())
+            }
+
 
         } else {
-            val templateId = variants.get(0)
-            sendCampaign(clientId, campaign, templateId, user)
-
+            executeCampaignForUser(campaign, user, clientId,winnerTemplate.toLong())
         }
-
-
     }
 
     private fun sendCampaign(clientId: Long, campaign: Campaign, templateId: Int, user: EventUser) {
-        //TODO make it thread safe.
-        try {
-            redisTemplalte.multi()      //starting transaction
-            var counter = redisTemplalte.opsForHash<String, Int>().get("$clientId:${campaign.id}:${templateId}", "count")
-            val newCounter = AtomicInteger(counter)
-            // sending notification to this template id
-            executeCampaignForUser(campaign, user, clientId, templateId.toLong())
-            counter--
-            //TODO we can replace it with atomic operation
-            //redisTemplalte.opsForHash<String,Int>().increment("$clientId:${campaign.id}:${templateId}","count",-1)
-            if (counter == 0) {
-                redisTemplalte.opsForList().leftPop("$clientId:${campaign.id}")
-                redisTemplalte.opsForList().rightPush("$clientId:${campaign.id}", templateId)
-            } else {
-                redisTemplalte.opsForHash<String, Int>().put("$clientId:${campaign.id}:${templateId}", "count", counter)
-            }
-
-            redisTemplalte.exec()   //committing transaction
-        } catch (ex: java.lang.Exception) {
-            redisTemplalte.discard()    //rollback discard all changes.
-        }
+//        //TODO make it thread safe.
+//        try {
+//            redisTemplalte.multi()      //starting transaction
+//            var counter = redisTemplalte.opsForHash<String, Int>().get("$clientId:${campaign.id}:${templateId}", "count")
+//            val newCounter = AtomicInteger(counter)
+//            // sending notification to this template id
+//            executeCampaignForUser(campaign, user, clientId, templateId.toLong())
+//            counter--
+//            //TODO we can replace it with atomic operation
+//            //redisTemplalte.opsForHash<String,Int>().increment("$clientId:${campaign.id}:${templateId}","count",-1)
+//            if (counter == 0) {
+//                redisTemplalte.opsForList().leftPop("$clientId:${campaign.id}")
+//                redisTemplalte.opsForList().rightPush("$clientId:${campaign.id}", templateId)
+//            } else {
+//                redisTemplalte.opsForHash<String, Int>().put("$clientId:${campaign.id}:${templateId}", "count", counter)
+//            }
+//
+//            redisTemplalte.exec()   //committing transaction
+//        } catch (ex: java.lang.Exception) {
+//            redisTemplalte.discard()    //rollback discard all changes.
+//        }
     }
 
     fun executeAbTestLiveCampaign(campaign: Campaign, clientId: Long, user: EventUser) {
-        //TODO handle split campaign associated with live segment
-        // TODO update when complete test campaign.
-        val variants = redisTemplalte.opsForList().range("$clientId:${campaign.id}", 0, -1) //get list of template
-        val winnerTemplate = redisTemplalte.opsForValue().get("$clientId:${campaign.id}:winner")
-        if (variants == null) {
-            val listOfTemplateId = mutableListOf<Int>()
-            campaign.variants.forEach {
-                listOfTemplateId.add(it.templateId!!)
-                redisTemplalte.opsForHash<String, Int>().putAll("$clientId:${campaign.id}:${it.templateId}",
-                        mapOf(Pair("users", it.users), Pair("count", it.counter), Pair("percentage", it.percentage)))
-            }
-            var templateId = campaign.variants[0].templateId ?: return
-            redisTemplalte.opsForList().leftPushAll("$clientId:${campaign.id}", listOfTemplateId)
-            sendAbLiveCampaign(clientId, campaign, templateId, user)
-        } else if (winnerTemplate != null) {
-            //get winner template and send notification
-            executeCampaignForUser(campaign, user, clientId, winnerTemplate.toLong())
-        } else {
-            val templateId = variants.get(0)
-
-            sendAbLiveCampaign(clientId, campaign, templateId, user)
-        }
+//        val variants = redisTemplalte.opsForList().range("$clientId:${campaign.id}", 0, -1) //get list of template
+//        val winnerTemplate = redisTemplalte.opsForValue().get("$clientId:${campaign.id}:winner")
+//        if (variants == null) {
+//            val listOfTemplateId = mutableListOf<Int>()
+//            campaign.variants.forEach {
+//                listOfTemplateId.add(it.templateId!!)
+//                redisTemplalte.opsForHash<String, Int>().putAll("$clientId:${campaign.id}:${it.templateId}",
+//                        mapOf(Pair("users", it.users), Pair("count", it.counter), Pair("percentage", it.percentage)))
+//            }
+//            var templateId = campaign.variants[0].templateId ?: return
+//            redisTemplalte.opsForList().leftPushAll("$clientId:${campaign.id}", listOfTemplateId)
+//            sendAbLiveCampaign(clientId, campaign, templateId, user)
+//        } else if (winnerTemplate != null) {
+//            //get winner template and send notification
+//            executeCampaignForUser(campaign, user, clientId, winnerTemplate.toLong())
+//        } else {
+//            val templateId = variants.get(0)
+//
+//            sendAbLiveCampaign(clientId, campaign, templateId, user)
+//        }
     }
 
     private fun sendAbLiveCampaign(clientId: Long, campaign: Campaign, templateId: Int, user: EventUser) {
@@ -282,6 +356,7 @@ class CampaignService {
             val token = userRepository.findSystemUser().key
                     ?: throw java.lang.Exception("Not Able to get system token.")
             val templateId = segmentUserServiceClient.getWinnerTemplate(campaign.id!!, clientId, token, "ALL")
+            //TODO update ab complate status here for live ab test
             redisTemplalte.opsForValue().set("$clientId:${campaign.id}:winner", templateId.toInt())
             redisTemplalte.opsForList().leftPop("$clientId:${campaign.id}")
         } else {
@@ -332,7 +407,7 @@ class CampaignService {
             //check mode of communication is email
             if (campaign.campaignType == "EMAIL") {
                 //TODO check whats happen if email not exists
-                if (user.communication?.email?.dnd == true)
+                if (user.communication?.email == null || user.communication?.email?.dnd == true)
                     return //Local lambda return
                 val email: Email = email(clientId, campaign, user, templateId)
                 toKafka(email)
@@ -340,20 +415,20 @@ class CampaignService {
             //check mode of communication is sms
             if (campaign.campaignType == "SMS") {
 
-                if (user.communication?.mobile?.dnd == true)
+                if (user.communication?.mobile == null || user.communication?.mobile?.dnd == true)
                     return //Local lambda return
                 val sms: Sms = sms(clientId, campaign, user, templateId)
                 toKafka(sms)
             }
             //                check mode of communication is mobile push
             if (campaign.campaignType == "PUSH_ANDROID") {
-                if (user.communication?.android?.dnd == true)
+                if (user.communication?.android==null || user.communication?.android?.dnd == true)
                     return //Local lambda return
                 val notification = fcmAndroidMessage(clientId, campaign, user, templateId)
                 toKafka(notification)
             }
             if (campaign.campaignType == "PUSH_WEB") {
-                if (user.communication?.webpush?.dnd == true)
+                if (user.communication?.webpush ==null || user.communication?.webpush?.dnd == true)
                     return //Local lambda return
                 user.identity.webFcmToken?.forEach {
                     val notification = fcmWebMessage(clientId, campaign, user, it, templateId)
@@ -361,7 +436,7 @@ class CampaignService {
                 }
             }
             if (campaign.campaignType == "PUSH_IOS") {
-                if (user.communication?.ios?.dnd == true)
+                if (user.communication?.ios == null || user.communication?.ios?.dnd == true)
                     return //Local lambda return
                 val notification = fcmIosMessage(clientId, campaign, user)
                 toKafka(notification)

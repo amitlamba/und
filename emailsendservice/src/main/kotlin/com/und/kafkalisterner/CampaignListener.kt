@@ -66,7 +66,7 @@ class CampaignListener {
         try{
             val (campaignId,clientId) = data
             campaignService.executeCampaignForAbManual(campaignId, clientId)
-            //TODO update status of campaign to complete but we updated it already. update it here.
+            //TODO update status of campaign to completed but we updated it already. update it here.
         }catch (ex:Exception){
             logger.error("error occurred", ex)
         } finally {
@@ -78,8 +78,8 @@ class CampaignListener {
         try {
             val (campaignId, clientId) = campaignData
             logger.debug("campaign trigger with id $campaignId and $clientId")
+            //TODO update status of campaign  dont update status in schedular here update ab complete status
             campaignService.executeCampaignForAb(campaignId, clientId)
-            //TODO update status of campaign  dont update status in schedular there update ab complete status
         } catch (ex: Exception) {
             logger.error("error occurred", ex)
         } finally {
@@ -139,10 +139,10 @@ class CampaignListener {
                 logger.debug("campaign live trigger with id $segmentId and $clientId and $userId and campaign id $campaign.id")
                 when(campaign.typeOfCampaign){
                     TypeOfCampaign.AB_TEST ->{
-                        campaignService.executeAbTestLiveCampaign(campaign,clientId,user[0])
+                        campaignService.newExecuteAbTestLiveCampaign(campaign,clientId,user[0])
                     }
                     TypeOfCampaign.SPLIT -> {
-                        campaignService.executeSplitLiveCampaign(campaign,clientId,user[0])
+                        campaignService.newExecuteSplitLiveCampaign(campaign,clientId,user[0])
                     }
                     else ->{
                         campaignService.executeLiveCampaign(campaign, clientId, user[0])

@@ -4,6 +4,7 @@ import com.mongodb.MongoClient
 import com.und.model.mongo.SegmentReachability
 import com.und.model.mongo.eventapi.Event
 import org.bson.types.ObjectId
+import org.junit.Test
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.query.Criteria
@@ -20,19 +21,19 @@ class Migration {
         fun main(args: Array<String>) {
             var migration = Migration()
             //Migrating event
-<<<<<<< HEAD
+
             migration.migrateEvent(1026)
             //Migrate eventUser
 //            migration.migrateEventUser(1026)
             //Migrate SegmentReport
 //            migration.migrateSegmentReport(1026)
-=======
+
             migration.migrateEvent(1018)
             //Migrate eventUser
 //            migration.migrateEventUser(1018)
             //Migrate SegmentReport
 //            migration.migrateSegmentReport(1018)
->>>>>>> dev
+
         }
     }
 

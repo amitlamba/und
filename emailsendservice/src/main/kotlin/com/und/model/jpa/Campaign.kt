@@ -90,7 +90,7 @@ class Campaign {
 
     @OneToMany(cascade = [CascadeType.ALL])
     @JoinColumn(name="campaign_id")
-    var variants:List<Variant> = emptyList()
+    var variants:List<Variant>? = null
 
 
 }
@@ -115,13 +115,13 @@ class AbCampaign {
     @Column(name = "run_type")
     var runType:RunType = RunType.AUTO
     @Column(name="rewind")
-    var rewind:Boolean =false
+    var remind:Boolean =false
     @Column(name="wait_time")
     var waitTime:Int?=null     //in minutes
     @Column(name="sample_size")
     var sampleSize:Int?=null
-    @Column(name="live_sample_size")
-    var liveSampleSize:Int?=null   //optional we are taking this info in variant also
+//    @Column(name="live_sample_size")
+//    var liveSampleSize:Int?=null   //optional we are taking this info in variant also
 
 }
 
@@ -134,8 +134,8 @@ class Variant {
     var percentage:Int?=null
     @Column(name="name")
     var name:String?=null
-    @Column(name="counter")
-    var counter:Int?=null
+//    @Column(name="counter")
+//    var counter:Int?=null
     @Column(name="users")
     var users:Int?=null
     @Column(name="winner")
