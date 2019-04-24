@@ -39,23 +39,13 @@ class CampaignJob : Job {
         val clientId = context.jobDetail.jobDataMap["clientId"] as String
         val campaignId = context.jobDetail.jobDataMap["campaignId"] as String
         val campaignName = context.jobDetail.jobDataMap["campaignName"] as String
-        val isAbType = context.jobDetail.jobDataMap.containsKey("typeOfCampaign")
         val abCompleted = context.jobDetail.jobDataMap.containsKey("abCompleted")
-        val runType = context.jobDetail.jobDataMap.get("runType")?:""
         val nextFireTime = jobGroupNextDate(context.jobDetail.key.group)
         //val keys = scheduler.get(GroupMatcher.groupEquals(JobUtil.getGroupName(clientId,campaignId)))
-
-        if (nextFireTime.isEmpty()&& !isAbType) {
-            val status = markCompleted(clientId, campaignId, campaignName, JobDescriptor.Action.COMPLETED)
+        val nextFireTimeStamp = if (nextFireTime.isEmpty()) null else nextFireTime[0]
+        if (!abCompleted) {
+            val status = markCompleted(clientId, campaignId, campaignName, JobDescriptor.Action.COMPLETED,nextFireTimeStamp)
             eventStream.scheduleJobAck().send(MessageBuilder.withPayload(status).build())
-        }else if(nextFireTime.isEmpty() && isAbType && runType.equals("AUTO")){
-            val status = markCompleted(clientId, campaignId, campaignName, JobDescriptor.Action.COMPLETED)
-            eventStream.scheduleJobAck().send(MessageBuilder.withPayload(status).build())
-        }else if(isAbType && runType==""){
-            val status = markCompleted(clientId, campaignId, campaignName, JobDescriptor.Action.COMPLETED,isAbType)
-            eventStream.scheduleJobAck().send(MessageBuilder.withPayload(status).build())
-        }else{
-            //upda
         }
         logger.info("Job ** ${context.jobDetail.key.name} ** fired @ ${context.fireTime} for client $clientId with campaign $campaignName : $campaignId")
         Pair(campaignId, clientId)
@@ -79,20 +69,18 @@ class CampaignJob : Job {
     }
 
     @SendTo("scheduleJobAckSend")
-    fun markCompleted(clientId: String, campaignId: String, campaignName: String, action: JobDescriptor.Action,isAbType:Boolean=false): JobActionStatus {
+    fun markCompleted(clientId: String, campaignId: String, campaignName: String, action: JobDescriptor.Action,timeStamp:Date?): JobActionStatus {
         fun jobActionStatus(): JobActionStatus {
             val jobAction = JobAction(
                     campaignId = campaignId,
                     clientId = clientId,
                     campaignName = campaignName,
-                    action = action
+                    action = action,
+                    nextTimeStamp = timeStamp
             )
             val status = JobActionStatus()
             status.jobAction = jobAction
-            if(isAbType)
-            status.status = JobActionStatus.Status.AB_COMPLETED
-            else
-                status.status = JobActionStatus.Status.COMPLETED
+            status.status = JobActionStatus.Status.COMPLETED
             return status
         }
 

@@ -27,6 +27,8 @@ import org.springframework.cache.annotation.Cacheable
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.messaging.support.MessageBuilder
+import org.springframework.scheduling.Trigger
+import org.springframework.scheduling.support.CronSequenceGenerator
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -97,18 +99,18 @@ class CampaignService {
         return if (persistedCampaign != null) buildWebCampaign(persistedCampaign) else WebCampaign()
     }
 
-    fun saveAbCampaign(abCampaign: AbCampaign,clientId: Long){
+    fun saveAbCampaign(abCampaign: AbCampaign, clientId: Long) {
         //val jpaAbCampaign = buildJpaAbCampaign(abCampaign)
         //val jpaVariant = buildJpaVariant(abCampaign.variants)
         val campaign = abCampaign.campaign
         campaign?.abCampaign = abCampaign
         campaign?.variants = abCampaign.variants
-        campaign?.let { saveCampaign(it)}
+        campaign?.let { saveCampaign(it) }
     }
 
-    private fun buildJpaAbCampaign(abCampaign: AbCampaign):JpaAbCampaign{
+    private fun buildJpaAbCampaign(abCampaign: AbCampaign): JpaAbCampaign {
         val campaign = JpaAbCampaign()
-        with(campaign){
+        with(campaign) {
             sampleSize = abCampaign.sampleSize
             runType = abCampaign.runType
             remind = abCampaign.remind
@@ -117,11 +119,11 @@ class CampaignService {
         return campaign
     }
 
-    private fun buildJpaVariant(variants:List<Variant>):List<JpaVariant>{
+    private fun buildJpaVariant(variants: List<Variant>): List<JpaVariant> {
         val jpaVariants = mutableListOf<JpaVariant>()
         variants.forEach {
             var variant = JpaVariant()
-            with(variant){
+            with(variant) {
                 percentage = it.percentage
                 templateId = it.templateId
                 name = it.name
@@ -148,9 +150,15 @@ class CampaignService {
                 //In case of live campaign its not scheduled.
                 logger.info("sending request to scheduler ${campaign.name}")
                 scheduleJob(webCampaign)
-            }else{
-                //TODO cache the campaign if its associated with live segment.
-                updateLiveSegmentCampaigns(campaign.clientID,campaign.segmentationID,persistedCampaign)
+            } else {
+                val campaigns = getLiveSegmentCampaigns(persistedCampaign.clientID!!,persistedCampaign.segmentationID!!).toMutableList()
+                val liveSegmentCampaign = LiveSegmentCampaign()
+                with(liveSegmentCampaign) {
+                    campaignId = persistedCampaign.id!!
+                    status = "CREATED"
+                }
+                campaigns.add(liveSegmentCampaign)
+                updateLiveSegmentCampaigns(persistedCampaign.clientID!!, persistedCampaign.segmentationID!!, campaigns)
 
             }
             return persistedCampaign
@@ -164,30 +172,16 @@ class CampaignService {
         return null
     }
 
-    @CachePut(value = ["liveSegmentCampaigns"],key = "'clientId_'+#clientId+'segmentId_'+#segmentId")
-    fun updateLiveSegmentCampaigns(clientId: Long?,segmentId: Long?,campaign: Campaign):List<LiveSegmentCampaign>{
-        var liveSegmentCampaigns= getLiveSegmentCampaigns(campaign.clientID,campaign.segmentationID,campaign).toMutableList()
-        var liveSegmentCampaign=LiveSegmentCampaign()
-        with(liveSegmentCampaign){
-            campaignId=campaign.id !!
-            startDate = campaign.startDate!!
-            endDate = campaign.endDate!!
-            status = "CREATED"
-        }
-        liveSegmentCampaigns.add(liveSegmentCampaign)
-        return liveSegmentCampaigns
+    @CachePut(value = ["liveSegmentCampaigns"], key = "'clientId_'+#clientId+'segmentId_'+#segmentId")
+    fun updateLiveSegmentCampaigns(clientId: Long, segmentId: Long, liveSegmentCampaign: List<LiveSegmentCampaign>):List<LiveSegmentCampaign> {
+        return liveSegmentCampaign
     }
-    @Cacheable(value = ["liveSegmentCampaigns"],key = "'clientId_'+#clientId+'segmentId_'+#segmentId")
-    fun getLiveSegmentCampaigns(clientId: Long?,segmentId: Long?,campaign: Campaign):List<LiveSegmentCampaign>{
-        var liveSegmentCampaign=LiveSegmentCampaign()
-        with(liveSegmentCampaign){
-            campaignId=campaign.id !!
-            startDate = campaign.startDate !!
-            endDate = campaign.endDate !!
-            status = "CREATED"
-        }
-        return listOf(liveSegmentCampaign)
+
+    @Cacheable(value = ["liveSegmentCampaigns"], key = "'clientId_'+#clientId+'segmentId_'+#segmentId")
+    fun getLiveSegmentCampaigns(clientId: Long, segmentId: Long): List<LiveSegmentCampaign> {
+        return emptyList()
     }
+
     private fun scheduleJob(webCampaign: com.und.web.model.Campaign) {
         val jobDescriptor = buildJobDescriptor(webCampaign, JobDescriptor.Action.CREATE)
         val sendToKafka = sendToKafka(jobDescriptor)
@@ -256,8 +250,8 @@ class CampaignService {
         jobDescriptor.clientId = AuthenticationUtils.clientID.toString()
         jobDescriptor.action = action
 
-        if(campaign.typeOfCampaign.equals(TypeOfCampaign.AB_TEST))
-        jobDescriptor.jobDetail = buildJobDetail(campaign.id.toString(), campaign.name, jobDescriptor.clientId,true)
+        if (campaign.typeOfCampaign.equals(TypeOfCampaign.AB_TEST))
+            jobDescriptor.jobDetail = buildJobDetail(campaign.id.toString(), campaign.name, jobDescriptor.clientId, true)
         else jobDescriptor.jobDetail = buildJobDetail(campaign.id.toString(), campaign.name, jobDescriptor.clientId)
 
 
@@ -268,7 +262,7 @@ class CampaignService {
         return jobDescriptor
     }
 
-    private fun buildJobDetail(campaignId: String, campaignName: String, clientId: String,abType:Boolean=false): JobDetail {
+    private fun buildJobDetail(campaignId: String, campaignName: String, clientId: String, abType: Boolean = false): JobDetail {
         val properties = CampaignJobDetailProperties()
         properties.campaignName = campaignName
         properties.campaignId = campaignId
@@ -315,7 +309,7 @@ class CampaignService {
             segmentationID = testWebCampaign.segmentationID
             clientEmailSettingId = testWebCampaign.clientEmailSettingId
             campaignType = testWebCampaign.campaignType
-            this.fromUser=testWebCampaign.fromUser
+            this.fromUser = testWebCampaign.fromUser
         }
         with(testCampaign) {
             this.clientId = clientId
@@ -419,8 +413,8 @@ class CampaignService {
             conversionEvent = webCampaign.conversionEvent
             fromUser = webCampaign.fromUser
             typeOfCampaign = webCampaign.typeOfCampaign
-            webCampaign.abCampaign?.let { abCampaign = buildJpaAbCampaign(it)}
-            webCampaign.variants?.let {  variants = buildJpaVariant(it)}
+            webCampaign.abCampaign?.let { abCampaign = buildJpaAbCampaign(it) }
+            webCampaign.variants?.let { variants = buildJpaVariant(it) }
 
             webCampaign.schedule?.oneTime?.let { whenTo ->
                 if (whenTo.nowOrLater == Now.Now) {
@@ -522,7 +516,7 @@ class CampaignService {
             serviceProviderId = campaign.serviceProviderId
             fromUser = campaign.fromUser
             //Migrate db
-            typeOfCampaign=campaign.typeOfCampaign
+            typeOfCampaign = campaign.typeOfCampaign
 
         }
 
@@ -570,24 +564,24 @@ class CampaignService {
         return webCampaign
     }
 
-    private fun buildAbCampaign(abCampaign: com.und.model.jpa.AbCampaign):AbCampaign{
+    private fun buildAbCampaign(abCampaign: com.und.model.jpa.AbCampaign): AbCampaign {
         val abCampaign = AbCampaign()
-        with(abCampaign){
+        with(abCampaign) {
             id = abCampaign.id
             runType = abCampaign.runType
             remind = abCampaign.remind
             waitTime = abCampaign.waitTime
-            sampleSize= abCampaign.sampleSize
+            sampleSize = abCampaign.sampleSize
         }
         return abCampaign
     }
 
-    private fun buildVariants(variants: List<JpaVariant>):List<Variant>{
+    private fun buildVariants(variants: List<JpaVariant>): List<Variant> {
         val webVariants = mutableListOf<Variant>()
         variants.forEach {
             val variant = Variant()
 
-            with(variant){
+            with(variant) {
                 id = it.id
                 percentage = it.percentage
                 users = it.users
@@ -600,6 +594,7 @@ class CampaignService {
         }
         return webVariants
     }
+
     fun buildWebCampaignForList(campaign: Campaign): WebCampaign {
         val webCampaign = WebCampaign()
         with(webCampaign) {
@@ -674,8 +669,12 @@ class CampaignService {
                 val status = it.status.toString()
                 val order = LiveCampaignStatus.valueOf(status)
                 if (order.ordinal < LiveCampaignStatus.PAUSED.ordinal) {
-                    //TODO update status in cache also
-                    //check in both cache if its present in active cache take it and put in queue cache
+                    var liveCampaigns=getLiveSegmentCampaigns(clientId,it.segmentationID!!)
+                    liveCampaigns=liveCampaigns.map {
+                        if(it.campaignId == campaignId) it.status = "PAUSE"
+                        it
+                    }
+                    updateLiveSegmentCampaigns(clientId,it.segmentationID!!,liveCampaigns)
                     campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.PAUSED.name)
                 }
             }
@@ -689,8 +688,11 @@ class CampaignService {
                 val status = it.status.toString()
                 val order = LiveCampaignStatus.valueOf(status)
                 if (order.ordinal >= LiveCampaignStatus.STOPPED.ordinal) {
-                    //TODO update status in cache also
-                    //remove from both cache and update delete satatus
+                    var liveCampaigns=getLiveSegmentCampaigns(clientId,it.segmentationID!!)
+                    liveCampaigns=liveCampaigns.filter {
+                        it.campaignId!=campaignId
+                    }
+                    updateLiveSegmentCampaigns(clientId,it.segmentationID!!,liveCampaigns)
                     campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.DELETED.name)
                 }
             }
@@ -704,8 +706,12 @@ class CampaignService {
                 val status = it.status.toString()
                 val order = LiveCampaignStatus.valueOf(status)
                 if (order.ordinal < LiveCampaignStatus.STOPPED.ordinal) {
-                    //TODO update status in cache also
-                    //check in queue cache and update status to create if start time is less then put in active also.
+                    var liveCampaigns=getLiveSegmentCampaigns(clientId,it.segmentationID!!)
+                    liveCampaigns=liveCampaigns.map {
+                        if(it.campaignId == campaignId) it.status = "CREATED"
+                        it
+                    }
+                    updateLiveSegmentCampaigns(clientId,it.segmentationID!!,liveCampaigns)
                     campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.CREATED.name)
                 }
             }
@@ -719,8 +725,11 @@ class CampaignService {
                 val status = it.status.toString()
                 val order = LiveCampaignStatus.valueOf(status)
                 if (order.ordinal < LiveCampaignStatus.COMPLETED.ordinal) {
-                    //TODO update status in cache also
-                    //remove from both queue and update status in db
+                    var liveCampaigns=getLiveSegmentCampaigns(clientId,it.segmentationID!!)
+                    liveCampaigns=liveCampaigns.filter {
+                        it.campaignId!=campaignId
+                    }
+                    updateLiveSegmentCampaigns(clientId,it.segmentationID!!,liveCampaigns)
                     campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.STOPPED.name)
                 }
             }
@@ -781,11 +790,42 @@ class CampaignService {
         val campaignId = action.campaignId.toLong()
         val campignName = action.campaignName
         val actionPerformed = action.action
-        //TODO add new Action AB_COMPLETED
+        val nextExecutionDate = action.nextTimeStamp
         when {
             status == JobActionStatus.Status.COMPLETED -> {
-                campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.COMPLETED.name)
-                logger.info(" Campaign Schedule created $campaignId")
+
+                val campaign = campaignRepository.findByIdAndClientID(campaignId, clientId)
+                if (campaign.isPresent) {
+                    when {
+                        campaign.get().typeOfCampaign.equals(TypeOfCampaign.AB_TEST) && campaign.get().status.equals(CampaignStatus.AB_COMPLETED) -> {
+                            if (nextExecutionDate == null) {
+                                campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.COMPLETED.name)
+                                logger.info(" Campaign Schedule completed $campaignId")
+                            }
+                        }
+                        campaign.get().typeOfCampaign.equals(TypeOfCampaign.AB_TEST) && !campaign.get().status.equals(CampaignStatus.AB_COMPLETED) -> {
+                            campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.AB_COMPLETED.name)
+                            logger.info(" Campaign Schedule Ab completed $campaignId")
+                            val runType = campaign.get().abCampaign?.runType ?: RunType.AUTO
+                            if (nextExecutionDate == null) {
+                                if (runType.equals(RunType.AUTO)) {
+                                    campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.COMPLETED.name)
+                                    logger.info(" Campaign Schedule completed $campaignId")
+                                } else {
+                                    //Pausing the campaign because its manual type.
+                                    campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.PAUSED.name)
+                                    pause(campaignId)
+                                    logger.info(" Campaign Schedule paused $campaignId")
+                                }
+                            }
+                        }
+                        else -> {
+                            campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.COMPLETED.name)
+                            logger.info(" Campaign Schedule completed $campaignId")
+                        }
+                    }
+                }
+
             }
             status == JobActionStatus.Status.OK -> {
                 campaignRepository.updateScheduleStatus(campaignId, clientId, actionToCampaignStatus(actionPerformed).name)
@@ -882,8 +922,12 @@ class CampaignService {
         eventStream.outTestCampaign().send(MessageBuilder.withPayload(campaign).build())
     }
 
-    fun runManualCampaign(campaignId: Long,clientId: Long){
-        eventStream.triggerManualCampaign().send(MessageBuilder.withPayload(Pair(campaignId,clientId)).build())
+    fun runManualCampaign(campaignId: Long, clientId: Long) {
+        //TODO perfrom some check if current time is before 2nd . or after last.
+        //TODO if its one time then update it to complete here.  resume campaign here.
+        val cronParser = CronSequenceGenerator("")
+
+        eventStream.triggerManualCampaign().send(MessageBuilder.withPayload(Pair(campaignId, clientId)).build())
     }
 
 }

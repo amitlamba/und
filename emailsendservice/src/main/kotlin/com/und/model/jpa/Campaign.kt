@@ -2,7 +2,9 @@ package com.und.model.jpa
 
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import javax.persistence.*
 import javax.validation.constraints.NotNull
 
@@ -68,6 +70,10 @@ class Campaign {
 
     @Column(name = "from_user")
     var fromUser: String? = null
+
+    @Column(name = "schedule")
+    @NotNull
+    var schedule: String? = null
 
     @Enumerated(EnumType.STRING)
     @NotNull
@@ -159,5 +165,78 @@ enum class CampaignStatus {
     DELETED,
     STOPPED,
     COMPLETED,
-    FORCE_PAUSED
+    FORCE_PAUSED,
+    AB_COMPLETED
+}
+
+
+class Schedule {
+    var oneTime: ScheduleOneTime? = null
+    var multipleDates: ScheduleMultipleDates? = null
+    var recurring: ScheduleRecurring? = null
+}
+
+class ScheduleOneTime {
+    var nowOrLater: Now? = Now.Later
+    var campaignDateTime: CampaignTime? = null
+}
+
+class ScheduleMultipleDates {
+    var campaignDateTimeList: List<CampaignTime> = mutableListOf()
+}
+
+class ScheduleRecurring {
+    lateinit var cronExpression: String
+    var scheduleStartDate: LocalDate? = null
+    var scheduleEnd: ScheduleEnd? = null
+}
+
+class CampaignTime {
+    lateinit var date: LocalDate
+    var hours: Int? = 0
+    var minutes: Int? = 0
+    lateinit var ampm: AmPm
+
+    fun toLocalDateTime(): LocalDateTime {
+
+        val minutes = minutes ?: 0
+        val hour = ampm.let { amPm ->
+
+            hours?.let {h->
+                when (amPm) {
+                    AmPm.PM -> {
+                        if (h in 1..11) h + 12 else h
+                    }
+                    AmPm.AM -> {
+                        if (h == 12) h - 12 else h
+                    }
+                }
+            }
+
+        } ?: 0
+        val localTime = LocalTime.of(hour, minutes)
+        return LocalDateTime.of(date, localTime)
+    }
+}
+
+class ScheduleEnd {
+    var endType: ScheduleEndType? = null
+    var endsOn: LocalDate? = null
+    var occurrences: Int = 0
+}
+
+enum class ScheduleEndType {
+    NeverEnd,
+    EndsOnDate,
+    Occurrences
+}
+
+enum class Now {
+    Now,
+    Later
+}
+
+enum class AmPm {
+    AM,
+    PM
 }

@@ -17,7 +17,7 @@ class AbCampaignJobService(private val jobService: JobService, private val event
 
     fun executeJob(pair: Pair<String, String>): String {
 
-        logger.info("The job has begun...")
+        logger.info("The job has begin...")
         try {
             eventStream.let { stream ->
                 stream.abCampaignTrigger().send(MessageBuilder.withPayload(pair).build())
