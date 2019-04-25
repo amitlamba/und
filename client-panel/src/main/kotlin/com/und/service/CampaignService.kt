@@ -1,6 +1,7 @@
 package com.und.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.sun.org.apache.xpath.internal.operations.Bool
 import com.und.common.utils.loggerFor
 import com.und.config.EventStream
 import com.und.model.*
@@ -20,6 +21,7 @@ import com.und.web.model.*
 import com.und.web.model.AbCampaign
 import com.und.web.model.EmailTemplate
 import com.und.web.model.Variant
+import io.lettuce.core.BitFieldArgs
 import org.hibernate.exception.ConstraintViolationException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cache.annotation.CachePut
@@ -32,8 +34,9 @@ import org.springframework.scheduling.support.CronSequenceGenerator
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
+import java.time.*
 import java.util.*
+import kotlin.Comparator
 import com.und.web.model.Campaign as WebCampaign
 import com.und.web.model.TestCampaign as WebTestCampaign
 import com.und.model.jpa.AbCampaign as JpaAbCampaign
@@ -922,12 +925,139 @@ class CampaignService {
         eventStream.outTestCampaign().send(MessageBuilder.withPayload(campaign).build())
     }
 
-    fun runManualCampaign(campaignId: Long, clientId: Long) {
-        //TODO perfrom some check if current time is before 2nd . or after last.
-        //TODO if its one time then update it to complete here.  resume campaign here.
-        val cronParser = CronSequenceGenerator("")
+    fun runManualCampaign(campaignId: Long, clientId: Long,timeZone: ZoneId) {
+        //On live campaign run type not playing any role.
+        val campaign = campaignRepository.findByIdAndClientID(campaignId,clientId)
+        campaign.ifPresent {
+            val scheduleJson = it.schedule
+            if(scheduleJson!=null && scheduleJson.isNotBlank()){
+                val schedule = objectMapper.readValue(scheduleJson,Schedule::class.java)
+                val (runRemaining,resumeOrNot)=runRemainingOrResumeOrNot(LocalDateTime.now(),schedule,timeZone)
+                if(runRemaining){
+                    logger.info("Manual campaign is triggered for clientId ${clientId}")
+                    eventStream.triggerManualCampaign().send(MessageBuilder.withPayload(Pair(campaignId, clientId)).build())
+                }
+                if(resumeOrNot){
+                    logger.info("Manual Type Campaign is resumed for clientId ${clientId}")
+                    resume(campaignId)
+                }else{
+                    logger.info("Manual Type Campaign is completed for clientId ${clientId}")
+                    campaignRepository.updateScheduleStatus(campaignId, clientId, CampaignStatus.COMPLETED.name)
+                }
 
-        eventStream.triggerManualCampaign().send(MessageBuilder.withPayload(Pair(campaignId, clientId)).build())
+            }
+        }
+
+    }
+    private fun runRemainingOrResumeOrNot(now:LocalDateTime,schedule: Schedule,timeZone: ZoneId):Pair<Boolean,Boolean>{
+        var resumeRemaining:Boolean = false
+        var resumeOrNot:Boolean = false
+        schedule.oneTime?.let {
+            resumeRemaining = true
+        }
+        schedule.multipleDates?.let {
+            val executionDates = mutableListOf<LocalDateTime>()
+            it.campaignDateTimeList.forEach {
+                executionDates.add(it.toLocalDateTime())
+            }
+            //sort execution date
+            Collections.sort(executionDates, object:Comparator<LocalDateTime>{
+                override fun compare(o1: LocalDateTime?, o2: LocalDateTime?): Int {
+                    return if(o1 !=null && o2!=null)  o1.compareTo(o2)  else 0
+                }
+            })
+            return getStatusForMultiDate(executionDates,now)
+        }
+        schedule.recurring?.let {
+            val endDate=it.scheduleEnd
+            val startDate=it.scheduleStartDate!!
+            when(endDate?.endType){
+                ScheduleEndType.Occurrences -> {
+                    val executionDates = getExecutionTimes(startDate=startDate,occurence = endDate.occurrences, cronExpression = it.cronExpression,endDate = null,timeZone = timeZone)
+                    return getStatusForMultiDate(executionDates,now)
+                }
+                ScheduleEndType.EndsOnDate -> {
+                    val endTime=endDate.endsOn
+                    val executionTimes = getExecutionTimes(startDate = startDate,occurence = null ,cronExpression = it.cronExpression,endDate = endTime,timeZone = timeZone)
+                    return getStatusForMultiDate(executionTimes,now)
+                }
+                ScheduleEndType.NeverEnd -> {
+                    val executionTimes = getExecutionTimes(startDate = startDate,occurence = null ,cronExpression = it.cronExpression,endDate = null,neverEnd = true,timeZone = timeZone)
+                    return getStatusForMultiDate(executionTimes,now)
+                }
+                else ->{}
+            }
+        }
+        return Pair(resumeRemaining,resumeOrNot)
     }
 
+    private fun getExecutionTimes(startDate:LocalDate,occurence:Int?,cronExpression:String,endDate:LocalDate?,neverEnd:Boolean=false,timeZone: ZoneId):List<LocalDateTime>{
+        val cronParser = CronSequenceGenerator(cronExpression)
+        val executionDates = mutableListOf<LocalDateTime>()
+
+        occurence?.let {
+            for ( i in 0..it-1 step 1){
+                executionDates.add(dateToLocalDateTime(cronParser.next(localDateToDate(startDate,timeZone)),timeZone))
+            }
+        }
+
+        endDate?.let {
+            val enddate = localDateToDate(it,timeZone)
+            var nextDate :Date = cronParser.next(localDateToDate(startDate,timeZone))
+            do{
+                executionDates.add(dateToLocalDateTime(nextDate,timeZone))
+                nextDate = cronParser.next(nextDate)
+            }while (nextDate.compareTo(enddate)<=0)
+        }
+
+        if(neverEnd){
+            val firstDate= cronParser.next(localDateToDate(startDate,timeZone))
+            executionDates.add(dateToLocalDateTime(firstDate,timeZone))
+            val secondDate= cronParser.next(firstDate)
+            executionDates.add(dateToLocalDateTime(secondDate,timeZone))
+            executionDates.add(dateToLocalDateTime(cronParser.next(getMaxDateAfterYear(1,timeZone)),timeZone))
+        }
+        return executionDates
+    }
+    private fun getStatusForMultiDate(executionDates:List<LocalDateTime>,now: LocalDateTime):Pair<Boolean,Boolean>{
+        var resumeRemaining:Boolean = false
+        var resumeOrNot:Boolean = false
+
+        if(executionDates.size==1){
+            resumeRemaining = true
+        }else{
+            if(executionDates[1].compareTo(now)>0){
+                resumeRemaining = true
+                //TODO enhancement  ---> if next execution time is 1 hour after from now then user receive two
+                // notification in short period of time one for ab test remaining and other from next execution time
+                resumeOrNot = true
+            }else if(executionDates.last().compareTo(now)>0){
+                resumeOrNot = true
+            }
+        }
+
+        return Pair(resumeRemaining,resumeOrNot)
+    }
+
+    // we are using server timezone when building jobdescriptor
+    private fun localDateToDate(date: LocalDate, timeZone: ZoneId): Date {
+        val defaultOffset = OffsetDateTime.now(timeZone).offset
+        val seconds = date.toEpochSecond(LocalTime.now(timeZone), defaultOffset)
+        return Date.from(Instant.ofEpochSecond(seconds))
+    }
+
+    fun dateToLocalDateTime(date: Date, timeZone: ZoneId): LocalDateTime {
+        return LocalDateTime.ofInstant(date.toInstant(), timeZone)
+    }
+
+    fun localDateTimeToDate(date: LocalDateTime, timeZone: ZoneId): Date {
+        val defaultOffset = OffsetDateTime.now(timeZone).offset
+        val seconds = date.toEpochSecond(defaultOffset)
+        return Date.from(Instant.ofEpochSecond(seconds))
+    }
+
+    fun getMaxDateAfterYear(year: Int, timeZone: ZoneId): Date {
+        val localDateTime = LocalDateTime.now(timeZone).plusYears(year.toLong())
+        return localDateTimeToDate(localDateTime, timeZone)
+    }
 }

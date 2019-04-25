@@ -113,18 +113,8 @@ class CampaignListener {
             val userId = liveSegmentUser.userId
 
 
-//            trackSegmentUser(clientId, liveSegmentId, segmentId, userId)
-            /***FIXED findById return empty but user present for this userId
-             *case 1 Id is String type in our repository but in real case its ObjectId in mongo.I try it but no success.
-             *case 2 I think spring resolve it to id field as we see in jpa  but in mongo its _id This may be reason but not sure.
-             **/
-//            val user = eventUserRepository.findById(userId).orElseThrow { EventUserNotFoundException("User Not Found") }
             val user = mongoTemplate.find(Query().addCriteria(Criteria.where("_id").`is`(ObjectId(userId))), EventUser::class.java, "${clientId}_eventUser")
             if (user.isEmpty()) throw EventUserNotFoundException("User Not Found.")
-            //get all campaigns associated with live segmentid
-//            val campaignList = campaignService.findLiveSegmentCampaign(segmentId, clientId)
-            //refresh cache I m thinking aboout schedulae ajob which update the status of live campaign
-            //a stop cam newer start again
 
             val campaignList = /*campaignService.findAllLiveSegmentCampaignBySegmentId(segmentId, clientId)*/ getCampaigns(clientId, segmentId)
             val filteredCampaigns = mutableListOf<Campaign>()

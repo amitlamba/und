@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import java.time.ZoneId
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 import javax.validation.Valid
@@ -219,7 +220,8 @@ class CampaignController {
     @GetMapping(value = ["run/manually/{campaignId}"])
     fun triggerCampaignManually(@PathVariable(value = "campaignId",required = true) campaignId: Long):Response{
         val clientID=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
-        campaignService.runManualCampaign(campaignId,clientID)
+        val timeZone=AuthenticationUtils.principal.timeZoneId
+        campaignService.runManualCampaign(campaignId,clientID,ZoneId.of(timeZone))
         return Response(status = ResponseStatus.SUCCESS)
     }
 

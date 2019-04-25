@@ -106,9 +106,6 @@ class CampaignService {
         eventUserRecordRepository.save(record)
 
         val time = LocalDateTime.now().plusMinutes(campaign.abCampaign?.waitTime?.toLong() ?: 1)
-//        //TODO update ab complete status
-//        val campaignId = campaign.id
-//        sendStatusToQueue(clientId,campaignId?:-1,"",JobDescriptor.Action.COMPLETED,true)
         val descriptor = buildJobDescriptor(campaign, "AB_${campaign.id}", JobDescriptor.Action.CREATE, time)
         eventStream.scheduleJobSend().send(MessageBuilder.withPayload(descriptor).build())
     }
@@ -166,7 +163,6 @@ class CampaignService {
                 executeRestOfCampaign(campaignId, clientId, campaign, templateId)
             }
             RunType.MANUAL -> {
-                //TODO if its manual then write end point to trigger rest of campaign manually.
                 if (campaign.abCampaign?.remind ?: false) {
                     //TODO send reminder to client
                 }
