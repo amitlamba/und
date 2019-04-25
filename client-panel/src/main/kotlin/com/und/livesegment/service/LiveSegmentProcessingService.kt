@@ -165,7 +165,8 @@ class LiveSegmentProcessingService {
                 //Tracking user
                 trackSegmentUser(event.clientId, liveSegment.id, liveSegment.segmentId, event.userId,event.userIdentified)
                 //Fixed send only if userIdentified is true
-                if(event.userIdentified) sendToLiveSegmentQueue(event, liveSegment)
+
+                /*if(event.userIdentified)*/ sendToLiveSegmentQueue(event, liveSegment)
 
             }
             else{
@@ -204,7 +205,8 @@ class LiveSegmentProcessingService {
                 //Tracking user
                 trackSegmentUser(event.clientId, liveSegment.id, liveSegment.segmentId, event.userId,event.userIdentified)
                 //Fixed send to campaign queue if user is identified only
-                if (event.userIdentified) sendToLiveSegmentQueue(event, liveSegment)
+
+                /*if (event.userIdentified)*/ sendToLiveSegmentQueue(event, liveSegment)
             }
         }
     }
