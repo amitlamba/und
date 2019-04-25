@@ -1,7 +1,6 @@
 package com.und.web.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.netflix.discovery.converters.Auto
 import com.und.common.utils.loggerFor
 import com.und.model.jpa.CampaignType
 import com.und.model.jpa.Schedule
@@ -17,6 +16,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
+import java.time.ZoneId
 import java.util.*
 import javax.servlet.http.HttpServletRequest
 import javax.validation.Valid
@@ -206,6 +206,23 @@ class CampaignController {
     fun getClientFromAddressAndSrp(): List<ClientEmailSettIdFromAddrSrp> {
         val clientId=AuthenticationUtils.clientID?:throw AccessDeniedException("Access denied")
         return campaignService.getClientFromAddressAndSrp(clientId)
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping(value=["/save/ab"])
+    fun saveAbCampaign(@Valid @RequestBody abCampaign: AbCampaign):Response{
+        val clientID=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        //TODO check template and segment exists.
+        campaignService.saveAbCampaign(abCampaign,clientID)
+        return Response(status = ResponseStatus.SUCCESS)
+    }
+
+    @GetMapping(value = ["run/manually/{campaignId}"])
+    fun triggerCampaignManually(@PathVariable(value = "campaignId",required = true) campaignId: Long):Response{
+        val clientID=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
+        val timeZone=AuthenticationUtils.principal.timeZoneId
+        campaignService.runManualCampaign(campaignId,clientID,ZoneId.of(timeZone))
+        return Response(status = ResponseStatus.SUCCESS)
     }
 
 }

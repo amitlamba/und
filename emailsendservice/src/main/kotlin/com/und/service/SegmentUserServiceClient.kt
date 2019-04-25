@@ -16,4 +16,6 @@ interface SegmentUserServiceClient {
     fun users(@PathVariable("segmentId") segmentId: Long, @PathVariable("clientId") clientId: Long,  @RequestHeader("Authorization") token: String,@RequestParam("include")includeUsers:IncludeUsers,@RequestParam("fromCampaign")fromCampaign:String): List<EventUser>
 
 
+    @GetMapping("/report/funnel/winner/template")
+    fun getWinnerTemplate(@RequestParam campaignId:Long,@RequestParam clientId: Long,@RequestHeader("Authorization")token: String,@RequestParam include:String):Long
 }

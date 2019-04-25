@@ -1,10 +1,12 @@
 package com.und.report.web.controller
 
+import com.und.model.jpa.Campaign
 import com.und.model.IncludeUsers
 import com.und.report.service.FunnelReportService
 import com.und.report.web.model.FunnelReport
 import com.und.report.web.model.FunnelStepAndFilter
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
 
 @RestController("/report/funnel")
@@ -47,5 +49,11 @@ class FunnelController {
         funnelFilter.filters=body.filters
         //FIXME All user make more sense then known.
         return funnelReportService.funnel(funnelFilter,IncludeUsers.KNOWN)
+    }
+
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
+    @GetMapping("/winner/template")
+    fun winnerTemplate(@RequestParam("campaignId")campaignId:Long,@RequestParam("clientId")clientId:Long,@RequestParam("include")includeUsers: String):Long{
+        return funnelReportService.getWinnerTemplate(clientId,campaignId,IncludeUsers.valueOf(includeUsers))
     }
 }

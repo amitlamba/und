@@ -140,7 +140,6 @@ class TriggerDescriptor {
 
         return triggerBuilder.build()
 
-
     }
 
     private fun advanceExpiredToNow(timeZone: ZoneId ,firetime: LocalDateTime?): ZonedDateTime? {

@@ -69,7 +69,8 @@ class LiveSegmentProcessingService {
     private lateinit var eventStream: EventStream
 
     @Autowired
-    private lateinit var mongoTemplate:MongoTemplate
+    private lateinit var mongoTemplate: MongoTemplate
+
 
     @StreamListener("inEventForLiveSegment")
     fun processEventMessage(event: EventMessage) {
@@ -108,6 +109,7 @@ class LiveSegmentProcessingService {
 
         val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, params.clientId.toLong(), params.userId,IncludeUsers.ALL)
         if (userPresentInSegment) {
+
             val event=eventRepository.findEventByObjectId(ObjectId(params.startEventId),params.clientId.toLong())
             if(event.isPresent){
             trackSegmentUser(params.clientId.toLong(), params.segmentId.toLong(), liveSegment.segmentId, params.userId,event.get().userIdentified)
@@ -159,10 +161,12 @@ class LiveSegmentProcessingService {
             }
             val timeZoneId = userSettingsService.getTimeZoneByClientId(event.clientId)
             if (liveSegment.endEvent.isBlank()){
+
                 //Tracking user
                 trackSegmentUser(event.clientId, liveSegment.id, liveSegment.segmentId, event.userId,event.userIdentified)
                 //Fixed send only if userIdentified is true
-                if(event.userIdentified) sendToLiveSegmentQueue(event, liveSegment)
+
+                /*if(event.userIdentified)*/ sendToLiveSegmentQueue(event, liveSegment)
 
             }
             else{
@@ -201,7 +205,8 @@ class LiveSegmentProcessingService {
                 //Tracking user
                 trackSegmentUser(event.clientId, liveSegment.id, liveSegment.segmentId, event.userId,event.userIdentified)
                 //Fixed send to campaign queue if user is identified only
-                if (event.userIdentified) sendToLiveSegmentQueue(event, liveSegment)
+
+                /*if (event.userIdentified)*/ sendToLiveSegmentQueue(event, liveSegment)
             }
         }
     }
@@ -352,5 +357,6 @@ class LiveSegmentProcessingService {
          */
 //        val v=liveSegmentTrackRepository.save(liveSegmentTrack)
     }
+
 
 }

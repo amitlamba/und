@@ -10,7 +10,8 @@ enum class CampaignStatus {
     DELETED,
     STOPPED,
     COMPLETED,
-    FORCE_PAUSED
+    FORCE_PAUSED,
+    AB_COMPLETED
 }
 
 enum class LiveCampaignStatus(order:Int){

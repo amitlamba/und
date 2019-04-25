@@ -1,6 +1,4 @@
-package com.und.model
-
-import java.util.*
+package com.und.model.utils
 
 class JobActionStatus {
     var status: Status = Status.OK
@@ -21,6 +19,5 @@ class JobAction(
         val clientId: String,
         val campaignId: String,
         val campaignName: String,
-        val action: JobDescriptor.Action,
-        val nextTimeStamp: Date?=null
+        val action: JobDescriptor.Action
 )

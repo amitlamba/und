@@ -13,7 +13,6 @@ import com.und.repository.jpa.ClientSettingsRepository
 import com.und.repository.mongo.SegmentReachabilityRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.SegmentService
-import jdk.internal.org.objectweb.asm.TypeReference
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired

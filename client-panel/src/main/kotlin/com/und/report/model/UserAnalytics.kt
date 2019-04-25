@@ -2,7 +2,6 @@ package com.und.report.model
 
 import com.und.web.model.GlobalFilterType
 import org.springframework.data.annotation.Id
-import sun.awt.EventListenerAggregate
 import java.io.Serializable
 import java.time.LocalDate
 import java.util.*
@@ -33,4 +32,6 @@ data class FunnelData(var userData: List<UserData> = emptyList(),  var eventsOrd
 data class SegmentTrendCount(var date:String,var count:Count)
 
 data class Count(val known:Int,val unknown:Int,val all:Int)
+
+data class WinnerTemplate(var percentage:Long=0,var varient:Int=0)
 
