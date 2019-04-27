@@ -31,7 +31,7 @@ class EmailCampaign {
     lateinit var campaign: Campaign
 
     @Column(name = "email_template_id")
-    @NotNull
+    //@NotNull
     var templateId: Long? = null
 
     @field:CreationTimestamp

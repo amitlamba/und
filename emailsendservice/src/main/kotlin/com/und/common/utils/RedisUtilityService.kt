@@ -13,8 +13,8 @@ class RedisUtilityService {
     fun storingQueueOfTemplateIdToRedis(key:String,listOfTemplateId:MutableList<Int>){
         redisTemplalte.opsForList().leftPushAll(key,listOfTemplateId)
     }
-    fun gettingFirstTemplateIdInQueue(key: String):Int{
-        return redisTemplalte.opsForList().leftPop(key) ?: 0
+    fun gettingFirstTemplateIdInQueue(key: String):Int?{
+        return redisTemplalte.opsForList().leftPop(key)
     }
     fun addingTheTemplateIdToEndOfQueue(key: String,templateId:Int){
         redisTemplalte.opsForList().rightPush(key,templateId)

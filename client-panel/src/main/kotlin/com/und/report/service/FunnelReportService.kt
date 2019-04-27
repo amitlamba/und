@@ -9,6 +9,6 @@ interface FunnelReportService {
 //    fun funnel(funnelFilter: FunnelReport.FunnelReportFilter): List<FunnelReport.FunnelStep>
     fun getWinnerTemplate(clientId:Long,campaignId:Long,includeUsers: IncludeUsers):Long
 
-    fun funnel(funnelFilter: FunnelReport.FunnelReportFilter,includeUsers: IncludeUsers): List<FunnelReport.FunnelStep>
+    fun funnel(funnelFilter: FunnelReport.FunnelReportFilter,includeUsers: IncludeUsers,clientId: Long?=null): List<FunnelReport.FunnelStep>
 
 }

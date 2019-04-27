@@ -53,7 +53,7 @@ class FunnelController {
 
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @GetMapping("/winner/template")
-    fun winnerTemplate(@RequestParam("campaignId")campaignId:Long,@RequestParam("clientId")clientId:Long,@RequestParam("include")includeUsers: String):Long{
+    fun winnerTemplate(@RequestParam("campaignId",required = true)campaignId:Long,@RequestParam("clientId",required = true)clientId:Long,@RequestParam("include",required = true)includeUsers: String):Long{
         return funnelReportService.getWinnerTemplate(clientId,campaignId,IncludeUsers.valueOf(includeUsers))
     }
 }

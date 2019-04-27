@@ -31,7 +31,7 @@ class SmsCampaign {
     lateinit var campaign: Campaign
 
     @Column(name = "sms_template_id")
-    @NotNull
+    //@NotNull
     var templateId: Long? = null
 
     @field:CreationTimestamp

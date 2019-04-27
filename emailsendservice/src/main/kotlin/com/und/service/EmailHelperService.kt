@@ -82,7 +82,7 @@ class EmailHelperService {
                 toEmailAddresses = email.toEmailAddresses,
                 emailTemplateId = email.emailTemplateId,
                 emailSubject = email.emailSubject ?: "NA",
-                campaignId = email.campaignId,
+                campaignId = email.campaignId?:-1,  // campaign id is never null because we save in mongo only when campaign id is not null.
                 status = emailStatus,
                 userID = email.eventUser?.id,
                 segmentId = email.segmentId

@@ -88,15 +88,19 @@ class Campaign {
     var endDate:LocalDateTime?=null
 
     @Column(name="type_campaign",nullable = false)  //live,normal,split,ab_test
-    var typeOfCampaign:TypeOfCampaign?=null
+    @Enumerated(EnumType.STRING)
+    lateinit var typeOfCampaign:TypeOfCampaign
 
-    @OneToOne(mappedBy = "campaign",cascade = [CascadeType.ALL])  //bi directional
-    @Column(name="ab_campaign")
+    @OneToOne(mappedBy = "campaign",cascade = [CascadeType.ALL])
     var abCampaign:AbCampaign?=null
+        set(value) {
+            field = value
+            field?.campaign = this
+        }
 
-    @OneToMany(cascade = [CascadeType.ALL])
+    @OneToMany(cascade = [CascadeType.ALL],fetch = FetchType.EAGER)
     @JoinColumn(name="campaign_id")
-    var variants:List<Variant>? = null
+    var variants:List<Variant> ?= null
 
 
 }
@@ -113,21 +117,19 @@ enum class TypeOfCampaign {
 class AbCampaign {
 
     @Id
+    @Column(name="id")
     var id:Long?=null
-    @Column(name="campaign_id",nullable = false)
-
-    @JoinColumn(name = "campaign_id")
-    lateinit var campaign:Campaign  //one to one
+    @OneToOne(cascade = [CascadeType.ALL])
+    @JoinColumn(name="campaign_id")
+    var campaign:Campaign?=null  //one to one
     @Column(name = "run_type")
     var runType:RunType = RunType.AUTO
-    @Column(name="rewind")
+    @Column(name="remind")
     var remind:Boolean =false
     @Column(name="wait_time")
     var waitTime:Int?=null     //in minutes
     @Column(name="sample_size")
     var sampleSize:Int?=null
-//    @Column(name="live_sample_size")
-//    var liveSampleSize:Int?=null   //optional we are taking this info in variant also
 
 }
 
@@ -135,17 +137,20 @@ class AbCampaign {
 @Table(name="variant")
 class Variant {
     @Id
+    @Column(name="id")
     var id:Long?=null
+    @NotNull
     @Column(name="percentage",nullable = false)
     var percentage:Int?=null
-    @Column(name="name")
-    var name:String?=null
-//    @Column(name="counter")
-//    var counter:Int?=null
+    @NotNull
+    @Column(name="name",nullable = false)
+    lateinit var name:String
     @Column(name="users")
     var users:Int?=null
     @Column(name="winner")
+    @NotNull
     var winner:Boolean=false
+    @NotNull
     @Column(name="template_id",nullable = false)
     var templateId:Int?=null
 }

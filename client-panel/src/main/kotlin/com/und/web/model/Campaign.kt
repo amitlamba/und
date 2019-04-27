@@ -23,8 +23,8 @@ class Campaign {
     lateinit var campaignType: CampaignType
     @NotNull
     var segmentationID: Long?=null
-    @NotNull
-    var templateID: Long?= -1
+    //@NotNull
+    var templateID: Long?= null
     var status: CampaignStatus? = null
     var dateCreated: LocalDateTime? = null
     var dateModified: LocalDateTime? = null

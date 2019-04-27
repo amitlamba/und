@@ -38,6 +38,9 @@ interface EventStream {
     @Input("clientEmailReceive")
     fun clientEmailSend(): SubscribableChannel
 
+    @Output("clientEmailSend")
+    fun clientEmailOut(): MessageChannel
+
     @Input("EmailUpdateReceive")
     fun emailUpdateEvent(): SubscribableChannel
 
