@@ -1090,8 +1090,12 @@ class CampaignService {
     // we are using server timezone when building jobdescriptor
     private fun localDateToDate(date: LocalDate, timeZone: ZoneId): Date {
         val defaultOffset = OffsetDateTime.now(timeZone).offset
+
+        /** jdk 9
         val seconds = date.toEpochSecond(LocalTime.now(timeZone), defaultOffset)
         return Date.from(Instant.ofEpochSecond(seconds))
+        */
+        return Date.from(date.atStartOfDay().atZone(timeZone).toInstant())
     }
 
     fun dateToLocalDateTime(date: Date, timeZone: ZoneId): LocalDateTime {
