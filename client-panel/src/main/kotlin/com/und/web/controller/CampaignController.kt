@@ -100,7 +100,7 @@ class CampaignController {
                 throw CustomException("template with id $templateId not exist")
             }
         }
-        logger.info("campaign not saved with name ${campaign.name}")
+        logger.info("campaign not saved with name ${campaign.name} and template $templateId")
         return ResponseEntity(campaign,HttpStatus.EXPECTATION_FAILED)
     }
 
@@ -217,7 +217,8 @@ class CampaignController {
         return Response(status = ResponseStatus.SUCCESS)
     }
 
-    @GetMapping(value = ["run/manually/{campaignId}"])
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping(value = ["/run/manually/{campaignId}"])
     fun triggerCampaignManually(@PathVariable(value = "campaignId",required = true) campaignId: Long):Response{
         val clientID=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
         val timeZone=AuthenticationUtils.principal.timeZoneId

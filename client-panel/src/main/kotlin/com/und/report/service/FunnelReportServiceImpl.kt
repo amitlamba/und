@@ -62,9 +62,9 @@ class FunnelReportServiceImpl : FunnelReportService {
     private lateinit var campaignRepository:CampaignRepository
 
 
-    override fun funnel(funnelFilter: FunnelReport.FunnelReportFilter,includeUsers: IncludeUsers): List<FunnelReport.FunnelStep> {
+    override fun funnel(funnelFilter: FunnelReport.FunnelReportFilter,includeUsers: IncludeUsers,clientId: Long?): List<FunnelReport.FunnelStep> {
         logger.debug("Funnel data for funnelFilter : $funnelFilter")
-        val clientID = AuthenticationUtils.clientID
+        val clientID = if(clientId==null) AuthenticationUtils.clientID else clientId
         val userIdentified = when(includeUsers){
             IncludeUsers.KNOWN -> true
             IncludeUsers.UNKNOWN -> false
@@ -107,7 +107,7 @@ class FunnelReportServiceImpl : FunnelReportService {
             val conversionTime=(days*24*60*60).toInt()
             campaign.get().variants?.forEach {
                 val filters= buildFilters(campaignId,it.templateId!!)
-                listOfFunnelResult.add(funnel(buildConversionFunnelRequest(conversionStep,conversionTime,days,filters,segmentId),includeUsers))
+                listOfFunnelResult.add(funnel(buildConversionFunnelRequest(conversionStep,conversionTime,days,filters,segmentId),includeUsers,clientId))
                 noOfVariant++;
             }
 
@@ -137,7 +137,14 @@ class FunnelReportServiceImpl : FunnelReportService {
             }
 
             val variants =it.variants
-            return if(variants!=null) variants[winner-1].templateId?.toLong()?:0 else 0
+
+            return if(variants!=null){
+                it.emailCampaign?.templateId = variants[winner-1].templateId?.toLong()?:0
+                campaignRepository.save(it)
+                variants[winner-1].templateId?.toLong()?:0
+            } else {
+                0
+            }
         }else{
             logger.error("No campaign present for campaignid $campaignId and clientId $clientId to calculate winner Template.")
             return 0
@@ -161,7 +168,7 @@ class FunnelReportServiceImpl : FunnelReportService {
 
     private fun buildStep(conversionStep:String):List<FunnelReport.Step>{
         return listOf(
-                FunnelReport.Step(1, "Notification Received"),
+                FunnelReport.Step(1, "Notification Sent"),
                 FunnelReport.Step(2, "Notification Clicked"),
                 FunnelReport.Step(3, conversionStep)
         )
@@ -270,14 +277,16 @@ class FunnelReportServiceImpl : FunnelReportService {
         val aggregationOperations = mutableListOf<AggregationOperation>()
 
         if(funnelFilter.filters.isNotEmpty()) {
-            val campaignId= funnelFilter.filters[0].values[0].toLong()
+            val (campaignId,templateId) = if(funnelFilter.filters.size==1) Pair(funnelFilter.filters[0].values[0].toLong(),null) else Pair(funnelFilter.filters[0].values[0].toLong(),funnelFilter.filters[1].values[0].toLong())
             var listofCriteria= mutableListOf<Criteria>()
             if(filters[0].name.equals("userId")){
             listofCriteria.add(Criteria("userId").`in`(filters[0].values))
             }
             listofCriteria.add(Criteria().orOperator(Criteria().andOperator(
                     Criteria.where("name").`is`(funnelFilter.steps[0].eventName),
-                    Criteria("attributes.campaign_id").`is`(campaignId)), Criteria("name").`is`(funnelFilter.steps[1].eventName)))
+                    * eventAttributesSpecificCriteria(campaignId, templateId).toTypedArray()),
+                    Criteria().andOperator(Criteria("name").`is`(funnelFilter.steps[1].eventName),*eventAttributesSpecificCriteria(campaignId, null).toTypedArray())
+            ,Criteria("name").`is`(funnelFilter.steps[2].eventName)))
             val matchOperation=Aggregation.match(Criteria().andOperator(*listofCriteria.toTypedArray()))
             aggregationOperations.add(matchOperation)
         }else{
@@ -295,6 +304,12 @@ class FunnelReportServiceImpl : FunnelReportService {
         return Aggregation.newAggregation(*aggregationOperations.toTypedArray())
     }
 
+    private fun eventAttributesSpecificCriteria(campaignId: Long,templateId:Long?):List<Criteria>{
+        val listOfCriteria = mutableListOf<Criteria>()
+        listOfCriteria.add(Criteria.where("attributes.campaign_id").`is`(campaignId))
+        if(templateId!=null) listOfCriteria.add(Criteria.where("attributes.template_id").`is`(templateId))
+        return listOfCriteria
+    }
     private fun createDateFilter(tz: ZoneId, funnelFilter: FunnelReport.FunnelReportFilter): GlobalFilter {
         val dateFilter = GlobalFilter()
         dateFilter.globalFilterType = GlobalFilterType.EventProperties

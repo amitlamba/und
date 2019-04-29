@@ -129,7 +129,7 @@ class Campaign {
         field?.campaign = this
     }
 
-    @OneToMany(cascade = [CascadeType.ALL])
+    @OneToMany(cascade = [CascadeType.ALL],fetch = FetchType.EAGER)
     @JoinColumn(name="campaign_id")
     var variants:List<Variant> ?= null
 }

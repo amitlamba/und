@@ -11,15 +11,14 @@ class AbCampaign {
     @Id
     @Column(name="id")
     @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "abcampaign_seq_generator")
-    @SequenceGenerator(name="abcampaign_seq_generator",sequenceName = "ab_campaign_seq_id")
+    @SequenceGenerator(name="abcampaign_seq_generator",sequenceName = "ab_campaign_seq_id",allocationSize = 1)
     var id:Long?=null
     @OneToOne(cascade = [CascadeType.ALL])
     @JoinColumn(name="campaign_id")
     var campaign:Campaign?=null
-    @NotNull
+    //@NotNull
     @Column(name = "run_type")
     var runType:RunType = RunType.AUTO
-    @NotNull
     @Column(name="remind")
     var remind:Boolean = true
     @Column(name="wait_time")
@@ -35,7 +34,7 @@ class Variant {
     @Id
     @Column(name="id")
     @GeneratedValue(strategy = GenerationType.IDENTITY,generator = "variant_seq_generator")
-    @SequenceGenerator(name="variant_seq_generator",sequenceName = "variant_seq_id")
+    @SequenceGenerator(name="variant_seq_generator",sequenceName = "variant_seq_id",allocationSize = 1)
     var id:Long?=null
     @NotNull
     @Column(name="percentage",nullable = false)

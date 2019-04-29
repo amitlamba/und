@@ -16,17 +16,20 @@ import com.und.repository.mongo.EventUserRepository
 import com.und.utils.loggerFor
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.ZoneId
+import javax.mail.internet.InternetAddress
 
 @Service
 class CampaignService {
 
     companion object {
         protected val logger = loggerFor(CampaignService::class.java)
+        private val campaignReminderTemplateId = 6L
     }
 
     @Autowired
@@ -73,6 +76,15 @@ class CampaignService {
 
     @Autowired
     private lateinit var redisUtiltiyService:RedisUtilityService
+
+    @Autowired
+    private lateinit var clientRepository: ClientRepository
+
+    @Value(value = "\${und.system.email.setting.id}")
+    var clientEmailSettingId:Long?=null
+
+    @Value(value = "\${und.system.from.address}")
+    lateinit var systemFromAddress:String
 
     fun executeCampaign(campaignId: Long, clientId: Long) {
         //if client not trigger manual campaign then next time(if its multidate) we automatically send winner template.
@@ -128,7 +140,7 @@ class CampaignService {
         val usersData = getUsersData(campaign.segmentationID!!, clientId, campaign.campaignType)
         //Finding sample size of users
         val usersSize = try {
-            Math.abs(usersData.size * (campaign.abCampaign?.sampleSize ?: 0).div(100))
+            (usersData.size * (campaign.abCampaign?.sampleSize ?: 0)).div(100)
         } catch (ex: Exception) {
             0
         }
@@ -137,7 +149,7 @@ class CampaignService {
         listOfVariant?.forEach {
             //calculating the no of users for this variant from sample size
             val users = try {
-                Math.abs((it.percentage ?: 0) * usersSize.div(100))
+                ((it.percentage ?: 0) * usersSize).div(100)
             } catch (ex: Exception) {
                 0
             }
@@ -146,7 +158,7 @@ class CampaignService {
                 executeCampaignForUser(campaign, usersData[i], clientId, it.templateId?.toLong())
             }
             startIndex = start + users
-            start = users
+            start = startIndex
         }
         usersData.listIterator(startIndex).forEach {
             unsentUserIds.add(ObjectId(it.id))
@@ -164,7 +176,23 @@ class CampaignService {
             }
             RunType.MANUAL -> {
                 if (campaign.abCampaign?.remind ?: false) {
-                    //TODO send reminder to client
+                    val client = clientRepository.findById(clientId).get()
+                    val dataMap = mutableMapOf<String,Any>()
+                    dataMap.put("name",client.name)
+                    dataMap.put("phone",client.phone?:"")
+                    dataMap.put("email",client.email)
+                    dataMap.put("firstname",client.firstname?:"")
+                    dataMap.put("lastname",client.lastname?:"")
+                    val email = Email(
+                            clientID = 1,
+                            fromEmailAddress = InternetAddress(systemFromAddress),
+                            toEmailAddresses = arrayOf(InternetAddress(client.email)),
+                            emailTemplateId = campaignReminderTemplateId,
+                            emailTemplateName = "campaignReminder",
+                            data = dataMap,
+                            clientEmailSettingId = clientEmailSettingId
+                    )
+                    eventStream.clientEmailOut().send(MessageBuilder.withPayload(email).build())
                 }
             }
         }
@@ -222,18 +250,27 @@ class CampaignService {
         if (templateId == null) {
             val listOfTemplateId = mutableListOf<Int>()
             makingTemplateIdSequenceForRedis(campaign, listOfTemplateId)
-            redisUtiltiyService.storingQueueOfTemplateIdToRedis("$clientId:${campaign.id}", listOfTemplateId)
-            templateId = redisUtiltiyService.gettingFirstTemplateIdInQueue("$clientId:${campaign.id}")
-        }
-        try {
-            executeCampaignForUser(campaign, user, clientId, templateId.toLong())
-            //sending template id to end of queue
-            redisUtiltiyService.addingTheTemplateIdToEndOfQueue("$clientId:${campaign.id}", templateId)
+            synchronized(this){
+                templateId = redisUtiltiyService.gettingFirstTemplateIdInQueue("$clientId:${campaign.id}")
+                if(templateId == null){
+                redisUtiltiyService.storingQueueOfTemplateIdToRedis("$clientId:${campaign.id}", listOfTemplateId)
+                templateId = redisUtiltiyService.gettingFirstTemplateIdInQueue("$clientId:${campaign.id}")
+                }
+            }
 
-        } catch (ex: Exception) {
-            //rollback operation adding the template id again in start of queue.
-            redisTemplalte.opsForList().leftPush("$clientId:${campaign.id}", templateId)
         }
+        templateId?.let {
+            try {
+                executeCampaignForUser(campaign, user, clientId, it.toLong())
+                //sending template id to end of queue
+                redisUtiltiyService.addingTheTemplateIdToEndOfQueue("$clientId:${campaign.id}", it)
+
+            } catch (ex: Exception) {
+                //rollback operation adding the template id again in start of queue.
+                redisTemplalte.opsForList().leftPush("$clientId:${campaign.id}", it)
+            }
+        }
+
     }
 
     /*
@@ -260,21 +297,25 @@ class CampaignService {
                 makingTemplateIdSequenceForRedis(campaign, listOfTemplateId)
                 redisUtiltiyService.storingSampleSizeToRedis("$clientId:${campaign.id}:sampleSize", campaign.abCampaign?.sampleSize ?: 0)
 
-                redisUtiltiyService.storingQueueOfTemplateIdToRedis("$clientId:${campaign.id}", listOfTemplateId)
-
-                templateId = redisUtiltiyService.gettingFirstTemplateIdInQueue("$clientId:${campaign.id}")
+                synchronized(this) {
+                    templateId = redisUtiltiyService.gettingFirstTemplateIdInQueue("$clientId:${campaign.id}")
+                    if (templateId == null) {
+                        redisUtiltiyService.storingQueueOfTemplateIdToRedis("$clientId:${campaign.id}", listOfTemplateId)
+                        templateId = redisUtiltiyService.gettingFirstTemplateIdInQueue("$clientId:${campaign.id}")
+                    }
+                }
             }
-
+            templateId?.let {
             try {
-                executeCampaignForUser(campaign, user, clientId, templateId.toLong())
+                executeCampaignForUser(campaign, user, clientId, it.toLong())
                 //right push that template id
-                redisUtiltiyService.addingTheTemplateIdToEndOfQueue("$clientId:${campaign.id}", templateId)
+                redisUtiltiyService.addingTheTemplateIdToEndOfQueue("$clientId:${campaign.id}", it)
                 //decrement the user count of sample size
                 redisUtiltiyService.decreasingTheSampleSize("$clientId:${campaign.id}:sampleSize", -1)
 
             } catch (ex: Exception) {
                 //rollback operation adding the template id again in start of queue.
-                redisTemplalte.opsForList().leftPush("$clientId:${campaign.id}", templateId)
+                redisTemplalte.opsForList().leftPush("$clientId:${campaign.id}", it)
             }
 
             val sampleSize = redisUtiltiyService.gettingSampleSize("$clientId:${campaign.id}:sampleSize")
@@ -287,7 +328,7 @@ class CampaignService {
 
                     val token = userRepository.findSystemUser().key
                             ?: throw java.lang.Exception("Not Able to get system token.")
-                     val winnerTemplateId = segmentUserServiceClient.getWinnerTemplate(campaign.id!!, clientId, token, "ALL").toInt()
+                    val winnerTemplateId = segmentUserServiceClient.getWinnerTemplate(campaign.id!!, clientId, token, "ALL").toInt()
                     //Updating live campaign ab test status to completed
                     updateCampaignStatus(CampaignStatus.AB_COMPLETED, clientId, campaign.segmentationID ?: -1)
                     redisUtiltiyService.settingWinnerTemplateForThisCampaign("$clientId:${campaign.id}:winner", winnerTemplateId)
@@ -295,6 +336,7 @@ class CampaignService {
                 }
 
             }
+        }
 
 
         } else {

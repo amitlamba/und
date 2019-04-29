@@ -8,10 +8,12 @@ import com.und.model.livesegment.LiveSegmentUser
 import com.und.model.mongo.EventUser
 import com.und.model.mongo.LiveSegmentTrack
 import com.und.model.redis.LiveSegmentCampaign
+import com.und.model.redis.LiveSegmentCampaignCache
 import com.und.model.utils.JobDescriptor
 import com.und.model.utils.TestCampaign
 import com.und.repository.mongo.EventUserRepository
 import com.und.repository.mongo.LiveSegmentTrackRepository
+import com.und.repository.redis.LiveSegmentCampaignRepository
 import com.und.service.CampaignService
 import com.und.service.TestCampaignService
 import com.und.utils.loggerFor
@@ -53,6 +55,9 @@ class CampaignListener {
     @Autowired
     private lateinit var objectMapper: ObjectMapper
 
+    @Autowired
+    private lateinit var liveSegmentCampaignRepository:LiveSegmentCampaignRepository
+
     companion object {
         val logger: Logger = loggerFor(CampaignListener::class.java)
     }
@@ -76,6 +81,7 @@ class CampaignListener {
     fun runManualCampaign(data: Pair<Long, Long>) {
         try {
             val (campaignId, clientId) = data
+            logger.debug("Manual campaign trigger with id $campaignId and $clientId")
             campaignService.executeCampaignForAbManual(campaignId, clientId)
         } catch (ex: Exception) {
             //TODO update status to error
@@ -89,7 +95,7 @@ class CampaignListener {
     fun executeAbCampaign(campaignData: Pair<Long, Long>) {
         try {
             val (campaignId, clientId) = campaignData
-            logger.debug("campaign trigger with id $campaignId and $clientId")
+            logger.debug("ab campaign trigger with id $campaignId and $clientId")
             campaignService.executeCampaignForAb(campaignId, clientId)
         } catch (ex: Exception) {
             //TODO update status to error
@@ -101,7 +107,14 @@ class CampaignListener {
 
     @StreamListener("inTestCampaign")
     fun executeTestCampaign(testCampaign: TestCampaign) {
-        testCampaignService.executeTestCampaign(testCampaign)
+        logger.debug("Test campaign triggered.")
+        try {
+            testCampaignService.executeTestCampaign(testCampaign)
+            logger.debug("Test campaign complete.")
+        }catch (ex:Exception){
+            logger.debug("Error occurred in test campaign.")
+        }
+
     }
 
     @StreamListener(value = "inLiveSegment")
@@ -127,16 +140,15 @@ class CampaignListener {
                         var liveCampaigns=getCampaignList(clientId, segmentId)
                         val campaignId = it.id
                         liveCampaigns = liveCampaigns.filter { it.campaignId!=campaignId }
-                        updateLiveSegmentCampaignList(clientId,it.segmentationID!!,liveCampaigns)
+                        updateLiveSegmentCampaignsListR(clientId,it.segmentationID!!,liveCampaigns)
                         campaignService.updateCampaignStatusByCampaignId(CampaignStatus.COMPLETED, clientId, it.id!!)
                     } else {
                         filteredCampaigns.add(it)
                     }
                 }
             }
-            logger.debug("campaign live trigger with id $segmentId and $clientId and $userId")
             filteredCampaigns.forEach { campaign ->
-                logger.debug("campaign live trigger with id $segmentId and $clientId and $userId and campaign id $campaign.id")
+                logger.debug("campaign live trigger with id $segmentId and $clientId and $userId and campaign id ${campaign.id}")
                 when (campaign.typeOfCampaign) {
                     TypeOfCampaign.AB_TEST -> {
                         campaignService.newExecuteAbTestLiveCampaign(campaign, clientId, user[0])
@@ -158,12 +170,15 @@ class CampaignListener {
     }
 
     fun getCampaigns(clientId: Long, segmentId: Long): List<Campaign> {
-        val liveCampaigns=getCampaignList(clientId, segmentId)
-        val campaignIds = emptyList<Long>()
+        val liveCampaigns=getCampaignListR(clientId, segmentId)
+        val campaignIds = mutableListOf<Long>()
         liveCampaigns.forEach {
-            when(it.status){
-                "CREATED" -> it.campaignId
+            val campaignId= when {
+                "CREATED"==it.status && it.startDate!!.compareTo(LocalDateTime.now()) < 0 -> it.campaignId
+                else -> {-1}
             }
+            if(campaignId != -1L) campaignIds.add(campaignId)
+
         }
         val campaigns = mutableListOf<Campaign>()
         campaignIds.forEach {
@@ -182,7 +197,22 @@ class CampaignListener {
     fun updateLiveSegmentCampaignList(clientId: Long,segmentId: Long,list: List<LiveSegmentCampaign>):List<LiveSegmentCampaign>{
         return list
     }
-    @Cacheable(value = ["campaigns"],key = "'client'+#clientId+'campaign'+#campaignId")
+
+    fun updateLiveSegmentCampaignsListR(clientId: Long, segmentId: Long, liveSegmentCampaign: List<LiveSegmentCampaign>) {
+        var liveSegmentCampaignCache = LiveSegmentCampaignCache()
+        liveSegmentCampaignCache.id = "clientId_${clientId}:segmentId_${segmentId}"
+        liveSegmentCampaignCache.liveSegmentCampaign = liveSegmentCampaign
+        liveSegmentCampaignRepository.save(liveSegmentCampaignCache)
+    }
+
+    fun getCampaignListR(clientId: Long, segmentId: Long): List<LiveSegmentCampaign> {
+        val id = "clientId_${clientId}:segmentId_${segmentId}"
+        val cacheResult=liveSegmentCampaignRepository.findById(id)
+        return if (cacheResult.isPresent) cacheResult.get().liveSegmentCampaign else emptyList()
+    }
+
+
+    @Cacheable(value = ["campaigns"],key = "'clientId'+#clientId+'campaignId'+#campaignId")
     fun getCampaign(clientId: Long,campaignId:Long):Campaign?{
         return campaignService.findCampaignById(campaignId)
     }

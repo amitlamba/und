@@ -13,7 +13,9 @@ class JobActionStatus {
         NOTFOUND,
         ERROR,
         OK,
-        COMPLETED
+        COMPLETED,
+        AB_COMPLETED,
+        PAUSE
     }
 }
 
