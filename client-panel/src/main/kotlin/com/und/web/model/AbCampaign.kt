@@ -9,7 +9,7 @@ class AbCampaign {
     var campaign:Campaign?=null
     @NotNull
     var variants:List<Variant> = emptyList()
-    @NotNull
+    //@NotNull
     var runType:RunType=RunType.AUTO
     var remind:Boolean=true
     var waitTime:Int?=null
@@ -23,7 +23,7 @@ class Variant{
     var percentage:Int?=null
     @NotNull
     lateinit var name:String
-    @NotNull
+    //@NotNull
     var users:Int?=null
     var winner:Boolean=false
     @NotNull
