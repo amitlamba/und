@@ -142,6 +142,7 @@ class LiveSegmentProcessingService {
     }
 
     private fun processStartEventChecks(event: EventMessage) {
+        //TODO cache it
         val possibleLiveSegments = this.liveSegmentService.findByClientIDAndStartEvent(event.clientId, event.name)
         possibleLiveSegments.forEach { liveSegment ->
             logger.info("Checking start event: $event for live-segment-id: ${liveSegment.id}")
@@ -177,6 +178,7 @@ class LiveSegmentProcessingService {
     }
 
     private fun processEndEventChecks(event: EventMessage) {
+        //TODO cache
         val possibleLiveSegments = this.liveSegmentService.findByClientIDAndEndEvent(event.clientId, event.name)
 
         possibleLiveSegments.forEach { liveSegment ->

@@ -214,7 +214,7 @@ class CampaignController {
         val clientID=AuthenticationUtils.clientID?: throw AccessDeniedException("Access Denied.")
         //TODO check template and segment exists.
         campaignService.saveAbCampaign(abCampaign,clientID)
-        return Response(status = ResponseStatus.SUCCESS)
+        return Response(status = ResponseStatus.SUCCESS,message = "Ab Campaign Save Successfully.")
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
