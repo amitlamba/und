@@ -22,6 +22,8 @@ import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import java.time.Instant
+import org.springframework.messaging.handler.annotation.Headers
+import com.und.eventapi.utils.logger
 import java.time.ZoneId
 import java.util.*
 import java.util.regex.Pattern
@@ -63,11 +65,9 @@ class EventService {
 
 
     @StreamListener("inEvent")
-//    @SendTo("outEvent")
-    fun save(event: Event) {
-
+    fun save(event: Event,@Headers headers:  Map<String,Any>) {
+        logger.info("kafka Offset is ${headers["kafka_offset"]}")
         saveEvent(event)
-
     }
 
     fun saveEvent(event: Event): String? {
