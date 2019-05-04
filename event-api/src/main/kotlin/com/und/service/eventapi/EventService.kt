@@ -4,6 +4,7 @@ import com.und.common.utils.MetadataUtil
 import com.und.eventapi.utils.copyToMongo
 import com.und.eventapi.utils.ipAddr
 import com.und.config.EventStream
+import com.und.eventapi.utils.logger
 import com.und.model.UpdateIdentity
 import com.und.model.mongo.eventapi.*
 import com.und.repository.mongo.*
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.data.mongodb.core.MongoOperations
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.messaging.handler.annotation.Headers
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
@@ -63,9 +65,8 @@ class EventService {
 
 
     @StreamListener("inEvent")
-//    @SendTo("outEvent")
-    fun save(event: Event) {
-
+    fun save(event: Event,@Headers headers:  Map<String,Any>) {
+        logger.info("kafka Offset is ${headers["kafka_offset"]}")
         saveEvent(event)
 
     }
