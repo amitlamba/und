@@ -81,7 +81,7 @@ class AuthenticationRestController {
     fun authenticationToken(@PathVariable("authToken", required = true) authToken: String, request: HttpServletRequest): ResponseEntity<*> {
         val type:String? = request.getParameter("type")
         val value:String? = request.getParameter("value")
-        logger.error("Validating token type $type and value $value")
+        logger.info("Validating token type $type and value $value")
         var result: Pair<com.und.model.jpa.security.UndUserDetails?, com.und.model.redis.security.UserCache>? = null
         if (type != null && value != null) {
             when (KEYTYPE.valueOf(type)) {
