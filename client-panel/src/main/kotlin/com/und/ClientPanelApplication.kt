@@ -20,7 +20,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @ComponentScan(basePackages = ["com.und"])
 @RefreshScope
 @EnableEurekaClient
-@EnableFeignClients
+@EnableFeignClients(basePackages = ["com.und"])
 @EnableCaching
 class ClientPanelApplication
 

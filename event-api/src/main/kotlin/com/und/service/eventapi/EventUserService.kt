@@ -178,6 +178,7 @@ class EventUserService {
             deviceId = if (deviceId.isNullOrEmpty()) UUID.randomUUID().toString() else deviceId
             sessionId = if (sessionId.isNullOrEmpty()) UUID.randomUUID().toString() else sessionId
             this.clientId = clientId
+            idf = 0
         }
 
         //creating anonymous user
