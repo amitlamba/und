@@ -65,7 +65,7 @@ class EventRepositoryUpdateImpl : EventRepositoryUpdate {
 //                        .and("userId").exists(false)
                 )
 
-                val events = mongoTemplate.find(query, Event::class.java)
+                val events = mongoTemplate.find(queryWithoutSession, Event::class.java)
                 if (events.isNotEmpty()) {
                     val updateSession = Update.update("sessionId", identity.sessionId)
                     updateSession.set("userId", it)
