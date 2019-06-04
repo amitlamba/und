@@ -4,17 +4,19 @@ import com.und.web.model.DataType
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
-@Document(collection = "#{tenantProvider.getTenant()}_eventmetadata")
+//@Document(collection = "#{tenantProvider.getTenant()}_eventmetadata")
 class EventMetadata(
         @field: Id var id: String? = "",
         val name: String,
+        var clientId:Long?,
         val properties: MutableList<Property>) {
 }
 
-@Document(collection = "#{tenantProvider.getTenant()}_userproperties")
+//@Document(collection = "#{tenantProvider.getTenant()}_userproperties")
 class CommonMetadata(
         @field: Id var id: String? = "",
         val name: String,
+        var clientId: Long?,
         val properties: MutableList<Property>) {
 }
 

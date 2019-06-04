@@ -2,13 +2,9 @@ package com.und.repository.mongo
 
 import com.und.model.mongo.eventapi.EventUser
 import org.springframework.data.mongodb.repository.MongoRepository
+import org.springframework.stereotype.Repository
 import java.util.*
 
-interface EventUserRepository : MongoRepository<EventUser, String> {
-
-
-    fun findByIdOrIdentityUid(id: String, uid: String): Optional<EventUser>
-    fun findByIdAndIdentityUid(id: String, uid: String): Optional<EventUser>
-    fun findByIdentityUid(uid: String): Optional<EventUser>
-
+@Repository
+interface EventUserRepository :MongoRepository<EventUser,String>,EventUserCustomRepository{
 }

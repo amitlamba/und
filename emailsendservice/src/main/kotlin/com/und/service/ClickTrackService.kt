@@ -15,10 +15,11 @@ class ClickTrackService {
     private lateinit var emailSentRepository: EmailSentRepository
 
     fun markClickTrack(clickTrackEvent: ClickTrackEvent): ClickTrackEvent {
+
         val saved = clickTrackEventRepository.save(clickTrackEvent)
         val clickTrackEventId = saved.id
         if (clickTrackEvent.emailUid.isNotBlank()) {
-            var email = emailSentRepository.findById(clickTrackEvent.emailUid).get()
+            var email = emailSentRepository.findById(clickTrackEvent.emailUid,saved.clientId.toLong()).get()
             when (email.status) {
                 EmailStatus.SENT, EmailStatus.READ -> {
                     email.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), EmailStatus.CTA_PERFORMED, clickTrackEventId))

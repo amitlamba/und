@@ -18,9 +18,6 @@ import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
-import java.lang.System
-import java.time.Instant
-import java.time.ZoneId
 import java.util.*
 import com.und.model.mongo.eventapi.EventUser as MongoEventUser
 
@@ -42,8 +39,8 @@ class EventUserService {
     @Autowired
     private lateinit var eventStream: EventStream
 
-    fun checkUserExistOrNot(uId: String): String? {
-        var eventUser = eventUserRepository.findByIdentityUid(uId)
+    fun checkUserExistOrNot(uId: String,clientId: Long): String? {
+        var eventUser = eventUserRepository.findByIdentityUid(uId,clientId)
         if (eventUser.isPresent) {
             return eventUser.get().id
         }
@@ -55,14 +52,15 @@ class EventUserService {
         tenantProvider.setTenat(clientId.toString())
         //FIXME save to user profile metadata
         val userProfileMetadta = buildMetadata(eventUser)
-        commonMetadataRepository.save(userProfileMetadta)
+        userProfileMetadta.clientId = clientId.toLong()
+        commonMetadataRepository.save(userProfileMetadta,clientId.toLong())
         return eventUserRepository.save(eventUser)
     }
 
 
     private fun buildMetadata(eventUser: MongoEventUser): CommonMetadata {
         val propertyName = "UserProperties"
-        val metadata = commonMetadataRepository.findByName(propertyName) ?: CommonMetadata()
+        val metadata = commonMetadataRepository.findByName(propertyName,eventUser.clientId.toLong()) ?: CommonMetadata()
         metadata.name = propertyName
         val properties = MetadataUtil.buildMetadata(eventUser.additionalInfo, metadata.properties)
         metadata.properties.clear()
@@ -70,21 +68,21 @@ class EventUserService {
         return metadata
     }
 
-    fun getEventUserByEventUserId(id: String): MongoEventUser? {
+    fun getEventUserByEventUserId(id: String,clientId:Long): MongoEventUser? {
         var mongoEventUser: MongoEventUser? = null
-        eventUserRepository.findById(id).ifPresent { eu -> mongoEventUser = eu }
+        eventUserRepository.findById(id,clientId).ifPresent { eu -> mongoEventUser = eu }
         return mongoEventUser
     }
 
-    fun getEventUserByUid(uid: String): MongoEventUser? {
+    fun getEventUserByUid(uid: String,clientId: Long): MongoEventUser? {
         var mongoEventUser: MongoEventUser? = null
-        eventUserRepository.findByIdentityUid(uid).ifPresent { eu -> mongoEventUser = eu }
+        eventUserRepository.findByIdentityUid(uid,clientId).ifPresent { eu -> mongoEventUser = eu }
         return mongoEventUser
     }
 
-    fun getEventUserByEventUserIdOrUid(id: String, uid: String): MongoEventUser? {
+    fun getEventUserByEventUserIdOrUid(id: String, uid: String,clientId: Long): MongoEventUser? {
         var mongoEventUser: MongoEventUser? = null
-        eventUserRepository.findByIdOrIdentityUid(id, uid).ifPresent { eu -> mongoEventUser = eu }
+        eventUserRepository.findByIdOrIdentityUid(id, uid,clientId).ifPresent { eu -> mongoEventUser = eu }
         return mongoEventUser
     }
 
@@ -93,28 +91,28 @@ class EventUserService {
     fun processIdentity(eventUser: EventUser): UpdateIdentity {
         tenantProvider.setTenat(eventUser.identity.clientId.toString())
         eventUser.clientId = eventUser.identity.clientId ?: -1
-        var tst: UpdateIdentity = UpdateIdentity()
+        var updateIdentity: UpdateIdentity = UpdateIdentity()
         val identity = eventUser.identity
         fun copyChangedValues(userId: String): MongoEventUser {
             val uid = eventUser.uid
             var existingEventUser: com.und.model.mongo.eventapi.EventUser
             if (uid != null && uid.isNotEmpty()) {
-                var user = eventUserRepository.findByIdentityUid(uid)
+                var user = eventUserRepository.findByIdentityUid(uid,eventUser.clientId.toLong())
                 if (!user.isPresent) {
-                    user = eventUserRepository.findById(userId)
+                    user = eventUserRepository.findById(userId,eventUser.clientId.toLong())
                     existingEventUser = user.get()
-                    tst = UpdateIdentity(find = userId, update = userId, clientId = eventUser.clientId)
+                    updateIdentity = UpdateIdentity(find = userId, update = userId, clientId = eventUser.clientId)
                 } else {
                     existingEventUser = user.get()
-                    val anonymous = eventUserRepository.findById(userId)
+                    val anonymous = eventUserRepository.findById(userId,existingEventUser.clientId.toLong())
                     existingEventUser = existingEventUser.copyNonNullMongo(anonymous.get())
-                    eventUserRepository.deleteById(userId)
-                    tst = UpdateIdentity(find = userId, update = existingEventUser.id!!, clientId = eventUser.clientId)
+                    eventUserRepository.deleteById(userId,existingEventUser.clientId.toLong())
+                    updateIdentity = UpdateIdentity(find = userId, update = existingEventUser.id!!, clientId = eventUser.clientId)
                 }
                 eventUser.identity.idf = 1
 
             } else {
-                existingEventUser = eventUserRepository.findById(userId).get()
+                existingEventUser = eventUserRepository.findById(userId,eventUser.clientId.toLong()).get()
             }
 //            val existingUser = /*if (existingEventUser.isPresent)*/ existingEventUser.get()
 //            else {
@@ -134,7 +132,7 @@ class EventUserService {
         if(userId != null) {
         val eventUserCopied = copyChangedValues(userId)
         val persistedUser = save(eventUserCopied)
-        return tst
+        return updateIdentity
 //            return Identity(userId = persistedUser.id, deviceId = identity.deviceId, sessionId = identity.sessionId, clientId = identity.clientId,idf = identity.idf)
         }else{
             throw IllegalArgumentException("user id should have been preset found null")

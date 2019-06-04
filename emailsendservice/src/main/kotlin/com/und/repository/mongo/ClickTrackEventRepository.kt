@@ -5,6 +5,5 @@ import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface ClickTrackEventRepository: MongoRepository<ClickTrackEvent, String> {
-
+interface ClickTrackEventRepository:MongoRepository<ClickTrackEvent,String> {
 }

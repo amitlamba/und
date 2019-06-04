@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.messaging.support.MessageBuilder
 import java.lang.RuntimeException
+import java.util.*
 
 class EventRepositoryUpdateImpl : EventRepositoryUpdate {
 
@@ -121,5 +122,14 @@ class EventRepositoryUpdateImpl : EventRepositoryUpdate {
     override fun save(event: Event) {
         mongoTemplate.save(event,"${event.clientId}_event")
 
+    }
+
+    override fun findByName(eventName: String,clientId:Long): List<Event> {
+        return mongoTemplate.find(Query.query(Criteria.where("name").`is`(eventName)),"${clientId}_event")
+    }
+
+    override fun findById(id: String, clientId: Long): Optional<Event> {
+        val event = mongoTemplate.findById(id,Event::class.java,"${clientId}_event")
+        return if(event == null) Optional.empty() else Optional.of(event)
     }
 }

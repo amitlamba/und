@@ -1,6 +1,5 @@
 package com.und.repository.mongo
 
-import org.springframework.stereotype.Repository
 import java.time.LocalDateTime
 
 

@@ -11,6 +11,10 @@ typealias AppFields = CommonMetadata
 @Repository
 interface CommonMetadataRepositoryCustom {
 
+    fun save(commonMetadata: CommonMetadata,clientId: Long)
+    fun findByName(name: String,clientId: Long):CommonMetadata?
+    fun findAll(clientId: Long):List<CommonMetadata>
+
     fun updateTechnographics(clientId: Long, name: TechnoGraphics): CommonMetadata?
 
     fun updateAppFields(clientId: Long, name: AppFields): CommonMetadata?

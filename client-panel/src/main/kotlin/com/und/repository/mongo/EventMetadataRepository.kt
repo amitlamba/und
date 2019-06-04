@@ -6,14 +6,11 @@ import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface EventMetadataRepository : MongoRepository<EventMetadata, String> {
-
-
+interface EventMetadataRepository :MongoRepository<EventMetadata,String>,EventMetadataCustomRepository {
 }
 
 @Repository
-interface CommonMetadataRepository : MongoRepository<CommonMetadata, String> {
-
+interface CommonMetadataRepository :MongoRepository<CommonMetadata,String>,CommonMetadataCustomRepository {
 
 }
 

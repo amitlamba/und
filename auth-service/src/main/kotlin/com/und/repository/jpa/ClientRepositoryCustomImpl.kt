@@ -19,29 +19,38 @@ class ClientRepositoryCustomImpl : ClientRepositoryCustom {
     @Autowired
     lateinit var mongoOperations: MongoOperations
 
-    override fun saveUserProperties(clientId: Long, metadataJson: String) {
+    override fun saveUserProperties(clientId: Long, metadataJson: List<CommonMetadata>) {
 
-        val dbObject: DBObject = BasicDBObject.parse(metadataJson) as DBObject
-        val parsed = dbObject.get("userProperties") as BasicDBList
-        mongoTemplate.insert(parsed, "${clientId}_userproperties")
+//        val dbObject: DBObject = BasicDBObject.parse(metadataJson) as DBObject
+//        val parsed = dbObject.get("userProperties") as BasicDBList
+//        mongoTemplate.insert(parsed, "userproperties")
+        mongoTemplate.insert(metadataJson,"userproperties")
 
     }
 
     override fun saveEventMetadta(clientId: Long, metadataJson: String) {
         val dbObject: DBObject = BasicDBObject.parse(metadataJson) as DBObject
         val parsed = dbObject.get("eventMetadata") as BasicDBList
-        mongoTemplate.insert(parsed, "${clientId}_eventmetadata")
+        mongoTemplate.insert(parsed, "eventmetadata")
 
     }
 
     override fun userpropertiesExists(clientId: Long): Boolean {
+
 //        var query=Query(Criteria.where("name").exists(true).`is`("Technographics"))
-        return mongoOperations.collectionExists("${clientId}_userproperties")
+        return mongoOperations.exists(Query.query(Criteria.where("clientId").`is`(clientId)),"userproperties")
+        //return mongoOperations.collectionExists("userproperties")
 //        return mongoOperations.exists(query, "${clientId}_userproperties")
 
     }
 
     override fun eventMetadtaExists(clientId: Long): Boolean {
-        return mongoOperations.exists(Query(Criteria.where("name").exists(true)), "${clientId}_eventmetadata")
+        return mongoOperations.exists(Query(Criteria.where("name").exists(true)), "eventmetadata")
+    }
+
+    override fun getCommonUserProperties(): List<CommonMetadata> {
+        // -1 is clientId for commonmetadata
+        val query = Query.query(Criteria.where("clientId").`is`(-1))
+        return mongoTemplate.find(query,CommonMetadata::class.java,"userproperties")
     }
 }

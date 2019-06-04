@@ -49,7 +49,7 @@ class EventTrackService {
             event.timeZone=it.timezone
         }
         val notificationId = event.notificationId
-        val email: Email? =  emailSentRepository.findById(notificationId).orElse(null)
+        val email: Email? =  emailSentRepository.findById(notificationId,clientId).orElse(null)
         //val mongoEventId = eventService.saveEvent(event)
         email?.let {
 
@@ -62,7 +62,7 @@ class EventTrackService {
 
             it.status = EmailStatus.CTA_PERFORMED
             it.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), EmailStatus.CTA_PERFORMED, null))
-            emailSentRepository.save(it)
+            emailSentRepository.saveEmail(it)
         }
 
 

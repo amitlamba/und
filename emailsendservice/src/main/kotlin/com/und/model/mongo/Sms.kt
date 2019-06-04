@@ -4,7 +4,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 import javax.persistence.Id
 
-@Document(collection = "#{tenantProvider.getTenant()}_sms")
+//@Document(collection = "#{tenantProvider.getTenant()}_sms")
 data class Sms(
         //here we are not saving all details why add extra properties
         var clientID: Long,

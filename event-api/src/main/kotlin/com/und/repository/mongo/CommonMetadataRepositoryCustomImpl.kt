@@ -4,6 +4,7 @@ import com.und.model.mongo.eventapi.CommonMetadata
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoOperations
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.findOne
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
@@ -28,10 +29,10 @@ class CommonMetadataRepositoryCustomImpl : CommonMetadataRepositoryCustom {
 //        val query =  Query(Criteria.where("name").`is`(name))
 
         technograhics.properties.forEach{property ->
-            val query =  Query(Criteria.where("name").`is`(name).and("properties.name").`is`(property.name))
+            val query =  Query(Criteria.where("name").`is`(name).and("properties.name").`is`(property.name).and("clientId").`is`(clientId))
 //            val update :Update = Update().addToSet("properties.${property.name}.options", property.options)
             val update :Update = Update().addToSet("properties.$.options").each(property.options)
-            mongoOperations.updateFirst(query, update, "${clientId}_userproperties")
+            mongoOperations.updateFirst(query, update, "userproperties")
 
         }
         return technograhics
@@ -41,13 +42,25 @@ class CommonMetadataRepositoryCustomImpl : CommonMetadataRepositoryCustom {
         val name = "AppFields"
 //        val query =  Query(Criteria.where("name").`is`(name))
         appFields.properties.forEach{property ->
-            val query =  Query(Criteria.where("name").`is`(name).and("properties.name").`is`(property.name))
+            val query =  Query(Criteria.where("name").`is`(name).and("properties.name").`is`(property.name).and("clientId").`is`(clientId))
 //            val update :Update = Update().addToSet("properties.${property.name}.options", property.options)
             val update :Update = Update().addToSet("properties.$.options").each(property.options)
-            mongoOperations.updateFirst(query, update, "${clientId}_userproperties")
+            mongoOperations.updateFirst(query, update, "userproperties")
 
         }
         return appFields
+    }
+
+    override fun findByName(name: String,clientId: Long): CommonMetadata? {
+        return mongoTemplate.findOne<CommonMetadata>(Query.query(Criteria.where("name").`is`(name).and("clientId").`is`(clientId)),"userproperties")
+    }
+
+    override fun save(commonMetadata: CommonMetadata, clientId: Long) {
+        mongoTemplate.save(commonMetadata,"userproperties")
+    }
+
+    override fun findAll(clientId: Long): List<CommonMetadata> {
+       return  mongoTemplate.find(query(Criteria.where("clientId").`is`(clientId)),CommonMetadata::class.java,"userproperties")
     }
 }
 

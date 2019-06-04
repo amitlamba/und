@@ -10,6 +10,7 @@ import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import java.time.LocalDateTime
+import java.util.*
 
 class CustomSegmentReachabilityRepositoryImpl:CustomSegmentReachabilityRepository {
 

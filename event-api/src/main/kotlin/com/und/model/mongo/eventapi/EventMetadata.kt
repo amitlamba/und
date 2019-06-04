@@ -3,21 +3,22 @@ package com.und.model.mongo.eventapi
 import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 
-@Document(collection = "#{tenantProvider.getTenant()}_eventmetadata")
+//@Document(collection = "#{tenantProvider.getTenant()}_eventmetadata")
 class EventMetadata {
     @field: Id
     var id: String? = null
     var name: String? = null
-
+    var clientId:Long?=null
     val properties: MutableList<Property> = mutableListOf()
 }
 
 
-@Document(collection = "#{tenantProvider.getTenant()}_userproperties")
+//@Document(collection = "#{tenantProvider.getTenant()}_userproperties")
 class CommonMetadata {
     @field: Id
     var id: String? = null
     var name: String? = null
+    var clientId:Long?=null
     val properties: MutableList<Property> = mutableListOf()
 }
 

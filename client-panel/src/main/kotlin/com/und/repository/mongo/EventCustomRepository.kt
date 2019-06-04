@@ -5,8 +5,10 @@ import org.bson.types.ObjectId
 import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.stereotype.Repository
 import java.util.*
 
+@Repository
 interface EventCustomRepository {
     fun usersFromEvent(query: Aggregation, clientId: Long): List<String>
     fun usersFromEvent(aggregations: List<AggregationOperation>, clientId: Long): List<String>
