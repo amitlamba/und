@@ -27,7 +27,7 @@ class NotificationTrackController {
         return emailService.getImage(id)
     }
 
-    @PostMapping(value="/android/tracking",headers = ["Accept=application/json"],consumes=["application/json"])
+    @PostMapping(value=["/android/tracking"],headers = ["Accept=application/json"],consumes=["application/json"])
     @ResponseBody
     fun trackAndroidFcmMessage(@RequestBody track:Track){
         var mongoId=track.mongoId
@@ -35,7 +35,7 @@ class NotificationTrackController {
         fcmService.updateStatus(mongoId,clientId,"android")
     }
 
-    @PostMapping(value="/webpush/tracking",consumes = ["application/json"])
+    @PostMapping(value=["/webpush/tracking"],consumes = ["application/json"])
     @ResponseBody
     fun trackWebpushFcmMessage(@RequestBody track:Track){
         var mongoId=track.mongoId
@@ -43,7 +43,7 @@ class NotificationTrackController {
         fcmService.updateStatus(mongoId,clientId,"web");
     }
 
-    @PostMapping(value="/ios/tracking",consumes = ["application/json"])
+    @PostMapping(value=["/ios/tracking"],consumes = ["application/json"])
     @ResponseBody
     fun trackIosFcmMessage(@RequestBody track:Track){
         var mongoId=track.mongoId
