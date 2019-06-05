@@ -54,7 +54,7 @@ class RegisterController {
         val response = request.getParameter("recaptchaToken")
         captchaService.processResponse(response)
         try {
-            //registrationService.validate(registrationRequest)
+            registrationService.validate(registrationRequest)
             val client = registrationService.register(registrationRequest)
             registrationService.sendVerificationEmail(client)
         }catch (ex:UserAlreadyRegistered){
@@ -62,16 +62,11 @@ class RegisterController {
         }
     }
 
-    @GetMapping(value = ["/verifyemail"])
-    fun verifyEmail(@RequestParam(name = "email",required = true) email: String, @RequestParam(name = "code",required = true) code: String) {
+    @GetMapping(value = ["/verifyemail/{email:.+}/{code}"])
+    fun verifyEmail(@PathVariable email: String, @PathVariable code: String) {
         registrationService.verifyEmail(email, code)
-    }
 
-//    @GetMapping(value = ["/verifyemail/{email:.+}/{code}"])
-//    fun verifyEmail(@PathVariable email: String, @PathVariable code: String) {
-//        registrationService.verifyEmail(email, code)
-//
-//    }
+    }
 
     @GetMapping(value = ["/sendvfnmail/{email:.+}"])
     fun newverifyEmail(@PathVariable email: String) {
