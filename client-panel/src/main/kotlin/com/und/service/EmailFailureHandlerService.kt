@@ -56,7 +56,8 @@ class EmailFailureHandlerService {
 
 
         when (failureType) {
-            EmailError.FailureType.CONNECTION -> handleEmailConnectionFailure(emailError)
+            EmailError.FailureType.CONNECTION -> { //handleEmailConnectionFailure(emailError)
+                 }
 
             EmailError.FailureType.DELIVERY -> handleEmailDeliveryFailure(emailError)
             EmailError.FailureType.INCORRECT_EMAIL -> handleEmailDeliveryFailure(emailError)

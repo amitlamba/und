@@ -204,7 +204,7 @@ class FcmHelperService {
     fun fetchAndroidTemplate(clientId: Long, templateId: Long): AndroidTemplate {
         return androidRepository.findByClientIdAndId(clientId, templateId)
     }
-    @Cacheable(value = "webpushTemplate",key = "'client_'+#message.clientId+'_template'+#message.templateId")
+    @Cacheable(value = ["webpushTemplate"],key = "'client_'+#message.clientId+'_template'+#message.templateId")
     fun fetchWebpushTemplate(message:UtilFcmMessage):WebPushTemplate{
         return webpushRepository.findByClientIdAndId(message.clientId, message.templateId)
     }

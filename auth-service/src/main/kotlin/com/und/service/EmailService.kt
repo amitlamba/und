@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import javax.mail.internet.InternetAddress
-import javax.xml.ws.Response
 
 @Service
 class EmailService {
@@ -114,7 +113,7 @@ class EmailService {
     fun sendVerificationEmail(client: Client) {
         val dataMap = mutableMapOf<String, Any>(
                 "name" to "${client.firstname} ${client.lastname}",
-                "emailVerificationLink" to "${clientPanelUrl}/verifyemail?email=${client.email}&code=${client.clientVerification.emailCode}"
+                "emailVerificationLink" to "${clientPanelUrl}/auth/register/verifyemail?email=${client.email}&code=${client.clientVerification.emailCode}"
         )
 
         val email = Email(

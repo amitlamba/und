@@ -223,7 +223,12 @@ class RestTokenUtil {
 
     private fun isInDomains(url1s: Array<String>, url2: String): Boolean {
         logger.info("Referer is $url2")
-        url1s.forEach { if(matchDomains(it,url2)) return true }
+        url1s.forEach {
+            if(matchDomains(it,url2)) {
+                logger.info("Matched referer $url2 with domain $it")
+                return true
+            }
+        }
         return false
     }
 

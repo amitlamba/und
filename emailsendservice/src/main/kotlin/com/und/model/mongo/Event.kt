@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
 
-@Document(collection = "#{tenantProvider.getTenant()}_event")
+//@Document(collection = "#{tenantProvider.getTenant()}_event")
 class Event(
         @field: Id var id: String? = null,
         val name: String,

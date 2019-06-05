@@ -10,9 +10,10 @@ import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
+import org.springframework.stereotype.Component
 import java.util.*
 
-
+@Component
 class EventCustomRepositoryImpl : EventCustomRepository {
 
     @Autowired

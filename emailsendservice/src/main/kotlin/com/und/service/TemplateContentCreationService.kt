@@ -57,7 +57,7 @@ class TemplateContentCreationService {
     fun getSmsBody(template:SmsTemplate,model:MutableMap<String,Any>):String{
         return FreeMarkerTemplateUtils.processTemplateIntoString(getSmsBodyFreeMarkerTemplate(template),model)
     }
-    @Cacheable(value = "sms-template-body",key = "'sms-template-body-'+#smsTemplate.id")
+    @Cacheable(value = ["sms-template-body"],key = "'sms-template-body-'+#smsTemplate.id")
     fun getSmsBodyFreeMarkerTemplate(smsTemplate: SmsTemplate):Template{
         return Template("${smsTemplate.clientID}-a-t-${smsTemplate.id}",StringReader(smsTemplate.smsTemplateBody),freeMarkerConfiguration)
     }
@@ -69,12 +69,12 @@ class TemplateContentCreationService {
         return FreeMarkerTemplateUtils.processTemplateIntoString(getWebpushBodyFreemarkerTemplate(template), model)
     }
 
-    @Cacheable(value = "android-template-body",key = "'android-template-body-'+ #androidTemplate.id")
+    @Cacheable(value = ["android-template-body"],key = "'android-template-body-'+ #androidTemplate.id")
     fun getAndroidBodyFreemarkerTemplate(androidTemplate: AndroidTemplate): Template {
         var template = Template("${androidTemplate.clientId}-a-t-${androidTemplate.id}", StringReader(androidTemplate.body), freeMarkerConfiguration)
         return template
     }
-    @Cacheable(value = "webpush-template-body",key = "'webpush-template-body'+#webTemplate.id")
+    @Cacheable(value = ["webpush-template-body"],key = "'webpush-template-body'+#webTemplate.id")
     fun getWebpushBodyFreemarkerTemplate(webTemplate: WebPushTemplate):Template{
         return Template("${webTemplate.clientId}-web-t-${webTemplate.id}",StringReader(webTemplate.body),freeMarkerConfiguration)
     }

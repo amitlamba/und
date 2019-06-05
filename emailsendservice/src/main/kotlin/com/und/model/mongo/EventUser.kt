@@ -5,7 +5,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.util.*
 
-@Document(collection = "#{tenantProvider.getTenant()}_eventUser")
+//@Document(collection = "#{tenantProvider.getTenant()}_eventUser")
 class EventUser {
         @field: Id
         var id: String? = null

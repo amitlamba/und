@@ -2,7 +2,9 @@ package com.und.model.jpa
 
 import org.hibernate.annotations.CreationTimestamp
 import org.hibernate.annotations.UpdateTimestamp
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import javax.persistence.*
 import javax.validation.constraints.NotNull
 
@@ -69,6 +71,10 @@ class Campaign {
     @Column(name = "from_user")
     var fromUser: String? = null
 
+    @Column(name = "schedule")
+    @NotNull
+    var schedule: String? = null
+
     @Enumerated(EnumType.STRING)
     @NotNull
     @Column(name="campaign_status")
@@ -80,6 +86,78 @@ class Campaign {
 
     @Column(name="end_date")
     var endDate:LocalDateTime?=null
+
+    @Column(name="type_campaign",nullable = false)  //live,normal,split,ab_test
+    @Enumerated(EnumType.STRING)
+    lateinit var typeOfCampaign:TypeOfCampaign
+
+    @OneToOne(mappedBy = "campaign",cascade = [CascadeType.ALL])
+    var abCampaign:AbCampaign?=null
+        set(value) {
+            field = value
+            field?.campaign = this
+        }
+
+    @OneToMany(cascade = [CascadeType.ALL],fetch = FetchType.EAGER)
+    @JoinColumn(name="campaign_id")
+    var variants:List<Variant> ?= null
+
+
+}
+
+enum class TypeOfCampaign {
+    NORMAL,
+    LIVE,
+    SPLIT,
+    AB_TEST
+}
+
+@Entity
+@Table(name="ab_campaign")
+class AbCampaign {
+
+    @Id
+    @Column(name="id")
+    var id:Long?=null
+    @OneToOne(cascade = [CascadeType.ALL])
+    @JoinColumn(name="campaign_id")
+    var campaign:Campaign?=null  //one to one
+    @Column(name = "run_type")
+    var runType:RunType = RunType.AUTO
+    @Column(name="remind")
+    var remind:Boolean =false
+    @Column(name="wait_time")
+    var waitTime:Int?=null     //in minutes
+    @Column(name="sample_size")
+    var sampleSize:Int?=null
+
+}
+
+@Entity
+@Table(name="variant")
+class Variant {
+    @Id
+    @Column(name="id")
+    var id:Long?=null
+    @NotNull
+    @Column(name="percentage",nullable = false)
+    var percentage:Int?=null
+    @NotNull
+    @Column(name="name",nullable = false)
+    lateinit var name:String
+    @Column(name="users")
+    var users:Int?=null
+    @Column(name="winner")
+    @NotNull
+    var winner:Boolean=false
+    @NotNull
+    @Column(name="template_id",nullable = false)
+    var templateId:Int?=null
+}
+
+enum class RunType{
+    MANUAL,
+    AUTO
 }
 
 enum class CampaignStatus {
@@ -92,5 +170,78 @@ enum class CampaignStatus {
     DELETED,
     STOPPED,
     COMPLETED,
-    FORCE_PAUSED
+    FORCE_PAUSED,
+    AB_COMPLETED
+}
+
+
+class Schedule {
+    var oneTime: ScheduleOneTime? = null
+    var multipleDates: ScheduleMultipleDates? = null
+    var recurring: ScheduleRecurring? = null
+}
+
+class ScheduleOneTime {
+    var nowOrLater: Now? = Now.Later
+    var campaignDateTime: CampaignTime? = null
+}
+
+class ScheduleMultipleDates {
+    var campaignDateTimeList: List<CampaignTime> = mutableListOf()
+}
+
+class ScheduleRecurring {
+    lateinit var cronExpression: String
+    var scheduleStartDate: LocalDate? = null
+    var scheduleEnd: ScheduleEnd? = null
+}
+
+class CampaignTime {
+    lateinit var date: LocalDate
+    var hours: Int? = 0
+    var minutes: Int? = 0
+    lateinit var ampm: AmPm
+
+    fun toLocalDateTime(): LocalDateTime {
+
+        val minutes = minutes ?: 0
+        val hour = ampm.let { amPm ->
+
+            hours?.let {h->
+                when (amPm) {
+                    AmPm.PM -> {
+                        if (h in 1..11) h + 12 else h
+                    }
+                    AmPm.AM -> {
+                        if (h == 12) h - 12 else h
+                    }
+                }
+            }
+
+        } ?: 0
+        val localTime = LocalTime.of(hour, minutes)
+        return LocalDateTime.of(date, localTime)
+    }
+}
+
+class ScheduleEnd {
+    var endType: ScheduleEndType? = null
+    var endsOn: LocalDate? = null
+    var occurrences: Int = 0
+}
+
+enum class ScheduleEndType {
+    NeverEnd,
+    EndsOnDate,
+    Occurrences
+}
+
+enum class Now {
+    Now,
+    Later
+}
+
+enum class AmPm {
+    AM,
+    PM
 }

@@ -1,6 +1,7 @@
 package com.und.repository.mongo
 
 import com.und.model.mongo.EventUser
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
@@ -72,4 +73,8 @@ class CustomEventUserRepositoryImpl:CustomEventUserRepository {
         return mongoTemplate.find(query,EventUser::class.java,"${clientId}_eventUser")
     }
 
+    override fun findAllById(clientId: Long, ids: List<ObjectId>):List<EventUser> {
+        val query = Query().addCriteria(Criteria.where("_id").`in`(ids))
+        return mongoTemplate.find(query,EventUser::class.java,"${clientId}_eventUser")
+    }
 }

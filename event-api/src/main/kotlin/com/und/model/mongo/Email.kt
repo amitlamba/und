@@ -5,7 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 import javax.mail.internet.InternetAddress
 
-@Document(collection = "#{tenantProvider.getTenant()}_email")
+//@Document(collection = "#{tenantProvider.getTenant()}_email")
 data class Email(
         var clientID: Long,
         var fromEmailAddress: InternetAddress,

@@ -18,7 +18,8 @@ dependencies {
 
     compile('org.springframework.boot:spring-boot-starter-data-rest')
     compile("org.springframework.boot:spring-boot-starter-mobile:1.5.9.RELEASE")
-    compile('org.flywaydb:flyway-core:5.0.7')
+    //compile('org.flywaydb:flyway-core:5.0.7')
+    compile('org.flywaydb:flyway-core:5.2.4')
     compile('org.springframework.boot:spring-boot-starter-mail')
     compile('org.springframework.boot:spring-boot-starter-security')
     compile group: 'org.springframework.security', name: 'spring-security-rsa', version: '1.0.5.RELEASE'

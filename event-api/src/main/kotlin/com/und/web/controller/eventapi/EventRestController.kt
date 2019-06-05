@@ -89,11 +89,13 @@ class EventRestController {
 
 
         identityInit.clientId = tenantProvider.tenant.toInt()
+        if(eventUser.identity.userId==null){
         eventUser.identity = identityInit
+        }
 
 
         if (uid != null && uid.isNotEmpty()) {
-            val user = eventUserService.getEventUserByUid(uid)
+            val user = eventUserService.getEventUserByUid(uid,identityInit.clientId!!.toLong())
             if (user != null) {
                 identityInit.userId = user.id
             }

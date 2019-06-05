@@ -84,4 +84,13 @@ class SchedulingReports {
             }
         }
     }
+
+    fun synchronizeLiveSegmentCampaignCache(){
+        //  update both cache
+
+        //get campaign list whose startdate is less then current date and status is created(running)
+        //remove those campaign from list whose endDate is less then now and status is stopped,complete
+
+        //check from live segment did they compete or not if complete update status and remove.
+    }
 }

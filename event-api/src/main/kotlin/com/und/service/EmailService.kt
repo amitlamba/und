@@ -51,13 +51,13 @@ class EmailService {
     fun processEmailRead(emailRead: EmailRead) {
         tenantProvider.setTenat(emailRead.clientID.toString())
 
-        val mongoEmail: com.und.model.mongo.Email? = emailSentRepository.findById(emailRead.mongoEmailId).get()
+        val mongoEmail: com.und.model.mongo.Email? = emailSentRepository.findById(emailRead.mongoEmailId,emailRead.clientID).get()
         if (mongoEmail != null) {
             if (mongoEmail.status.order < EmailStatus.READ.order) {
                 mongoEmail.status = EmailStatus.READ
             }
             mongoEmail.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), EmailStatus.READ, null))
-            emailSentRepository.save(mongoEmail)
+            emailSentRepository.saveEmail(mongoEmail)
             val event = Event()
             with(event) {
                 name = "Notification Read"

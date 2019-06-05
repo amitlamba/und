@@ -2,6 +2,7 @@ package com.und.scheduler
 
 
 import com.und.config.EventStream
+import com.und.job.AbCampaignJobService
 import org.quartz.Job
 import org.quartz.JobExecutionContext
 import org.slf4j.LoggerFactory
@@ -26,6 +27,9 @@ class CampaignJob : Job {
     lateinit var jobService: CampaignJobService
 
     @Autowired
+    lateinit var abJobService: AbCampaignJobService
+
+    @Autowired
     protected lateinit var scheduler: Scheduler
 
     @Autowired
@@ -35,17 +39,20 @@ class CampaignJob : Job {
         val clientId = context.jobDetail.jobDataMap["clientId"] as String
         val campaignId = context.jobDetail.jobDataMap["campaignId"] as String
         val campaignName = context.jobDetail.jobDataMap["campaignName"] as String
+        val abCompleted = context.jobDetail.jobDataMap.containsKey("abCompleted")
         val nextFireTime = jobGroupNextDate(context.jobDetail.key.group)
         //val keys = scheduler.get(GroupMatcher.groupEquals(JobUtil.getGroupName(clientId,campaignId)))
-
-        if (nextFireTime.isEmpty()) {
-
-            val status = markCompleted(clientId, campaignId, campaignName, JobDescriptor.Action.COMPLETED)
+        val nextFireTimeStamp = if (nextFireTime.isEmpty()) null else nextFireTime[0]
+        if (!abCompleted) {
+            val status = markCompleted(clientId, campaignId, campaignName, JobDescriptor.Action.COMPLETED,nextFireTimeStamp)
             eventStream.scheduleJobAck().send(MessageBuilder.withPayload(status).build())
         }
         logger.info("Job ** ${context.jobDetail.key.name} ** fired @ ${context.fireTime} for client $clientId with campaign $campaignName : $campaignId")
         Pair(campaignId, clientId)
-        jobService.executeJob(Pair(campaignId, clientId))
+        if (abCompleted)
+            abJobService.executeJob(Pair(campaignId, clientId))
+        else
+            jobService.executeJob(Pair(campaignId, clientId))
 
         logger.info("Next job scheduled @ ${context.nextFireTime}")
     }
@@ -62,13 +69,14 @@ class CampaignJob : Job {
     }
 
     @SendTo("scheduleJobAckSend")
-    fun markCompleted(clientId: String, campaignId: String, campaignName: String, action: JobDescriptor.Action): JobActionStatus {
+    fun markCompleted(clientId: String, campaignId: String, campaignName: String, action: JobDescriptor.Action,timeStamp:Date?): JobActionStatus {
         fun jobActionStatus(): JobActionStatus {
             val jobAction = JobAction(
                     campaignId = campaignId,
                     clientId = clientId,
                     campaignName = campaignName,
-                    action = action
+                    action = action,
+                    nextTimeStamp = timeStamp
             )
             val status = JobActionStatus()
             status.jobAction = jobAction

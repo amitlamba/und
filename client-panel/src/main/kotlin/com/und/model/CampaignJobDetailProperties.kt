@@ -10,4 +10,6 @@ class CampaignJobDetailProperties: JobDetailProperties() {
     @NotBlank
     var campaignName: String? = null
 
+    var typeOfCampaign:String?=null
+
 }

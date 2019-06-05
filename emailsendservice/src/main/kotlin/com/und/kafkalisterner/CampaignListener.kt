@@ -1,25 +1,34 @@
 package com.und.kafkalisterner
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.und.config.EventStream
 import com.und.exception.EventUserNotFoundException
-import com.und.model.jpa.Campaign
-import com.und.model.jpa.CampaignStatus
+import com.und.model.jpa.*
 import com.und.model.livesegment.LiveSegmentUser
 import com.und.model.mongo.EventUser
 import com.und.model.mongo.LiveSegmentTrack
+import com.und.model.redis.LiveSegmentCampaign
+import com.und.model.redis.LiveSegmentCampaignCache
+import com.und.model.utils.JobDescriptor
 import com.und.model.utils.TestCampaign
 import com.und.repository.mongo.EventUserRepository
 import com.und.repository.mongo.LiveSegmentTrackRepository
+import com.und.repository.redis.LiveSegmentCampaignRepository
 import com.und.service.CampaignService
 import com.und.service.TestCampaignService
 import com.und.utils.loggerFor
 import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.cache.annotation.CachePut
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
+import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Service
@@ -40,6 +49,15 @@ class CampaignListener {
     @Autowired
     private lateinit var mongoTemplate: MongoTemplate
 
+    @Autowired
+    private lateinit var eventStream: EventStream
+
+    @Autowired
+    private lateinit var objectMapper: ObjectMapper
+
+    @Autowired
+    private lateinit var liveSegmentCampaignRepository:LiveSegmentCampaignRepository
+
     companion object {
         val logger: Logger = loggerFor(CampaignListener::class.java)
     }
@@ -52,6 +70,35 @@ class CampaignListener {
             logger.debug("campaign trigger with id $campaignId and $clientId")
             campaignService.executeCampaign(campaignId, clientId)
         } catch (ex: Exception) {
+            //TODO update status to error
+            logger.error("error occurred", ex)
+        } finally {
+            logger.info("complete")
+        }
+    }
+
+    @StreamListener("receiveManualTriggerCampaign")
+    fun runManualCampaign(data: Pair<Long, Long>) {
+        try {
+            val (campaignId, clientId) = data
+            logger.debug("Manual campaign trigger with id $campaignId and $clientId")
+            campaignService.executeCampaignForAbManual(campaignId, clientId)
+        } catch (ex: Exception) {
+            //TODO update status to error
+            logger.error("error occurred", ex)
+        } finally {
+            logger.info("complete")
+        }
+    }
+
+    @StreamListener("abCampaignTriggerReceive")
+    fun executeAbCampaign(campaignData: Pair<Long, Long>) {
+        try {
+            val (campaignId, clientId) = campaignData
+            logger.debug("ab campaign trigger with id $campaignId and $clientId")
+            campaignService.executeCampaignForAb(campaignId, clientId)
+        } catch (ex: Exception) {
+            //TODO update status to error
             logger.error("error occurred", ex)
         } finally {
             logger.info("complete")
@@ -59,8 +106,15 @@ class CampaignListener {
     }
 
     @StreamListener("inTestCampaign")
-    fun executeTestCampaign(testCampaign: TestCampaign){
-        testCampaignService.executeTestCampaign(testCampaign)
+    fun executeTestCampaign(testCampaign: TestCampaign) {
+        logger.debug("Test campaign triggered.")
+        try {
+            testCampaignService.executeTestCampaign(testCampaign)
+            logger.debug("Test campaign complete.")
+        }catch (ex:Exception){
+            logger.debug("Error occurred in test campaign.")
+        }
+
     }
 
     @StreamListener(value = "inLiveSegment")
@@ -71,42 +125,42 @@ class CampaignListener {
             val clientId = liveSegmentUser.clientId
             val userId = liveSegmentUser.userId
 
-        //TODO handle userIDentified true case
-//            trackSegmentUser(clientId, liveSegmentId, segmentId, userId)
-            /***FIXED findById return empty but user present for this userId
-             *case 1 Id is String type in our repository but in real case its ObjectId in mongo.I try it but no success.
-             *case 2 I think spring resolve it to id field as we see in jpa  but in mongo its _id This may be reason but not sure.
-            **/
-//            val user = eventUserRepository.findById(userId).orElseThrow { EventUserNotFoundException("User Not Found") }
-            val user=mongoTemplate.find(Query().addCriteria(Criteria.where("_id").`is`(ObjectId(userId))),EventUser::class.java,"${clientId}_eventUser")
-            if(user.isEmpty()) throw EventUserNotFoundException("User Not Found.")
-            //get all campaigns associated with live segmentid
-//            val campaignList = campaignService.findLiveSegmentCampaign(segmentId, clientId)
-            //refresh cache I m thinking aboout schedulae ajob which update the status of live campaign
-            //a stop cam newer start again
 
-            val campaignList=campaignService.findAllLiveSegmentCampaignBySegmentId(segmentId, clientId)
-            //FIXME if campaign list is empty then update the status of campaign to completed for this segment id.
+            val user = mongoTemplate.find(Query().addCriteria(Criteria.where("_id").`is`(ObjectId(userId))), EventUser::class.java, "${clientId}_eventUser")
+            if (user.isEmpty()) throw EventUserNotFoundException("User Not Found.")
 
-            //we imporve it find all cmapign with this segmentid if there endTime is passed mark it completed here if
-            //we have two campaign with this id then and one is completed then we are not updating it.
-            val filteredCampaigns= mutableListOf<Campaign>()
-            if(campaignList.isEmpty())
-            campaignService.updateCampaignStatus(CampaignStatus.COMPLETED,clientId,segmentId)
-            else{
+            val campaignList = /*campaignService.findAllLiveSegmentCampaignBySegmentId(segmentId, clientId)*/ getCampaigns(clientId, segmentId)
+            val filteredCampaigns = mutableListOf<Campaign>()
+            if (campaignList.isEmpty())
+                campaignService.updateCampaignStatus(CampaignStatus.COMPLETED, clientId, segmentId)
+            else {
                 campaignList.forEach {
-                    if(it.endDate!!.isBefore(LocalDateTime.now())){
-                        //remove that campaign from cache
-                        campaignService.updateCampaignStatusByCampaignId(CampaignStatus.COMPLETED,clientId,it.id!!)
-                    }else{
+
+                    if (it.endDate!!.isBefore(LocalDateTime.now())) {
+                        var liveCampaigns=getCampaignList(clientId, segmentId)
+                        val campaignId = it.id
+                        liveCampaigns = liveCampaigns.filter { it.campaignId!=campaignId }
+                        updateLiveSegmentCampaignsListR(clientId,it.segmentationID!!,liveCampaigns)
+                        campaignService.updateCampaignStatusByCampaignId(CampaignStatus.COMPLETED, clientId, it.id!!)
+                    } else {
                         filteredCampaigns.add(it)
                     }
                 }
             }
-            logger.debug("campaign live trigger with id $segmentId and $clientId and $userId")
             filteredCampaigns.forEach { campaign ->
-                logger.debug("campaign live trigger with id $segmentId and $clientId and $userId and campaign id $campaign.id")
-                campaignService.executeLiveCampaign(campaign, clientId, user[0])
+                logger.debug("campaign live trigger with id $segmentId and $clientId and $userId and campaign id ${campaign.id}")
+                when (campaign.typeOfCampaign) {
+                    TypeOfCampaign.AB_TEST -> {
+                        campaignService.newExecuteAbTestLiveCampaign(campaign, clientId, user[0])
+                    }
+                    TypeOfCampaign.SPLIT -> {
+                        campaignService.newExecuteSplitLiveCampaign(campaign, clientId, user[0])
+                    }
+                    else -> {
+                        campaignService.executeLiveCampaign(campaign, clientId, user[0])
+                    }
+                }
+
             }
         } catch (ex: Exception) {
             logger.error("error occurred", ex)
@@ -115,21 +169,52 @@ class CampaignListener {
         }
     }
 
-    private fun trackSegmentUser(clientId: Long, liveSegmentId: Long, segmentId: Long, userId: String) {
-        val liveSegmentTrack = LiveSegmentTrack(
-                clientID = clientId,
-                liveSegmentId = liveSegmentId,
-                segmentId = segmentId,
-                userId = userId
-        )
-        //TODO write it in dao layer.
-        mongoTemplate.save(liveSegmentTrack,"${clientId}_livesegmenttrack")
-        /**
-         * in below code collection name is not resolve because on system call #{tenantProvider.getTenant()} not available.
-         * here collection name is _livesegmenttrack
-         */
-//        val v=liveSegmentTrackRepository.save(liveSegmentTrack)
+    fun getCampaigns(clientId: Long, segmentId: Long): List<Campaign> {
+        val liveCampaigns=getCampaignListR(clientId, segmentId)
+        val campaignIds = mutableListOf<Long>()
+        liveCampaigns.forEach {
+            val campaignId= when {
+                "CREATED"==it.status && it.startDate!!.compareTo(LocalDateTime.now()) < 0 -> it.campaignId
+                else -> {-1}
+            }
+            if(campaignId != -1L) campaignIds.add(campaignId)
+
+        }
+        val campaigns = mutableListOf<Campaign>()
+        campaignIds.forEach {
+           val campaign = getCampaign(clientId,it)
+            if(campaign!=null) campaigns.add(campaign)
+        }
+        return campaigns
     }
 
+    @Cacheable(value = ["liveSegmentCampaigns"], key = "'clientId_'+#clientId+'segmentId_'+#segmentId")
+    fun getCampaignList(clientId: Long, segmentId: Long): List<LiveSegmentCampaign> {
+        return emptyList()
+    }
+
+    @CachePut(value = ["liveSegmentCampaigns"], key = "'clientId_'+#clientId+'segmentId_'+#segmentId")
+    fun updateLiveSegmentCampaignList(clientId: Long,segmentId: Long,list: List<LiveSegmentCampaign>):List<LiveSegmentCampaign>{
+        return list
+    }
+
+    fun updateLiveSegmentCampaignsListR(clientId: Long, segmentId: Long, liveSegmentCampaign: List<LiveSegmentCampaign>) {
+        var liveSegmentCampaignCache = LiveSegmentCampaignCache()
+        liveSegmentCampaignCache.id = "clientId_${clientId}:segmentId_${segmentId}"
+        liveSegmentCampaignCache.liveSegmentCampaign = liveSegmentCampaign
+        liveSegmentCampaignRepository.save(liveSegmentCampaignCache)
+    }
+
+    fun getCampaignListR(clientId: Long, segmentId: Long): List<LiveSegmentCampaign> {
+        val id = "clientId_${clientId}:segmentId_${segmentId}"
+        val cacheResult=liveSegmentCampaignRepository.findById(id)
+        return if (cacheResult.isPresent) cacheResult.get().liveSegmentCampaign else emptyList()
+    }
+
+
+    @Cacheable(value = ["campaigns"],key = "'clientId'+#clientId+'campaignId'+#campaignId")
+    fun getCampaign(clientId: Long,campaignId:Long):Campaign?{
+        return campaignService.findCampaignById(campaignId)
+    }
 
 }

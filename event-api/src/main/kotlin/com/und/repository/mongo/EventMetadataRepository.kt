@@ -6,10 +6,7 @@ import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface EventMetadataRepository : MongoRepository<EventMetadata, String> {
-    fun findByName(name: String):EventMetadata?
-
-
+interface EventMetadataRepository:MongoRepository<EventMetadata,String>,EventMetadataCustomRepository {
 }
 
 

@@ -16,7 +16,7 @@ dependencies {
         exclude group: 'org.apache.tomcat' , module: 'tomcat-jdbc'
         exclude group: 'com.mchange' , module: 'c3p0'
     }
-    compile('org.flywaydb:flyway-core:5.0.7')
+    compile('org.flywaydb:flyway-core:5.2.4')
     compile('org.springframework.boot:spring-boot-starter-quartz')
     compile('org.springframework.boot:spring-boot-starter-security')
 

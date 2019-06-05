@@ -5,4 +5,6 @@ import org.springframework.data.mongodb.repository.MongoRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface EventUserRepository : MongoRepository<EventUser, String>, EventUserCustomRepository
+interface EventUserRepository : MongoRepository<EventUser,String>,EventUserCustomRepository {
+
+}

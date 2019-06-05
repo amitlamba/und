@@ -43,7 +43,7 @@ class TestCampaignService {
     lateinit var eventUserRepository: EventUserRepository
 
     fun executeTestCampaign(testCampaign:TestCampaign){
-
+        logger.info("Test campaign is received for client ${testCampaign.clientId}")
         val campaign=testCampaign.campaign
         val clientId= testCampaign.clientId!!
         var userList :List<EventUser> ?=null
@@ -122,21 +122,21 @@ class TestCampaignService {
     }
 
     private fun executeEmailCampaignForUser(campaign: Campaign, user: EventUser, clientId: Long,emailTemplate: EmailTemplate){
-        if (user.communication?.email?.dnd == true)
+        if (user.communication?.email==null || user.communication?.email?.dnd == true)
             return //Local lambda return
         val email=buildCampaignMessage.buildTestCampaignEmail(clientId,campaign,user,emailTemplate)
         commonEmailService.sendEmail(email)
     }
 
     private fun executeSmsCampaignForUser(campaign: Campaign, user: EventUser, clientId: Long,smsTemplate: SmsTemplate){
-        if (user.communication?.mobile?.dnd == true)
+        if (user.communication?.mobile==null || user.communication?.mobile?.dnd == true)
             return //Local lambda return
         val sms=buildCampaignMessage.buildTestCampaignSms(clientId,campaign,user,smsTemplate)
         commonSmsService.sendSms(sms)
     }
 
     private fun executeAndroidCampaignForUser(campaign: Campaign, user: EventUser, clientId: Long,androidTemplate: AndroidTemplate){
-        if (user.communication?.android?.dnd == true)
+        if (user.communication?.android==null || user.communication?.android?.dnd == true)
             return //Local lambda return
         val jpaCampaign=buildCampaign(campaign,clientId)
         val message=buildCampaignMessage.buildTestCampaignAndroidFcmMessage(clientId,user,jpaCampaign,androidTemplate)
@@ -144,7 +144,7 @@ class TestCampaignService {
     }
 
     private fun executeWebCampaignForUser(campaign: Campaign, user: EventUser, clientId: Long,webPushTemplate: WebPushTemplate){
-        if (user.communication?.webpush?.dnd == true)
+        if (user.communication?.webpush ==null || user.communication?.webpush?.dnd == true)
             return //Local lambda return
         val jpaCampaign=buildCampaign(campaign,clientId)
         user.identity.webFcmToken?.forEach {

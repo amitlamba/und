@@ -1,6 +1,5 @@
 package com.und.repository.jpa
 
-import com.sun.org.apache.xpath.internal.operations.Bool
 import com.und.model.Status
 import com.und.model.jpa.ServiceProviderCredentials
 import org.springframework.data.jpa.repository.JpaRepository
