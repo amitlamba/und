@@ -24,7 +24,7 @@ class ClientRepositoryCustomImpl : ClientRepositoryCustom {
 //        val dbObject: DBObject = BasicDBObject.parse(metadataJson) as DBObject
 //        val parsed = dbObject.get("userProperties") as BasicDBList
 //        mongoTemplate.insert(parsed, "userproperties")
-        mongoTemplate.insert(metadataJson,"userproperties")
+        mongoTemplate.insert(metadataJson, "userproperties")
 
     }
 
@@ -38,7 +38,7 @@ class ClientRepositoryCustomImpl : ClientRepositoryCustom {
     override fun userpropertiesExists(clientId: Long): Boolean {
 
 //        var query=Query(Criteria.where("name").exists(true).`is`("Technographics"))
-        return mongoOperations.exists(Query.query(Criteria.where("clientId").`is`(clientId)),"userproperties")
+        return mongoOperations.exists(Query.query(Criteria.where("clientId").`is`(clientId)), "userproperties")
         //return mongoOperations.collectionExists("userproperties")
 //        return mongoOperations.exists(query, "${clientId}_userproperties")
 
@@ -51,6 +51,6 @@ class ClientRepositoryCustomImpl : ClientRepositoryCustom {
     override fun getCommonUserProperties(): List<CommonMetadata> {
         // -1 is clientId for commonmetadata
         val query = Query.query(Criteria.where("clientId").`is`(-1))
-        return mongoTemplate.find(query,CommonMetadata::class.java,"userproperties")
+        return mongoTemplate.find(query, CommonMetadata::class.java, "userproperties")
     }
 }

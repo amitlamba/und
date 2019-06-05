@@ -16,7 +16,7 @@ class EventUser {
     var clientId: Int = -1
     var identity: Identity = Identity()
     var standardInfo: StandardInfo = StandardInfo()
-    val additionalInfo: HashMap<String, Any> = hashMapOf()
+    var additionalInfo: HashMap<String, Any> = hashMapOf()
     var creationTime: Date = DateUtils.nowInUTC()
     var communication: Communication = Communication()
     var testUser:Boolean=false

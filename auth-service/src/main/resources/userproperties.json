@@ -1,6 +1,7 @@
 {"userProperties":[
   {
     "name": "Demographics",
+    "clientId": -1,
     "properties": [
       {
         "name": "age",
@@ -18,6 +19,7 @@
   },
   {
     "name": "Technographics",
+    "clientId": -1,
     "properties": [
       {
         "name": "browser",
@@ -64,6 +66,7 @@
   },
   {
     "name": "Reachability",
+    "clientId": -1,
     "properties": [
       {
         "name": "hasAndroid",
@@ -149,6 +152,7 @@
   },
   {
     "name": "AppFields",
+    "clientId": -1,
     "properties": [
       {
         "name": "appversion",

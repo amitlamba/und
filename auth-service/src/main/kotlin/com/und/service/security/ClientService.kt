@@ -63,7 +63,8 @@ class ClientService {
             val commonUserProperties:List<CommonMetadata> = clientRepository.getCommonUserProperties()
             // common properties must not be null.
             var clientProperties = commonUserProperties.map {
-                it.clientId=clientId
+                it.id = null
+                it.clientId = clientId
                 it
             }
             clientRepository.saveUserProperties(clientId, clientProperties)

@@ -21,12 +21,12 @@ class CommonMetadata(
 }
 
 
-class Property {
-    var dataType: DataType = DataType.string
-    var regex: String? = null
-    var name: String? = null
-    val options: MutableSet<Any> = mutableSetOf()
-}
+class Property (
+        var dataType: DataType = DataType.string,
+        var regex: String? = null,
+        var name: String? = null,
+        val options: MutableSet<Any> = mutableSetOf()
+)
 
 enum class DataType {
     string,
