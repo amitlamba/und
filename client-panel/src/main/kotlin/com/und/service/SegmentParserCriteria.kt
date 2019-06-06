@@ -164,7 +164,7 @@ class SegmentParserCriteria {
         * divide global filter into event and user and find criteria
         * */
         val gFilters = segment.globalFilters
-        val (eventPropertyMatch, userPropertyMatch) = filterGlobalQWithUserId(gFilters, tz, segment.userId,userIdentified)
+        val (eventPropertyMatch, _) = filterGlobalQWithUserId(gFilters, tz, segment.userId,userIdentified)
         //adding event globalCriteria aggregation
         if (eventPropertyMatch != null)
             listOfAggregation.add(Aggregation.match(eventPropertyMatch))
@@ -202,7 +202,7 @@ class SegmentParserCriteria {
             listOfAggregation.add(match)
         }
         val gFilters = segment.globalFilters
-        val (eventPropertyMatch, userPropertyMatch) = filterGlobalQWithUserId(gFilters, tz, segment.userId,null)
+        val (_, userPropertyMatch) = filterGlobalQWithUserId(gFilters, tz, segment.userId,null)
         if (userPropertyMatch != null) {
             listOfAggregation.add(Aggregation.match(userPropertyMatch))
         }
@@ -292,7 +292,7 @@ class SegmentParserCriteria {
     private fun addDidNotAggregation(segment: Segment, listOfAggregation: MutableList<AggregationOperation>, tz: ZoneId,userIdentified: Boolean?) {
         var didnot = segment.didNotEvents?.events
         var listOfDidNotCriteria = mutableListOf<Criteria>()
-        didnot?.forEachIndexed { index, event ->
+        didnot?.forEachIndexed { _, event ->
             listOfDidNotCriteria.add(parseEvents2(event, tz, false,userIdentified))
         }
         if(listOfDidNotCriteria.isNotEmpty()){
@@ -324,7 +324,7 @@ class SegmentParserCriteria {
                 if(segment.didEvents!!.joinCondition.conditionType.equals(ConditionType.AllOf)) {
                     setIntersection = SetOperators.SetOperatorFactory("pipe0._id").intersects("pipe1._id")
 
-                    did.forEachIndexed { index, event ->
+                    did.forEachIndexed { index, _ ->
                         if (index > 1) {
                             setIntersection = setIntersection.intersects("pipe" + index + "._id")
                         }
@@ -334,7 +334,7 @@ class SegmentParserCriteria {
                 }else{
                     setUnion = SetOperators.SetOperatorFactory("pipe0._id").union("pipe1._id")
 
-                    did.forEachIndexed { index, event ->
+                    did.forEachIndexed { index, _ ->
                         if (index > 1) {
                             setUnion = setUnion.union("pipe" + index + "._id")
                         }
@@ -365,7 +365,7 @@ class SegmentParserCriteria {
         segment.didEvents?.let {
             var did = it.events
             var listOfCriteria = mutableListOf<Criteria>()
-            did.forEachIndexed { index, event ->
+            did.forEachIndexed { _, event ->
                 var matches = getListOfCriteria(event, tz,userIdentified)
                 var criteria = Criteria().andOperator(*matches.toTypedArray())
                 listOfCriteria.add(criteria)
@@ -834,8 +834,8 @@ class SegmentParserCriteria {
             GlobalFilterType.Reachability->return reachabilityMap[name]?:"communication.${name}.dnd"
             GlobalFilterType.UserComputedProperties-> return "${name}"
             GlobalFilterType.UserIdentity->return "identity.${name}"
-            GlobalFilterType.UserTechnographics->return return "system.${name}.name"
-            GlobalFilterType.AppFields->return return "appfield.${name}.name"
+            GlobalFilterType.UserTechnographics->return  "system.${name}.name"
+            GlobalFilterType.AppFields->return  "appfield.${name}.name"
 
             GlobalFilterType.Geogrophy->return "geogrophy.${name}"
             GlobalFilterType.Technographics->return "system.${name}.name"

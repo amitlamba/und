@@ -34,6 +34,8 @@ dependencies {
     compile('org.springframework.boot:spring-boot-starter-data-mongodb')
     compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: '2.9.4.1'
     runtime('org.postgresql:postgresql')
+    // https://mvnrepository.com/artifact/com.google.guava/guava
+    compile group: 'com.google.guava', name: 'guava', version: '27.1-jre'
 
 
     compile(

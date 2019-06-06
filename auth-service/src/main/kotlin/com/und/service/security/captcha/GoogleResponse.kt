@@ -11,22 +11,22 @@ class GoogleResponse {
     @JsonProperty("success")
     @get:JsonProperty("success")
     @set:JsonProperty("success")
-    var isSuccess: Boolean = false
+    internal var isSuccess: Boolean = false
 
     @JsonProperty("challenge_ts")
     @get:JsonProperty("challenge_ts")
     @set:JsonProperty("challenge_ts")
-    private var challengeTs: String? = null
+    internal var challengeTs: String? = null
 
     @JsonProperty("hostname")
     @get:JsonProperty("hostname")
     @set:JsonProperty("hostname")
-    private var hostname: String? = null
+    internal var hostname: String? = null
 
     @JsonProperty("error-codes")
     @get:JsonProperty("error-codes")
     @set:JsonProperty("error-codes")
-    private var errorCodes: Array<ErrorCode>? = null
+    internal var errorCodes: Array<ErrorCode>? = null
 
     internal enum class ErrorCode {
         MissingSecret, InvalidSecret, MissingResponse, InvalidResponse,TimeOutOrDuplicate,BadRequest;
