@@ -6,4 +6,4 @@ import org.springframework.stereotype.Repository
 import java.util.*
 
 @Repository
-interface EmailSentRepository: EmailSentCustomRepository
+interface EmailSentRepository:MongoRepository<Email,String>, EmailSentCustomRepository

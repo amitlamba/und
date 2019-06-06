@@ -1,0 +1,217 @@
+#server:
+#  port: 5464
+#
+#
+#spring:
+#  application:
+#    name: event-api
+#  jackson:
+#    serialization:
+#      INDENT_OUTPUT: true
+#  cloud:
+#    stream:
+#      kafka:
+#        binder:
+#          brokers: ${KAFKA_IP}
+#          defaultBrokerPort: ${KAFKA_PORT}
+#          #zkNodes: ${KAFKA_IP}
+#          defaultZkPort: 2181
+#          #producer-configuration:
+#          configuration:
+#            enable:
+#              auto:
+#                commit: true
+#            auto:
+#              offset:
+#                reset: earliest
+#            max:
+#              poll:
+#                records: 50
+#                interval:
+#                  ms: 300000
+#            heartbeat:
+#              interval:
+#                ms: 3000
+#            session:
+#              timeout:
+#                ms: 10000
+#        bindings:
+#          inEvent:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 1
+#                group:
+#                  id: inEvent
+#            group: inEvent
+#            destination: eventStaging
+#          outEvent:
+#            group: outEvent
+#            destination: eventStaging
+#          inEventUser:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 2
+#                group:
+#                  id: inEventUser
+#            group: inEventUser
+#            destination: eventUserStaging
+#          outEventUser:
+#            group: outEventUser
+#            destination: eventUserStaging
+#          inProcessEventUserProfile:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 3
+#                group:
+#                  id: processEventUserProfile
+#            group: processEventUserProfile
+#            destination: processUserProfileStaging
+#          outProcessEventUserProfile:
+#            group: processEventUserProfile
+#            destination: processUserProfileStaging
+#          inTrackEvent:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 4
+#                group:
+#                  id: inTrackEvent
+#            group: inTrackEvent
+#            destination: trackEventStaging
+#          outTrackEvent:
+#            group: outTrackEvent
+#            destination: trackEventStaging
+#          inEmailRead:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 5
+#                group:
+#                  id: inEmailRead
+#            group: inEmailRead
+#            destination: emailReadStaging
+#          outEmailRead:
+#            group: outEmailRead
+#            destination: emailReadStaging
+#          inNotificationRead:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 6
+#                group:
+#                  id: inNotification
+#            group: inNotification
+#            destination: trackNotification
+#          outNotificationRead:
+#            group: outNotification
+#            destination: trackNotification
+#          outEventForLiveSegment:
+#            destination: processliveevent
+#      bindings:
+#        inEvent:
+#          destination: eventStaging
+#        outEvent:
+#          destination: eventStaging
+#        inEventUser:
+#          destination: eventUserStaging
+#        outEventUser:
+#          destination: eventUserStaging
+#        inProcessEventUserProfile:
+#          destination: processUserProfileStaging
+#        outProcessEventUserProfile:
+#          destination: processUserProfileStaging
+#        inTrackEvent:
+#          destination: trackEventStaging
+#        outTrackEvent:
+#          destination: trackEventStaging
+#        inEmailRead:
+#          destination: emailReadStaging
+#        outEmailRead:
+#          destination: emailReadStaging
+#        inNotificationRead:
+#          destination: trackNotification
+#        outNotificationRead:
+#          destination: trackNotification
+#        outEventForLiveSegment:
+#          destination: processliveevent
+#  jpa:
+#    show-sql: false
+#    database-platform: org.hibernate.dialect.PostgreSQL9Dialect
+#    properties:
+#      hibernate:
+#        temp:
+#          use_jdbc_metadata_defaults: false
+#  datasource:
+#    url: jdbc:postgresql://${POSTGRES_IP}:${POSTGRES_PORT}/undstaging
+#    driver-class-name: org.postgresql.Driver
+#    username: postgres
+#    password:  postgres
+#    tomcat:
+#      initial-size: 10
+#      max-wait: 10000
+#      max-active: 50
+#      test-on-borrow: true
+#
+#  data:
+#    mongodb:
+#      database: eventdbstaging
+#      host: ${MONGO_IP}
+#      port: ${MONGO_PORT}
+#
+#  zipkin:
+#    base-url: ${ZIPKIN_SERVER}
+#    sender:
+#      type: web
+#  sleuth:
+#    sampler:
+#      probability: 1
+#  kafka:
+#    bootstrap-servers: ${KAFKA_IP}:${KAFKA_PORT}
+#
+#security:
+#  header:
+#    token: Authorization
+#    username: UserName
+#  secret: mySecret
+#  expiration: 604800
+#  route:
+#    authentication:
+#      path: auth
+#      refresh: refresh
+#
+#
+#
+#
+#eureka:
+#  instance:
+#    prefer-ip-address: true
+#    health-check-url-path: /application/health
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    region: desktop
+#    service-url:
+#      defaultZone: http://${EUREKA_IP}:${EUREKA_PORT_STAGING}/eureka
+#
+#
+#logging:
+#  level:
+#    org:
+#      springframework: info
+#      apache: info
+#      hibernate: info
+#    com:
+#      und: info
+#  file: ${HOME}/log/staging/und-event-api.log
+#
+#und:
+#  system:
+#    user:
+#      token: jasdghajskdhg
+#  url:
+#    event: http://userndot.com/event
+#  auth-url: http://nestros.com:8080/auth
+#  from-email: shiv@userndot.com

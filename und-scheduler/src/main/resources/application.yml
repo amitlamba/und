@@ -1,0 +1,118 @@
+## config context path to "/" by setting an empty string
+#server:
+#  port: 6373
+#
+## JACKSON
+#spring:
+#  application:
+#    name: und-scheduler
+#  jackson:
+#    serialization:
+#      INDENT_OUTPUT: true
+#  cloud:
+#    stream:
+#      kafka:
+#        binder:
+#          brokers: ${KAFKA_IP}
+#          defaultBrokerPort: ${KAFKA_PORT}
+#          #zkNodes: ${KAFKA_IP}
+#          defaultZkPort: 2181
+#          configuration:
+#            enable:
+#              auto:
+#                commit: true
+#            auto:
+#              offset:
+#                reset: earliest
+#        bindings:
+#          scheduleJobReceive:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 1
+#                group:
+#                  id: scheduleJobReceiveStaging
+#            group: scheduleJobReceiveStaging
+#            destination: scheduleJobStaging
+#          campaignTriggerSend:
+#            group: campaignTriggerGroup
+#            destination: campaignTriggerStaging
+#          scheduleJobAckSend:
+#            group: scheduleJobAckGroup
+#            destination: scheduleJobAckStaging
+#          scheduleLiveJobReceive:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 2
+#                group:
+#                  id: scheduleLiveJobReceiveStaging
+#          abCampaignTriggerSend:
+#            group: abCampaignTrigger
+#            destination: abCampaignTriggerStaging
+#      bindings:
+#        scheduleJobReceive:
+#          destination: scheduleJobStaging
+#        campaignTriggerSend:
+#          destination: campaignTriggerStaging
+#        scheduleJobAckSend:
+#          destination: scheduleJobAckStaging
+#        outJobForLiveSegmentCheck:
+#          destination: liveusercheck
+#        scheduleLiveJobReceive:
+#          destination: scheduleLiveJobStaging
+#        abCampaignTriggerSend:
+#          destination: abCampaignTriggerStaging
+#
+#  datasource:
+#    url: jdbc:postgresql://${POSTGRES_IP}:${POSTGRES_PORT}/recurrencestaging
+#    driver-class-name: org.postgresql.Driver
+#    username: postgres
+#    password:  postgres
+#    tomcat:
+#      initial-size: 10
+#      max-wait: 10000
+#      max-active: 50
+#      test-on-borrow: true
+#
+#  zipkin:
+#    base-url: ${ZIPKIN_SERVER}
+#    sender:
+#      type: web
+#  sleuth:
+#    sampler:
+#      probability: 1
+#  kafka:
+#    bootstrap-servers: ${KAFKA_IP}:${KAFKA_PORT}
+#
+#security:
+#  header:
+#    token: authorization
+#    username: UserName
+#  secret: mySecret
+#  expiration: 604800
+#  route:
+#    authentication:
+#      path: auth
+#      refresh: refresh
+#
+#eureka:
+#  instance:
+#    prefer-ip-address: true
+#    health-check-url-path: /application/health
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    region: desktop
+#    service-url:
+#      defaultZone: http://${EUREKA_IP}:${EUREKA_PORT_STAGING}/eureka
+#
+#logging:
+#  level:
+#    org:
+#      springframework: info
+#      apache: info
+#      hibernate: info
+#    com:
+#      und: info
+#  file: ${HOME}/log/staging/und-scheduler.log

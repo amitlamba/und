@@ -19,4 +19,5 @@ interface SegmentUserServiceClient {
     @GetMapping(value = ["/report/funnel/winner/template"])
     fun getWinnerTemplate(@RequestParam("campaignId") campaignId:Long,@RequestParam("clientId") clientId: Long,@RequestHeader("Authorization")token: String,@RequestParam("include") include:String):Long
 
+
 }
