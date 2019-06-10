@@ -1,5 +1,7 @@
 package com.und.model
 
+import java.util.*
+
 
 class JobActionStatus {
     var status: Status = Status.OK
@@ -11,13 +13,24 @@ class JobActionStatus {
         NOTFOUND,
         ERROR,
         OK,
-        COMPLETED
+        COMPLETED,
+        AB_COMPLETED,
+        PAUSE
     }
 }
 
-class JobAction(
-        val clientId: String,
-        val campaignId: String,
-        val campaignName: String,
-        val action: JobDescriptor.Action
-)
+class JobAction {
+    val clientId: String
+    val campaignId: String
+    val campaignName: String
+    val action: JobDescriptor.Action
+    val nextTimeStamp: Date?
+
+    constructor(clientId: String, campaignId: String, campaignName: String, action: JobDescriptor.Action, nextTimeStamp: Date? = null) {
+        this.clientId = clientId
+        this.campaignId = campaignId
+        this.campaignName = campaignName
+        this.action = action
+        this.nextTimeStamp = nextTimeStamp
+    }
+}

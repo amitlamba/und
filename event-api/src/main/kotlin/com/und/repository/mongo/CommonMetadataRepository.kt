@@ -8,8 +8,7 @@ import org.springframework.stereotype.Repository
 
 
 @Repository
-interface CommonMetadataRepository :CommonMetadataRepositoryCustom, MongoRepository<CommonMetadata, String> {
-    fun findByName(name: String):CommonMetadata?
+interface CommonMetadataRepository :MongoRepository<CommonMetadata,String>,CommonMetadataRepositoryCustom {
 
 }
 

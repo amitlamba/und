@@ -65,6 +65,7 @@ class LiveSegmentServiceImpl : LiveSegmentService {
 
     @Transactional(rollbackFor = arrayOf(Exception::class))
     fun saveLiveSegment(normalSegment:JpaSegment,liveSegment:LiveSegment){
+        //TODO cache start , end date of
         val persistedSegment=segmentRepository.save(normalSegment)
         liveSegment.segmentId=persistedSegment.id!!
         try {

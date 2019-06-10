@@ -129,24 +129,31 @@ class EmailService:CommonEmailService {
 //                throw  EmailFailureException("from email for template id ${email.emailTemplateId} is not present for system user", error)
 //            }
 //        }
-        emailHelperService.saveMailInMongo(emailToSend, NOT_SENT, mongoEmailId)
-        emailServiceUtility.sendEmailWithoutTracking(emailToSend)
-        emailHelperService.updateEmailStatus(mongoEmailId, SENT, emailToSend.clientID)
-
-        //TODO this event is track only for campaign not for system emails
-        val token = userRepository.findSystemUser().key
-        var event= Event()
-        with(event) {
-            name = "Notification Sent"
-            clientId=emailToSend.clientID
-            notificationId=mongoEmailId
-            attributes.put("campaign_id",emailToSend.campaignId)
-            attributes.put("template_id",emailToSend.emailTemplateId)
-            userIdentified=true
-            identity= Identity(userId = email.eventUser?.id,clientId = emailToSend.clientID.toInt(),idf=1)
-
+        //this event is track only for campaign not for system emails
+        if(emailToSend.campaignId!=null) {
+            emailHelperService.saveMailInMongo(emailToSend, NOT_SENT, mongoEmailId)
         }
-        eventApiFeignClient.pushEvent(token,event)
+        emailServiceUtility.sendEmailWithoutTracking(emailToSend)
+
+        emailToSend.campaignId?.let {
+
+            emailHelperService.updateEmailStatus(mongoEmailId, SENT, emailToSend.clientID)
+
+
+            val token = userRepository.findSystemUser().key
+            var event = Event()
+            with(event) {
+                name = "Notification Sent"
+                clientId = emailToSend.clientID
+                notificationId = mongoEmailId
+                attributes.put("campaign_id", it)
+                attributes.put("template_id", emailToSend.emailTemplateId)
+                userIdentified = true
+                identity = Identity(userId = email.eventUser?.id, clientId = emailToSend.clientID.toInt(), idf = 1)
+
+            }
+            eventApiFeignClient.pushEvent(token, event)
+        }
     }
 
 

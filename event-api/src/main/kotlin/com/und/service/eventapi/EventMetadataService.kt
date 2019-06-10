@@ -16,11 +16,11 @@ class EventMetadataService {
     @Autowired
     lateinit var commonMetadataRepository: CommonMetadataRepository
 
-    fun getEventMetadata(): List<EventMetadata> {
-        return eventMetadataRepository.findAll()
+    fun getEventMetadata(clientId:Long): List<EventMetadata> {
+        return eventMetadataRepository.findAll(clientId)
     }
 
-    fun getCommonProperties(): List<CommonMetadata> {
-        return commonMetadataRepository.findAll()
+    fun getCommonProperties(clientId:Long): List<CommonMetadata> {
+        return commonMetadataRepository.findAll(clientId)
     }
 }

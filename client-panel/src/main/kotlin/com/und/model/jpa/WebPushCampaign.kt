@@ -23,7 +23,7 @@ class WebPushCampaign {
     @OneToOne
     @JoinColumn(name="campaign_id")
     lateinit var campaign:Campaign
-    @NotNull
+    //@NotNull
     @Column(name="template_id")
     var templateId:Long?=null
     @field:CreationTimestamp

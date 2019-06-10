@@ -8,7 +8,7 @@ import java.time.LocalTime
 import java.time.ZoneId
 import javax.persistence.TemporalType
 
-@Document(collection = "#{tenantProvider.getTenant()}_livesegmenttrack")
+//@Document(collection = "#{tenantProvider.getTenant()}_livesegmenttrack")
 data class LiveSegmentTrack(
         @Id
         var id: String? = null, //Mongo Auto-generated Document id

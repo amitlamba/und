@@ -7,8 +7,6 @@ import org.springframework.stereotype.Repository
 @Repository
 interface EventRepository : MongoRepository<Event, String>, EventRepositoryUpdate {
 
-    fun findByName(eventName: String): List<Event>
-
 }
 
 

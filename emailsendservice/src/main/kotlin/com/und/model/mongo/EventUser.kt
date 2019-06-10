@@ -5,14 +5,14 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import java.util.*
 
-@Document(collection = "#{tenantProvider.getTenant()}_eventUser")
+//@Document(collection = "#{tenantProvider.getTenant()}_eventUser")
 class EventUser {
         @field: Id
         var id: String? = null
         var clientId: Int = -1
         var identity: Identity = Identity()
         var standardInfo: StandardInfo = StandardInfo()
-        val additionalInfo: HashMap<String, Any> = hashMapOf()
+        var additionalInfo: HashMap<String, Any> = hashMapOf()
         var creationTime: Date = DateUtils.nowInUTC()
         var communication: Communication? = null
 }

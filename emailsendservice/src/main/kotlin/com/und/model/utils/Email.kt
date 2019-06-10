@@ -19,7 +19,7 @@ data class Email(
         var emailTemplateName: String,
         var data: MutableMap<String, Any> = mutableMapOf(),
         var eventUser: EventUser? = null,
-        var campaignId:Long,
+        var campaignId:Long?=null,
         var creationTime: Date = DateUtils.nowInUTC(),
         var retries:Int = 0,
         var mongoNotificationId:String?=null,

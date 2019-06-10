@@ -38,6 +38,9 @@ interface EventStream {
     @Input("clientEmailReceive")
     fun clientEmailSend(): SubscribableChannel
 
+    @Output("clientEmailSend")
+    fun clientEmailOut(): MessageChannel
+
     @Input("EmailUpdateReceive")
     fun emailUpdateEvent(): SubscribableChannel
 
@@ -52,5 +55,14 @@ interface EventStream {
 
     @Input("inTestCampaign")
     fun inTestCampaign():SubscribableChannel
+
+    @Input("abCampaignTriggerReceive")
+    fun abCampaignReceive():SubscribableChannel
+
+    @Output("scheduleJobSend")
+    fun scheduleJobSend(): MessageChannel
+
+    @Input("receiveManualTriggerCampaign")
+    fun runManualCampaign():SubscribableChannel
 
 }

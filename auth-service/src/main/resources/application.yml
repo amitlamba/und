@@ -1,0 +1,129 @@
+## config context path to "/" by setting an empty string
+#server:
+#  port: 9605
+#  contextPath:
+#
+## JACKSON
+#spring:
+#  application:
+#    name: auth-service
+#  thymeleaf:
+#    cache: false
+#  jackson:
+#    serialization:
+#      INDENT_OUTPUT: true
+#  cloud:
+#    stream:
+#      kafka:
+#        binder:
+#          brokers: ${KAFKA_IP}
+#          defaultBrokerPort: ${KAFKA_PORT}
+#          zkNodes: ${KAFKA_IP}
+#          defaultZkPort: 2181
+#          configuration:
+#            enable:
+#              auto:
+#                commit: true
+#            auto:
+#              offset:
+#                reset: earliest
+#        bindings:
+#          clientEmailSend:
+#            producer:
+#              configuration:
+#                client:
+#                  id: 1
+#            group: clientEmailSendGroup
+#            destination: clientEmailStaging
+#      bindings:
+#        clientEmailSend:
+#          destination: clientEmailStaging
+#
+#  datasource:
+#    url: jdbc:postgresql://${POSTGRES_IP}:${POSTGRES_PORT}/undstaging
+#    driver-class-name: org.postgresql.Driver
+#    username: postgres
+#    password:  postgres
+#  data:
+#    mongodb:
+#      database: eventdbstaging
+#      host: ${MONGO_IP}
+#      port: ${MONGO_PORT}
+#    tomcat:
+#      initial-size: 10
+#      max-wait: 10000
+#      max-active: 50
+#      test-on-borrow: true
+#
+#  redis:
+#    host: ${REDIS_IP}
+#    port: ${REDIS_PORT}
+#    database: 1
+#  zipkin:
+#    sender:
+#      type: web
+#    base-url: http://127.0.0.1:9411/
+#  sleuth:
+#    sampler:
+#      probability: 1.0
+#
+#security:
+#  header:
+#    token: authorization
+#    username: UserName
+#  secret: mySecret
+#  expiration: 604800
+#  route:
+#    authentication:
+#      path: auth
+#      userdetail: userdetail
+#      validate: auth/validate
+#
+#eureka:
+#  instance:
+#    prefer-ip-address: true
+#    health-check-url-path: /application/health
+#  client:
+#    register-with-eureka: true
+#    fetch-registry: true
+#    region: desktop
+#    service-url:
+#      defaultZone: http://${EUREKA_IP}:${EUREKA_PORT_STAGING}/eureka
+#
+#logging:
+#  level:
+#    org:
+#      springframework: info
+#      apache: info
+#      hibernate: info
+#    com:
+#      und: info
+#  file: ${HOME}/log/staging/und-auth-service.log
+#
+#und:
+#  system:
+#    user:
+#      token: jasdghajskdhg
+#    email:
+#      setting:
+#        id: 1
+#    from:
+#      address: userndot19@gmail.com
+#  metadata:
+#    userProperties: /home/shiv/und/initconfig/userproperties.json
+#    eventMetadata: eventMetadata.json
+#  url:
+#    event: http://userndot.com/event
+#    clientpanelui: http://userndot.com
+#  auth-url: http://nestros.com:8080/auth
+#  from-email: shiv@userndot.com
+#
+#google:
+#  recaptcha:
+#    key:
+#      site: 6Lcv4FsUAAAAAL1CEPzpEjUIxiDL93UWR2in1h1x
+#      secret: 6Lcv4FsUAAAAAMK62khPw_aUoUf3RvY6n7HmES6w
+#
+#system:
+#  captcha:
+#    enabled: false

@@ -26,6 +26,8 @@ import org.mockito.junit.MockitoJUnitRunner
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.test.util.ReflectionTestUtils
+import java.net.URI
+import java.net.URISyntaxException
 
 /**
  * Created by shiv on 21/07/17.

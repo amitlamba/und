@@ -4,6 +4,7 @@ import com.und.common.utils.MetadataUtil
 import com.und.eventapi.utils.copyToMongo
 import com.und.eventapi.utils.ipAddr
 import com.und.config.EventStream
+import com.und.eventapi.utils.logger
 import com.und.model.UpdateIdentity
 import com.und.model.mongo.eventapi.*
 import com.und.repository.mongo.*
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.data.mongodb.core.MongoOperations
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.messaging.handler.annotation.Headers
 import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
@@ -58,7 +60,7 @@ class EventService {
     @Autowired
     private lateinit var eventStream: EventStream
 
-    fun findByName(name: String): List<MongoEvent> = eventRepository.findByName(name)
+    fun findByName(name: String,clientId:Long): List<MongoEvent> = eventRepository.findByName(name,clientId)
 
 
     fun toKafka(event: Event): Boolean = eventStream.outEvent().send(MessageBuilder.withPayload(event).build())
@@ -111,10 +113,13 @@ class EventService {
 
 
         val eventMetadata = buildMetadata(mongoEvent)
-        eventMetadataRepository.save(eventMetadata)
+        eventMetadata.clientId = clientId
+        eventMetadataRepository.save(eventMetadata,clientId)
         val technographicsMetadata = buildTechnoGraphics(mongoEvent)
+        technographicsMetadata.clientId = clientId
         userMetadataRepository.updateTechnographics(clientId, technographicsMetadata)
         val appFieldsMetadata = buildAppFields(mongoEvent)
+        appFieldsMetadata.clientId = clientId
         userMetadataRepository.updateAppFields(clientId, appFieldsMetadata)
         //FIXME add to metadata
 //        val saved = eventRepository.insert(mongoEvent)
@@ -124,14 +129,14 @@ class EventService {
             mongoEvent.userIdentified = true
         }
         eventRepository.save(mongoEvent)
-        val saved = eventRepository.findById(id.toString()).get()
+        val saved = eventRepository.findById(id.toString(),mongoEvent.clientId).get()
         mongoEvent.userId?.let {
             eventStream.outEventForLiveSegment().send(MessageBuilder.withPayload(buildEventForLiveSegment(saved)).build())
         }
         return saved.id
     }
 
-    private inline fun addProperty(propertyName: String, optionName: String?, technographics: CommonMetadata) {
+    private  fun addProperty(propertyName: String, optionName: String?, technographics: CommonMetadata) {
         optionName?.let { option ->
             val property = Property()
             property.name = propertyName
@@ -165,7 +170,7 @@ class EventService {
     }
 
     private fun buildMetadata(event: MongoEvent): EventMetadata {
-        val metadata = eventMetadataRepository.findByName(event.name) ?: EventMetadata()
+        val metadata = eventMetadataRepository.findByName(event.name,event.clientId) ?: EventMetadata()
         metadata.name = event.name
         val properties = MetadataUtil.buildMetadata(event.attributes, metadata.properties)
         metadata.properties.clear()

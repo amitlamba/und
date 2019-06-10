@@ -59,8 +59,15 @@ class ClientService {
 
     fun insertMetadata(clientId:Long) {
         if(!clientRepository.userpropertiesExists(clientId)) {
-            val userProperties = File(userPropertiesFile).readText(Charsets.UTF_8)
-            clientRepository.saveUserProperties(clientId, userProperties)
+           // val userProperties = File(userPropertiesFile).readText(Charsets.UTF_8)
+            val commonUserProperties:List<CommonMetadata> = clientRepository.getCommonUserProperties()
+            // common properties must not be null.
+            var clientProperties = commonUserProperties.map {
+                it.id = null
+                it.clientId = clientId
+                it
+            }
+            clientRepository.saveUserProperties(clientId, clientProperties)
         }
         //val eventMetadata = File(eventMetadataFile).readText(Charsets.UTF_8)
         //clientRepository.saveEventMetadta(clientId, eventMetadata)

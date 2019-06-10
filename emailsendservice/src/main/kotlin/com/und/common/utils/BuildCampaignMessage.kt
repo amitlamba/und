@@ -32,7 +32,7 @@ class BuildCampaignMessage {
                 clientID = clientId,
                 fromEmailAddress = InternetAddress.parse(campaign.fromUser, false)[0],
                 toEmailAddresses = InternetAddress.parse(user.identity.email, false),
-                emailTemplateId = emailCampaign.templateId ?: 0L,
+                emailTemplateId = emailTemplate.id ?: 0L,
                 emailTemplateName = emailTemplate.name,
                 campaignId = campaign.id!!,
                 eventUser = user,
@@ -72,10 +72,10 @@ class BuildCampaignMessage {
         )
     }
 
-    fun buildAndroidFcmMessage(clientId: Long, androidCampaign: AndroidCampaign, user: EventUser, campaign: Campaign): FcmMessage {
+    fun buildAndroidFcmMessage(clientId: Long, androidCampaign: AndroidCampaign, user: EventUser, campaign: Campaign,templateId:Long?=null): FcmMessage {
         return FcmMessage(
                 clientId = clientId,
-                templateId = androidCampaign.templateId ?: 0L,
+                templateId = if(templateId==null) androidCampaign.templateId ?: 0L else templateId,
                 to = user.identity.androidFcmToken ?: "",
                 type = "android",
                 campaignId = -1,
@@ -101,10 +101,10 @@ class BuildCampaignMessage {
         )
     }
 
-    fun buildWebFcmMessage(clientId: Long, webPushCampaign: WebPushCampaign, token: String, campaign: Campaign, user: EventUser): FcmMessage {
+    fun buildWebFcmMessage(clientId: Long, webPushCampaign: WebPushCampaign, token: String, campaign: Campaign, user: EventUser,templateId: Long?=null): FcmMessage {
         return FcmMessage(
                 clientId = clientId,
-                templateId = webPushCampaign.templateId ?: 0L,
+                templateId = if(templateId==null) webPushCampaign.templateId ?: 0L else templateId,
                 to = token,
                 type = "web",
                 campaignId = campaign.id!!,

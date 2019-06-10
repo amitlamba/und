@@ -11,15 +11,14 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
-import org.springframework.stereotype.Repository
-import java.text.SimpleDateFormat
-import java.time.LocalDate
+import org.springframework.stereotype.Component
 import java.util.*
-@Repository
+
+//@Component
 class EventUserCustomRepositoryImpl : EventUserCustomRepository {
 
     @Autowired
-    lateinit var mongoTemplate: MongoTemplate
+    private lateinit var mongoTemplate: MongoTemplate
 
 
     override fun findUserByIds(ids:Set<String>, clientId: Long): List<EventUser> {
@@ -134,5 +133,9 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
             return if(result.isNotEmpty()) result[0].userId else emptyList()
         }
         return emptyList()
+    }
+
+    override fun findAll(clientId: Long): List<EventUser> {
+        return mongoTemplate.findAll(EventUser::class.java,"${clientId}_eventUser")
     }
 }

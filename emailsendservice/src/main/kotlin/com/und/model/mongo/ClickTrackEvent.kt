@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document
 import java.lang.System
 import java.util.*
 
-@Document(collection = "#{tenantProvider.getTenant()}_click_event")
+//@Document(collection = "#{tenantProvider.getTenant()}_click_event")
 data class ClickTrackEvent(
         val name: String = "",
         @Id
