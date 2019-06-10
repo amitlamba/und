@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 import java.util.*
 import javax.mail.internet.InternetAddress
 
-@Document(collection = "#{tenantProvider.getTenant()}_email")
+//@Document(collection = "#{tenantProvider.getTenant()}_email")
 data class Email(
         @Id
         var id: String? = null, //Mongo Auto-generated Document id

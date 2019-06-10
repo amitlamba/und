@@ -95,7 +95,7 @@ class EventRestController {
 
 
         if (uid != null && uid.isNotEmpty()) {
-            val user = eventUserService.getEventUserByUid(uid)
+            val user = eventUserService.getEventUserByUid(uid,identityInit.clientId!!.toLong())
             if (user != null) {
                 identityInit.userId = user.id
             }

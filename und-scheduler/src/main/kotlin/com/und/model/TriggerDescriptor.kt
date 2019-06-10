@@ -50,12 +50,7 @@ class TriggerDescriptor {
         name = buildName(jobDescriptor)
         group = buildGroupName(jobDescriptor)
         val timeZone = jobDescriptor.timeZoneId
-        val startDayTime = startDate?.atStartOfDay(timeZone)
-        val endDateTime = endDate?.let {
 
-            val endTime = LocalTime.of(23, 59, 59)
-            LocalDateTime.of(endDate, endTime)?.atZone(timeZone)
-        }
         val triggerBuilder = when {
 
 

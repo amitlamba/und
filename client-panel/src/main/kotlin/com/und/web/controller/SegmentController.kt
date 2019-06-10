@@ -31,13 +31,15 @@ class SegmentController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/metadata"])
     fun getEventMetadta(): List<EventMetadata> {
-        return eventMetadataService.getEventMetadata()
+        val clientId = AuthenticationUtils.principal.clientId?: throw AccessDeniedException("Access Denied")
+        return eventMetadataService.getEventMetadata(clientId)
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping(value = ["/commonproperties"])
     fun getCommonProperties(): List<CommonMetadata> {
-        return eventMetadataService.getCommonProperties()
+        val clientId = AuthenticationUtils.principal.clientId?: throw AccessDeniedException("Access Denied")
+        return eventMetadataService.getCommonProperties(clientId)
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")

@@ -15,7 +15,7 @@ class ClientUsersService {
 
     fun getEventUsers(clientId: Long): List<EventUser> {
         TenantProvider().setTenat(clientId.toString())
-        return eventUserRepository.findAll()
+        return eventUserRepository.findAll(clientId)
 
     }
 

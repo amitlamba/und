@@ -111,7 +111,9 @@
 #          scheduleLiveJobSend:
 #            destination: scheduleLiveJobStaging
 #          outTestCampaign:
-#            destinataion: testCampaignStaging
+#            destination: testCampaignStaging
+#          triggerManualCampaign:
+#            destination: manualCampaignStaging
 #      bindings:
 #        scheduleJobSend:
 #          destination: scheduleJobStaging
@@ -132,7 +134,10 @@
 #        scheduleLiveJobSend:
 #          destination: scheduleLiveJobStaging
 #        outTestCampaign:
-#          destinataion: testCampaignStaging
+#          destination: testCampaignStaging
+#        triggerManualCampaign:
+#          destination: manualCampaignStaging
+#
 #  mvc:
 #    view:
 #      prefix: /WEB-INF/views/
@@ -169,9 +174,9 @@
 #    placeholder-replacement: false
 #
 #  zipkin:
-#    base-url: http://springbootzipkin:7777
+#    base-url: http://127.0.0.1:9411/
 #    sender:
-#      type: kafka
+#      type: web
 #  sleuth:
 #    sampler:
 #      probability: 1

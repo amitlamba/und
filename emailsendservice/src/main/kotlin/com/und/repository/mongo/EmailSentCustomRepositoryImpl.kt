@@ -6,12 +6,14 @@ import com.und.model.mongo.EmailStatusUpdate
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoTemplate
+import org.springframework.data.mongodb.core.findOne
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Repository
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.util.*
 
 @Repository
 class EmailSentCustomRepositoryImpl : EmailSentCustomRepository {
@@ -33,4 +35,12 @@ class EmailSentCustomRepositoryImpl : EmailSentCustomRepository {
             mongoTemplate.updateFirst(query, update, Email::class.java, "${clientId}_email")
     }
 
+    override fun findById(id: String, clientId: Long): Optional<Email> {
+       val email = mongoTemplate.findOne(Query.query(Criteria.where("_id").`is`(id).and("clientID").`is`(clientId)),Email::class.java,"${clientId}_email")
+        return if (email == null) Optional.empty() else Optional.of(email)
+    }
+
+    override fun save(email: Email) {
+        mongoTemplate.save(email,"${email.clientID}_email")
+    }
 }

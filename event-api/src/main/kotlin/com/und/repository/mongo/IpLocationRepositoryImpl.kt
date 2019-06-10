@@ -32,14 +32,13 @@ class IpLocationRepositoryImpl :IpLocationRepository{
 
     private fun convertIpv4ToDecimal(ipAddress: String): Int {
         if(ipAddress.contains(":")) return 0
-        var octet = ipAddress.split(".")
-        var octet1 = Integer.parseInt(octet[0]) * 16777216
-        var octet2 = Integer.parseInt(octet[1]) * 65536
-        var octet3 = Integer.parseInt(octet[2]) * 256
-        var octet4 = Integer.parseInt(octet[3])
+        val octet = ipAddress.split(".")
+        val octet1 = Integer.parseInt(octet[0]) * 16777216
+        val octet2 = Integer.parseInt(octet[1]) * 65536
+        val octet3 = Integer.parseInt(octet[2]) * 256
+        //val octet4 = Integer.parseInt(octet[3])
         //Fixme remove below line when we have commercial database of ip address currently our database not support this level of preciseness
-        octet4 = 0
-        var ipToDecimal = octet1 + octet2 + octet3 + octet4
-        return ipToDecimal
+        val octet4 = 0
+        return octet1 + octet2 + octet3 + octet4
     }
 }

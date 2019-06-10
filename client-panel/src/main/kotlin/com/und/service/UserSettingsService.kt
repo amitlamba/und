@@ -19,7 +19,7 @@ import com.und.common.utils.DateUtils
 import com.und.common.utils.encrypt
 import com.und.common.utils.loggerFor
 import com.und.config.EventStream
-import com.und.feign.FeignClientForAuthService
+//import com.und.feign.FeignClientForAuthService
 import com.und.model.Email
 import com.und.model.jpa.Client
 import com.und.web.controller.exception.UndBusinessValidationException
@@ -28,6 +28,7 @@ import com.und.model.jpa.security.User
 import com.und.repository.jpa.*
 import com.und.repository.redis.TokenIdentityRepository
 import com.und.repository.redis.UserCacheRepository
+import com.und.security.service.AuthenticationServiceClient
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.WrongCredentialException
@@ -72,7 +73,7 @@ class UserSettingsService {
     private lateinit var userRepository: UserRepository
 
     @Autowired
-    lateinit var feignClientForAuthService: FeignClientForAuthService
+    lateinit var feignClientForAuthService: AuthenticationServiceClient
 
     @Autowired
     lateinit var userCacheRepository: UserCacheRepository

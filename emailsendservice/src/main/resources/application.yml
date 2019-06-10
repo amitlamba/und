@@ -35,7 +35,7 @@
 #              #                  This property effect performance.
 #              commit:
 #                interval:
-#                  ms: 2000  #default value
+#                  ms: 5000  #default value
 #            max:
 #              poll:
 #                interval:
@@ -166,6 +166,27 @@
 #                  id: testCampaignReceiveGroup
 #            group: testCampaignReceiveGroup
 #            destination: testCampaignStaging
+#          abCampaignTriggerReceive:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 11
+#                group:
+#                  id: abCampaignTriggerReceiveGroup
+#          receiveManualTriggerCampaign:
+#            consumer:
+#              configuration:
+#                client:
+#                  id: 12
+#                group:
+#                  id: manualCampaignTriggerReceiveGroup
+#            group: manualCampaignTriggerReceiveGroup
+#            destination: manualCampaignStaging
+#          scheduleJobSend:
+#            group: scheduleJobGroup
+#            destination: scheduleJobStaging
+#          clientEmailSend:
+#            destination: clientEmailStaging
 #      bindings:
 #        emailEventSend:
 #          destination: emailEventStaging
@@ -197,6 +218,14 @@
 #          destination: processliveuser
 #        inTestCampaign:
 #          destination: testCampaignStaging
+#        abCampaignTriggerReceive:
+#          destination: abCampaignTriggerStaging
+#        receiveManualTriggerCampaign:
+#          destination: manualCampaignStaging
+#        scheduleJobSend:
+#          destination: scheduleJobStaging
+#        clientEmailSend:
+#          destination: clientEmailStaging
 #  mvc:
 #    view:
 #      prefix: /WEB-INF/views/
@@ -228,9 +257,9 @@
 #      port: ${MONGO_PORT}
 #
 #  zipkin:
-#    base-url: http://springbootzipkin:7777
+#    base-url: ${ZIPKIN_SERVER}
 #    sender:
-#      type: kafka
+#      type: web
 #  sleuth:
 #    sampler:
 #      probability: 1
@@ -280,6 +309,11 @@
 #  system:
 #    user:
 #      token: jasdghajskdhg
+#    email:
+#      setting:
+#        id: 1
+#    from:
+#      address: userndot19@gmail.com
 #  url:
 #    event: http://userndot.com/event
 #  auth-url: http://nestros.com:8090/auth
