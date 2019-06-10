@@ -8,7 +8,6 @@ import com.und.model.TriggerDescriptor
 import com.und.service.JobService
 import com.und.util.JobUtil
 import org.quartz.Scheduler
-import org.quartz.impl.matchers.GroupMatcher
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
@@ -104,7 +103,10 @@ class CampaignJobService(private val jobService: JobService, private val eventSt
                 val status = jobActionStatus(jobDescriptor, action)
                 status.status = JobActionStatus.Status.NOTFOUND
                 status.message = "No action with this name can be performed"
-                status
+
+            }
+            else ->{
+                logger.error("schedule  live job can't receive ${jobDescriptor.action}")
             }
         }
     }

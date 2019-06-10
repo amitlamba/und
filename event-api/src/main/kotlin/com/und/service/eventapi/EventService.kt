@@ -135,7 +135,7 @@ class EventService {
         return saved.id
     }
 
-    private inline fun addProperty(propertyName: String, optionName: String?, technographics: CommonMetadata) {
+    private  fun addProperty(propertyName: String, optionName: String?, technographics: CommonMetadata) {
         optionName?.let { option ->
             val property = Property()
             property.name = propertyName
