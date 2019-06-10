@@ -1,9 +1,9 @@
 package com.und.service.eventapi
 
 import com.und.common.utils.MetadataUtil
+import com.und.config.EventStream
 import com.und.eventapi.utils.copyToMongo
 import com.und.eventapi.utils.ipAddr
-import com.und.config.EventStream
 import com.und.eventapi.utils.logger
 import com.und.model.UpdateIdentity
 import com.und.model.mongo.eventapi.*
@@ -13,21 +13,13 @@ import com.und.security.utils.TenantProvider
 import com.und.web.exception.EventNotFoundException
 import com.und.web.model.eventapi.Event
 import com.und.web.model.eventapi.EventMessage
-import com.und.web.model.eventapi.Identity
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
-import org.springframework.data.mongodb.core.MongoOperations
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.messaging.handler.annotation.Headers
-import org.springframework.messaging.handler.annotation.SendTo
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
-import java.time.Instant
-import org.springframework.messaging.handler.annotation.Headers
-import com.und.eventapi.utils.logger
-import java.time.ZoneId
-import java.util.*
 import java.util.regex.Pattern
 import javax.servlet.http.HttpServletRequest
 import com.und.model.mongo.eventapi.Event as MongoEvent
