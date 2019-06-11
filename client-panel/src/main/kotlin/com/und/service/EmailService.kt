@@ -6,6 +6,7 @@ import com.und.exception.EmailError
 import com.und.model.Email
 import com.und.model.EmailRead
 import com.und.repository.jpa.ClientSettingsEmailRepository
+import com.und.repository.jpa.SystemEmailRepository
 import com.und.web.controller.exception.CustomException
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
@@ -26,8 +27,8 @@ class EmailService {
         protected val logger = loggerFor(EmailService::class.java)
     }
 
-    @Value(value = "\${und.system.email.setting.id}")
-    private var clientSettingId:Long?=null
+//    @Value(value = "\${und.system.email.setting.id}")
+//    private var clientSettingId:Long?=null
 
     @Autowired
     private lateinit var eventStream: EventStream
@@ -37,6 +38,9 @@ class EmailService {
 
     @Autowired
     private lateinit var kafkaTemplateEmailRead: KafkaTemplate<String, EmailRead>
+
+    @Autowired
+    private lateinit var systemEmailRepository: SystemEmailRepository
 
     @Autowired
     private lateinit var clientSettingsEmailRepository: ClientSettingsEmailRepository
@@ -71,58 +75,67 @@ class EmailService {
     }
 
     fun sendEmailConnectionErrorEmail(emailError: EmailError) {
-        val clientSetting=getClientEmailSettings((clientSettingId)?:-1)
-        emailError.clientid?.let {clientId->
-            val client = clientService.getClientByClientId(clientId)
+        val systemEmail = systemEmailRepository.findByEmailTemplateId(emailConnectionErrorTemplate)
+        systemEmail?.let { sysEmail ->
+            val clientSetting=getClientEmailSettings((sysEmail.emailSettingId)?:-1)
+            emailError.clientid?.let {clientId->
+                val client = clientService.getClientByClientId(clientId)
 
-            client?.let {
-                val dataMap = mutableMapOf<String, Any>(
-                        "name" to "${it.firstname} ${it.lastname}",
-                        "error" to "${emailError.causeMessage}"
+                client?.let {
+                    val dataMap = mutableMapOf<String, Any>(
+                            "name" to "${it.firstname} ${it.lastname}",
+                            "error" to "${emailError.causeMessage}"
 
-                )
+                    )
 
-                val email = Email(
-                        clientID = 1,
-                        fromEmailAddress = InternetAddress(clientSetting),
-                        toEmailAddresses = arrayOf(InternetAddress(it.email)),
-                        emailTemplateId = emailConnectionErrorTemplate,
-                        emailTemplateName = "emailConnectionError",
-                        data = dataMap,
-                        clientEmailSettingId = clientSettingId
-                )
-                sendEmail(email)
+                    val email = Email(
+                            clientID = 1,
+                            fromEmailAddress = InternetAddress(clientSetting),
+                            toEmailAddresses = arrayOf(InternetAddress(it.email)),
+                            emailTemplateId = emailConnectionErrorTemplate,
+                            emailTemplateName = "emailConnectionError",
+                            data = dataMap,
+                            clientEmailSettingId = sysEmail.emailSettingId
+                    )
+                    sendEmail(email)
+                }
+
             }
-
         }
+
     }
 
     fun sendNotificationConnectionErrorEmail(notificationError: NotificationError) {
-        val clientSetting=getClientEmailSettings((clientSettingId)?:-1)
-        notificationError.clientId?.let {clientId->
-            val client = clientService.getClientByClientId(clientId)
+        val systemEmail = systemEmailRepository.findByEmailTemplateId(emailConnectionErrorTemplate)
+        systemEmail?.let {sysEmail ->
+            val clientSetting=getClientEmailSettings((sysEmail.emailSettingId)?:-1)
+            //val clientSetting=getClientEmailSettings((clientSettingId)?:-1)
+            notificationError.clientId?.let {clientId->
+                val client = clientService.getClientByClientId(clientId)
 
-            client?.let {
+                client?.let {
 
-                val dataMap = mutableMapOf<String, Any>(
-                        "name" to "${it.firstname} ${it.lastname}",
-                        "error" to "${notificationError.status}"
+                    val dataMap = mutableMapOf<String, Any>(
+                            "name" to "${it.firstname} ${it.lastname}",
+                            "error" to "${notificationError.status}"
 
-                )
+                    )
 
-                val email = Email(
-                        clientID = 1,
-                        fromEmailAddress = InternetAddress(clientSetting),
-                        toEmailAddresses = arrayOf(InternetAddress(it.email)),
-                        emailTemplateId = emailConnectionErrorTemplate,
-                        emailTemplateName = "emailConnectionError",
-                        data = dataMap,
-                        clientEmailSettingId = clientSettingId
-                )
-                sendEmail(email)
+                    val email = Email(
+                            clientID = 1,
+                            fromEmailAddress = InternetAddress(clientSetting),
+                            toEmailAddresses = arrayOf(InternetAddress(it.email)),
+                            emailTemplateId = emailConnectionErrorTemplate,
+                            emailTemplateName = "emailConnectionError",
+                            data = dataMap,
+                            clientEmailSettingId = sysEmail.emailSettingId
+                    )
+                    sendEmail(email)
+                }
+
             }
-
         }
+
     }
 
     @Cacheable(key = "'client_1'+'setting_id_'+#id",cacheNames = ["client_email_settings"])

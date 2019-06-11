@@ -29,7 +29,7 @@ class CampaignService {
 
     companion object {
         protected val logger = loggerFor(CampaignService::class.java)
-        private val campaignReminderTemplateId = 6L
+        private val campaignReminderTemplateId = 7L
     }
 
     @Autowired
@@ -80,11 +80,14 @@ class CampaignService {
     @Autowired
     private lateinit var clientRepository: ClientRepository
 
-    @Value(value = "\${und.system.email.setting.id}")
-    var clientEmailSettingId:Long?=null
+    @Autowired
+    private lateinit var systemEmailRepository: SystemEmailRepository
 
-    @Value(value = "\${und.system.from.address}")
-    lateinit var systemFromAddress:String
+//    @Value(value = "\${und.system.email.setting.id}")
+//    var clientEmailSettingId:Long?=null
+
+//    @Value(value = "\${und.system.from.address}")
+//    lateinit var systemFromAddress:String
 
     fun executeCampaign(campaignId: Long, clientId: Long) {
         //if client not trigger manual campaign then next time(if its multidate) we automatically send winner template.
@@ -183,16 +186,24 @@ class CampaignService {
                     dataMap.put("email",client.email)
                     dataMap.put("firstname",client.firstname?:"")
                     dataMap.put("lastname",client.lastname?:"")
-                    val email = Email(
-                            clientID = 1,
-                            fromEmailAddress = InternetAddress(systemFromAddress),
-                            toEmailAddresses = arrayOf(InternetAddress(client.email)),
-                            emailTemplateId = campaignReminderTemplateId,
-                            emailTemplateName = "campaignReminder",
-                            data = dataMap,
-                            clientEmailSettingId = clientEmailSettingId
-                    )
-                    eventStream.clientEmailOut().send(MessageBuilder.withPayload(email).build())
+                    val systemEmail = systemEmailRepository.findByEmailTemplateId(campaignReminderTemplateId)
+                    systemEmail?.let {
+                        val clientEmailSettings = clientEmailSettingsRepository.findById(it.emailSettingId)
+                        clientEmailSettings.ifPresent {
+                            val email = Email(
+                                    clientID = 1,
+                                    fromEmailAddress = InternetAddress(it.email),
+                                    toEmailAddresses = arrayOf(InternetAddress(client.email)),
+                                    emailTemplateId = campaignReminderTemplateId,
+                                    emailTemplateName = "campaignReminder",
+                                    data = dataMap,
+                                    clientEmailSettingId = it.id
+                            )
+                            eventStream.clientEmailOut().send(MessageBuilder.withPayload(email).build())
+                        }
+
+                    }
+
                 }
             }
         }
