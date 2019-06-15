@@ -10,6 +10,7 @@ import com.und.web.controller.exception.EventUserListNotFoundException
 import com.und.web.controller.exception.EventUserNotFoundException
 import com.und.web.controller.exception.EventsListNotFoundException
 import com.und.web.model.EventUser
+import com.und.web.model.EventUserMinimal
 import com.und.web.model.event.Event
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -113,6 +114,7 @@ class EventUserService {
         eventUser.lastName = eventUserMongo.standardInfo.lastname
         eventUser.gender = eventUserMongo.standardInfo.gender
         eventUser.country = eventUserMongo.standardInfo.country
+        eventUser.undId = eventUserMongo.id
         eventUser.city = eventUserMongo.standardInfo.city
         eventUser.address = eventUserMongo.standardInfo.address
         eventUser.clientId = eventUserMongo.clientId
@@ -124,10 +126,20 @@ class EventUserService {
         eventUser.fbId = eventUserMongo.identity.fbId
         eventUser.googleId = eventUserMongo.identity.googleId
         eventUser.mobile = eventUserMongo.identity.mobile
-        eventUser.undId = eventUserMongo.id
         eventUser.countryCode = eventUserMongo.standardInfo.countryCode
         eventUser.communication = eventUserMongo.communication
         eventUser.testUser = eventUserMongo.testUser
+        return eventUser
+    }
+
+    internal fun buildEventUserMinimal(eventUserMongo: EventUserMongo): EventUserMinimal {
+
+        val eventUser = EventUserMinimal()
+        eventUser.firstName = eventUserMongo.standardInfo.firstname
+        eventUser.lastName = eventUserMongo.standardInfo.lastname
+        eventUser.gender = eventUserMongo.standardInfo.gender
+        eventUser.country = eventUserMongo.standardInfo.country
+        eventUser.undId = eventUserMongo.id
         return eventUser
     }
 

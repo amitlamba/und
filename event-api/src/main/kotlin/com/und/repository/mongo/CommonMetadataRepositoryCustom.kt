@@ -15,9 +15,9 @@ interface CommonMetadataRepositoryCustom {
     fun findByName(name: String,clientId: Long):CommonMetadata?
     fun findAll(clientId: Long):List<CommonMetadata>
 
-    fun updateTechnographics(clientId: Long, name: TechnoGraphics): CommonMetadata?
+    fun updateTechnographics(clientId: Long, technographics: TechnoGraphics): CommonMetadata?
 
-    fun updateAppFields(clientId: Long, name: AppFields): CommonMetadata?
+    fun updateAppFields(clientId: Long, appFields: AppFields): CommonMetadata?
 }
 
 

@@ -81,14 +81,12 @@ class LiveSegmentServiceImpl : LiveSegmentService {
     override fun getLiveSegments(clientId: Long): List<WebLiveSegment> {
         val liveSegments=liveSegmentRepository.findByClientID(clientId)
         val behaviouralSegments=segmentRepository.findByClientIDAndType(clientId,"Live")
-        return if(liveSegments.isPresent){
-            val liveSegmentList=liveSegments.get()
-            val behaviouralSegmentList=behaviouralSegments.get()
-            liveSegmentList.map {
-                val segment=behaviouralSegmentList.find { segment ->  segment.id==it.segmentId}!!
+
+            return liveSegments.map {
+                val segment=behaviouralSegments.find { segment ->  segment.id==it.segmentId}!!
                 buildWebLiveSegment(it,segment)
             }
-        }else emptyList()
+
     }
 
     override fun getLiveSegmentByClientIDAndId(clientId: Long, id: Long): WebLiveSegment {

@@ -41,5 +41,9 @@ object AuthenticationUtils {
             return principal.clientId
         }
 
+    fun  retrieveClientId(): Long {
+        return clientID?: throw AccessDeniedException("Access Denied.")
+    }
+
 
 }

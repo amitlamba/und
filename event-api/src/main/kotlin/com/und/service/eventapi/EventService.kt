@@ -107,6 +107,7 @@ class EventService {
         val eventMetadata = buildMetadata(mongoEvent)
         eventMetadata.clientId = clientId
         eventMetadataRepository.save(eventMetadata,clientId)
+
         val technographicsMetadata = buildTechnoGraphics(mongoEvent)
         technographicsMetadata.clientId = clientId
         userMetadataRepository.updateTechnographics(clientId, technographicsMetadata)

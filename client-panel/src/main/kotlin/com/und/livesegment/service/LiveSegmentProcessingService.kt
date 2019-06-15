@@ -146,7 +146,6 @@ class LiveSegmentProcessingService {
         val possibleLiveSegments = this.liveSegmentService.findByClientIDAndStartEvent(event.clientId, event.name)
         possibleLiveSegments.forEach { liveSegment ->
             logger.info("Checking start event: $event for live-segment-id: ${liveSegment.id}")
-            val segment = this.segmentService.persistedSegmentById(liveSegment.segmentId, liveSegment.clientID)
 
             //TODO why not we create a custom method to match it. and take eventFilter in event Message
             val startEventMatched = startEventPropertiesMatched(liveSegment, event.eventId, event.userId, event.clientId)
@@ -155,6 +154,7 @@ class LiveSegmentProcessingService {
                 return@forEach
             }
 
+            val segment = this.segmentService.persistedSegmentById(liveSegment.segmentId, liveSegment.clientID)
             val userPresentInSegment = this.segmentService.isUserPresentInSegment(segment, event.clientId, event.userId,IncludeUsers.ALL)
             if (!userPresentInSegment) {
                 logger.info("User checks not matched with $event for live-segment-id: ${liveSegment.id}")
@@ -303,7 +303,7 @@ class LiveSegmentProcessingService {
         val aggregation = Aggregation.newAggregation(matchOps, groupOps)
 
         val idList = eventRepository.usersFromEvent(aggregation, clientId)
-        if (!idList.isEmpty()) {
+        if (idList.isNotEmpty()) {
             return true
         }
 

@@ -1,6 +1,5 @@
 package com.und.model.jpa
 
-import com.und.livesegment.model.jpa.LiveSegment
 import com.und.web.model.DidEvents
 import com.und.web.model.Geography
 import com.und.web.model.GlobalFilter
@@ -12,25 +11,29 @@ import javax.validation.constraints.NotNull
 
 @Entity
 @Table(name = "segment")
-class Segment {
+class Segment  {
 
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY, generator = "segment_id_seq")
     @SequenceGenerator(name = "segment_id_seq", sequenceName = "segment_id_seq", allocationSize = 1)
-    var id: Long? = null
+    open var id: Long? = null
 
-    @Column(name = "client_id")
-    @NotNull
-    var clientID: Long? = null
-
-    @Column(name = "appuser_id")
-    @NotNull
-    var appuserID: Long? = null
 
     @Column(name = "name")
     @NotNull
-    var name: String = ""
+    open var name: String = ""
+
+    @Column(name = "client_id")
+    @NotNull
+    open var clientID: Long? = null
+
+
+    @Column(name = "appuser_id")
+    @NotNull
+    open var appuserID: Long? = null
+
+
 
     @Column(name = "type")
     @NotNull
@@ -50,6 +53,7 @@ class Segment {
 
     @Column(name = "data")
     @NotNull
+    @Basic(fetch = FetchType.LAZY)
     var data: String = "{}"
 
     //add live segment filed in web model

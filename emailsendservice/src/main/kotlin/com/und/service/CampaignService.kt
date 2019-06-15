@@ -355,77 +355,7 @@ class CampaignService {
         }
     }
 
-    private fun sendCampaign(clientId: Long, campaign: Campaign, templateId: Int, user: EventUser) {
-//        try {
-//            redisTemplalte.multi()      //starting transaction
-//            var counter = redisTemplalte.opsForHash<String, Int>().get("$clientId:${campaign.id}:${templateId}", "count")
-//            val newCounter = AtomicInteger(counter)
-//            // sending notification to this template id
-//            executeCampaignForUser(campaign, user, clientId, templateId.toLong())
-//            counter--
-//            //redisTemplalte.opsForHash<String,Int>().increment("$clientId:${campaign.id}:${templateId}","count",-1)
-//            if (counter == 0) {
-//                redisTemplalte.opsForList().leftPop("$clientId:${campaign.id}")
-//                redisTemplalte.opsForList().rightPush("$clientId:${campaign.id}", templateId)
-//            } else {
-//                redisTemplalte.opsForHash<String, Int>().put("$clientId:${campaign.id}:${templateId}", "count", counter)
-//            }
-//
-//            redisTemplalte.exec()   //committing transaction
-//        } catch (ex: java.lang.Exception) {
-//            redisTemplalte.discard()    //rollback discard all changes.
-//        }
-    }
 
-    fun executeAbTestLiveCampaign(campaign: Campaign, clientId: Long, user: EventUser) {
-//        val variants = redisTemplalte.opsForList().range("$clientId:${campaign.id}", 0, -1) //get list of template
-//        val winnerTemplate = redisTemplalte.opsForValue().get("$clientId:${campaign.id}:winner")
-//        if (variants == null) {
-//            val listOfTemplateId = mutableListOf<Int>()
-//            campaign.variants.forEach {
-//                listOfTemplateId.add(it.templateId!!)
-//                redisTemplalte.opsForHash<String, Int>().putAll("$clientId:${campaign.id}:${it.templateId}",
-//                        mapOf(Pair("users", it.users), Pair("count", it.counter), Pair("percentage", it.percentage)))
-//            }
-//            var templateId = campaign.variants[0].templateId ?: return
-//            redisTemplalte.opsForList().leftPushAll("$clientId:${campaign.id}", listOfTemplateId)
-//            sendAbLiveCampaign(clientId, campaign, templateId, user)
-//        } else if (winnerTemplate != null) {
-//            //get winner template and send notification
-//            executeCampaignForUser(campaign, user, clientId, winnerTemplate.toLong())
-//        } else {
-//            val templateId = variants.get(0)
-//
-//            sendAbLiveCampaign(clientId, campaign, templateId, user)
-//        }
-    }
-
-    private fun sendAbLiveCampaign(clientId: Long, campaign: Campaign, templateId: Int, user: EventUser) {
-//        val v = redisTemplalte.opsForHash<String, Int>().entries("$clientId:${campaign.id}:${templateId}")
-//
-//        var counter = v["count"] ?: 0
-//        var users = v["users"] ?: 0
-//
-//        executeCampaignForUser(campaign, user, clientId, templateId.toLong())
-//        users--
-//        counter--
-//        if (counter == 0 && users != 0) {
-//            redisTemplalte.opsForList().leftPop("$clientId:${campaign.id}")
-//            redisTemplalte.opsForList().rightPush("$clientId:${campaign.id}", templateId)
-//            redisTemplalte.opsForHash<String, Int>().put("$clientId:${campaign.id}:${templateId}", "count", (v["percentage"]?.div(10))
-//                    ?: 0)
-//            redisTemplalte.opsForHash<String, Int>().put("$clientId:${campaign.id}:${templateId}", "users", users)
-//        } else if (users == 0) {
-//            val token = userRepository.findSystemUser().key
-//                    ?: throw java.lang.Exception("Not Able to get system token.")
-//            val templateId = segmentUserServiceClient.getWinnerTemplate(campaign.id!!, clientId, token, "ALL")
-//            redisTemplalte.opsForValue().set("$clientId:${campaign.id}:winner", templateId.toInt())
-//            redisTemplalte.opsForList().leftPop("$clientId:${campaign.id}")
-//        } else {
-//            redisTemplalte.opsForHash<String, Int>().putAll("$clientId:${campaign.id}:${templateId}",
-//                    mapOf(Pair("users", users), Pair("count", counter)))
-//        }
-    }
 
     private fun communicationChannelPresent(campaign: Campaign, user: EventUser): Boolean {
         return when (campaign.campaignType) {

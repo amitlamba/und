@@ -165,20 +165,20 @@ class TriggerDescriptor {
                 val tz = TimeZone.getTimeZone(timeZoneId)
                 val fireTimeString = trigger.jobDataMap["fireTime"] as String?
                 if (!fireTimeString.isNullOrBlank()) {
-                    fireTime = fireTimeString?.let { LocalDateTime.ofEpochSecond(fireTimeString.toLong(), 0, ZoneOffset.UTC) }
+                    fireTime =  LocalDateTime.ofEpochSecond(fireTimeString.toLong(), 0, ZoneOffset.UTC)
                 }
                 cron = trigger.jobDataMap["cron"] as String?
                 val startDateString = trigger.jobDataMap["startDate"] as String?
                 if (!startDateString.isNullOrBlank()) {
-                    startDate = startDateString?.let { LocalDate.ofEpochDay(startDateString.toLong()) }
+                    startDate =  LocalDate.ofEpochDay(startDateString.toLong())
                 }
                 val endDateString = trigger.jobDataMap["endDate"] as String?
                 if (!endDateString.isNullOrBlank()) {
-                    endDate = endDateString?.let { LocalDate.ofEpochDay(endDateString.toLong()) }
+                    endDate =  LocalDate.ofEpochDay(endDateString.toLong())
                 }
                 val count = (trigger.jobDataMap["countTimes"] as String?)
                 if (!count.isNullOrBlank()) {
-                    countTimes = count?.let { count.toInt() } ?: 0
+                    countTimes =  count.toInt()
                 }
                 return triggerDescriptor
             }

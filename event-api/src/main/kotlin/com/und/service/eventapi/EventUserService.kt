@@ -173,8 +173,8 @@ class EventUserService {
         val clientId= AuthenticationUtils.principal.clientId?.toInt() ?: -1
         val timeZone = AuthenticationUtils.principal.timeZoneId
         with(identityCopy) {
-            deviceId = if (deviceId.isNullOrEmpty()) UUID.randomUUID().toString() else deviceId
-            sessionId = if (sessionId.isNullOrEmpty()) UUID.randomUUID().toString() else sessionId
+            deviceId = if (deviceId.isEmpty()) UUID.randomUUID().toString() else deviceId
+            sessionId = if (sessionId.isEmpty()) UUID.randomUUID().toString() else sessionId
             this.clientId = clientId
             idf = 0
         }
@@ -208,8 +208,8 @@ class EventUserService {
         val identityCopy = identity?.copy() ?: Identity()
 
         with(identityCopy) {
-            deviceId = if (deviceId.isNullOrEmpty()) UUID.randomUUID().toString() else deviceId
-            sessionId = if (sessionId.isNullOrEmpty()) UUID.randomUUID().toString() else sessionId
+            deviceId = if (deviceId.isEmpty()) UUID.randomUUID().toString() else deviceId
+            sessionId = if (sessionId.isEmpty()) UUID.randomUUID().toString() else sessionId
         }
         //verify old data exists if device id, session id is not null
         return identityCopy
@@ -219,8 +219,8 @@ class EventUserService {
         val identityCopy = identity?.copy() ?: Identity()
 
         with(identityCopy) {
-            deviceId = if (deviceId.isNullOrEmpty()) UUID.randomUUID().toString() else deviceId
-            sessionId = if (sessionId.isNullOrEmpty()) UUID.randomUUID().toString() else sessionId
+            deviceId = if (deviceId.isEmpty()) UUID.randomUUID().toString() else deviceId
+            sessionId = if (sessionId.isEmpty()) UUID.randomUUID().toString() else sessionId
         }
         //verify old data exists if device id, session id is not null
         return identityCopy

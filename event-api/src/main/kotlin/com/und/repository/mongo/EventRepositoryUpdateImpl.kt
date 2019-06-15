@@ -35,7 +35,7 @@ class EventRepositoryUpdateImpl : EventRepositoryUpdate {
     }
 
     override fun updateEventsWithIdentityMatching(identity: Identity) {
-        identity.userId?.let {
+        identity.userId?.let { userId->
 
             val query = Query().addCriteria(Criteria
                     .where("deviceId").`is`(identity.deviceId)
@@ -44,10 +44,10 @@ class EventRepositoryUpdateImpl : EventRepositoryUpdate {
 //                    .and("userId").exists(false)
             )
 
-            val events = mongoTemplate.find(query, Event::class.java)
-            if (events.isNotEmpty()) {
-                val update = Update.update("userId", it).set("userIdentified", true)
-                updateAndDelete(query, update, events)
+            val eventsWithSession = mongoTemplate.find(query, Event::class.java)
+            if (eventsWithSession.isNotEmpty()) {
+                val update = Update.update("userId", userId).set("userIdentified", true)
+                updateAndDelete(query, update, eventsWithSession)
                 /***find all those event that are identified with this identity.
                  * And put them in queue for live segment processing
                  * **/
@@ -66,12 +66,12 @@ class EventRepositoryUpdateImpl : EventRepositoryUpdate {
 //                        .and("userId").exists(false)
                 )
 
-                val events = mongoTemplate.find(queryWithoutSession, Event::class.java)
-                if (events.isNotEmpty()) {
+                val eventsWithoutSession = mongoTemplate.find(queryWithoutSession, Event::class.java)
+                if (eventsWithoutSession.isNotEmpty()) {
                     val updateSession = Update.update("sessionId", identity.sessionId)
-                    updateSession.set("userId", it)
+                    updateSession.set("userId", userId)
                     updateSession.set("userIdentified",true)
-                    updateAndDelete(queryWithoutSession, updateSession, events)
+                    updateAndDelete(queryWithoutSession, updateSession, eventsWithoutSession)
                     /***find all those event that are identified with this identity.
                      * And put them in queue for live segment processing
                      * **/

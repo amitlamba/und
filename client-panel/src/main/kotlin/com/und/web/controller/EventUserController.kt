@@ -5,6 +5,7 @@ import com.und.security.utils.AuthenticationUtils
 import com.und.service.EventUserService
 import com.und.service.SegmentService
 import com.und.web.controller.exception.EventUserListBySegmentNotFoundException
+import com.und.web.model.EventUserMinimal
 import com.und.web.model.EventUser
 import com.und.web.model.Response
 import com.und.web.model.Segment
@@ -74,10 +75,11 @@ class EventUserController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping(value = ["/user-list/segment"])
-    fun findEventUsersBySegment(@RequestBody segment: Segment,request:HttpServletRequest): ResponseEntity<List<EventUser>> {
-        val clientId = getClientId()
+    fun findEventUsersBySegment(@RequestBody segment: Segment,request:HttpServletRequest): ResponseEntity<List<EventUserMinimal>> {
+        val clientId = AuthenticationUtils.retrieveClientId()
+        val appuserID = AuthenticationUtils.principal.id!!
         val includeUsers=request.getParameter("include")?:"ALL"
-        val eventUserList = segmentService.segmentUsers(segment, clientId,IncludeUsers.valueOf(includeUsers))
+        val eventUserList = segmentService.segmentUsers(segment, clientId, appuserID,IncludeUsers.valueOf(includeUsers))
         return if (eventUserList.isEmpty()) {
             throw EventUserListBySegmentNotFoundException("Event user list not found")
         } else {
@@ -116,10 +118,6 @@ class EventUserController {
     }
 
 
-    private fun getClientId(): Long {
-        val clientId = AuthenticationUtils.clientID
-        return clientId ?: throw org.springframework.security.access.AccessDeniedException("User is not logged in")
 
-    }
 
 }

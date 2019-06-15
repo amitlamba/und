@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.client.AbstractClientHttpResponse
 import org.springframework.security.access.prepost.PreAuthorize
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.AuthenticationException
@@ -43,8 +44,9 @@ class AuthenticationRestController {
     private lateinit var captchaService: CaptchaService
 
     companion object {
-        var logger=LoggerFactory.getLogger(AuthenticationRestController::class.java)
+        var logger = LoggerFactory.getLogger(AuthenticationRestController::class.java)
     }
+
     @PostMapping(value = ["\${security.route.authentication.path}"])
     @Throws(AuthenticationException::class)
     fun createAuthenticationToken(@RequestBody authenticationRequest: RestAuthenticationRequest, request: HttpServletRequest): ResponseEntity<*> {
@@ -79,20 +81,23 @@ class AuthenticationRestController {
     @GetMapping(value = ["\${security.route.authentication.path}/validate/{authToken}"])
     @Throws(AuthenticationException::class)
     fun authenticationToken(@PathVariable("authToken", required = true) authToken: String, request: HttpServletRequest): ResponseEntity<*> {
-        val type:String? = request.getParameter("type")
-        val value:String? = request.getParameter("value")
+        val type: String? = request.getParameter("type")
+        val value: String? = request.getParameter("value")
         logger.info("Validating token type $type and value $value")
-        var result: Pair<com.und.model.jpa.security.UndUserDetails?, com.und.model.redis.security.UserCache>? = null
-        if (type != null && value != null) {
+        //var result: Pair<com.und.model.jpa.security.UndUserDetails?, com.und.model.redis.security.UserCache>? = null
+        val result = if (type != null && value != null) {
             when (KEYTYPE.valueOf(type)) {
-                KEYTYPE.EVENT_ANDROID -> result = restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.EVENT_ANDROID, value)
-                KEYTYPE.EVENT_IOS -> result = restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.EVENT_IOS, value)
-                KEYTYPE.EVENT_WEB -> result = restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.EVENT_WEB, value)
+                KEYTYPE.EVENT_ANDROID -> restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.EVENT_ANDROID, value)
+                KEYTYPE.EVENT_IOS -> restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.EVENT_IOS, value)
+                KEYTYPE.EVENT_WEB -> restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.EVENT_WEB, value)
+                else -> {
+                    throw AuthenticationCredentialsNotFoundException("invalid token type, not meant for the platform being used")
+                }
             }
         } else {
-            result = restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.ADMIN_LOGIN)
+            restTokenUtil.validateTokenForKeyType(authToken, KEYTYPE.ADMIN_LOGIN)
         }
-        return if (result?.first?.id != null) {
+        return if (result.first?.id != null) {
             ResponseEntity.ok(Response(
                     status = ResponseStatus.SUCCESS,
                     data = Data(result.first)
@@ -108,7 +113,7 @@ class AuthenticationRestController {
     }
 
 
-    @PreAuthorize("hasRole(ROLE_SYSTEM)")
+    @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @GetMapping(value = ["\${security.route.authentication.path}/userdetail/{name}"])
     @Throws(AuthenticationException::class)
     fun userByName(@PathVariable("name") name: String): ResponseEntity<*> {

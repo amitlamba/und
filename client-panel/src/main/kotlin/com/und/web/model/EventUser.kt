@@ -8,15 +8,13 @@ import javax.validation.constraints.Email
 import javax.validation.constraints.Pattern
 import javax.validation.constraints.Size
 
-class EventUser {
+class EventUser:EventUserMinimal(){
 
     @Email
     var email: String? = null
 
     var uid: String? = null //this is id of the user client has provided
 
-    @Email
-    var undId: String? = null
 
     @Email
     var fbId: String? = null
@@ -24,27 +22,11 @@ class EventUser {
     @Email
     var googleId: String? = null
 
-    @Size(min = 10, max = 20)
-    @Pattern(regexp = "[0-9]*")
-    var mobile: String? = null
 
-    @Size(min = 2, max = 50)
-    @Pattern(regexp = "[A-Za-z0-9][A-Za-z0-9\\s]*")
-    var firstName: String? = null
-
-    @Size(min = 2, max = 50)
-    @Pattern(regexp = "[A-Za-z0-9][A-Za-z0-9\\s]*")
-    var lastName: String? = null
-
-    @Pattern(regexp = "[A-za-z]")
-    var gender: String? = null
 
     @Pattern(regexp = "(\\d{4})[-](0?[1-9]|1[012])[-](0?[1-9]|[12][0-9]|3[01])")
     var dob: String? = null
 
-    @Size(min = 4, max = 50)
-    @Pattern(regexp = "[A-Za-z][A-Za-z\\s]*")
-    var country: String? = null
 
     @Size(min = 3, max = 50)
     @Pattern(regexp = "[A-Za-z][A-Za-z\\s]*")
