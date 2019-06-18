@@ -992,6 +992,9 @@ class SegmentParserCriteria {
         }.filterNotNull()
 //        return if(userIdentified!=null) Criteria().orOperator(*criteria.toTypedArray())
 //        else Criteria().orOperator(*criteria.toTypedArray())
+
+
+        "".equals("")
         return Criteria().orOperator(*criteria.toTypedArray())
     }
 

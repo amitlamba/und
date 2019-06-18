@@ -27,6 +27,8 @@ import org.springframework.cache.annotation.CachePut
 import org.springframework.cache.annotation.Cacheable
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.scheduling.support.CronSequenceGenerator
 import org.springframework.security.access.AccessDeniedException
@@ -1111,5 +1113,13 @@ class CampaignService {
     fun getMaxDateAfterYear(year: Int, timeZone: ZoneId): Date {
         val localDateTime = LocalDateTime.now(timeZone).plusYears(year.toLong())
         return localDateTimeToDate(localDateTime, timeZone)
+    }
+    fun testPaging(page:Int):List<Campaign>{
+        val defaultPageSize = 20
+        var pagale = PageRequest.of(page,defaultPageSize)
+        var result: Page<Campaign> = campaignRepository.findAll(pagale)
+        print(result.totalPages)
+        print(result.totalElements)
+        return result.content
     }
 }

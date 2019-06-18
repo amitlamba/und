@@ -5,4 +5,4 @@ include 'event-api'
 include 'client-panel'
 include 'emailsendservice'
 include 'und-scheduler'
-
+include 'event-processor'

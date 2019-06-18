@@ -1,0 +1,33 @@
+jar {
+	group = 'com.und'
+	baseName = 'event-processor'
+	version = '0.2.0'
+}
+
+ext {
+	bitWalkerUagentVersion = '1.20'
+}
+dependencies {
+	compile('org.springframework.cloud:spring-cloud-starter-stream-kafka')
+	compile('org.springframework.boot:spring-boot-starter-data-mongodb:2.0.2.RELEASE')
+
+	//compile group: 'org.mongodb', name: 'mongodb-driver', version: '3.7.1'
+	compile('org.springframework.boot:spring-boot-starter-mail')
+	compile("org.springframework.boot:spring-boot-starter-mobile:2.0.0.M5")
+	compile("org.springframework.boot:spring-boot-starter-data-rest")
+	compile('org.springframework.boot:spring-boot-starter-security')
+	compile("eu.bitwalker:UserAgentUtils:${bitWalkerUagentVersion}")
+	// compile("io.springfox:springfox-swagger2:$swaggerVersion")
+	// compile("io.springfox:springfox-swagger-ui:$swaggerVersion")
+	//compile ("com.und:auth-client:0.4.0-SNAPSHOT")
+	compile('org.springframework.boot:spring-boot-starter-data-jpa'){
+		exclude group: 'org.apache.tomcat' , module: 'tomcat-jdbc'
+		exclude group: 'com.mchange' , module: 'c3p0'
+	}
+	compile('org.postgresql:postgresql')
+	compile group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
+	compile group: 'org.hibernate', name: 'hibernate-validator', version: '6.0.7.Final'
+
+
+
+}

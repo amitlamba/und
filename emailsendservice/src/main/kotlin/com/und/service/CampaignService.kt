@@ -121,6 +121,7 @@ class CampaignService {
         eventUserRecordRepository.save(record)
 
         val time = LocalDateTime.now().plusMinutes(campaign.abCampaign?.waitTime?.toLong() ?: 1)
+        logger.info("Ab test complete and scheduled for time $time currrent time is ${LocalDateTime.now()}")
         val descriptor = buildJobDescriptor(campaign, "AB_${campaign.id}", JobDescriptor.Action.CREATE, time)
         eventStream.scheduleJobSend().send(MessageBuilder.withPayload(descriptor).build())
     }
@@ -172,6 +173,7 @@ class CampaignService {
     fun executeCampaignForAb(campaignId: Long, clientId: Long) {
         val token = userRepository.findSystemUser().key ?: throw java.lang.Exception("Not Able to get system token.")
         val templateId = segmentUserServiceClient.getWinnerTemplate(campaignId, clientId, token, "ALL")
+        //TODo update winner template in jpa
         val campaign = findCampaign(campaignId, clientId)
         when (campaign.abCampaign?.runType) {
             RunType.AUTO -> {
@@ -214,6 +216,7 @@ class CampaignService {
         val variant = campaign.variants?.find {
             it.winner == true
         }
+        //todo if there is no variant then don't send.
         executeRestOfCampaign(campaignId, clientId, campaign, variant?.templateId?.toLong())
     }
 

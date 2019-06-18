@@ -226,4 +226,9 @@ class CampaignController {
         return Response(status = ResponseStatus.SUCCESS)
     }
 
+    @GetMapping("/testpaging")
+    fun testpging(@RequestParam("page")page:Int):List<com.und.model.jpa.Campaign>{
+        return campaignService.testPaging(page)
+    }
+
 }
