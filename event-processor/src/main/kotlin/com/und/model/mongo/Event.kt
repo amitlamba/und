@@ -1,16 +1,12 @@
-package com.und.model
+package com.und.model.mongo
 
-import com.fasterxml.jackson.annotation.JsonIgnore
 import com.und.utils.DateUtils
-import org.springframework.data.annotation.Id
-import org.springframework.data.mongodb.core.mapping.Document
-import java.sql.Timestamp
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.ZonedDateTime
 import java.util.*
+import com.und.model.web.LineItem
 
-class MongoEvent(
+class Event(
         var id: String? = null,
         val name: String,
         val clientId: Long,
@@ -77,14 +73,14 @@ class System {
 }
 
 
-class LineItem {
-    var price: Int = 0
-    var currency: String? = null
-    var product: String? = null
-    var categories: MutableList<String> = mutableListOf()
-    var tags: MutableList<String> = mutableListOf()
-    var quantity: Int = 0
-    var properties: HashMap<String, Any> = hashMapOf()
-}
+//class LineItem {
+//    var price: Int = 0
+//    var currency: String? = null
+//    var product: String? = null
+//    var categories: MutableList<String> = mutableListOf()
+//    var tags: MutableList<String> = mutableListOf()
+//    var quantity: Int = 0
+//    var properties: HashMap<String, Any> = hashMapOf()
+//}
 
 class Geogrophy(val country: String?, val state: String?, val city: String?)

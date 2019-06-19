@@ -1,34 +1,91 @@
 package com.und.service
 
-import com.sun.org.apache.xpath.internal.operations.Bool
+
 import com.und.model.*
+import com.und.model.mongo.Geogrophy
+import com.und.model.mongo.Metadata
+import com.und.model.web.EventMessage
+import com.und.repository.mongo.IpLocationRepository
+import com.und.model.web.Event as WebEvent
+import com.und.model.mongo.Event as MongoEvent
 import com.und.utils.Constants
 import com.und.utils.DateUtils
+import com.und.utils.MongoEventUtils
+import com.und.utils.parseUserAgentString
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
+import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
+import java.time.Instant
 import java.time.ZoneId
+import java.util.*
 
 
 @Service
-class SegmentProcessingService {
+class EventSegmentProcessing {
 
     @Autowired
     private lateinit var dateUtils: DateUtils
 
+    @Autowired
+    private lateinit var ipLocationRepository :IpLocationRepository
+
+    @Autowired
+    private lateinit var mongoEventUtils : MongoEventUtils
+
     @StreamListener(Constants.PROCESS_SEGMENT)
-    fun processSegment(event:MongoEvent) {
+    fun processSegment(event: WebEvent) {
         //find all segments metadata for this clientid and not dead from cache
         //divide live segment for high priority processing. to improve performance store them separately redis key live_clientId,past_clientId
         //build mongo event
+        var mongoEvent = MongoEvent(clientId = event.clientId, name = event.name)
+        mongoEvent.timeZoneId = ZoneId.of(event.timeZone)
+        mongoEvent.creationTime= Date.from(Instant.ofEpochMilli(event.creationTime).atZone(ZoneId.of("UTC")).toInstant())
+        mongoEvent = mongoEvent.parseUserAgentString(event.agentString)
+        if(event.country != null && event.state != null && event.city != null){
+            mongoEvent.geogrophy = Geogrophy(event.country,event.state,event.city)
+        }else{
+            event.ipAddress?.let {
+                mongoEvent.geogrophy = ipLocationRepository.getGeographyByIpAddress(it)
+            }
+        }
+        //FIXME hard coded charged
+        if ("charged".equals(event.name, ignoreCase = false)) {
+            mongoEvent.lineItem = event.lineItem
+            mongoEvent.lineItem.forEach { item ->
+                item.properties = mongoEventUtils.toDateInMap(item.properties)
+
+            }
+        }
+        //copy attributes
+        mongoEvent.attributes.putAll(mongoEventUtils.toDateInMap(event.attributes))
+        if (event.identity.idf == 1) {
+            mongoEvent.userIdentified = true
+        }
         val liveSegments = listOf<Metadata>()
-        val pasSegments = listOf<Metadata>()
-        val segments = listOf<Metadata>()
-        segments.forEach {
-            checkEventEffectOnSegment(event, Metadata())
+        liveSegments.forEach {
+            checkEventEffectOnSegment(mongoEvent, Metadata())
+        }
+        //send for live procssing
+        sendForLiveProcessing()
+        val pastSegments = listOf<Metadata>()
+        pastSegments.forEach {
+            checkEventEffectOnSegment(mongoEvent, Metadata())
         }
     }
 
+    fun sendForLiveProcessing(mongoEvent:com.und.model.mongo.Event){
+        eventStream.outEventForLiveSegment().send(MessageBuilder.withPayload(buildEventForLiveSegment(mongoEvent)).build())
+    }
+    fun buildEventForLiveSegment(fromEvent: com.und.model.mongo.Event): EventMessage {
+        val eventId = fromEvent.id
+        if (eventId != null) {
+            return EventMessage(eventId, fromEvent.clientId, fromEvent.userId, fromEvent.name, fromEvent.creationTime, fromEvent.userIdentified)
+        } else {
+            //throw EventNotFoundException("Event with null id")
+        }
+
+    }
     fun checkEventEffectOnSegment(event: MongoEvent, metadata: Metadata) {
         //if a segment contain did or did not then chek eventname is it effect ot not.
         when (metadata.criteriaGroup) {
@@ -167,13 +224,13 @@ class SegmentProcessingService {
         return !filterResult.contains(false)
     }
 
-    fun checkDidNotEvent(metadata: DidEvents?, event: MongoEvent): Boolean {
-        //TODO  nere no need to compute segment if did events and event properties have no criteria to compute then
-        //TODo here we just remove userId if criteria match else do nothing.
-
-        //TODO get timezone of client
-        return false
-    }
+//    fun checkDidNotEvent(metadata: DidEvents?, event: Event): Boolean {
+//        //TODO  nere no need to compute segment if did events and event properties have no criteria to compute then
+//        //TODo here we just remove userId if criteria match else do nothing.
+//
+//        //TODO get timezone of client
+//        return false
+//    }
 
     fun checkEventProperties(globalFilter: List<GlobalFilter>, event: MongoEvent): Boolean {
         //TODO if userID already present do nothing else check and compute
@@ -316,6 +373,10 @@ class SegmentProcessingService {
 //        }
         return true
     }
+
+//    fun createMetadata(segment: Segment){
+//
+//    }
 
 }
 
