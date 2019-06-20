@@ -1,14 +1,6 @@
 package com.und.model.web
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
 import java.util.*
-import javax.validation.constraints.Email
-import javax.validation.constraints.NotNull
-import javax.validation.constraints.Pattern
-import javax.validation.constraints.Size
 
 class EventUser {
 

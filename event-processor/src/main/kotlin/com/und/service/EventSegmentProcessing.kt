@@ -1,11 +1,15 @@
 package com.und.service
 
 
+import com.und.config.StreamClass
+import com.und.exception.EventNotFoundException
 import com.und.model.*
 import com.und.model.mongo.Geogrophy
 import com.und.model.mongo.Metadata
 import com.und.model.web.EventMessage
 import com.und.repository.mongo.IpLocationRepository
+import com.und.repository.mongo.MetadataRepository
+import com.und.service.segmentquerybuilder.SegmentService
 import com.und.model.web.Event as WebEvent
 import com.und.model.mongo.Event as MongoEvent
 import com.und.utils.Constants
@@ -31,20 +35,42 @@ class EventSegmentProcessing {
     private lateinit var ipLocationRepository :IpLocationRepository
 
     @Autowired
+    private lateinit var metadataRepository: MetadataRepository
+
+    @Autowired
     private lateinit var mongoEventUtils : MongoEventUtils
+
+    @Autowired
+    private lateinit var streamClass: StreamClass
+
+    @Autowired
+    private lateinit var segmentService: SegmentService
 
     @StreamListener(Constants.PROCESS_SEGMENT)
     fun processSegment(event: WebEvent) {
-        //find all segments metadata for this clientid and not dead from cache
-        //divide live segment for high priority processing. to improve performance store them separately redis key live_clientId,past_clientId
-        //build mongo event
+        val mongoEvent = buildMongoEvent(event)
+        val liveSegments = getMetadataOfLiveSegment(event.clientId,"live",false)
+        liveSegments.forEach {
+            checkEventEffectOnSegment(mongoEvent, Metadata())
+        }
+        sendForLiveProcessing(mongoEvent)
+        val pastSegments = getMetadataOfLiveSegment(event.clientId,"past",false)
+        pastSegments.forEach {
+            checkEventEffectOnSegment(mongoEvent, Metadata())
+        }
+    }
+
+    private fun getMetadataOfLiveSegment(clientId:Long,status:String,stopped:Boolean):List<Metadata>{
+        return metadataRepository.findByClientIdAndStatusAndStopped(clientId,status, stopped)
+    }
+    private fun buildMongoEvent(event: com.und.model.web.Event): com.und.model.mongo.Event {
         var mongoEvent = MongoEvent(clientId = event.clientId, name = event.name)
         mongoEvent.timeZoneId = ZoneId.of(event.timeZone)
-        mongoEvent.creationTime= Date.from(Instant.ofEpochMilli(event.creationTime).atZone(ZoneId.of("UTC")).toInstant())
+        mongoEvent.creationTime = Date.from(Instant.ofEpochMilli(event.creationTime).atZone(ZoneId.of("UTC")).toInstant())
         mongoEvent = mongoEvent.parseUserAgentString(event.agentString)
-        if(event.country != null && event.state != null && event.city != null){
-            mongoEvent.geogrophy = Geogrophy(event.country,event.state,event.city)
-        }else{
+        if (event.country != null && event.state != null && event.city != null) {
+            mongoEvent.geogrophy = Geogrophy(event.country, event.state, event.city)
+        } else {
             event.ipAddress?.let {
                 mongoEvent.geogrophy = ipLocationRepository.getGeographyByIpAddress(it)
             }
@@ -62,30 +88,19 @@ class EventSegmentProcessing {
         if (event.identity.idf == 1) {
             mongoEvent.userIdentified = true
         }
-        val liveSegments = listOf<Metadata>()
-        liveSegments.forEach {
-            checkEventEffectOnSegment(mongoEvent, Metadata())
-        }
-        //send for live procssing
-        sendForLiveProcessing()
-        val pastSegments = listOf<Metadata>()
-        pastSegments.forEach {
-            checkEventEffectOnSegment(mongoEvent, Metadata())
-        }
+        return mongoEvent
     }
 
     fun sendForLiveProcessing(mongoEvent:com.und.model.mongo.Event){
-        eventStream.outEventForLiveSegment().send(MessageBuilder.withPayload(buildEventForLiveSegment(mongoEvent)).build())
+        streamClass.outEventForLiveProcessing().send(MessageBuilder.withPayload(buildEventForLiveSegment(mongoEvent)).build())
     }
-    fun buildEventForLiveSegment(fromEvent: com.und.model.mongo.Event): EventMessage {
-        val eventId = fromEvent.id
-        if (eventId != null) {
-            return EventMessage(eventId, fromEvent.clientId, fromEvent.userId, fromEvent.name, fromEvent.creationTime, fromEvent.userIdentified)
-        } else {
-            //throw EventNotFoundException("Event with null id")
-        }
 
+    fun buildEventForLiveSegment(fromEvent: com.und.model.mongo.Event): EventMessage {
+        return fromEvent.id?.let {
+            EventMessage(it, fromEvent.clientId, fromEvent.userId, fromEvent.name, fromEvent.creationTime, fromEvent.userIdentified)
+        }?: throw EventNotFoundException("Event with null id")
     }
+
     fun checkEventEffectOnSegment(event: MongoEvent, metadata: Metadata) {
         //if a segment contain did or did not then chek eventname is it effect ot not.
         when (metadata.criteriaGroup) {
@@ -374,10 +389,9 @@ class EventSegmentProcessing {
         return true
     }
 
-//    fun createMetadata(segment: Segment){
-//
-//    }
+    fun createSegmentMetadata(){
 
+    }
 }
 
 
@@ -389,7 +403,7 @@ enum class SegmentCriteriaGroup {
     USERPROP,
     DID_EVENTPROP,
     DIDNOT_EVENTPROP,
-    //DID_USERPROP,
-    //DIDNOT_USERPROP,
+    DID_USERPROP,
+    DIDNOT_USERPROP,
     DID_DIDNOT_EVENTPROP
 }

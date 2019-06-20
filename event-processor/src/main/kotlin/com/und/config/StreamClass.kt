@@ -6,36 +6,31 @@ import org.springframework.cloud.stream.annotation.Output
 import org.springframework.messaging.MessageChannel
 import org.springframework.messaging.SubscribableChannel
 
-
 interface StreamClass {
 
-    @Input(Constants.EVENT_QUEUE)
-    fun inEvent():SubscribableChannel
-
-//    @Output(Constants.EVENT_INTER_STATE)
-//    fun outEvent():MessageChannel
-
-    //listning fom event inter state queue
     @Input(Constants.SAVE_EVENT)
     fun saveEvent():SubscribableChannel
-    //listning fom event inter state queue
     @Input(Constants.BUILD_METADATA)
     fun buildMetadata():SubscribableChannel
-    //listning fom event inter state queue
     @Input(Constants.PROCESS_SEGMENT)
     fun processSegment():SubscribableChannel
-
-    //listing on inEventUser chanel queue
     @Input(Constants.SAVE_USER)
     fun saveEventUser():SubscribableChannel
-    //listing on inEventUser chanel queue
     @Input(Constants.BUILD_USER_METADATA)
     fun buildEventUserMetadata():SubscribableChannel
-    //listing on inEventUser chanel queue
     @Input(Constants.PROCESS_USER_SEGMENT)
     fun userSegmentProcess():SubscribableChannel
-
-    @Output("outEventForLiveSegment")
+    @Output(Constants.OUT_EVENT_LIVE_SEGMENT)
     fun outEventForLiveProcessing():MessageChannel
+    @Input(Constants.IN_EMAIL_READ)
+    fun inEmailRead():SubscribableChannel
+    @Input(Constants.IN_NOTIFICATION_READ)
+    fun inNotificationRead():SubscribableChannel
+    @Input(Constants.IN_TRACK_EVENT)
+    fun inTrackEvent():SubscribableChannel
+    @Output(Constants.OUT_EVENTUSER)
+    fun outEventUser():MessageChannel
+    @Input(Constants.IN_EVENTUSER)
+    fun inEventUser():SubscribableChannel
 
 }

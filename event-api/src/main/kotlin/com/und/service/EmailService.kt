@@ -26,16 +26,9 @@ import javax.imageio.ImageIO
 @Service
 class EmailService {
 
-    @Autowired
-    private lateinit var tenantProvider: TenantProvider
 
     @Autowired
     private lateinit var eventStream: EventStream
-
-    @Autowired
-    private lateinit var emailSentRepository: EmailSentRepository
-
-    private lateinit var eventService: EventService
 
     @Value("\${und.url.event}")
     private lateinit var eventApiUrl: String
@@ -46,30 +39,6 @@ class EmailService {
     }
 
     private fun toKafka(emailRead: EmailRead): Boolean = eventStream.outEmailRead().send(MessageBuilder.withPayload(emailRead).build())
-
-    @StreamListener("inEmailRead")
-    fun processEmailRead(emailRead: EmailRead) {
-        tenantProvider.setTenat(emailRead.clientID.toString())
-
-        val mongoEmail: com.und.model.mongo.Email? = emailSentRepository.findById(emailRead.mongoEmailId,emailRead.clientID).get()
-        if (mongoEmail != null) {
-            if (mongoEmail.status.order < EmailStatus.READ.order) {
-                mongoEmail.status = EmailStatus.READ
-            }
-            mongoEmail.statusUpdates.add(EmailStatusUpdate(LocalDateTime.now(ZoneId.of("UTC")), EmailStatus.READ, null))
-            emailSentRepository.saveEmail(mongoEmail)
-            val event = Event()
-            with(event) {
-                name = "Notification Read"
-                clientId = emailRead.clientID
-                notificationId = mongoEmail.id ?: "-1"
-                attributes["campaign_id"] = mongoEmail.campaignId ?: -1L
-                attributes["status"] =  mongoEmail.status
-            }
-            eventService.toKafka(event)
-
-        }
-    }
 
     fun getImage(id: String): ByteArray {
         try {

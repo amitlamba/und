@@ -7,6 +7,7 @@ import com.und.model.Segment
 import com.und.model.mongo.EventUser
 import com.und.repository.EventUserRepository
 import com.und.repository.mongo.EventRepository
+import com.und.repository.mongo.SegmentUsersRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import com.und.service.segmentquerybuilder.UserSettingsService
@@ -22,15 +23,10 @@ class SegmentServiceImpl : SegmentService {
     companion object {
         val logger: Logger = LoggerFactory.getLogger(SegmentServiceImpl::class.java)
     }
-//
-//    @Autowired
-//    lateinit var segmentRepository: SegmentRepository
-//
-//    @Autowired
-//    lateinit var eventUserService: EventUserService
-//
-//
-//
+
+    @Autowired
+    private lateinit var segmentUsersRepository: SegmentUsersRepository
+
     @Autowired
     lateinit var eventRepository: EventRepository
 
@@ -63,6 +59,13 @@ class SegmentServiceImpl : SegmentService {
         return getSegmentUsers(segment, clientId, includeUsers = includeUsers, campaign = campaign,userId = userId).second.isNotEmpty()
     }
 
+    override fun addUserInSegment(userId: String, clientId: Long,segmentId:Long) {
+        segmentUsersRepository.addUserInSegment(clientId, userId, segmentId)
+    }
+
+    override fun removeUserFromSegment(userId: String, clientId: Long,segmentId:Long) {
+        segmentUsersRepository.removeUserFromSegment(clientId,userId,segmentId)
+    }
 
     /*
     * TODO performance improvement  we can add project aggregation stage to remove that part of document which is not used in next stage.

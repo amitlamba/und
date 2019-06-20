@@ -1,11 +1,16 @@
 package com.und.service
 
+import com.netflix.discovery.converters.Auto
+import com.und.exception.EventNotFoundException
+import com.und.model.UpdateIdentity
 import com.und.model.mongo.ClientTimeNow
 import com.und.model.mongo.Coordinate
 import com.und.model.mongo.GeoLocation
 import com.und.model.mongo.Geogrophy
 import com.und.model.web.Event
+import com.und.model.web.EventMessage
 import com.und.repository.mongo.EventRepository
+import com.und.repository.mongo.EventRepositoryUpdate
 import com.und.repository.mongo.IpLocationRepository
 import com.und.utils.*
 import com.und.model.mongo.Event as MongoEvent
@@ -20,13 +25,16 @@ import java.util.*
 import java.util.regex.Pattern
 
 @Service
-class SaveEventService {
+class EventSaveService {
 
     @Autowired
     private lateinit var ipLocationRepository : IpLocationRepository
 
     @Autowired
     private lateinit var eventRepository:EventRepository
+
+    @Autowired
+    private lateinit var eventUpdateRepository : EventRepositoryUpdate
 
     @Autowired
     private lateinit var mongoEventUtils : MongoEventUtils
@@ -42,11 +50,12 @@ class SaveEventService {
             mongoEvent.geogrophy = Geogrophy(event.country,event.state,event.city)
         }else{
             event.ipAddress?.let {
-                return ipLocationRepository.getGeographyByIpAddress(it)
+                mongoEvent.geogrophy = ipLocationRepository.getGeographyByIpAddress(it)
             }
         }
 
         mongoEvent.clientTime = ClientTimeNow(LocalDateTime.from(Instant.ofEpochMilli(event.creationTime).atZone(mongoEvent.timeZoneId)))
+        mongoEvent.id = event.id
         mongoEvent.userId = event.identity.userId
         mongoEvent.sessionId = event.identity.sessionId
         mongoEvent.deviceId = event.identity.deviceId
@@ -79,4 +88,19 @@ class SaveEventService {
         eventRepository.save(mongoEvent)
 
     }
+
+    fun updateEventWithUserIdentity(identity: UpdateIdentity) {
+        //tenantProvider.setTenat(identity.clientId.toString())
+        eventUpdateRepository.updateEventsWithIdentityMatching(identity)
+    }
+
+//    fun buildEventForLiveSegment(fromEvent: com.und.model.mongo.Event): EventMessage {
+//        val eventId = fromEvent.id
+//        if (eventId != null) {
+//            return EventMessage(eventId, fromEvent.clientId, fromEvent.userId, fromEvent.name, fromEvent.creationTime, fromEvent.userIdentified)
+//        } else {
+//            throw EventNotFoundException("Event with null id")
+//        }
+//
+//    }
 }

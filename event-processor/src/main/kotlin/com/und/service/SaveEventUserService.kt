@@ -19,6 +19,9 @@ class SaveEventUserService {
     @Autowired
     private lateinit var eventUserRepository:EventUserRepository
 
+    @Autowired
+    private lateinit var eventSaveService:EventSaveService
+
     @StreamListener(Constants.SAVE_USER)
     @SendTo(Constants.OUT_EVENTUSER)
     fun saveEventUser(eventUser: EventUser):UpdateIdentity{
@@ -57,5 +60,15 @@ class SaveEventUserService {
         }else{
             throw IllegalArgumentException("user id should have been preset found null")
         }
+    }
+
+    @StreamListener("inProcessEventUserProfile")
+    fun processedEventUserProfile(identity: UpdateIdentity) {
+        //tenantProvider.setTenat(identity.clientId.toString())
+        //println(identity)
+        eventSaveService.updateEventWithUserIdentity(identity)
+        //update all events where session id, machine id matches and userid is absent
+        //eventUserRepository.
+        //save(identity.eventUser )
     }
 }

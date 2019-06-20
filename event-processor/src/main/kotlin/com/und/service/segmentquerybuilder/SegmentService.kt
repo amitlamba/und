@@ -24,6 +24,10 @@ interface SegmentService {
 
     //fun segmentUsers(segment: WebSegment, clientId: Long, userId: Long, includeUsers: IncludeUsers): List<EventUserMinimal>
 
+    fun addUserInSegment(userId: String,clientId: Long,segmentId:Long)
+
+    fun removeUserFromSegment(userId: String,clientId: Long,segmentId: Long)
+
     //fun isUserPresentInSegment(segment: Segment, clientId: Long, userId: String,includeUsers: IncludeUsers): Boolean
 
     //fun segmentByClientId(clientId: Long):List<Segment>

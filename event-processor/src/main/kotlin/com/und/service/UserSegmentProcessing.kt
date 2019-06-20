@@ -28,7 +28,7 @@ class UserSegmentProcessing {
         }
     }
     private fun matchUserProperties(eventUser: EventUser,metadata: Metadata):Boolean{
-
+return false
     }
 
     private fun compute(metadata: Metadata){

@@ -1,8 +1,8 @@
 package com.und.service
 
-import com.und.model.mongo.eventapi.CommonMetadata
-import com.und.model.mongo.eventapi.EventMetadata
-import com.und.model.mongo.eventapi.Property
+import com.und.model.mongo.CommonMetadata
+import com.und.model.mongo.EventMetadata
+import com.und.model.mongo.Property
 import com.und.model.web.Event
 import com.und.model.mongo.Event as MongoEvent
 import com.und.repository.mongo.CommonMetadataRepository
