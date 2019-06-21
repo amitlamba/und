@@ -1,9 +1,9 @@
 package com.und.model.mongo
 
-import com.und.model.*
-import com.und.service.SegmentCriteriaGroup
+import com.und.web.model.*
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
+
 
 /*
 * if a segment contain after,relative operator in any of did and did not then it will never end.
@@ -32,7 +32,7 @@ class MetaEvent{
      var size:Int = 0
      lateinit var date:List<String>
      var property:List<PropertyFilter> = listOf()
-     var conditionalOperator:ConditionType = ConditionType.AllOf
+     var conditionalOperator: ConditionType = ConditionType.AllOf
 }
 
 /**
@@ -42,4 +42,22 @@ class MetaEvent{
  * @param error it store any error which occur during segmentation computation.
  * @param successful true when segment computed successfully.
  */
-data class TriggerInfo(val previousTriggerPoint:LocalDateTime?,val nextTriggerPoint:LocalDateTime,val error:String?,val successful:Boolean)
+data class TriggerInfo(val previousTriggerPoint: LocalDateTime?, val nextTriggerPoint:LocalDateTime, val error:String?, val successful:Boolean)
+
+
+enum class SegmentCriteriaGroup {
+     DID,
+     DIDNOT,
+     DID_DIDNOT,
+     EVENTPROP,
+     USERPROP,
+     DID_EVENTPROP,
+     DIDNOT_EVENTPROP,
+     DID_USERPROP,
+     DIDNOT_USERPROP,
+     DID_DIDNOT_EVENTPROP,
+     EVENTPROP_USERPROP,
+     DID_DIDNOT_USERPROP,
+     DID_DIDNOT_EVENTPROP_USERPROP,
+     NONE
+}

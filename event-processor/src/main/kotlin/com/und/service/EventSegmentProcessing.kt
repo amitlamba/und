@@ -5,6 +5,7 @@ import com.und.config.StreamClass
 import com.und.exception.EventNotFoundException
 import com.und.model.*
 import com.und.model.mongo.Geogrophy
+import com.und.model.mongo.MetaEvent
 import com.und.model.mongo.Metadata
 import com.und.model.web.EventMessage
 import com.und.repository.mongo.IpLocationRepository
@@ -24,7 +25,9 @@ import java.time.Instant
 import java.time.ZoneId
 import java.util.*
 
-
+/*
+* when computing segment users add userid in segment
+* */
 @Service
 class EventSegmentProcessing {
 
@@ -32,13 +35,13 @@ class EventSegmentProcessing {
     private lateinit var dateUtils: DateUtils
 
     @Autowired
-    private lateinit var ipLocationRepository :IpLocationRepository
+    private lateinit var ipLocationRepository: IpLocationRepository
 
     @Autowired
     private lateinit var metadataRepository: MetadataRepository
 
     @Autowired
-    private lateinit var mongoEventUtils : MongoEventUtils
+    private lateinit var mongoEventUtils: MongoEventUtils
 
     @Autowired
     private lateinit var streamClass: StreamClass
@@ -49,20 +52,21 @@ class EventSegmentProcessing {
     @StreamListener(Constants.PROCESS_SEGMENT)
     fun processSegment(event: WebEvent) {
         val mongoEvent = buildMongoEvent(event)
-        val liveSegments = getMetadataOfLiveSegment(event.clientId,"live",false)
+        val liveSegments = getMetadataOfLiveSegment(event.clientId, "live", false)
         liveSegments.forEach {
             checkEventEffectOnSegment(mongoEvent, Metadata())
         }
         sendForLiveProcessing(mongoEvent)
-        val pastSegments = getMetadataOfLiveSegment(event.clientId,"past",false)
+        val pastSegments = getMetadataOfLiveSegment(event.clientId, "past", false)
         pastSegments.forEach {
             checkEventEffectOnSegment(mongoEvent, Metadata())
         }
     }
 
-    private fun getMetadataOfLiveSegment(clientId:Long,status:String,stopped:Boolean):List<Metadata>{
-        return metadataRepository.findByClientIdAndStatusAndStopped(clientId,status, stopped)
+    private fun getMetadataOfLiveSegment(clientId: Long, status: String, stopped: Boolean): List<Metadata> {
+        return metadataRepository.findByClientIdAndStatusAndStopped(clientId, status, stopped)
     }
+
     private fun buildMongoEvent(event: com.und.model.web.Event): com.und.model.mongo.Event {
         var mongoEvent = MongoEvent(clientId = event.clientId, name = event.name)
         mongoEvent.timeZoneId = ZoneId.of(event.timeZone)
@@ -91,14 +95,14 @@ class EventSegmentProcessing {
         return mongoEvent
     }
 
-    fun sendForLiveProcessing(mongoEvent:com.und.model.mongo.Event){
+    fun sendForLiveProcessing(mongoEvent: com.und.model.mongo.Event) {
         streamClass.outEventForLiveProcessing().send(MessageBuilder.withPayload(buildEventForLiveSegment(mongoEvent)).build())
     }
 
     fun buildEventForLiveSegment(fromEvent: com.und.model.mongo.Event): EventMessage {
         return fromEvent.id?.let {
             EventMessage(it, fromEvent.clientId, fromEvent.userId, fromEvent.name, fromEvent.creationTime, fromEvent.userIdentified)
-        }?: throw EventNotFoundException("Event with null id")
+        } ?: throw EventNotFoundException("Event with null id")
     }
 
     fun checkEventEffectOnSegment(event: MongoEvent, metadata: Metadata) {
@@ -118,17 +122,17 @@ class EventSegmentProcessing {
             }
             else -> {
                 //check is this event affect global filter
-                val eventProp = checkEventProperties(metadata.segment!!.globalFilters,event)
+                val eventProp = checkEventProperties(metadata.segment!!.globalFilters, event)
                 //check is this event affect geography filter
-                val geoProp = checkGeographyFilter(metadata,event)
+                val geoProp = checkGeographyFilter(metadata, event)
                 //if they return false then don't compute. because this event user is never included if its already present then ok.
                 if (!eventProp || !geoProp) {
                     //check is this event affect did event
-                    if (checkEvent(metadata.segment!!.didEvents!!,event)) {
+                    if (checkEvent(metadata.segment!!.didEvents!!, event)) {
                         //compute
                     } else {
                         //check is this event affect did not event
-                        if (checkEvent(metadata.segment!!.didNotEvents!!,event)) {
+                        if (checkEvent(metadata.segment!!.didNotEvents!!, event)) {
                             //compute
                         }
                     }
@@ -206,7 +210,7 @@ class EventSegmentProcessing {
     fun checkEventAttributes(metaAttibutes: List<PropertyFilter>, eventAttributes: HashMap<String, Any>): Boolean {
         val groupByNameAttr = metaAttibutes.groupBy { it.name }   // its beter to store metadata in groupby format.
         val filterResult = mutableListOf<Boolean>()
-        groupByNameAttr.forEach { key,propertyFilters->
+        groupByNameAttr.forEach { key, propertyFilters ->
             val result = propertyFilters.map { filter ->
                 if (eventAttributes.containsKey(filter.name)) {
                     when (filter.type) {
@@ -223,7 +227,7 @@ class EventSegmentProcessing {
 //                            matchRangeOperator(filter.operator, filter.values, eventAttributes[filter.name]!!)
 //                        }
                         DataType.string -> {
-                            matchStringOperator(eventAttributes[filter.name]!! as String,filter.operator, filter.values)
+                            matchStringOperator(eventAttributes[filter.name]!! as String, filter.operator, filter.values)
                         }
                         else -> false
                     }
@@ -349,7 +353,7 @@ class EventSegmentProcessing {
     private fun matchNumberOperator(operatorName: String, metavalues: List<String>, eventvalues: Any): Boolean {
         val value = eventvalues as Int
         val intMetaValues = metavalues.map { it.toInt() }
-        return when(NumberOperator.valueOf(operatorName)){
+        return when (NumberOperator.valueOf(operatorName)) {
             NumberOperator.Between -> value > intMetaValues[0] && value < intMetaValues[1]
             NumberOperator.Equals -> value == intMetaValues[0]
             NumberOperator.DoesNotExist -> true
@@ -361,10 +365,10 @@ class EventSegmentProcessing {
         }
     }
 
-    private fun matchBooleanOperator(operatorName: String, metavalues: List<String>, eventvalues: Any): Boolean{
+    private fun matchBooleanOperator(operatorName: String, metavalues: List<String>, eventvalues: Any): Boolean {
         val value = eventvalues as Boolean
         val intMetaValues = metavalues.map { it.toBoolean() }
-        return if(value == intMetaValues[0]) true else false
+        return if (value == intMetaValues[0]) true else false
     }
 
     private fun matchDateOperator(operatorName: String, metavalues: List<String>, eventvalues: Any): Boolean {
@@ -389,8 +393,137 @@ class EventSegmentProcessing {
         return true
     }
 
-    fun createSegmentMetadata(){
+    fun createSegmentMetadata(segment: Segment, segmentId: Long, clientId: Long, status: String):Metadata {
 
+
+        fun buildMetaEvent(events:List<Event>,condition:ConditionType):List<MetaEvent>{
+
+            val result:List<MetaEvent?> = events.map {
+                if(it.dateFilter.operator.name == "After" || it.dateFilter.operator.name == "Today"){
+                    val metaEvent = MetaEvent()
+                    metaEvent.name = it.name
+                    metaEvent.operator = it.dateFilter.operator.name
+                    metaEvent.size = events.size
+                    metaEvent.date = it.dateFilter.values
+                    metaEvent.property = it.propertyFilters
+                    metaEvent.conditionalOperator = condition
+                    metaEvent
+                } else null
+            }
+
+            return result.filterNotNull()
+        }
+
+        fun buildGlobalFilter(globalFilters:List<GlobalFilter>):Map<String,List<GlobalFilter>>{
+           return globalFilters.groupBy { it.name }
+        }
+
+        fun findCriteriaGroup(): SegmentCriteriaGroup {
+            val map = mutableMapOf<Boolean, MutableSet<Int>>()
+//            val did = 1
+//            val didnot = 2
+//            val event = 3
+//            val user = 4
+            when {
+                segment.didEvents!!.events.isNotEmpty() -> map.put(true, mutableSetOf(1))
+                segment.didNotEvents!!.events.isNotEmpty() -> {
+                    val v = map[true] ?: mutableSetOf(2)
+                    v.add(2)
+                    map.put(true, v)
+                }
+                segment.geographyFilters.isNotEmpty() -> {
+                    val v = map[true] ?: mutableSetOf(3)
+                    v.add(3)
+                    map.put(true, v)
+                }
+                segment.globalFilters.isNotEmpty() -> {
+                    val userGlobalFilter: GlobalFilter? = segment.globalFilters.find { (it.globalFilterType == GlobalFilterType.UserProperties || it.globalFilterType == GlobalFilterType.Demographics || it.globalFilterType == GlobalFilterType.Reachability) }
+                    val eventGlobalFilter: GlobalFilter? = segment.globalFilters.find { (it.globalFilterType == GlobalFilterType.Technographics || it.globalFilterType == GlobalFilterType.AppFields) }
+                    if (eventGlobalFilter != null) {
+                        val v = map[true] ?: mutableSetOf(3)
+                        v.add(3)
+                        map.put(true, v)
+                    }
+                    if (userGlobalFilter != null) {
+                        val v = map[true] ?: mutableSetOf(4)
+                        v.add(4)
+                        map.put(true, v)
+                    }
+                }
+            }
+            var group: SegmentCriteriaGroup = SegmentCriteriaGroup.NONE
+            map[true]?.let {
+                it.forEach {
+                    when (it) {
+                        1 -> group = SegmentCriteriaGroup.DID
+                        2 -> {
+                            if (group == SegmentCriteriaGroup.NONE) {
+                                group = SegmentCriteriaGroup.DIDNOT
+                            } else {
+                                group = SegmentCriteriaGroup.valueOf(group.name + "_DIDNOT")
+                            }
+                        }
+                        3 -> {
+                            if (group == SegmentCriteriaGroup.NONE) {
+                                group = SegmentCriteriaGroup.EVENTPROP
+                            } else {
+                                group = SegmentCriteriaGroup.valueOf(group.name + "_EVENTPROP")
+                            }
+                        }
+                        4 -> {
+                            if (group == SegmentCriteriaGroup.NONE) {
+                                group = SegmentCriteriaGroup.USERPROP
+                            } else {
+                                group = SegmentCriteriaGroup.valueOf(group.name + "_USERPROP")
+                            }
+                        }
+                    }
+                }
+            }
+
+            return group
+        }
+        fun isContainRelativeDate(events:List<Event>):Boolean{
+            events.forEach {
+                val operator = it.dateFilter.operator
+                if( operator== DateOperator.After || operator == DateOperator.Today){
+                    return true
+                }
+            }
+            return false
+        }
+        val group = findCriteriaGroup()
+        fun isComputable(): Boolean {
+            return when(group){
+                SegmentCriteriaGroup.DID_DIDNOT, SegmentCriteriaGroup.DID_DIDNOT_EVENTPROP -> {
+                    if(isContainRelativeDate(segment.didEvents!!.events)){
+                        true
+                    }else{
+                        isContainRelativeDate(segment.didNotEvents!!.events)
+                    }
+                }
+                SegmentCriteriaGroup.DIDNOT,SegmentCriteriaGroup.DIDNOT_EVENTPROP -> isContainRelativeDate(segment.didNotEvents!!.events)
+                SegmentCriteriaGroup.DID,SegmentCriteriaGroup.DID_EVENTPROP -> isContainRelativeDate(segment.didEvents!!.events)
+                SegmentCriteriaGroup.NONE -> false
+                else -> true
+            }
+        }
+
+
+        val metadata = Metadata()
+        with(metadata) {
+            id = segmentId
+            this.clientId = clientId
+            this.status = status
+            stopped = isComputable()
+            this.segment = segment
+            criteriaGroup = findCriteriaGroup()
+            didEvents = buildMetaEvent(segment.didEvents!!.events,segment.didEvents!!.joinCondition.conditionType)
+            didNotEvents = buildMetaEvent(segment.didNotEvents!!.events,segment.didNotEvents!!.joinCondition.conditionType)
+            globalFilter = buildGlobalFilter(segment.globalFilters)
+            geoFilter = segment.geographyFilters
+        }
+        return metadata
     }
 }
 
@@ -405,5 +538,9 @@ enum class SegmentCriteriaGroup {
     DIDNOT_EVENTPROP,
     DID_USERPROP,
     DIDNOT_USERPROP,
-    DID_DIDNOT_EVENTPROP
+    DID_DIDNOT_EVENTPROP,
+    EVENTPROP_USERPROP,
+    DID_DIDNOT_USERPROP,
+    DID_DIDNOT_EVENTPROP_USERPROP,
+    NONE
 }

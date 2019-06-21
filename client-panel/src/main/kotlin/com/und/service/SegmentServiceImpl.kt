@@ -12,6 +12,7 @@ import com.und.model.mongo.eventapi.EventUser
 import com.und.repository.jpa.SegmentRepository
 import com.und.repository.mongo.EventRepository
 import com.und.repository.mongo.EventUserRepository
+import com.und.repository.mongo.SegmentMetadataRepository
 import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.SegmentNotFoundException
 import com.und.web.model.ConditionType
@@ -63,6 +64,12 @@ class SegmentServiceImpl : SegmentService {
     private lateinit var segmentParserCriteria: SegmentParserCriteria
 
     @Autowired
+    private lateinit var metadataRepository: SegmentMetadataRepository
+
+    @Autowired
+    private lateinit var metadataService: CreateMetadataService
+
+    @Autowired
     lateinit var mongoTemplate: MongoTemplate
 
     @Autowired
@@ -76,6 +83,8 @@ class SegmentServiceImpl : SegmentService {
             segmentRepository.save(segment)
             logger.debug("Segment with name: ${websegment.name} is saved successfully.")
             websegment.id = segment.id
+            val metadata = metadataService.createSegmentMetadata(websegment,segment.id!!,clientId,"past")
+            metadataRepository.save(metadata)
             return websegment
         } catch (ex: ConstraintViolationException) {
             throw CustomException("Template with this name already exists.")
