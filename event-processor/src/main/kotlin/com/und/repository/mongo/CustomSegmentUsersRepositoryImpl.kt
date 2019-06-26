@@ -1,6 +1,7 @@
 package com.und.repository.mongo
 
 import com.und.model.SegmentUsers
+import com.und.model.mongo.EventUser
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -32,5 +33,10 @@ class CustomSegmentUsersRepositoryImpl:CustomSegmentUsersRepository {
         val result = mongoTemplate.updateFirst(query,update,SegmentUsers::class.java)
         if(result.modifiedCount>=1) logger.info("$userId is removed from segment $segmentId users list .. clientId $clientId")
         else logger.info("$userId is not present in segment $segmentId users list .. clientId $clientId")
+    }
+
+    override fun findUserByUserProperties(criteria: Criteria, clientId: Long): List<EventUser> {
+        val query = Query(criteria)
+        return mongoTemplate.find(query,EventUser::class.java,"${clientId}_eventUser")
     }
 }

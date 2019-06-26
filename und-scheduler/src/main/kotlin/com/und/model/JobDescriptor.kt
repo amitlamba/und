@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.und.scheduler.CampaignJob
 import com.und.scheduler.LiveSegmentJob
+import com.und.scheduler.SegmentJob
 import com.und.util.JobUtil
 import org.quartz.JobBuilder
 import org.quartz.JobDataMap
@@ -57,6 +58,8 @@ class JobDescriptor {
         val jobClassName=when(this.jobDetail.jobType){
             com.und.model.JobDetail.JobType.LIVESEGMENT -> LiveSegmentJob::class.java
             com.und.model.JobDetail.JobType.CAMPAIGN -> CampaignJob::class.java
+            com.und.model.JobDetail.JobType.SEGMENT -> SegmentJob::class.java
+
         }
         return JobBuilder.newJob(jobClassName)
                 .withIdentity(JobUtil.getJobName(this), JobUtil.getGroupName(this))

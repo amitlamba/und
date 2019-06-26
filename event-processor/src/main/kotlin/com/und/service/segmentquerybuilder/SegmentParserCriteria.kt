@@ -1,5 +1,6 @@
 package com.und.service.segmentquerybuilder
 
+import com.sun.org.apache.xpath.internal.operations.Bool
 import com.und.model.*
 import com.und.model.Unit
 import com.und.utils.DateUtils
@@ -185,6 +186,10 @@ class SegmentParserCriteria {
         return Pair(listOfAggregation,didnotAggOperation)
     }
 
+    fun isUserPropertiesMatch(filter:List<GlobalFilter>,userId: String,timezone:String,userIdentified: Boolean?):Criteria?{
+        val (_,userfilter) = filterGlobalQWithUserId(filter, ZoneId.of(timezone),userId, userIdentified)
+        return userfilter
+    }
     fun getUserSpecificAggOperation(segment: Segment, tz: ZoneId, idList: List<String>, didNot:Boolean=false, fromCampaign:String?): MutableList<AggregationOperation> {
         var listOfAggregation = mutableListOf<AggregationOperation>()
         var objectIds = mutableSetOf<ObjectId>()

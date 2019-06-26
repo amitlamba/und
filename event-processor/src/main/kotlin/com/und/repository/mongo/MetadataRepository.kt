@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface MetadataRepository : MongoRepository<Metadata,Long> {
 
-    fun findByClientIdAndStatusAndStopped(clientId:Long,status:String,stopped:Boolean):List<Metadata>
+    fun findByClientIdAndTypeAndStopped(clientId:Long,status:String,stopped:Boolean):List<Metadata>
 }

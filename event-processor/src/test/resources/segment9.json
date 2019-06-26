@@ -1,0 +1,1 @@
+{"liveSegment":null,"didEvents":{"joinCondition":{"conditionType":"AllOf","anyOfCount":null},"events":[]},"didNotEvents":{"joinCondition":{"conditionType":"AnyOf","anyOfCount":null},"events":[]},"globalFilters":[{"globalFilterType":"Technographics","name":"Browser","type":"string","operator":"Equals","values":["Mobile Application"]}],"geographyFilters":[],"type":"Behaviour"}

@@ -78,7 +78,7 @@ class LiveSegmentServiceImpl : LiveSegmentService {
         try {
             liveSegmentRepository.save(liveSegment)
             //we can do it in background also.
-            val metadata = metadataService.createSegmentMetadata(normalSegment,liveSegment.segmentId,liveSegment.clientID!!,"live")
+            val metadata = metadataService.createSegmentMetadata(buildWebSegment(normalSegment),liveSegment.segmentId,liveSegment.clientID!!,"live")
             metadataRepository.save(metadata)
         }catch (ex:Throwable){
             segmentRepository.deleteById(persistedSegment.id)

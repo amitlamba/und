@@ -17,14 +17,14 @@ import org.springframework.stereotype.Service
 class SaveEventUserService {
 
     @Autowired
-    private lateinit var eventUserRepository:EventUserRepository
+    private lateinit var eventUserRepository: EventUserRepository
 
     @Autowired
-    private lateinit var eventSaveService:EventSaveService
+    private lateinit var eventSaveService: EventSaveService
 
     @StreamListener(Constants.SAVE_USER)
     @SendTo(Constants.OUT_EVENTUSER)
-    fun saveEventUser(eventUser: EventUser):UpdateIdentity{
+    fun saveEventUser(eventUser: EventUser): UpdateIdentity {
         eventUser.clientId = eventUser.identity.clientId ?: -1
         var updateIdentity: UpdateIdentity = UpdateIdentity()
         val identity = eventUser.identity
@@ -32,32 +32,32 @@ class SaveEventUserService {
             val uid = eventUser.uid
             var existingEventUser: com.und.model.mongo.EventUser
             if (uid != null && uid.isNotEmpty()) {
-                var user = eventUserRepository.findByIdentityUid(uid,eventUser.clientId.toLong())
+                var user = eventUserRepository.findByIdentityUid(uid, eventUser.clientId.toLong())
                 if (!user.isPresent) {
-                    user = eventUserRepository.findById(userId,eventUser.clientId.toLong())
+                    user = eventUserRepository.findById(userId, eventUser.clientId.toLong())
                     existingEventUser = user.get()
                     updateIdentity = UpdateIdentity(find = userId, update = userId, clientId = eventUser.clientId)
                 } else {
                     existingEventUser = user.get()
-                    val anonymous = eventUserRepository.findById(userId,existingEventUser.clientId.toLong())
+                    val anonymous = eventUserRepository.findById(userId, existingEventUser.clientId.toLong())
                     existingEventUser = existingEventUser.copyNonNullMongo(anonymous.get())
-                    eventUserRepository.deleteById(userId,existingEventUser.clientId.toLong())
+                    eventUserRepository.deleteById(userId, existingEventUser.clientId.toLong())
                     updateIdentity = UpdateIdentity(find = userId, update = existingEventUser.id!!, clientId = eventUser.clientId)
                 }
                 eventUser.identity.idf = 1
 
             } else {
-                existingEventUser = eventUserRepository.findById(userId,eventUser.clientId.toLong()).get()
+                existingEventUser = eventUserRepository.findById(userId, eventUser.clientId.toLong()).get()
             }
             return existingEventUser.copyNonNull(eventUser)
         }
 
         val userId = identity.userId
-        if(userId != null) {
+        if (userId != null) {
             val eventUserCopied = copyChangedValues(userId)
             eventUserRepository.save(eventUserCopied)
             return updateIdentity
-        }else{
+        } else {
             throw IllegalArgumentException("user id should have been preset found null")
         }
     }

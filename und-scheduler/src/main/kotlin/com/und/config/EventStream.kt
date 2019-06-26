@@ -25,6 +25,11 @@ interface EventStream {
     @Output("abCampaignTriggerSend")
     fun abCampaignTrigger():MessageChannel
 
+    @Input("inSegment")
+    fun processSegment():SubscribableChannel
+
+    @Output("outComputeSegment")
+    fun computeSegment():MessageChannel
 
 
 }

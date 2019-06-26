@@ -1,0 +1,45 @@
+{
+  "liveSegment": null,
+  "didEvents": {
+    "joinCondition": {
+      "conditionType": "AllOf",
+      "anyOfCount": null
+    },
+    "events": []
+  },
+  "didNotEvents": {
+    "joinCondition": {
+      "conditionType": "AnyOf",
+      "anyOfCount": null
+    },
+    "events": [
+      {
+        "name": "App Uninstalled",
+        "dateFilter": {
+          "operator": "InThePast",
+          "values": [
+            35
+          ],
+          "valueUnit": "mins"
+        },
+        "propertyFilters": [],
+        "whereFilter": {}
+      },
+      {
+        "name": "Added to cart",
+        "dateFilter": {
+          "operator": "InThePast",
+          "values": [
+            55
+          ],
+          "valueUnit": "mins"
+        },
+        "propertyFilters": [],
+        "whereFilter": {}
+      }
+    ]
+  },
+  "globalFilters": [],
+  "geographyFilters": [],
+  "type": "Behaviour"
+}

@@ -12,7 +12,7 @@ CREATE TABLE variant  (id bigserial primary key , percentage bigint not null , n
 
 ALTER TABLE campaign ADD COLUMN if not exists type_campaign varchar (100) not null default 'NORMAL';
 
--- create sequence ab_campaign_seq_id start 1000;
--- create sequence variant_seq_id start 1000;
+create sequence ab_campaign_seq_id start 1000;
+create sequence variant_seq_id start 1000;
 alter sequence ab_campaign_seq_id RESTART with 1000 increment 1;
 alter sequence variant_seq_id RESTART with 1000 increment 1;

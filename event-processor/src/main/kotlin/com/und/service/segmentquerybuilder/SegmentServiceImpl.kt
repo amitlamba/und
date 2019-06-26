@@ -2,6 +2,7 @@ package com.und.service.segmentquerybuilder
 
 
 import com.und.model.ConditionType
+import com.und.model.GlobalFilter
 import com.und.model.IncludeUsers
 import com.und.model.Segment
 import com.und.model.mongo.EventUser
@@ -67,6 +68,28 @@ class SegmentServiceImpl : SegmentService {
         segmentUsersRepository.removeUserFromSegment(clientId,userId,segmentId)
     }
 
+    override fun isUserPresentInSegmentWithoutUserProp(segment: Segment, clientId: Long, includeUsers: IncludeUsers, campaign: String?, userId: String): Boolean {
+        val userIdentified = when (includeUsers) {
+            IncludeUsers.KNOWN -> true
+            IncludeUsers.UNKNOWN -> false
+            IncludeUsers.ALL -> null
+        }
+        val tz = userSettingsService.getTimeZoneByClientId(clientId)
+        segment.userId = userId
+        val eventAggregation = segmentParserCriteria.getEventSpecificAggOperation(segment, tz, userIdentified)
+        val idList = eventRepository.usersFromEvent(eventAggregation.first, clientId)
+        val didNotIdList = eventRepository.usersFromEvent(eventAggregation.second, clientId)
+        return !(idList.isNotEmpty() && didNotIdList.isNotEmpty())
+    }
+
+    override fun isUserPresentInSegmentWithUserPropOnly(segment: Segment, clientId: Long, includeUsers: IncludeUsers, campaign: String?, userId: String): Boolean {
+        val tz = userSettingsService.getTimeZoneByClientId(clientId)
+        segment.userId =userId
+        val  userAggregation = segmentParserCriteria.getUserSpecificAggOperation(segment, tz, emptyList(), fromCampaign = null)
+        val result = eventUserRepository.usersIdFromEventUser(userAggregation, clientId)
+        return result.isNotEmpty()
+    }
+
     /*
     * TODO performance improvement  we can add project aggregation stage to remove that part of document which is not used in next stage.
     * eg. we add geo filter in first stage it mean after this stage we are not performing geo specific match so we can drop that field here.
@@ -85,7 +108,7 @@ class SegmentServiceImpl : SegmentService {
             IncludeUsers.ALL -> null
         }
         val tz = userSettingsService.getTimeZoneByClientId(clientId)
-
+        websegment.userId=userId
         val eventAggregation = segmentParserCriteria.getEventSpecificAggOperation(websegment, tz, userIdentified)
         val idList = eventRepository.usersFromEvent(eventAggregation.first, clientId)
         val didNotIdList = eventRepository.usersFromEvent(eventAggregation.second, clientId)
@@ -135,4 +158,10 @@ class SegmentServiceImpl : SegmentService {
         return mutableResult
     }
 
+    override fun isUserPropertyMatch(userId: String, clientId: Long, filter: List<GlobalFilter>, userIdentified: Boolean, timezne: String): Boolean {
+        val criteria = segmentParserCriteria.isUserPropertiesMatch(filter,userId,timezne,userIdentified)
+        return criteria?.let {
+            segmentUsersRepository.findUserByUserProperties(it,clientId).isNotEmpty()
+        }?:true
+    }
 }

@@ -1,5 +1,6 @@
 package com.und.service.segmentquerybuilder
 
+import com.und.model.GlobalFilter
 import com.und.model.IncludeUsers
 import com.und.model.Segment
 import org.springframework.stereotype.Service
@@ -28,10 +29,15 @@ interface SegmentService {
 
     fun removeUserFromSegment(userId: String,clientId: Long,segmentId: Long)
 
+    fun isUserPropertyMatch(userId: String,clientId: Long,filter:List<GlobalFilter>,userIdentified:Boolean,timezne:String):Boolean
+
     //fun isUserPresentInSegment(segment: Segment, clientId: Long, userId: String,includeUsers: IncludeUsers): Boolean
 
     //fun segmentByClientId(clientId: Long):List<Segment>
 
     fun isUserPresentInSegment(segment: Segment, clientId: Long, includeUsers: IncludeUsers,campaign:String?,userId:String): Boolean
+
+    fun isUserPresentInSegmentWithoutUserProp(segment: Segment, clientId: Long, includeUsers: IncludeUsers,campaign:String?,userId:String): Boolean
+    fun isUserPresentInSegmentWithUserPropOnly(segment: Segment, clientId: Long, includeUsers: IncludeUsers,campaign:String?,userId:String): Boolean
 }
 
