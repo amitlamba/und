@@ -12,11 +12,9 @@ import org.springframework.data.mongodb.core.find
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
 import org.springframework.data.mongodb.core.query.Update
-import org.springframework.messaging.support.MessageBuilder
-import java.lang.RuntimeException
 import java.util.*
 
-class EventRepositoryUpdateImpl : EventRepositoryUpdate {
+class EventUpdateCustomRepositoryImpl : EventUpdateCustomRepository {
 
     @Autowired
     lateinit var mongoTemplate: MongoTemplate
@@ -28,7 +26,7 @@ class EventRepositoryUpdateImpl : EventRepositoryUpdate {
 //    lateinit var eventService:EventService
 
     companion object {
-        val logger = LoggerFactory.getLogger(EventRepositoryUpdate::class.java)
+        val logger = LoggerFactory.getLogger(EventUpdateRepository::class.java)
     }
     override fun findEventsMatchingIdentity(identity: Identity): List<Event> {
         //FIXME query is empty

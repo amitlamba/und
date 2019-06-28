@@ -69,8 +69,9 @@ class EventSegmentProcessing {
         return metadataRepository.findByClientIdAndTypeAndStopped(clientId, status, stopped)
     }
 
-    private fun buildMongoEvent(event: com.und.model.web.Event): com.und.model.mongo.Event {
+    fun buildMongoEvent(event: com.und.model.web.Event): com.und.model.mongo.Event {
         var mongoEvent = MongoEvent(clientId = event.clientId, name = event.name)
+        mongoEvent.id=event.id
         mongoEvent.timeZoneId = ZoneId.of(event.timeZone)
         mongoEvent.creationTime = Date.from(Instant.ofEpochMilli(event.creationTime).atZone(ZoneId.of("UTC")).toInstant())
         mongoEvent = mongoEvent.parseUserAgentString(event.agentString)

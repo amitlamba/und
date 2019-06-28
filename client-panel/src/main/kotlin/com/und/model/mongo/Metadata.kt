@@ -1,5 +1,6 @@
 package com.und.model.mongo
 
+import com.fasterxml.jackson.annotation.JsonIgnore
 import com.und.web.model.*
 import com.und.web.model.Unit
 import org.springframework.data.mongodb.core.mapping.Document

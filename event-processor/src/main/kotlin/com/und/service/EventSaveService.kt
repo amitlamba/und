@@ -1,20 +1,16 @@
 package com.und.service
 
-import com.netflix.discovery.converters.Auto
-import com.und.exception.EventNotFoundException
 import com.und.model.UpdateIdentity
 import com.und.model.mongo.ClientTimeNow
 import com.und.model.mongo.Coordinate
 import com.und.model.mongo.GeoLocation
 import com.und.model.mongo.Geogrophy
 import com.und.model.web.Event
-import com.und.model.web.EventMessage
 import com.und.repository.mongo.EventRepository
-import com.und.repository.mongo.EventRepositoryUpdate
+import com.und.repository.mongo.EventUpdateRepository
 import com.und.repository.mongo.IpLocationRepository
 import com.und.utils.*
 import com.und.model.mongo.Event as MongoEvent
-import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.stereotype.Service
@@ -22,7 +18,6 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
-import java.util.regex.Pattern
 
 @Service
 class EventSaveService {
@@ -34,7 +29,7 @@ class EventSaveService {
     private lateinit var eventRepository:EventRepository
 
     @Autowired
-    private lateinit var eventUpdateRepository : EventRepositoryUpdate
+    private lateinit var eventUpdateRepository : EventUpdateRepository
 
     @Autowired
     private lateinit var mongoEventUtils : MongoEventUtils
@@ -85,7 +80,7 @@ class EventSaveService {
         if (event.identity.idf == 1) {
             mongoEvent.userIdentified = true
         }
-        eventRepository.save(mongoEvent)
+        eventRepository.save(mongoEvent,event.clientId)
 
     }
 

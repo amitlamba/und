@@ -13,11 +13,15 @@ import org.springframework.data.mongodb.core.query.Update
 import org.springframework.stereotype.Component
 import java.util.*
 
-@Component
 class EventCustomRepositoryImpl : EventCustomRepository {
+
 
     @Autowired
     lateinit var mongoTemplate: MongoTemplate
+
+    override fun save(event: Event, clientId: Long):Event {
+        return mongoTemplate.save(event,"${clientId}_event")
+    }
 
     override fun usersFromEvent(query: Aggregation, clientId: Long): List<String> {
         val output = mongoTemplate.aggregate(query, "${clientId}_event", Document::class.java)

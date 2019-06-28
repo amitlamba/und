@@ -78,25 +78,25 @@ class UserSegmentProcessing {
 
     private fun checkUserProp(filter : Map<String,List<GlobalFilter>>,eventUser: EventUser):Boolean{
         val resultList = mutableListOf<Boolean>()
-        filter.forEach { key, value ->
-            val result = value.map {filter ->
-                when(filter.globalFilterType){
-                    GlobalFilterType.UserProperties -> true
-                    GlobalFilterType.Demographics -> {
-                        when(filter.name){
-                            "age" -> {
-
-                            }
-                            "gender" -> {
-
-                            }
-                        }
-                    }
-                    GlobalFilterType.Reachability -> true
-                }
-            }
-            resultList.add(result.contains(true))
-        }
+//        filter.forEach { key, value ->
+//            val result = value.map {filter ->
+//                when(filter.globalFilterType){
+//                    GlobalFilterType.UserProperties -> true
+//                    GlobalFilterType.Demographics -> {
+//                        when(filter.name){
+//                            "age" -> {
+//
+//                            }
+//                            "gender" -> {
+//
+//                            }
+//                        }
+//                    }
+//                    GlobalFilterType.Reachability -> true
+//                }
+//            }
+//            resultList.add(result.contains(true))
+//        }
         return !resultList.contains(false)
     }
 }
