@@ -290,7 +290,7 @@ class CampaignService {
 
     private fun makingTemplateIdSequenceForRedis(campaign: Campaign, listOfTemplateId: MutableList<Int>) {
         campaign.variants?.forEach {
-            val size = it.percentage!! * 10.div(100)
+            val size = (it.percentage!! * 10).div(100)
             for (i in size downTo 1 step 1) {
                 listOfTemplateId.add(it.templateId ?: 0)
             }
