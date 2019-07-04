@@ -1,5 +1,20 @@
 package com.und.model.mongo
 
+import com.fasterxml.jackson.annotation.JsonGetter
+import com.fasterxml.jackson.annotation.JsonSetter
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.core.TreeNode
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.JsonDeserializer
+import com.fasterxml.jackson.databind.JsonSerializer
+import com.fasterxml.jackson.databind.SerializerProvider
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import com.fasterxml.jackson.databind.node.ArrayNode
+import com.fasterxml.jackson.databind.node.BooleanNode
+import com.fasterxml.jackson.databind.node.TextNode
 import com.sun.org.apache.xpath.internal.operations.Bool
 import com.und.model.*
 import com.und.model.Unit
@@ -7,6 +22,7 @@ import com.und.service.SegmentCriteriaGroup
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 import java.time.ZoneId
+import javax.xml.soap.Text
 
 /*
 * if a segment contain after,relative operator in any of did and did not then it will never end.
@@ -21,6 +37,7 @@ class Metadata {
     var type: String = "past" //live
     var stopped: Boolean = false
     lateinit var segment: Segment
+    @JsonDeserialize(using = CustomDeserializer::class)
     var triggerInfo: TriggerInfo? = null               //it will be null for those segment which are past computed(dead)
     var criteriaGroup: SegmentCriteriaGroup = SegmentCriteriaGroup.DID_DIDNOT_EVENTPROP
     var conditionalOperator: ConditionType = ConditionType.AllOf
@@ -40,6 +57,7 @@ class MetaEvent {
     var consider: Boolean = true
     lateinit var date: List<String>
     var property: List<PropertyFilter> = listOf()
+    var whereCount:Int = 0
 }
 
 /**
@@ -65,5 +83,44 @@ class TriggerPoint {
             val obj = it as TriggerPoint
             if (obj.unit == this.unit && obj.interval == this.interval) true else false
         } ?: false
+    }
+}
+
+//
+//class CustomSerializer : JsonSerializer<TriggerInfo>(){
+//    override fun serialize(value: TriggerInfo?, gen: JsonGenerator?, serializers: SerializerProvider?) {
+//        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+//    }
+//}
+
+class CustomDeserializer(vc: Class<*>?) : StdDeserializer<TriggerInfo>(vc) {
+
+    constructor():this(null){
+
+    }
+    override fun deserialize(p: JsonParser?, ctxt: DeserializationContext?): TriggerInfo? {
+            //var c = p!!.codec.readValues(p,TriggerInfo::class.java)
+        var a = p!!.codec.readTree<TreeNode>(p)
+        var t =a["timeZoneId"] as TextNode
+        var trig = a["triggerPoint"] as ArrayNode
+        var s =a["previousTriggerPoint"] as? TextNode
+        var next = a["nextTriggerPoint"] as TextNode
+        var error  = a["error"] as? TextNode
+        var success = a["successful"] as BooleanNode
+        val previousTriggerPoint = s?.let { LocalDateTime.parse(s.asText()) }
+        var trigger  = TriggerInfo(previousTriggerPoint, LocalDateTime.parse(next.asText()),error?.textValue(),success.asBoolean())
+            trigger.timeZoneId = ZoneId.of(t.asText())
+
+        trigger.triggerPoint = trig.map {
+            val triggerPoint = TriggerPoint()
+            with(triggerPoint){
+                name = it["name"].asText()
+                unit = Unit.valueOf(it["unit"].asText())
+                interval = it["interval"].asInt()
+                lastExecutionPoint = LocalDateTime.parse(it["lastExecutionPoint"].asText())
+            }
+            triggerPoint
+        }
+        return trigger
     }
 }

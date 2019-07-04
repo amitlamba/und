@@ -1,0 +1,96 @@
+{
+  "id" : 111,
+  "clientId" : 11,
+  "type" : "past",
+  "stopped" : false,
+  "segment" : {
+    "id" : null,
+    "userId" : null,
+    "name" : "",
+    "type" : "Behaviour",
+    "creationDate" : "2019-07-01T11:12:05.5",
+    "conversionEvent" : null,
+    "didEvents" : {
+      "description" : null,
+      "joinCondition" : {
+        "anyOfCount" : null,
+        "conditionType" : "AllOf"
+      },
+      "events" : [ {
+        "name" : "Search",
+        "dateFilter" : {
+          "operator" : "InThePast",
+          "values" : [ "1" ],
+          "valueUnit" : "hours"
+        },
+        "propertyFilters" : [ ],
+        "whereFilter" : {
+          "whereFilterName" : "Count",
+          "propertyName" : "",
+          "operator" : "GreaterThan",
+          "values" : [ 0 ]
+        }
+      }, {
+        "name" : "Add to Cart",
+        "dateFilter" : {
+          "operator" : "Today",
+          "values" : [ ],
+          "valueUnit" : "NONE"
+        },
+        "propertyFilters" : [ ],
+        "whereFilter" : {
+          "whereFilterName" : "Count",
+          "propertyName" : "",
+          "operator" : "GreaterThan",
+          "values" : [ 0 ]
+        }
+      } ]
+    },
+    "didNotEvents" : {
+      "description" : null,
+      "joinCondition" : {
+        "anyOfCount" : null,
+        "conditionType" : "AnyOf"
+      },
+      "events" : [ ]
+    },
+    "globalFilters" : [ ],
+    "geographyFilters" : [ ],
+    "liveSegment" : null
+  },
+  "triggerInfo" : {
+    "timeZoneId" : "Asia/Kolkata",
+    "triggerPoint" : [ {
+      "name" : "0+did",
+      "unit" : "hours",
+      "interval" : 1,
+      "lastExecutionPoint" : "2019-07-01T11:12:05.5"
+    }, {
+      "name" : "1+did",
+      "unit" : "days",
+      "interval" : 1,
+      "lastExecutionPoint" : "2019-07-01T00:00:00"
+    } ],
+    "previousTriggerPoint" : null,
+    "nextTriggerPoint" : "2019-07-01T11:12:05.5",
+    "error" : null,
+    "successful" : true
+  },
+  "criteriaGroup" : "DID",
+  "conditionalOperator" : "AllOf",
+  "didEventsSize" : 2,
+  "didNotEventSize" : 0,
+  "didEvents" : [ {
+    "name" : "Add to Cart",
+    "operator" : "Today",
+    "consider" : true,
+    "date" : [ ],
+    "property" : [ ],
+    "whereCount" : 0
+  } ],
+  "didNotEvents" : [ ],
+  "eventGlobalFilter" : { },
+  "userGlobalFilter" : { },
+  "geoFilter" : [ ],
+  "creationTime" : "2019-07-01T11:12:05.5"
+}

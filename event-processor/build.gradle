@@ -27,7 +27,8 @@ dependencies {
 	compile('org.postgresql:postgresql')
 	compile group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
 	compile group: 'org.hibernate', name: 'hibernate-validator', version: '6.0.7.Final'
-
-
+	//use mockito-kotlin to avoid not null error when we use argument matcher  ArgumentMatchers support for @NonNull / Kotlin non-null.
+	testCompile group: 'com.nhaarman.mockitokotlin2', name: 'mockito-kotlin', version: '2.0.0-alpha01'
+	
 
 }

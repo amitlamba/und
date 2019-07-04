@@ -1,0 +1,48 @@
+{
+  "liveSegment": null,
+  "didEvents": {
+    "joinCondition": {
+      "conditionType": "AllOf",
+      "anyOfCount": null
+    },
+    "events": []
+  },
+  "didNotEvents": {
+    "joinCondition": {
+      "conditionType": "AnyOf",
+      "anyOfCount": null
+    },
+    "events": [
+      {
+        "name": "Support",
+        "dateFilter": {
+          "operator": "After",
+          "values": [
+            "2019-06-27"
+          ],
+          "valueUnit": "NONE"
+        },
+        "propertyFilters": [
+        ],
+        "whereFilter": {}
+      },
+      {
+        "name": "Support",
+        "dateFilter": {
+          "operator": "InThePast",
+          "values": [
+            "1"
+          ],
+          "valueUnit": "hours"
+        },
+        "propertyFilters": [
+        ],
+        "whereFilter": {}
+      }
+    ]
+  },
+  "globalFilters": [],
+  "geographyFilters": [],
+  "type": "Behaviour",
+  "name": "Testing_Did_Not"
+}

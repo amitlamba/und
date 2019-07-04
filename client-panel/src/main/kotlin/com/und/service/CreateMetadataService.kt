@@ -1,7 +1,6 @@
 package com.und.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.netflix.discovery.converters.Auto
 import com.und.config.EventStream
 import com.und.model.*
 import com.und.model.mongo.*
@@ -42,30 +41,28 @@ class CreateMetadataService {
     fun createSegmentMetadata(segment: Segment, segmentId: Long, clientId: Long, type: String): Metadata {
 
 
+        fun buildMetaEvent(it: Event): MetaEvent {
+            val metaEvent = MetaEvent()
+            metaEvent.name = it.name
+            metaEvent.operator = it.dateFilter.operator.name
+            metaEvent.consider = true
+            metaEvent.date = it.dateFilter.values
+            metaEvent.property = it.propertyFilters
+            return metaEvent
+        }
+
         fun buildMetaEvent(events: List<Event>): List<MetaEvent> {
 
             val result: List<MetaEvent?> = events.map {
                 val metaEvent = when (it.dateFilter.operator) {
                     DateOperator.After, DateOperator.Today -> {
-                        val metaEvent = MetaEvent()
-                        metaEvent.name = it.name
-                        metaEvent.operator = it.dateFilter.operator.name
-                        metaEvent.consider = true
-                        metaEvent.date = it.dateFilter.values
-                        metaEvent.property = it.propertyFilters
-                        metaEvent
+                        buildMetaEvent(it)
                     }
                     DateOperator.Between -> {
                         val lastDate = LocalDate.parse(it.dateFilter.values[1])
                         val todayDate = LocalDate.now()
                         if (lastDate.compareTo(todayDate) == 0) {
-                            val metaEvent = MetaEvent()
-                            metaEvent.name = it.name
-                            metaEvent.consider = true
-                            metaEvent.operator = it.dateFilter.operator.name
-                            metaEvent.date = it.dateFilter.values
-                            metaEvent.property = it.propertyFilters
-                            metaEvent
+                            buildMetaEvent(it)
                         } else {
                             null
                         }
@@ -75,13 +72,7 @@ class CreateMetadataService {
                         val date = LocalDate.parse(it.dateFilter.values[0])
                         val todayDate = LocalDate.now()
                         if (date.compareTo(todayDate) == 0) {
-                            val metaEvent = MetaEvent()
-                            metaEvent.name = it.name
-                            metaEvent.consider = true
-                            metaEvent.operator = it.dateFilter.operator.name
-                            metaEvent.date = it.dateFilter.values
-                            metaEvent.property = it.propertyFilters
-                            metaEvent
+                            buildMetaEvent(it)
                         } else {
                             null
                         }
@@ -189,7 +180,7 @@ class CreateMetadataService {
         val group = findCriteriaGroup()
 
         fun isComputable(): Boolean {
-            //if we contain eventprop but did and did not date are absoulte then mark segment dead.
+            //if we contain event prop but did and did not criteria date are absolute then mark segment dead.
             return when (group) {
                 SegmentCriteriaGroup.DID_DIDNOT, SegmentCriteriaGroup.DID_DIDNOT_EVENTPROP -> {
                     if (isContainRelativeDate(segment.didEvents!!.events)) {
@@ -222,7 +213,8 @@ class CreateMetadataService {
             this.type = type
             stopped = !isComputable()
             this.segment = segment
-            criteriaGroup = findCriteriaGroup()
+            criteriaGroup = group
+            creationTime = segment.creationDate
             didEventsSize = segment.didEvents!!.events.size
             didNotEventSize = segment.didNotEvents!!.events.size
             conditionalOperator = segment.didEvents!!.joinCondition.conditionType
@@ -240,7 +232,7 @@ class CreateMetadataService {
     }
     fun createTriggerPointMetadata(segment: Segment): TriggerInfo {
         val result = findTriggerPoints(segment.didEvents!!.events, segment.didNotEvents!!.events, segment.creationDate)
-        val triggerInfo = TriggerInfo(null, segment.creationDate, null, false)
+        val triggerInfo = TriggerInfo(null, segment.creationDate, null, true)
         with(triggerInfo) {
             this.timeZoneId = ZoneId.systemDefault()
             this.triggerPoint = result
@@ -360,16 +352,19 @@ class CreateMetadataService {
         return newTriggerInfo
     }
 
+    /**
+     * This method execute just after segment save.
+     * It compute segment for first time and save the segment users list into segment_users collection after that
+     * This method schedule a job if trigger point present in metadata...
+     */
     @StreamListener("inSegment")
     fun segmentPostProcessing(jpaSegment: com.und.model.jpa.Segment){
-        val segment:Segment = buildWebSegmentWithFilters(jpaSegment)
+        val segment:Segment = buildWebSegmentWithFilters(jpaSegment) //building webSegment from jpa segment
         val timeZoneId = clientSettingsRepository.findByClientID(jpaSegment.clientID!!)?.timezone?:"UTC"
         var error:Boolean = false
         var message:String? = null
         try{
-            //1 compute segment
             val users = segmentService.segmentUserIds(segment,jpaSegment.clientID!!,IncludeUsers.ALL)
-            //save result
             val segmentUsers = SegmentUsers()
             with(segmentUsers){
                 this.segmentId =segmentId
@@ -382,7 +377,7 @@ class CreateMetadataService {
             message = ex.localizedMessage
         }
 
-        //create metadata
+        //creating metadata  next trigger point date is that date fro which segment computation is scheduled but not completed yet.
         val metadata = createSegmentMetadata(segment,jpaSegment.id!!,jpaSegment.clientID!!,"past")
         metadata.triggerInfo?.let {
             val scheduleDate = findNextTriggerPoint(it.triggerPoint,it.timeZoneId)
@@ -393,11 +388,12 @@ class CreateMetadataService {
             scheduleSegmentJob(jobDescriptor)
         }
         metadataRepository.save(metadata)
-        //save metadata
-
 
     }
 
+    /**
+     * This method is listening from scheduler
+     */
     @StreamListener("inComputeSegment")
     fun computeSegment(computeSegment:ComputeSegment){
         val metadata = metadataRepository.findById(computeSegment.segmentId)

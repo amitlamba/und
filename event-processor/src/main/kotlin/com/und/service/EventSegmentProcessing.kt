@@ -72,6 +72,7 @@ class EventSegmentProcessing {
     fun buildMongoEvent(event: com.und.model.web.Event): com.und.model.mongo.Event {
         var mongoEvent = MongoEvent(clientId = event.clientId, name = event.name)
         mongoEvent.id=event.id
+        mongoEvent.userId = event.identity.userId
         mongoEvent.timeZoneId = ZoneId.of(event.timeZone)
         mongoEvent.creationTime = Date.from(Instant.ofEpochMilli(event.creationTime).atZone(ZoneId.of("UTC")).toInstant())
         mongoEvent = mongoEvent.parseUserAgentString(event.agentString)
@@ -115,13 +116,14 @@ class EventSegmentProcessing {
         when (metadata.criteriaGroup) {
             SegmentCriteriaGroup.DID -> {
                 //if return true then add userID in list no need computation.
+                //in case of did if user is already present then no need to check
                 val isEventMatch = checkEvent(metadata.didEvents, event)
                 if (isEventMatch) {
                     when (metadata.conditionalOperator) {
                         ConditionType.AllOf -> {
                             if (metadata.didEventsSize > 1) {
                                 //compute
-                                val isPresent = segmentService.isUserPresentInSegment(metadata.segment, userId = event.userId!!, includeUsers = IncludeUsers.ALL, clientId = metadata.clientId!!, campaign = null)
+                                val isPresent = segmentService.isUserPresentInSegment(metadata.segment,  clientId = metadata.clientId!!,includeUsers = IncludeUsers.ALL, campaign = null,userId = event.userId!!)
                                 if (isPresent) {
                                     segmentService.addUserInSegment(clientId = clientId, userId = userId, segmentId = segmentId)
                                 } else {
@@ -129,12 +131,25 @@ class EventSegmentProcessing {
                                 }
                             } else {
                                 //add directly if not present
-                                segmentService.addUserInSegment(clientId = clientId, userId = userId, segmentId = segmentId)
+                                //when where count is >0 not in the case when where count is >>1
+                                //segmentService.addUserInSegment(clientId = clientId, userId = userId, segmentId = segmentId)
+                                //compute segment
+                                val isPresent = segmentService.isUserPresentInSegment(metadata.segment, userId = event.userId!!, includeUsers = IncludeUsers.ALL, clientId = metadata.clientId!!, campaign = null)
+                                if (isPresent) {
+                                    segmentService.addUserInSegment(clientId = clientId, userId = userId, segmentId = segmentId)
+                                } else {
+                                    //Do nothing
+                                }
                             }
                         }
                         ConditionType.AnyOf -> {
-                            //add directly if not present
-                            segmentService.addUserInSegment(clientId = clientId, userId = userId, segmentId = segmentId)
+                            //add directly if wherecount is >0 instead of >1 else compute
+                            val isPresent = segmentService.isUserPresentInSegment(metadata.segment,  clientId = metadata.clientId!!,includeUsers = IncludeUsers.ALL, campaign = null,userId = event.userId!!)
+                            if (isPresent) {
+                                segmentService.addUserInSegment(clientId = clientId, userId = userId, segmentId = segmentId)
+                            } else {
+                                //Do nothing
+                            }
                         }
                     }
                 } else {
@@ -143,14 +158,41 @@ class EventSegmentProcessing {
 
             }
             SegmentCriteriaGroup.DIDNOT -> {
-                //if return true then remove userID in list no need computation.
+                //in did not case we have possibility to remove only not add
                 val isEventMatch = checkEvent(metadata.didNotEvents, event)
                 if (isEventMatch) {
                     //removing userid
-                    segmentService.removeUserFromSegment(userId, clientId, segmentId)
+                    if (metadata.didNotEventSize == 1) {
+                        segmentService.removeUserFromSegment(userId, clientId, segmentId)
+                    } else {
+                        //if user present compute else do nothing
+                        val isPresent = segmentService.isUserPresent(userId, clientId, segmentId)
+                        if(isPresent){
+                            val isPresents = segmentService.isUserPresentInSegment(metadata.segment,  clientId = metadata.clientId!!,includeUsers = IncludeUsers.ALL, campaign = null,userId = event.userId!!)
+                            if (!isPresents) {
+                                segmentService.removeUserFromSegment(userId, clientId, segmentId)
+                            }
+
+                        }else{
+                            //do nothing because if during segment creation user is not present mean he fail to pass criteria so its impossible to add now
+                            //compute segment add user because new user
+                            if (!isUserExistsBeforeSegmentCreation(metadata.creationTime,event.userId!!)) {
+                                val isPresents = segmentService.isUserPresentInSegment(metadata.segment, clientId = metadata.clientId!!, includeUsers = IncludeUsers.ALL, campaign = null, userId = event.userId!!)
+                                if (isPresents) {
+                                    segmentService.addUserInSegment(clientId = clientId, userId = userId, segmentId = segmentId)
+                                }
+                            }
+                        }
+                    }
                 } else {
-                    //adding userid  do nothing because in did not case we have possibility to remove only not add but we have to compute segemnt during new user creation
-                    segmentService.addUserInSegment(userId, clientId, segmentId)
+                    //do nothing because in did not case we have possibility to remove only not add but we have to compute segemnt during new user creation(add user)
+                    //check is user exists before segm,ent creation date
+                    if (!isUserExistsBeforeSegmentCreation(metadata.creationTime,event.userId!!)) {
+                        val isPresents = segmentService.isUserPresentInSegment(metadata.segment, clientId = metadata.clientId!!, includeUsers = IncludeUsers.ALL, campaign = null, userId = event.userId!!)
+                        if (isPresents) {
+                            segmentService.addUserInSegment(clientId = clientId, userId = userId, segmentId = segmentId)
+                        }
+                    }
                 }
 
             }
@@ -382,7 +424,7 @@ class EventSegmentProcessing {
     }
 
     fun checkEvent(metadata: List<MetaEvent>, event: MongoEvent): Boolean {
-        val tz = ZoneId.of("UTC")
+        val tz = event.timeZoneId
         val filterResult = mutableListOf<Boolean>()
         val metaEvents = metadata.map { metaEvent ->
             if (metaEvent.consider) {
@@ -393,7 +435,7 @@ class EventSegmentProcessing {
                             val endDate = dateUtils.getMidnight(dates.last(), tz)
                             val eventCreationTime = event.creationTime
                             when {
-                                eventCreationTime.compareTo(endDate) == 0 -> true
+                                eventCreationTime.compareTo(endDate) <= 0 -> true
                                 else -> {
                                     //update metadata
                                     metaEvent.consider = false
@@ -557,6 +599,11 @@ class EventSegmentProcessing {
         return false
     }
 
+    private fun isUserExistsBeforeSegmentCreation(segmentCreationTime:LocalDateTime,userId:String):Boolean{
+        //find user creation time
+        val userCreationDate = LocalDateTime.now()
+        return userCreationDate <= segmentCreationTime
+    }
     private fun matchStringOperator(eventValue: String, filterOperator: String, filterValues: List<String>): Boolean {
         return when (filterOperator) {
             StringOperator.Equals.name -> filterValues[0] == eventValue

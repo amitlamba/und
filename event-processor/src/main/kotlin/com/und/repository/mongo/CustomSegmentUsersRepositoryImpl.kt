@@ -39,4 +39,9 @@ class CustomSegmentUsersRepositoryImpl:CustomSegmentUsersRepository {
         val query = Query(criteria)
         return mongoTemplate.find(query,EventUser::class.java,"${clientId}_eventUser")
     }
+
+    override fun isUserPresent(userId: String, clientId: Long, segmentId: Long): Boolean {
+        val query = Query(Criteria.where("clientId").`is`(clientId).and("segmentId").`is`(segmentId).and("users").`is`(userId))
+        return mongoTemplate.exists(query,SegmentUsers::class.java)
+    }
 }

@@ -9,10 +9,6 @@ import org.bson.types.ObjectId
 import org.slf4j.Logger
 import org.springframework.data.domain.Sort
 import org.springframework.data.mongodb.core.aggregation.*
-import org.springframework.data.mongodb.core.aggregation.Aggregation
-import org.springframework.data.mongodb.core.aggregation.AggregationOperation
-import org.springframework.data.mongodb.core.aggregation.GroupOperation
-import org.springframework.data.mongodb.core.aggregation.MatchOperation
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.stereotype.Component
 import java.io.Serializable
@@ -20,7 +16,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
 /*

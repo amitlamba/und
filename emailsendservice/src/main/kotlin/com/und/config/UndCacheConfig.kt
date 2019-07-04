@@ -9,7 +9,10 @@ import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories
+import org.springframework.data.redis.serializer.RedisSerializer
+import org.springframework.data.redis.serializer.StringRedisSerializer
 import java.time.Duration
 
 
@@ -24,12 +27,27 @@ class UndCacheConfig {
     }
 
     @Bean
-    fun redisTemplate(): RedisTemplate<*, *> {
+    fun redisTemplate(): RedisTemplate<*,*> {
 
         val template =  RedisTemplate<ByteArray, ByteArray>()
+//        val template = StringRedisTemplate()
+//        template.keySerializer = StringRedisSerializer()
+//        template.valueSerializer = StringRedisSerializer()
         template.connectionFactory = connectionFactory()
         return template
     }
+
+    @Bean
+    fun stringRedisTemplate(): StringRedisTemplate {
+
+        //val template =  RedisTemplate<ByteArray, ByteArray>()
+        val template = StringRedisTemplate()
+        template.keySerializer = StringRedisSerializer()
+        template.valueSerializer = StringRedisSerializer()
+        template.connectionFactory = connectionFactory()
+        return template
+    }
+
 
     @Bean
     fun cacheManager(redisTemplate: RedisTemplate<*, *>): CacheManager {

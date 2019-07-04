@@ -90,6 +90,11 @@ class SegmentServiceImpl : SegmentService {
         return result.isNotEmpty()
     }
 
+
+    override fun isUserPresent(userId: String, clientId: Long, segmentId: Long): Boolean {
+        return segmentUsersRepository.isUserPresent(userId, clientId, segmentId)
+    }
+
     /*
     * TODO performance improvement  we can add project aggregation stage to remove that part of document which is not used in next stage.
     * eg. we add geo filter in first stage it mean after this stage we are not performing geo specific match so we can drop that field here.
@@ -140,7 +145,6 @@ class SegmentServiceImpl : SegmentService {
             Pair(result, emptyList())
         }
     }
-
 
     private fun retrieveUsers(queries: List<Aggregation>, conditionType: ConditionType, clientId: Long): MutableSet<String> {
         val userDidList = mutableListOf<Set<String>>()

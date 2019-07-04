@@ -1,0 +1,39 @@
+{
+  "liveSegment": null,
+  "didEvents": {
+    "joinCondition": {
+      "conditionType": "AllOf",
+      "anyOfCount": null
+    },
+    "events": [
+      {
+        "name": "Search",
+        "dateFilter": {
+          "operator": "Between",
+          "values": [
+            "2019-06-25",
+            "2019-07-01"
+          ]
+        },
+        "propertyFilters": [],
+        "whereFilter": {
+          "whereFilterName": "Count",
+          "operator": "GreaterThan",
+          "values": [
+            0
+          ]
+        }
+      }
+    ]
+  },
+  "didNotEvents": {
+    "joinCondition": {
+      "conditionType": "AnyOf",
+      "anyOfCount": null
+    },
+    "events": []
+  },
+  "globalFilters": [],
+  "geographyFilters": [],
+  "type": "Behaviour"
+}

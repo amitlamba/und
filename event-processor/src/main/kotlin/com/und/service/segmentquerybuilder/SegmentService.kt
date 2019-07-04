@@ -29,6 +29,8 @@ interface SegmentService {
 
     fun removeUserFromSegment(userId: String,clientId: Long,segmentId: Long)
 
+    fun isUserPresent(userId: String,clientId: Long,segmentId: Long):Boolean
+
     fun isUserPropertyMatch(userId: String,clientId: Long,filter:List<GlobalFilter>,userIdentified:Boolean,timezne:String):Boolean
 
     //fun isUserPresentInSegment(segment: Segment, clientId: Long, userId: String,includeUsers: IncludeUsers): Boolean

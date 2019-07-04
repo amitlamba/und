@@ -1,0 +1,71 @@
+{
+  "liveSegment": null,
+  "didEvents": {
+    "joinCondition": {
+      "conditionType": "AllOf",
+      "anyOfCount": null
+    },
+    "events": [
+      {
+        "name": "Support",
+        "dateFilter": {
+          "operator": "Between",
+          "values": [
+            "2019-06-25",
+            "2019-07-04"
+          ],
+          "valueUnit": "NONE"
+        },
+        "propertyFilters": [],
+        "whereFilter": {
+          "whereFilterName": "Count",
+          "operator": "GreaterThan",
+          "values": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "Search",
+        "dateFilter": {
+          "operator": "On",
+          "values": [
+            "2019-06-26"
+          ],
+          "valueUnit": "NONE"
+        },
+        "propertyFilters": [],
+        "whereFilter": {
+          "whereFilterName": "Count",
+          "operator": "GreaterThan",
+          "values": [
+            0
+          ]
+        }
+      }
+    ]
+  },
+  "didNotEvents": {
+    "joinCondition": {
+      "conditionType": "AnyOf",
+      "anyOfCount": null
+    },
+    "events": [
+      {
+        "name": "Search",
+        "dateFilter": {
+          "operator": "After",
+          "values": [
+            "2019-07-01"
+          ],
+          "valueUnit": "NONE"
+        },
+        "propertyFilters": [],
+        "whereFilter": {}
+      }
+    ]
+  },
+  "globalFilters": [],
+  "geographyFilters": [],
+  "type": "Behaviour"
+}

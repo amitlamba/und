@@ -1,0 +1,73 @@
+{
+  "liveSegment": null,
+  "didEvents": {
+    "joinCondition": {
+      "conditionType": "AllOf",
+      "anyOfCount": null
+    },
+    "events": [
+      {
+        "name": "Search",
+        "dateFilter": {
+          "operator": "WasExactly",
+          "values": [
+            1
+          ],
+          "valueUnit":"days"
+        },
+        "propertyFilters": [],
+        "whereFilter": {
+          "whereFilterName": "Count",
+          "operator": "GreaterThan",
+          "values": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "View",
+        "dateFilter": {
+          "operator": "On",
+          "values": [
+            "2019-06-25"
+          ]
+        },
+        "propertyFilters": [],
+        "whereFilter": {
+          "whereFilterName": "Count",
+          "operator": "GreaterThan",
+          "values": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "Add to Cart",
+        "dateFilter": {
+          "operator": "After",
+          "values": [
+            "2019-06-24"
+          ]
+        },
+        "propertyFilters": [],
+        "whereFilter": {
+          "whereFilterName": "Count",
+          "operator": "GreaterThan",
+          "values": [
+            0
+          ]
+        }
+      }
+    ]
+  },
+  "didNotEvents": {
+    "joinCondition": {
+      "conditionType": "AnyOf",
+      "anyOfCount": null
+    },
+    "events": []
+  },
+  "globalFilters": [],
+  "geographyFilters": [],
+  "type": "Behaviour"
+}

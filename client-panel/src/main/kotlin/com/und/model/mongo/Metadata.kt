@@ -1,6 +1,7 @@
 package com.und.model.mongo
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.und.web.model.*
 import com.und.web.model.Unit
 import org.springframework.data.mongodb.core.mapping.Document
@@ -40,15 +41,17 @@ class MetaEvent {
      var consider: Boolean = true
      lateinit var date: List<String>
      var property: List<PropertyFilter> = listOf()
+     var whereCount:Int = 0
 }
 
 /**
  * we scheduled another job which check all segment where error occurred.
- * @param previousTriggerPoint its store the date which is passed(for this date segment should be competed without error if there is error then recompute). it may be null
- * @param nextTriggerPoint here we store the date for which segment computation is scheduled.
+ * @param previousTriggerPoint its store the date which is passed(for this date segment is competed with and without error if there is error then recompute). it may be null
+ * @param nextTriggerPoint here we store the date for which segment computation is scheduled but not yet computed.
  * @param error it store any error which occur during segmentation computation.
  * @param successful true when segment computed successfully.
  */
+
 class TriggerInfo(val previousTriggerPoint: LocalDateTime?, val nextTriggerPoint: LocalDateTime, val error: String?, val successful: Boolean) {
      var timeZoneId: ZoneId = ZoneId.systemDefault()
      var triggerPoint: List<TriggerPoint> = listOf()

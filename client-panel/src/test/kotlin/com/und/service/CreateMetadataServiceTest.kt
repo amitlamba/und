@@ -1,7 +1,9 @@
 package com.und.service
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.core.JsonGenerator
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.*
+import com.fasterxml.jackson.databind.module.SimpleModule
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.und.model.mongo.TriggerPoint
 import com.und.web.model.Segment
@@ -11,9 +13,13 @@ import org.junit.Before
 import org.junit.BeforeClass
 import org.junit.Test
 import java.io.File
+import com.und.model.jpa.Segment as JpaSegment
+import java.lang.reflect.Method
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 class CreateMetadataServiceTest{
     //    private lateinit var segment1:String
@@ -38,6 +44,7 @@ class CreateMetadataServiceTest{
     private lateinit var eventProcessingService:CreateMetadataService
     private lateinit var objectMapper: ObjectMapper
     private lateinit var creationDate: LocalDateTime
+    private lateinit var segmentService:SegmentService
 
     companion object {
         @JvmStatic
@@ -49,6 +56,7 @@ class CreateMetadataServiceTest{
     @Before
     fun setUp() {
         eventProcessingService = CreateMetadataService()
+        segmentService = SegmentServiceImpl()
         objectMapper = ObjectMapper()
         objectMapper.enable(SerializationFeature.INDENT_OUTPUT)
         creationDate = LocalDateTime.of(LocalDate.parse("2019-06-20"), LocalTime.of(20,0))

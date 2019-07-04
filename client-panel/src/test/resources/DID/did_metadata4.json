@@ -1,0 +1,70 @@
+{
+  "id" : 111,
+  "clientId" : 11,
+  "type" : "past",
+  "stopped" : true,
+  "segment" : {
+    "id" : null,
+    "userId" : null,
+    "name" : "",
+    "type" : "Behaviour",
+    "creationDate" : "2019-07-01T11:12:04.21",
+    "conversionEvent" : null,
+    "didEvents" : {
+      "description" : null,
+      "joinCondition" : {
+        "anyOfCount" : null,
+        "conditionType" : "AllOf"
+      },
+      "events" : [ {
+        "name" : "Search",
+        "dateFilter" : {
+          "operator" : "InThePast",
+          "values" : [ "5" ],
+          "valueUnit" : "mins"
+        },
+        "propertyFilters" : [ ],
+        "whereFilter" : {
+          "whereFilterName" : "Count",
+          "propertyName" : "",
+          "operator" : "GreaterThan",
+          "values" : [ 0 ]
+        }
+      } ]
+    },
+    "didNotEvents" : {
+      "description" : null,
+      "joinCondition" : {
+        "anyOfCount" : null,
+        "conditionType" : "AnyOf"
+      },
+      "events" : [ ]
+    },
+    "globalFilters" : [ ],
+    "geographyFilters" : [ ],
+    "liveSegment" : null
+  },
+  "triggerInfo" : {
+    "timeZoneId" : "Asia/Kolkata",
+    "triggerPoint" : [ {
+      "name" : "0+did",
+      "unit" : "mins",
+      "interval" : 5,
+      "lastExecutionPoint" : "2019-07-01T11:12:04.21"
+    } ],
+    "previousTriggerPoint" : null,
+    "nextTriggerPoint" : "2019-07-01T11:12:04.21",
+    "error" : null,
+    "successful" : true
+  },
+  "criteriaGroup" : "DID",
+  "conditionalOperator" : "AllOf",
+  "didEventsSize" : 1,
+  "didNotEventSize" : 0,
+  "didEvents" : [ ],
+  "didNotEvents" : [ ],
+  "eventGlobalFilter" : { },
+  "userGlobalFilter" : { },
+  "geoFilter" : [ ],
+  "creationTime" : "2019-07-01T11:12:04.21"
+}

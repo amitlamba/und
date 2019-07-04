@@ -289,11 +289,12 @@ class CampaignService {
 
     /*
     * Here we are making a queue in redis which keep track of template id we are sending and next time we send
+    * at a time we are storing 10 template id in queue. eg if we have two variant with 50% each then queue = [v1,v1,v1,v1,v1,v2,v2,v2,v2,v2]
     * */
 
     private fun makingTemplateIdSequenceForRedis(campaign: Campaign, listOfTemplateId: MutableList<Int>) {
         campaign.variants?.forEach {
-            val size = it.percentage!! * 10.div(100)
+            val size = (it.percentage!! * 10).div(100)
             for (i in size downTo 1 step 1) {
                 listOfTemplateId.add(it.templateId ?: 0)
             }

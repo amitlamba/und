@@ -1,0 +1,79 @@
+{
+  "id" : 111,
+  "clientId" : 11,
+  "type" : "past",
+  "stopped" : false,
+  "segment" : {
+    "id" : null,
+    "userId" : null,
+    "name" : "",
+    "type" : "Behaviour",
+    "creationDate" : "2019-07-04T08:54:36.713",
+    "conversionEvent" : null,
+    "didEvents" : {
+      "description" : null,
+      "joinCondition" : {
+        "anyOfCount" : null,
+        "conditionType" : "AllOf"
+      },
+      "events" : [ {
+        "name" : "Search",
+        "dateFilter" : {
+          "operator" : "After",
+          "values" : [ "2019-06-26" ],
+          "valueUnit" : "NONE"
+        },
+        "propertyFilters" : [ ],
+        "whereFilter" : {
+          "whereFilterName" : "Count",
+          "propertyName" : "",
+          "operator" : "GreaterThan",
+          "values" : [ 0 ]
+        }
+      } ]
+    },
+    "didNotEvents" : {
+      "description" : null,
+      "joinCondition" : {
+        "anyOfCount" : null,
+        "conditionType" : "AnyOf"
+      },
+      "events" : [ {
+        "name" : "Add to Cart",
+        "dateFilter" : {
+          "operator" : "Before",
+          "values" : [ "2019-07-04" ],
+          "valueUnit" : "NONE"
+        },
+        "propertyFilters" : [ ],
+        "whereFilter" : {
+          "whereFilterName" : null,
+          "propertyName" : "",
+          "operator" : "NONE",
+          "values" : null
+        }
+      } ]
+    },
+    "globalFilters" : [ ],
+    "geographyFilters" : [ ],
+    "liveSegment" : null
+  },
+  "triggerInfo" : null,
+  "criteriaGroup" : "DID_DIDNOT",
+  "conditionalOperator" : "AllOf",
+  "didEventsSize" : 1,
+  "didNotEventSize" : 1,
+  "didEvents" : [ {
+    "name" : "Search",
+    "operator" : "After",
+    "consider" : true,
+    "date" : [ "2019-06-26" ],
+    "property" : [ ],
+    "whereCount" : 0
+  } ],
+  "didNotEvents" : [ ],
+  "eventGlobalFilter" : { },
+  "userGlobalFilter" : { },
+  "geoFilter" : [ ],
+  "creationTime" : "2019-07-04T08:54:36.713"
+}

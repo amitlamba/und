@@ -1,0 +1,48 @@
+{
+  "liveSegment": null,
+  "didEvents": {
+    "joinCondition": {
+      "conditionType": "AllOf",
+      "anyOfCount": null
+    },
+    "events": []
+  },
+  "didNotEvents": {
+    "joinCondition": {
+      "conditionType": "AnyOf",
+      "anyOfCount": null
+    },
+    "events": [
+      {
+        "name": "Search",
+        "dateFilter": {
+          "operator": "On",
+          "values": [
+            "2019-06-25"
+          ],
+          "valueUnit": "NONE"
+        },
+        "propertyFilters": [
+        ],
+        "whereFilter": {}
+      },
+      {
+        "name": "View",
+        "dateFilter": {
+          "operator": "After",
+          "values": [
+            "2019-07-01"
+          ],
+          "valueUnit": "NONE"
+        },
+        "propertyFilters": [
+        ],
+        "whereFilter": {}
+      }
+    ]
+  },
+  "globalFilters": [],
+  "geographyFilters": [],
+  "type": "Behaviour",
+  "name": "Testing_Did_Not"
+}

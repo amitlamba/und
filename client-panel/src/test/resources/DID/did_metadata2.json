@@ -1,0 +1,65 @@
+{
+  "id" : 111,
+  "clientId" : 11,
+  "type" : "past",
+  "stopped" : false,
+  "segment" : {
+    "id" : null,
+    "userId" : null,
+    "name" : "",
+    "type" : "Behaviour",
+    "creationDate" : "2019-07-01T11:12:02.219",
+    "conversionEvent" : null,
+    "didEvents" : {
+      "description" : null,
+      "joinCondition" : {
+        "anyOfCount" : null,
+        "conditionType" : "AllOf"
+      },
+      "events" : [ {
+        "name" : "Search",
+        "dateFilter" : {
+          "operator" : "Between",
+          "values" : [ "2019-06-25", "2019-07-01" ],
+          "valueUnit" : "NONE"
+        },
+        "propertyFilters" : [ ],
+        "whereFilter" : {
+          "whereFilterName" : "Count",
+          "propertyName" : "",
+          "operator" : "GreaterThan",
+          "values" : [ 0 ]
+        }
+      } ]
+    },
+    "didNotEvents" : {
+      "description" : null,
+      "joinCondition" : {
+        "anyOfCount" : null,
+        "conditionType" : "AnyOf"
+      },
+      "events" : [ ]
+    },
+    "globalFilters" : [ ],
+    "geographyFilters" : [ ],
+    "liveSegment" : null
+  },
+  "triggerInfo" : null,
+  "criteriaGroup" : "DID",
+  "conditionalOperator" : "AllOf",
+  "didEventsSize" : 1,
+  "didNotEventSize" : 0,
+  "didEvents" : [ {
+    "name" : "Search",
+    "operator" : "Between",
+    "consider" : true,
+    "date" : [ "2019-06-25", "2019-07-01" ],
+    "property" : [ ],
+    "whereCount" : 0
+  } ],
+  "didNotEvents" : [ ],
+  "eventGlobalFilter" : { },
+  "userGlobalFilter" : { },
+  "geoFilter" : [ ],
+  "creationTime" : "2019-07-01T11:12:02.219"
+}

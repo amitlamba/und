@@ -1,0 +1,91 @@
+{
+  "id" : 111,
+  "clientId" : 11,
+  "type" : "past",
+  "stopped" : false,
+  "segment" : {
+    "id" : null,
+    "userId" : null,
+    "name" : "Testing_Did_Not",
+    "type" : "Behaviour",
+    "creationDate" : "2019-07-02T17:40:24.326",
+    "conversionEvent" : null,
+    "didEvents" : {
+      "description" : null,
+      "joinCondition" : {
+        "anyOfCount" : null,
+        "conditionType" : "AllOf"
+      },
+      "events" : [ ]
+    },
+    "didNotEvents" : {
+      "description" : null,
+      "joinCondition" : {
+        "anyOfCount" : null,
+        "conditionType" : "AnyOf"
+      },
+      "events" : [ {
+        "name" : "Support",
+        "dateFilter" : {
+          "operator" : "After",
+          "values" : [ "2019-06-27" ],
+          "valueUnit" : "NONE"
+        },
+        "propertyFilters" : [ ],
+        "whereFilter" : {
+          "whereFilterName" : null,
+          "propertyName" : "",
+          "operator" : "NONE",
+          "values" : null
+        }
+      }, {
+        "name" : "Support",
+        "dateFilter" : {
+          "operator" : "InThePast",
+          "values" : [ "1" ],
+          "valueUnit" : "hours"
+        },
+        "propertyFilters" : [ ],
+        "whereFilter" : {
+          "whereFilterName" : null,
+          "propertyName" : "",
+          "operator" : "NONE",
+          "values" : null
+        }
+      } ]
+    },
+    "globalFilters" : [ ],
+    "geographyFilters" : [ ],
+    "liveSegment" : null
+  },
+  "triggerInfo" : {
+    "timeZoneId" : "Asia/Kolkata",
+    "triggerPoint" : [ {
+      "name" : "1+didnot",
+      "unit" : "hours",
+      "interval" : 1,
+      "lastExecutionPoint" : "2019-07-02T17:40:24.326"
+    } ],
+    "previousTriggerPoint" : null,
+    "nextTriggerPoint" : "2019-07-02T17:40:24.326",
+    "error" : null,
+    "successful" : true
+  },
+  "criteriaGroup" : "DIDNOT",
+  "conditionalOperator" : "AllOf",
+  "didEventsSize" : 0,
+  "didNotEventSize" : 2,
+  "didEvents" : [ ],
+  "didNotEvents" : [ {
+    "name" : "Support",
+    "operator" : "After",
+    "consider" : true,
+    "date" : [ "2019-06-27" ],
+    "property" : [ ],
+    "whereCount" : 0
+  } ],
+  "eventGlobalFilter" : { },
+  "userGlobalFilter" : { },
+  "geoFilter" : [ ],
+  "creationTime" : "2019-07-02T17:40:24.326"
+}

@@ -1,0 +1,58 @@
+{
+  "id" : 111,
+  "clientId" : 11,
+  "type" : "past",
+  "stopped" : true,
+  "segment" : {
+    "id" : null,
+    "userId" : null,
+    "name" : "Testing_Did_Not",
+    "type" : "Behaviour",
+    "creationDate" : "2019-07-02T17:40:24.287",
+    "conversionEvent" : null,
+    "didEvents" : {
+      "description" : null,
+      "joinCondition" : {
+        "anyOfCount" : null,
+        "conditionType" : "AllOf"
+      },
+      "events" : [ ]
+    },
+    "didNotEvents" : {
+      "description" : null,
+      "joinCondition" : {
+        "anyOfCount" : null,
+        "conditionType" : "AnyOf"
+      },
+      "events" : [ {
+        "name" : "Search",
+        "dateFilter" : {
+          "operator" : "Between",
+          "values" : [ "2019-06-24", "2019-06-27" ],
+          "valueUnit" : "NONE"
+        },
+        "propertyFilters" : [ ],
+        "whereFilter" : {
+          "whereFilterName" : null,
+          "propertyName" : "",
+          "operator" : "NONE",
+          "values" : null
+        }
+      } ]
+    },
+    "globalFilters" : [ ],
+    "geographyFilters" : [ ],
+    "liveSegment" : null
+  },
+  "triggerInfo" : null,
+  "criteriaGroup" : "DIDNOT",
+  "conditionalOperator" : "AllOf",
+  "didEventsSize" : 0,
+  "didNotEventSize" : 1,
+  "didEvents" : [ ],
+  "didNotEvents" : [ ],
+  "eventGlobalFilter" : { },
+  "userGlobalFilter" : { },
+  "geoFilter" : [ ],
+  "creationTime" : "2019-07-02T17:40:24.287"
+}
