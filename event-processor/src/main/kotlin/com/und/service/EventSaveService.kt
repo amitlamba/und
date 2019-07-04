@@ -80,7 +80,8 @@ class EventSaveService {
         if (event.identity.idf == 1) {
             mongoEvent.userIdentified = true
         }
-        eventRepository.save(mongoEvent,event.clientId)
+        val savedEvent = eventRepository.save(mongoEvent,event.clientId)
+        //update in redis cache
 
     }
 

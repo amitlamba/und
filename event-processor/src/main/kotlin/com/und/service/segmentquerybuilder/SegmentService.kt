@@ -3,6 +3,7 @@ package com.und.service.segmentquerybuilder
 import com.und.model.GlobalFilter
 import com.und.model.IncludeUsers
 import com.und.model.Segment
+import com.und.model.mongo.Event
 import org.springframework.stereotype.Service
 
 
@@ -41,5 +42,7 @@ interface SegmentService {
 
     fun isUserPresentInSegmentWithoutUserProp(segment: Segment, clientId: Long, includeUsers: IncludeUsers,campaign:String?,userId:String): Boolean
     fun isUserPresentInSegmentWithUserPropOnly(segment: Segment, clientId: Long, includeUsers: IncludeUsers,campaign:String?,userId:String): Boolean
+    fun isEventExists(id:String):Boolean
+    fun saveEvent(event:Event,clientId: Long)
 }
 

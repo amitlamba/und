@@ -5,6 +5,7 @@ import com.und.model.ConditionType
 import com.und.model.GlobalFilter
 import com.und.model.IncludeUsers
 import com.und.model.Segment
+import com.und.model.mongo.Event
 import com.und.model.mongo.EventUser
 import com.und.repository.EventUserRepository
 import com.und.repository.mongo.EventRepository
@@ -93,6 +94,14 @@ class SegmentServiceImpl : SegmentService {
 
     override fun isUserPresent(userId: String, clientId: Long, segmentId: Long): Boolean {
         return segmentUsersRepository.isUserPresent(userId, clientId, segmentId)
+    }
+
+    override fun isEventExists(id: String): Boolean {
+        return eventRepository.existsById(id)
+    }
+
+    override fun saveEvent(event: Event,clientId: Long) {
+        eventRepository.save(event,clientId)
     }
 
     /*
