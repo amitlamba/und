@@ -40,4 +40,16 @@ interface EventStream {
 
     @Output("triggerManualCampaign")
     fun triggerManualCampaign():MessageChannel
+
+    @Output("outSegment")
+    fun outSegment():MessageChannel
+
+    @Input("inSegment")
+    fun inSegment():SubscribableChannel
+
+    @Output("outSegmentScheduleJob")
+    fun outSegmentScheduleJob():MessageChannel
+
+    @Input("inComputeSegment")
+    fun inComputeSegment():SubscribableChannel
 }

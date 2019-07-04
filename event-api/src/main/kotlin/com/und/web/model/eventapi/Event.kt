@@ -21,6 +21,7 @@ import javax.validation.constraints.Size
 //FIXME handle validation for other fields and different types, e.g. @see
 open class Event {
 
+    var id:String?=null
     @Size(min = 2, max = 40, message = "{event.name.invalidSize}")
     lateinit var name: String
 

@@ -241,6 +241,10 @@ class SegmentServiceImplTest {
         return result.size
     }
 
+    @Test
+    fun createMetadata(){
+
+    }
     private fun retrieveUsers(queries: List<Aggregation>, conditionType: ConditionType, clientId: Long): MutableSet<String> {
         val userDidList = mutableListOf<Set<String>>()
         queries.forEach { aggregation ->

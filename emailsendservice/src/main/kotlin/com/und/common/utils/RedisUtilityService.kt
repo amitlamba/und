@@ -14,6 +14,7 @@ class RedisUtilityService {
     @Autowired
     private lateinit var stringRedisTemplate:StringRedisTemplate
 
+
     fun storingQueueOfTemplateIdToRedis(key:String,listOfTemplateId:MutableList<Int>){
         redisTemplalte.opsForList().leftPushAll(key,listOfTemplateId)
     }

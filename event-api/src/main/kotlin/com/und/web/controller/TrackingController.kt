@@ -1,6 +1,7 @@
 package com.und.web.controller
 
 import com.und.eventapi.utils.ipAddr
+import com.und.security.utils.TenantProvider
 import com.und.service.eventapi.EventTrackService
 import com.und.web.model.eventapi.Event
 import org.springframework.beans.factory.annotation.Autowired
@@ -20,6 +21,9 @@ class TrackingController {
     @Autowired
     private lateinit var eventTrackService: EventTrackService
 
+    @Autowired
+    private lateinit var tenantProvider: TenantProvider
+
     @GetMapping(value = ["/track"])
     fun trackUrlClick(@RequestParam("c") clientId: Long, @RequestParam("e") mongoEmailId: String,
                       @RequestParam("u") redirectToUrl: String, httpServletResponse: HttpServletResponse,request:HttpServletRequest) {
@@ -34,6 +38,7 @@ class TrackingController {
         )
         event.agentString=request.getHeader("User-Agent")
         event.ipAddress=request.ipAddr()
+        tenantProvider.setTenat(clientId.toString())
         eventTrackService.toKafka(event)
 
         httpServletResponse.setHeader("Location", redirectToUrl)

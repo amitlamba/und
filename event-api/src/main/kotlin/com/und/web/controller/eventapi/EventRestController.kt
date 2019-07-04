@@ -47,6 +47,9 @@ class EventRestController {
     @PostMapping(value = ["/push/event"], produces = ["application/json"], consumes = ["application/json"])
     fun saveEvent(@Valid @RequestBody event: Event, request: HttpServletRequest): ResponseEntity<Response<String>> {
         val toEvent = eventService.buildEvent(event, request)
+        tenantProvider.setTenat(toEvent.clientId.toString())
+        val id = ObjectId()
+        toEvent.id = id.toString()
         eventService.toKafka(toEvent)
         return ResponseEntity.ok(Response(status = ResponseStatus.SUCCESS))
     }
@@ -101,6 +104,7 @@ class EventRestController {
             }
             identityInit.idf = 1
         }
+        tenantProvider.setTenat(eventUser.identity.clientId.toString())
         eventUserService.toKafka(eventUser)
         //don't send event back rather send instance id, and status, also send a new instance id if user id changes
         return ResponseEntity.ok(Response(

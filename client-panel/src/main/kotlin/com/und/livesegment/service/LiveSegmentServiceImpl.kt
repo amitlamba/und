@@ -13,7 +13,9 @@ import com.und.livesegment.repository.mongo.LiveSegmentResult
 import com.und.livesegment.repository.mongo.LiveSegmentUserTrackRepository
 import com.und.repository.jpa.SegmentRepository
 import com.und.repository.jpa.UserRepository
+import com.und.repository.mongo.SegmentMetadataRepository
 import com.und.security.utils.AuthenticationUtils
+import com.und.service.CreateMetadataService
 import com.und.service.SegmentService
 import com.und.web.controller.exception.CustomException
 import com.und.web.model.DidEvents
@@ -46,6 +48,11 @@ class LiveSegmentServiceImpl : LiveSegmentService {
     @Autowired
     private lateinit var liveSegmentUserRepository: LiveSegmentUserTrackRepository
 
+    @Autowired
+    private lateinit var metadataService: CreateMetadataService
+    @Autowired
+    private lateinit var metadataRepository:SegmentMetadataRepository
+
     override fun findByClientIDAndStartEvent(clientId: Long, startEvent: String): List<LiveSegment> {
         val segments = liveSegmentRepository.findByClientIDAndStartEvent(clientId, startEvent)
         return segments?: emptyList()
@@ -70,6 +77,9 @@ class LiveSegmentServiceImpl : LiveSegmentService {
         liveSegment.segmentId=persistedSegment.id!!
         try {
             liveSegmentRepository.save(liveSegment)
+            //we can do it in background also.
+            val metadata = metadataService.createSegmentMetadata(buildWebSegment(normalSegment),liveSegment.segmentId,liveSegment.clientID!!,"live")
+            metadataRepository.save(metadata)
         }catch (ex:Throwable){
             segmentRepository.deleteById(persistedSegment.id)
             throw ex

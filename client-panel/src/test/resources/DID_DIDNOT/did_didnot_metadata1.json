@@ -1,0 +1,84 @@
+{
+  "id" : 111,
+  "clientId" : 11,
+  "type" : "past",
+  "stopped" : true,
+  "segment" : {
+    "id" : null,
+    "userId" : null,
+    "name" : "",
+    "type" : "Behaviour",
+    "creationDate" : "2019-07-04T08:54:36.286",
+    "conversionEvent" : null,
+    "didEvents" : {
+      "description" : null,
+      "joinCondition" : {
+        "anyOfCount" : null,
+        "conditionType" : "AllOf"
+      },
+      "events" : [ {
+        "name" : "Search",
+        "dateFilter" : {
+          "operator" : "On",
+          "values" : [ "2019-06-27" ],
+          "valueUnit" : "NONE"
+        },
+        "propertyFilters" : [ ],
+        "whereFilter" : {
+          "whereFilterName" : "Count",
+          "propertyName" : "",
+          "operator" : "GreaterThan",
+          "values" : [ 0 ]
+        }
+      } ]
+    },
+    "didNotEvents" : {
+      "description" : null,
+      "joinCondition" : {
+        "anyOfCount" : null,
+        "conditionType" : "AnyOf"
+      },
+      "events" : [ {
+        "name" : "Add to Cart",
+        "dateFilter" : {
+          "operator" : "InThePast",
+          "values" : [ "1" ],
+          "valueUnit" : "days"
+        },
+        "propertyFilters" : [ ],
+        "whereFilter" : {
+          "whereFilterName" : null,
+          "propertyName" : "",
+          "operator" : "NONE",
+          "values" : null
+        }
+      } ]
+    },
+    "globalFilters" : [ ],
+    "geographyFilters" : [ ],
+    "liveSegment" : null
+  },
+  "triggerInfo" : {
+    "timeZoneId" : "Asia/Kolkata",
+    "triggerPoint" : [ {
+      "name" : "0+didnot",
+      "unit" : "days",
+      "interval" : 1,
+      "lastExecutionPoint" : "2019-07-04T00:00:00"
+    } ],
+    "previousTriggerPoint" : null,
+    "nextTriggerPoint" : "2019-07-04T08:54:36.286",
+    "error" : null,
+    "successful" : true
+  },
+  "criteriaGroup" : "DID_DIDNOT",
+  "conditionalOperator" : "AllOf",
+  "didEventsSize" : 1,
+  "didNotEventSize" : 1,
+  "didEvents" : [ ],
+  "didNotEvents" : [ ],
+  "eventGlobalFilter" : { },
+  "userGlobalFilter" : { },
+  "geoFilter" : [ ],
+  "creationTime" : "2019-07-04T08:54:36.286"
+}

@@ -1,0 +1,112 @@
+{
+  "id" : 111,
+  "clientId" : 11,
+  "type" : "past",
+  "stopped" : false,
+  "segment" : {
+    "id" : null,
+    "userId" : null,
+    "name" : "",
+    "type" : "Behaviour",
+    "creationDate" : "2019-07-04T08:54:36.773",
+    "conversionEvent" : null,
+    "didEvents" : {
+      "description" : null,
+      "joinCondition" : {
+        "anyOfCount" : null,
+        "conditionType" : "AnyOf"
+      },
+      "events" : [ {
+        "name" : "Search",
+        "dateFilter" : {
+          "operator" : "InThePast",
+          "values" : [ "2" ],
+          "valueUnit" : "days"
+        },
+        "propertyFilters" : [ ],
+        "whereFilter" : {
+          "whereFilterName" : "Count",
+          "propertyName" : "",
+          "operator" : "GreaterThan",
+          "values" : [ 0 ]
+        }
+      }, {
+        "name" : "Add to Cart",
+        "dateFilter" : {
+          "operator" : "After",
+          "values" : [ "2019-07-01" ],
+          "valueUnit" : "NONE"
+        },
+        "propertyFilters" : [ ],
+        "whereFilter" : {
+          "whereFilterName" : "Count",
+          "propertyName" : "",
+          "operator" : "GreaterThan",
+          "values" : [ 0 ]
+        }
+      } ]
+    },
+    "didNotEvents" : {
+      "description" : null,
+      "joinCondition" : {
+        "anyOfCount" : null,
+        "conditionType" : "AnyOf"
+      },
+      "events" : [ {
+        "name" : "Charged",
+        "dateFilter" : {
+          "operator" : "After",
+          "values" : [ "2019-07-01" ],
+          "valueUnit" : "NONE"
+        },
+        "propertyFilters" : [ ],
+        "whereFilter" : {
+          "whereFilterName" : null,
+          "propertyName" : "",
+          "operator" : "NONE",
+          "values" : null
+        }
+      } ]
+    },
+    "globalFilters" : [ ],
+    "geographyFilters" : [ ],
+    "liveSegment" : null
+  },
+  "triggerInfo" : {
+    "timeZoneId" : "Asia/Kolkata",
+    "triggerPoint" : [ {
+      "name" : "0+did",
+      "unit" : "days",
+      "interval" : 1,
+      "lastExecutionPoint" : "2019-07-04T00:00:00"
+    } ],
+    "previousTriggerPoint" : null,
+    "nextTriggerPoint" : "2019-07-04T08:54:36.773",
+    "error" : null,
+    "successful" : true
+  },
+  "criteriaGroup" : "DID_DIDNOT",
+  "conditionalOperator" : "AnyOf",
+  "didEventsSize" : 2,
+  "didNotEventSize" : 1,
+  "didEvents" : [ {
+    "name" : "Add to Cart",
+    "operator" : "After",
+    "consider" : true,
+    "date" : [ "2019-07-01" ],
+    "property" : [ ],
+    "whereCount" : 0
+  } ],
+  "didNotEvents" : [ {
+    "name" : "Charged",
+    "operator" : "After",
+    "consider" : true,
+    "date" : [ "2019-07-01" ],
+    "property" : [ ],
+    "whereCount" : 0
+  } ],
+  "eventGlobalFilter" : { },
+  "userGlobalFilter" : { },
+  "geoFilter" : [ ],
+  "creationTime" : "2019-07-04T08:54:36.773"
+}

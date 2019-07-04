@@ -3,6 +3,7 @@ package com.und.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.und.common.utils.loggerFor
+import com.und.config.EventStream
 import com.und.livesegment.model.jpa.LiveSegment
 import com.und.livesegment.model.webmodel.WebLiveSegment
 import com.und.livesegment.repository.jpa.LiveSegmentRepository
@@ -12,6 +13,7 @@ import com.und.model.mongo.eventapi.EventUser
 import com.und.repository.jpa.SegmentRepository
 import com.und.repository.mongo.EventRepository
 import com.und.repository.mongo.EventUserRepository
+import com.und.repository.mongo.SegmentMetadataRepository
 import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.SegmentNotFoundException
 import com.und.web.model.ConditionType
@@ -26,6 +28,7 @@ import org.springframework.data.mongodb.core.aggregation.Aggregation
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation
 import org.springframework.data.mongodb.core.aggregation.ConvertOperators
 import org.springframework.data.mongodb.core.query.Query
+import org.springframework.messaging.support.MessageBuilder
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.stereotype.Service
 import com.und.web.model.EventUser as EventUserWeb
@@ -62,20 +65,26 @@ class SegmentServiceImpl : SegmentService {
     @Autowired
     private lateinit var segmentParserCriteria: SegmentParserCriteria
 
+
     @Autowired
     lateinit var mongoTemplate: MongoTemplate
 
     @Autowired
     private lateinit var liveSegmentRepository: LiveSegmentRepository
 
+    @Autowired
+    private lateinit var eventStream:EventStream
+
 
     override fun createSegment(websegment: WebSegment, clientId: Long, userId: Long): WebSegment {
         logger.debug("Saving segment: ${websegment.name}")
         val segment = buildSegment(websegment, clientId, userId)
         try {
-            segmentRepository.save(segment)
+            val persistedSegment = segmentRepository.save(segment)
             logger.debug("Segment with name: ${websegment.name} is saved successfully.")
-            websegment.id = segment.id
+            websegment.id = persistedSegment.id
+            //compute segment
+            eventStream.outSegment().send(MessageBuilder.withPayload(persistedSegment).build())
             return websegment
         } catch (ex: ConstraintViolationException) {
             throw CustomException("Template with this name already exists.")
@@ -133,6 +142,9 @@ class SegmentServiceImpl : SegmentService {
         throw SegmentNotFoundException("No Segment Exists with id $id")
     }
 
+    override fun segmentUserIds(segment: com.und.web.model.Segment, clientId: Long, includeUsers: IncludeUsers): List<String> {
+        return getSegmentUsers(segment, clientId, "userId", includeUsers, null).second
+    }
 
     override fun segmentUserIds(segmentId: Long, clientId: Long, includeUsers: IncludeUsers): List<String> {
         val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)

@@ -16,6 +16,6 @@ class JobDetail {
     var jobType: JobType = JobType.CAMPAIGN
 
     enum class JobType {
-        CAMPAIGN, LIVESEGMENT
+        CAMPAIGN, LIVESEGMENT,SEGMENT
     }
 }

@@ -5,6 +5,7 @@ import com.und.model.IncludeUsers
 import com.und.report.service.FunnelReportService
 import com.und.report.web.model.FunnelReport
 import com.und.report.web.model.FunnelStepAndFilter
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.*
@@ -16,6 +17,9 @@ class FunnelController {
     @Autowired
     private lateinit var funnelReportService: FunnelReportService;
 
+    companion object {
+        val logger = LoggerFactory.getLogger(FunnelReportService::class.java)
+    }
 /*
         for a segment lets say all users and for a time period lets say 100 days
 
@@ -40,7 +44,7 @@ class FunnelController {
     100->25->13->5
  */
 
-
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/funnel")
     fun funnel(@RequestBody(required = true) body:FunnelStepAndFilter,
                funnelFilter: FunnelReport.FunnelReportFilter): List<FunnelReport.FunnelStep> {
@@ -54,6 +58,7 @@ class FunnelController {
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
     @GetMapping("/winner/template")
     fun winnerTemplate(@RequestParam("campaignId",required = true)campaignId:Long,@RequestParam("clientId",required = true)clientId:Long,@RequestParam("include",required = true)includeUsers: String):Long{
+        logger.info("Finding winner template...")
         return funnelReportService.getWinnerTemplate(clientId,campaignId,IncludeUsers.valueOf(includeUsers))
     }
 }

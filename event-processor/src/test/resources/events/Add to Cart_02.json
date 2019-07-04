@@ -1,0 +1,26 @@
+{
+  "id" : null,
+  "name" : "Add to Cart",
+  "clientId" : 1,
+  "creationTime" : 1562043600000,
+  "identity" : {
+    "deviceId" : "rwerewtttetw",
+    "sessionId" : "erewrewrerwerew",
+    "userId" : "erewrewrewrewrw",
+    "clientId" : 1,
+    "idf" : 0
+  },
+  "ipAddress" : "127.0.0.1",
+  "city" : "Gurgaon",
+  "state" : "Haryana",
+  "country" : "India",
+  "latitude" : "90.0000",
+  "longitude" : "90.000",
+  "agentString" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.100 Safari/537.36",
+  "userIdentified" : true,
+  "lineItem" : [ ],
+  "attributes" : { "item":"shoes" },
+  "appField" : null,
+  "timeZone" : "UTC",
+  "notificationId" : null
+}

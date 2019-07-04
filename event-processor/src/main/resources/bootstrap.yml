@@ -1,0 +1,11 @@
+spring:
+  cloud:
+    config:
+      uri: http://${CONFIG_IP}:${CONFIG_PORT}
+      enabled: true
+      name: event-processor
+  application:
+    name: event-processor
+
+encrypt:
+  key: ${ENCRYPT_KEY}

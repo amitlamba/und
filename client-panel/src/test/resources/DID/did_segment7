@@ -1,0 +1,56 @@
+{
+  "liveSegment": null,
+  "didEvents": {
+    "joinCondition": {
+      "conditionType": "AnyOf",
+      "anyOfCount": null
+    },
+    "events": [
+      {
+        "name": "Support",
+        "dateFilter": {
+          "operator": "After",
+          "values": [
+            "2019-07-01"
+          ],
+          "valueUnit":"NONE"
+        },
+        "propertyFilters": [],
+        "whereFilter": {
+          "whereFilterName": "Count",
+          "operator": "GreaterThan",
+          "values": [
+            0
+          ]
+        }
+      },
+      {
+        "name": "Add to Cart",
+        "dateFilter": {
+          "operator": "On",
+          "values": [
+            "2019-07-02"
+          ]
+        },
+        "propertyFilters": [],
+        "whereFilter": {
+          "whereFilterName": "Count",
+          "operator": "GreaterThan",
+          "values": [
+            0
+          ]
+        }
+      }
+    ]
+  },
+  "didNotEvents": {
+    "joinCondition": {
+      "conditionType": "AnyOf",
+      "anyOfCount": null
+    },
+    "events": []
+  },
+  "globalFilters": [],
+  "geographyFilters": [],
+  "type": "Behaviour"
+}

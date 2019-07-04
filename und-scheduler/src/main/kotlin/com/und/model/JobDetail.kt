@@ -14,6 +14,6 @@ class JobDetail {
     var properties: Map<String, String> = emptyMap()
 
     enum class JobType {
-        CAMPAIGN, LIVESEGMENT
+        CAMPAIGN, LIVESEGMENT,SEGMENT
     }
 }

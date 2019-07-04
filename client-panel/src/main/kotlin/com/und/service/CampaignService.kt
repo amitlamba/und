@@ -325,8 +325,7 @@ class CampaignService {
             clientEmailSetting.ifPresent {
                 fromUser = it.email
             }
-        }
-                ?: if (fromUser == null || serviceProviderId == null) throw CustomException("Either fromUser or service provider is missing.")
+        }?: if (fromUser == null || serviceProviderId == null) throw CustomException("Either fromUser or service provider is missing.")
                 else {
                     val clientSettingsEmail = clientSettingsEmailRepository.findByClientIdAndEmailAndServiceProviderId(clientId, fromUser?:"", serviceProviderId)
                     if (clientSettingsEmail.isPresent) testWebCampaign.clientEmailSettingId = clientSettingsEmail.get().id else throw CustomException("No client Email Setting found for email ${fromUser} and serviceProivder ${serviceProviderId}")

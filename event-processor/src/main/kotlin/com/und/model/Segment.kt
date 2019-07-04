@@ -29,7 +29,7 @@ class Segment : Serializable {
     var didNotEvents: DidEvents? = null
     var globalFilters: List<GlobalFilter> = listOf()
     var geographyFilters: List<Geography> = listOf()
-    //var liveSegment: WebLiveSegment?=null
+    var liveSegment: String? = null
 }
 
 class DidEvents : Serializable {
@@ -196,11 +196,11 @@ class Geography : Serializable {
     var city: City? = null
 }
 
-class Country(val id: Int, val name: String) : Serializable
+data class Country(val id: Int, val name: String) : Serializable
 
-class State(val id: Int, val name: String) : Serializable
+data class State(val id: Int, val name: String) : Serializable
 
-class City(val id: Int, val name: String) : Serializable
+data class City(val id: Int, val name: String) : Serializable
 
 
 class RegisteredEvent : Serializable {
