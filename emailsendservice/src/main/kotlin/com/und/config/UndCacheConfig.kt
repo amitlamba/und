@@ -9,7 +9,9 @@ import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories
+import org.springframework.data.redis.serializer.StringRedisSerializer
 import java.time.Duration
 
 
@@ -28,6 +30,15 @@ class UndCacheConfig {
 
         val template =  RedisTemplate<ByteArray, ByteArray>()
         template.connectionFactory = connectionFactory()
+        return template
+    }
+
+    @Bean
+    fun stringRedisTemplate(): StringRedisTemplate {
+        val template =  StringRedisTemplate()
+        template.connectionFactory = connectionFactory()
+        template.keySerializer = StringRedisSerializer()
+        template.valueSerializer = StringRedisSerializer()
         return template
     }
 

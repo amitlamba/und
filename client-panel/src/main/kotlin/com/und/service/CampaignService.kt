@@ -317,13 +317,18 @@ class CampaignService {
         val emailTemplate = testWebCampaign.emailTemplate
         emailTemplate ?: throw CustomException("Template missing.")
         testWebCampaign.segmentationID
-                ?: if (testWebCampaign.findByType == null || testWebCampaign.toAddresses == null) throw CustomException("")
+                ?: if (testWebCampaign.findByType == null || testWebCampaign.toAddresses == null) throw CustomException("Either findByType or address is missing.")
         val serviceProviderId = testWebCampaign.serviceProviderId
-        val fromUser = testWebCampaign.fromUser
-        testWebCampaign.clientEmailSettingId
-                ?: if (fromUser == null || serviceProviderId == null) throw CustomException("")
+        var fromUser = testWebCampaign.fromUser
+        testWebCampaign.clientEmailSettingId?.let{
+            val clientEmailSetting = clientSettingsEmailRepository.findByClientIdAndId(clientId,it)
+            clientEmailSetting.ifPresent {
+                fromUser = it.email
+            }
+        }
+                ?: if (fromUser == null || serviceProviderId == null) throw CustomException("Either fromUser or service provider is missing.")
                 else {
-                    val clientSettingsEmail = clientSettingsEmailRepository.findByClientIdAndEmailAndServiceProviderId(clientId, fromUser, serviceProviderId)
+                    val clientSettingsEmail = clientSettingsEmailRepository.findByClientIdAndEmailAndServiceProviderId(clientId, fromUser?:"", serviceProviderId)
                     if (clientSettingsEmail.isPresent) testWebCampaign.clientEmailSettingId = clientSettingsEmail.get().id else throw CustomException("No client Email Setting found for email ${fromUser} and serviceProivder ${serviceProviderId}")
                 }
 
@@ -332,7 +337,7 @@ class CampaignService {
             segmentationID = testWebCampaign.segmentationID
             clientEmailSettingId = testWebCampaign.clientEmailSettingId
             campaignType = testWebCampaign.campaignType
-            this.fromUser = testWebCampaign.fromUser
+            this.fromUser = fromUser
         }
         with(testCampaign) {
             this.clientId = clientId
