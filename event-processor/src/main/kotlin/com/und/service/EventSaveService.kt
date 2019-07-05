@@ -1,6 +1,7 @@
 package com.und.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.und.model.IncludeUsers
 import com.und.model.UpdateIdentity
 import com.und.model.mongo.ClientTimeNow
 import com.und.model.mongo.Coordinate
@@ -10,6 +11,8 @@ import com.und.model.web.Event
 import com.und.repository.mongo.EventRepository
 import com.und.repository.mongo.EventUpdateRepository
 import com.und.repository.mongo.IpLocationRepository
+import com.und.repository.mongo.MetadataRepository
+import com.und.service.segmentquerybuilder.SegmentService
 import com.und.utils.*
 import com.und.model.mongo.Event as MongoEvent
 import org.springframework.beans.factory.annotation.Autowired
@@ -34,6 +37,12 @@ class EventSaveService {
 
     @Autowired
     private lateinit var mongoEventUtils : MongoEventUtils
+
+    @Autowired
+    private lateinit var segmentService:SegmentService
+
+    @Autowired
+    private lateinit var metadataRepository:MetadataRepository
 
     @StreamListener(Constants.SAVE_EVENT)
     fun saveEvent(event: Event){
@@ -87,6 +96,21 @@ class EventSaveService {
     fun updateEventWithUserIdentity(identity: UpdateIdentity) {
         //tenantProvider.setTenat(identity.clientId.toString())
         eventUpdateRepository.updateEventsWithIdentityMatching(identity)
+        //Recomputing segments after identity update.
+        val metadataGroup = metadataRepository.findByClientId(identity.clientId.toLong())
+        metadataGroup.forEach {
+            // computing only those segments which are not dead.
+            if(!it.stopped){
+                val result = segmentService.isUserPresentInSegment(it.segment, identity.clientId.toLong(), IncludeUsers.ALL, null, identity.update)
+                if (result) {
+                    segmentService.addUserInSegment(identity.update, identity.clientId.toLong(), it.id!!)
+                } else {
+                    segmentService.removeUserFromSegment(identity.update, identity.clientId.toLong(), it.id!!)
+                }
+            }
+        }
+
+
     }
 
 //    fun buildEventForLiveSegment(fromEvent: com.und.model.mongo.Event): EventMessage {

@@ -1,6 +1,7 @@
 package com.und.repository.mongo
 
 import com.und.model.mongo.EventUser
+import com.und.model.utils.CampaignType
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoTemplate
@@ -75,6 +76,28 @@ class CustomEventUserRepositoryImpl:CustomEventUserRepository {
 
     override fun findAllById(clientId: Long, ids: List<ObjectId>):List<EventUser> {
         val query = Query().addCriteria(Criteria.where("_id").`in`(ids))
+        return mongoTemplate.find(query,EventUser::class.java,"${clientId}_eventUser")
+    }
+
+    override fun findAllByIdAndByCampaignType(clientId: Long, ids: List<ObjectId>, type: CampaignType): List<EventUser> {
+        var query = Query()
+        query = when(type){
+            CampaignType.EMAIL -> {
+                query.addCriteria(Criteria.where("_id").`in`(ids).and("identity.email").exists(true))
+            }
+            CampaignType.SMS ->{
+                query.addCriteria(Criteria.where("_id").`in`(ids).and("identity.mobile").exists(true))
+            }
+            CampaignType.PUSH_ANDROID -> {
+                 query.addCriteria(Criteria.where("_id").`in`(ids).and("identity.androidFcmToken").exists(true))
+            }
+            CampaignType.PUSH_IOS ->{
+                 query.addCriteria(Criteria.where("_id").`in`(ids).and("identity.iosFcmToken").exists(true))
+            }
+            CampaignType.PUSH_WEB -> {
+                 query.addCriteria(Criteria.where("_id").`in`(ids).and("identity.webFcmToken").exists(true))
+            }
+        }
         return mongoTemplate.find(query,EventUser::class.java,"${clientId}_eventUser")
     }
 }

@@ -61,14 +61,18 @@ class UserSegmentProcessing {
             SegmentCriteriaGroup.DID_EVENTPROP_USERPROP -> {
                 val userId = eventUser.identity.userId!!
                 val clientId = metadata.clientId!!
-                val result = didWeCompute(eventUser, metadata.userGlobalFilter)
-                if (result) {
-                    //save profile first
-                    val isPresent = segmentService.isUserPresentInSegmentWithoutUserProp(metadata.segment, clientId, IncludeUsers.ALL, null, userId)
-                    if(isPresent)
-                        segmentService.addUserInSegment(clientId = clientId, userId = userId, segmentId = metadata.id!!)
-                    else
-                        segmentService.removeUserFromSegment(userId, clientId, metadata.id!!)
+                //here we are computing segment only if uid is null
+                eventUser.uid?.let {
+                    if(it.isNotBlank()){
+                        val result = didWeCompute(eventUser, metadata.userGlobalFilter)
+                        if (result) {
+                            val isPresent = segmentService.isUserPresentInSegmentWithoutUserProp(metadata.segment, clientId, IncludeUsers.ALL, null, userId)
+                            if(isPresent)
+                                segmentService.addUserInSegment(clientId = clientId, userId = userId, segmentId = metadata.id!!)
+                            else
+                                segmentService.removeUserFromSegment(userId, clientId, metadata.id!!)
+                        }
+                    }
                 }
             }
             else -> {

@@ -138,13 +138,6 @@ class EventSegmentProcessing {
             }
             else ->{
                 //check exists check in redis and set time to live with key.
-//                val eventExists = segmentService.isEventExists(event.id!!)
-//                if(eventExists){
-//                    computeAndUpdateUser(metadata.segment, clientId, userId, segmentId)
-//                }else{
-//                    segmentService.saveEvent(event, clientId)
-//                    computeAndUpdateUser(metadata.segment, clientId, userId, segmentId)
-//                }
                 segmentService.insertIfNotExists(event,clientId)
                 computeAndUpdateUser(metadata.segment, clientId, userId, segmentId)
 

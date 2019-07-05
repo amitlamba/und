@@ -33,7 +33,7 @@ class EventUpdateCustomRepositoryImpl : EventUpdateCustomRepository {
         val events = mongoTemplate.find(Query(), Event::class.java)
         return events
     }
-
+    //FIXME no uses of this function
     override fun updateEventsWithIdentityMatching(identity: Identity) {
         identity.userId?.let { userId->
 

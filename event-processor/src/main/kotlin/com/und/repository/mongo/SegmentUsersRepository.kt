@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface SegmentUsersRepository:MongoRepository<SegmentUsers,Long>,CustomSegmentUsersRepository {
+    fun findByClientId(clientId:Long):List<SegmentUsers>
 }

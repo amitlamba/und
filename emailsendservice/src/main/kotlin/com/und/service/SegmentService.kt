@@ -3,6 +3,7 @@ package com.und.service
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.model.jpa.Segment
 import com.und.model.mongo.EventUser
+import com.und.model.utils.CampaignType
 import com.und.model.utils.IncludeUsers
 import com.und.repository.jpa.SegmentRepository
 import com.und.repository.jpa.security.UserRepository
@@ -64,7 +65,7 @@ class SegmentService {
         val segmentUsers = segmentUsersRepository.findById(segmentId)
         return if(segmentUsers.isPresent){
             val users= segmentUsers.get().users
-            eventUserRepository.findAllById(clientId,users.map { ObjectId(it) })
+            eventUserRepository.findAllByIdAndByCampaignType(clientId,users.map { ObjectId(it) },CampaignType.valueOf(type))
         }else emptyList<EventUser>()
 //        val token = userRepository.findSystemUser().key
 //        return if (token != null) {
