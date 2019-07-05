@@ -503,8 +503,9 @@ class CampaignService {
     }
 
     fun getUsersData(segmentId: Long, clientId: Long, campaignType: String): List<EventUser> {
-        val segment = segmentService.getWebSegment(segmentId, clientId)
-        return segmentService.getUserData(segment, clientId, campaignType)
+        return segmentService.getUserData(segmentId,clientId,campaignType)
+//        val segment = segmentService.getWebSegment(segmentId, clientId)
+//        return segmentService.getUserData(segment, clientId, campaignType)
     }
 
     fun toKafka(fcmMessage: FcmMessage) {

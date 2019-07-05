@@ -6,6 +6,9 @@ import com.und.model.mongo.EventUser
 import com.und.model.utils.IncludeUsers
 import com.und.repository.jpa.SegmentRepository
 import com.und.repository.jpa.security.UserRepository
+import com.und.repository.mongo.EventUserRepository
+import com.und.repository.mongo.SegmentUsersRepository
+import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import com.und.model.utils.Segment as WebSegment
@@ -24,6 +27,12 @@ class SegmentService {
 
     @Autowired
     private lateinit var segmentUserServiceClient: SegmentUserServiceClient
+
+    @Autowired
+    private lateinit var segmentUsersRepository: SegmentUsersRepository
+
+    @Autowired
+    private lateinit var eventUserRepository: EventUserRepository
 
     fun getSegment(segmentId: Long, clientId: Long): Segment {
         return segmentRepository.getSegmentByIdAndClientID(segmentId, clientId)
@@ -52,10 +61,15 @@ class SegmentService {
     }
 
     fun getUserData(segmentId:Long,clientId: Long,type:String):List<EventUser>{
-        val token = userRepository.findSystemUser().key
-        return if (token != null) {
-            segmentUserServiceClient.users(segmentId, clientId, token,IncludeUsers.ALL,type)
-        } else emptyList()
+        val segmentUsers = segmentUsersRepository.findById(segmentId)
+        return if(segmentUsers.isPresent){
+            val users= segmentUsers.get().users
+            eventUserRepository.findAllById(clientId,users.map { ObjectId(it) })
+        }else emptyList<EventUser>()
+//        val token = userRepository.findSystemUser().key
+//        return if (token != null) {
+//            segmentUserServiceClient.users(segmentId, clientId, token,IncludeUsers.ALL,type)
+//        } else emptyList()
     }
 
 

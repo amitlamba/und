@@ -124,6 +124,7 @@ class EventSegmentProcessingDid_DidNot {
             webEvent.identity.userId = it
         }
         var event  = eventSegmentProcessing.buildMongoEvent(webEvent)
+        println(objectMapper.writeValueAsString(event))
         val metadata = metadataRepository.findByClientIdAndTypeAndStopped(1,"all",false)
         //filter list of metadata select which are not dead(stopped)
         val filteredList = metadata.filter { !it.stopped }

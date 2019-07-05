@@ -1,5 +1,6 @@
 package com.und.service
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.model.UpdateIdentity
 import com.und.model.mongo.ClientTimeNow
 import com.und.model.mongo.Coordinate
@@ -80,9 +81,7 @@ class EventSaveService {
         if (event.identity.idf == 1) {
             mongoEvent.userIdentified = true
         }
-        val savedEvent = eventRepository.save(mongoEvent,event.clientId)
-        //update in redis cache
-
+        eventRepository.insertIfNotExistsElseUpdate(mongoEvent,mongoEvent.clientId)
     }
 
     fun updateEventWithUserIdentity(identity: UpdateIdentity) {

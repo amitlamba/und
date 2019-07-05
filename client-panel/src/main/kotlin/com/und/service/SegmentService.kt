@@ -23,12 +23,16 @@ interface SegmentService {
 
     fun persistedSegmentById(id:Long,clientId: Long?): Segment
 
+    //replaced
     fun segmentUserIds(segmentId: Long, clientId: Long,includeUsers: IncludeUsers): List<String>
 
+    // cant replace used by create metadata service for first time segment computation and scheduled segment computation
     fun segmentUserIds(segment:WebSegment,clientId: Long,includeUsers: IncludeUsers):List<String>
 
+    //replaced -- two use case found one for campaign and one for client panel
     fun segmentUsers(segmentId: Long, clientId: Long,includeUsers: IncludeUsers,campaign:String?): List<EventUser>
 
+    //   /user-list/segment  used from ui and we are sending segment object which is unsaved so cant replace
     fun segmentUsers(segment: WebSegment, clientId: Long, userId: Long, includeUsers: IncludeUsers): List<EventUserMinimal>
 
     fun isUserPresentInSegment(segment: Segment, clientId: Long, userId: String,includeUsers: IncludeUsers): Boolean

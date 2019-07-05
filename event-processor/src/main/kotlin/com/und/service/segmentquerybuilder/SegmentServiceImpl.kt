@@ -104,6 +104,9 @@ class SegmentServiceImpl : SegmentService {
         eventRepository.save(event,clientId)
     }
 
+    override fun insertIfNotExists(event: Event, clientId: Long) {
+        eventRepository.insertIfNotExists(event,clientId)
+    }
     /*
     * TODO performance improvement  we can add project aggregation stage to remove that part of document which is not used in next stage.
     * eg. we add geo filter in first stage it mean after this stage we are not performing geo specific match so we can drop that field here.

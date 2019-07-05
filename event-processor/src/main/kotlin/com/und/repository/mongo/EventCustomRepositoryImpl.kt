@@ -48,6 +48,22 @@ class EventCustomRepositoryImpl : EventCustomRepository {
         } ?: emptyList()
     }
 
+    override fun insertIfNotExists(event: Event, clientId: Long) {
+        val query = Query(Criteria("_id").`is`(ObjectId(event.id)))
+        val update = Update().set("name",event.name)
+        mongoTemplate.upsert(query,update,"${clientId}_event")
+    }
+
+    override fun insertIfNotExistsElseUpdate(event: Event, clientId: Long) {
+        val query = Query(Criteria("_id").`is`(ObjectId(event.id)))
+        val update = Update().set("sessionId",event.sessionId).
+                set("deviceId",event.deviceId).
+                set("notificationId",event.notificationId).
+                set("geoDetails",event.geoDetails)
+        mongoTemplate.upsert(query,update,"${clientId}_event")
+
+    }
+
 //    override fun findEventById(id: String, clientId: Long): Optional<Event> {
 //        val q = Query(Criteria.where("_id").`is`(id))
 //        return queryEvent(q, clientId)

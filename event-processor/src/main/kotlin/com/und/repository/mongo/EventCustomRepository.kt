@@ -16,4 +16,6 @@ interface EventCustomRepository {
     fun usersFromEvent(query: Query,clientId: Long):List<String>
    //fun findEventByObjectId(id:ObjectId,clientId: Long):Optional<Event>
     fun save(event:Event,clientId: Long):Event
+    fun insertIfNotExists(event: Event,clientId: Long)
+    fun insertIfNotExistsElseUpdate(event: Event,clientId: Long)
 }

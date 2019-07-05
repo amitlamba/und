@@ -14,6 +14,7 @@ import com.und.repository.jpa.SegmentRepository
 import com.und.repository.mongo.EventRepository
 import com.und.repository.mongo.EventUserRepository
 import com.und.repository.mongo.SegmentMetadataRepository
+import com.und.repository.mongo.SegmentUsersRepository
 import com.und.web.controller.exception.CustomException
 import com.und.web.controller.exception.SegmentNotFoundException
 import com.und.web.model.ConditionType
@@ -74,6 +75,9 @@ class SegmentServiceImpl : SegmentService {
 
     @Autowired
     private lateinit var eventStream:EventStream
+
+    @Autowired
+    private lateinit var segmentUsersRepository: SegmentUsersRepository
 
 
     override fun createSegment(websegment: WebSegment, clientId: Long, userId: Long): WebSegment {
@@ -142,27 +146,35 @@ class SegmentServiceImpl : SegmentService {
         throw SegmentNotFoundException("No Segment Exists with id $id")
     }
 
+    /**
+     * we cant replace this code with our already compute segment users because here we need to compute segment
+     */
     override fun segmentUserIds(segment: com.und.web.model.Segment, clientId: Long, includeUsers: IncludeUsers): List<String> {
         return getSegmentUsers(segment, clientId, "userId", includeUsers, null).second
     }
 
     override fun segmentUserIds(segmentId: Long, clientId: Long, includeUsers: IncludeUsers): List<String> {
-        val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
-        return if (segmentOption.isPresent) {
-            val segment = segmentOption.get()
-            getSegmentUsers(segment, clientId, "userId", includeUsers, null).second
-        } else emptyList()
+        val segmentUsers = segmentUsersRepository.findById(segmentId)
+        return if(segmentUsers.isPresent){
+            segmentUsers.get().users.toList()
+        }else emptyList()
+//        val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
+//        return if (segmentOption.isPresent) {
+//            val segment = segmentOption.get()
+//            getSegmentUsers(segment, clientId, "userId", includeUsers, null).second
+//        } else emptyList()
     }
 
     override fun segmentUsers(segmentId: Long, clientId: Long, includeUsers: IncludeUsers, campaign: String?): List<EventUser> {
-        if (segmentId == -2L) {
-            return getTestSEgmentUsers(clientId)
-        }
-        val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
-        return if (segmentOption.isPresent) {
-            val segment = segmentOption.get()
-            getSegmentUsersList(segment, clientId, includeUsers, campaign)
-        } else emptyList()
+       return getEventUsersByIds(segmentId)
+//        if (segmentId == -2L) {
+//            return getTestSEgmentUsers(clientId)
+//        }
+//        val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
+//        return if (segmentOption.isPresent) {
+//            val segment = segmentOption.get()
+//            getSegmentUsersList(segment, clientId, includeUsers, campaign)
+//        } else emptyList()
     }
 
     override fun segmentUsers(segment: WebSegment, clientId: Long,userId: Long, includeUsers: IncludeUsers): List<EventUserMinimal> {
@@ -178,6 +190,13 @@ class SegmentServiceImpl : SegmentService {
         return checkUserInSegment(segment, clientId, userId, includeUsers)
     }
 
+    private fun getEventUsersByIds(segmentId: Long):List<EventUser>{
+        val segmentUsers = segmentUsersRepository.findById(segmentId)
+        return if(segmentUsers.isPresent){
+            eventUserRepository.findUserByIds(segmentUsers.get().users,segmentUsers.get().clientId!!)
+        }else emptyList()
+
+    }
     private fun checkUserInSegment(segment: Segment, clientId: Long, userId: String, includeUsers: IncludeUsers): Boolean {
         val tz = userSettingsService.getTimeZoneByClientId(clientId)
 

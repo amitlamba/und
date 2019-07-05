@@ -44,5 +44,6 @@ interface SegmentService {
     fun isUserPresentInSegmentWithUserPropOnly(segment: Segment, clientId: Long, includeUsers: IncludeUsers,campaign:String?,userId:String): Boolean
     fun isEventExists(id:String):Boolean
     fun saveEvent(event:Event,clientId: Long)
+    fun insertIfNotExists(event: Event,clientId: Long)
 }
 

@@ -70,64 +70,19 @@ class EventSegmentProcessing {
     }
 
     fun buildMongoEvent(event: com.und.model.web.Event): com.und.model.mongo.Event {
-//        var mongoEvent = MongoEvent(clientId = event.clientId, name = event.name)
-//        mongoEvent.id=event.id
-//        mongoEvent.userId = event.identity.userId
-//        mongoEvent.timeZoneId = ZoneId.of(event.timeZone)
-//        mongoEvent.creationTime = Date.from(Instant.ofEpochMilli(event.creationTime).atZone(ZoneId.of("UTC")).toInstant())
-//        mongoEvent = mongoEvent.parseUserAgentString(event.agentString)
-//        if (event.country != null && event.state != null && event.city != null) {
-//            mongoEvent.geogrophy = Geogrophy(event.country, event.state, event.city)
-//        } else {
-//            event.ipAddress?.let {
-//                mongoEvent.geogrophy = ipLocationRepository.getGeographyByIpAddress(it)
-//            }
-//        }
-//        //FIXME hard coded charged
-//        if ("charged".equals(event.name, ignoreCase = false)) {
-//            mongoEvent.lineItem = event.lineItem
-//            mongoEvent.lineItem.forEach { item ->
-//                item.properties = mongoEventUtils.toDateInMap(item.properties)
-//
-//            }
-//        }
-//        //copy attributes
-//        mongoEvent.attributes.putAll(mongoEventUtils.toDateInMap(event.attributes))
-//        if (event.identity.idf == 1) {
-//            mongoEvent.userIdentified = true
-//        }
-
-
         var mongoEvent = MongoEvent(clientId = event.clientId, name = event.name)
+        mongoEvent.id=event.id
+        mongoEvent.userId = event.identity.userId
         mongoEvent.timeZoneId = ZoneId.of(event.timeZone)
-        mongoEvent.creationTime= Date.from(Instant.ofEpochMilli(event.creationTime).atZone(ZoneId.of("UTC")).toInstant())
+        mongoEvent.creationTime = Date.from(Instant.ofEpochMilli(event.creationTime).atZone(ZoneId.of("UTC")).toInstant())
         mongoEvent = mongoEvent.parseUserAgentString(event.agentString)
-        if(event.country != null && event.state != null && event.city != null){
-            mongoEvent.geogrophy = Geogrophy(event.country,event.state,event.city)
-        }else{
+        if (event.country != null && event.state != null && event.city != null) {
+            mongoEvent.geogrophy = Geogrophy(event.country, event.state, event.city)
+        } else {
             event.ipAddress?.let {
                 mongoEvent.geogrophy = ipLocationRepository.getGeographyByIpAddress(it)
             }
         }
-
-        mongoEvent.clientTime = ClientTimeNow(LocalDateTime.from(Instant.ofEpochMilli(event.creationTime).atZone(mongoEvent.timeZoneId)))
-        mongoEvent.id = event.id
-        mongoEvent.userId = event.identity.userId
-        mongoEvent.sessionId = event.identity.sessionId
-        mongoEvent.deviceId = event.identity.deviceId
-        mongoEvent.notificationId = event.notificationId
-        mongoEvent.appfield = event.appField
-
-        with(mongoEvent.geoDetails) {
-            ip = event.ipAddress
-            //FIXME find a way to update coordinates
-
-            var lat = event.latitude
-            var long = event.longitude
-            if (lat != null && long != null)
-                mongoEvent.geoDetails.geolocation = GeoLocation("Point", Coordinate(lat.toDouble(), long.toDouble()))
-        }
-
         //FIXME hard coded charged
         if ("charged".equals(event.name, ignoreCase = false)) {
             mongoEvent.lineItem = event.lineItem
@@ -141,6 +96,25 @@ class EventSegmentProcessing {
         if (event.identity.idf == 1) {
             mongoEvent.userIdentified = true
         }
+        mongoEvent.appfield = event.appField
+
+        mongoEvent.clientTime = ClientTimeNow(LocalDateTime.from(Instant.ofEpochMilli(event.creationTime).atZone(mongoEvent.timeZoneId)))
+//        mongoEvent.sessionId = event.identity.sessionId
+//        mongoEvent.deviceId = event.identity.deviceId
+//        mongoEvent.notificationId = event.notificationId
+
+//
+//        with(mongoEvent.geoDetails) {
+//            ip = event.ipAddress
+//            //FIXME find a way to update coordinates
+//
+//            var lat = event.latitude
+//            var long = event.longitude
+//            if (lat != null && long != null)
+//                mongoEvent.geoDetails.geolocation = GeoLocation("Point", Coordinate(lat.toDouble(), long.toDouble()))
+//        }
+//
+//
         return mongoEvent
     }
 
@@ -164,13 +138,15 @@ class EventSegmentProcessing {
             }
             else ->{
                 //check exists check in redis and set time to live with key.
-                val eventExists = segmentService.isEventExists(event.id!!)
-                if(eventExists){
-                    computeAndUpdateUser(metadata.segment, clientId, userId, segmentId)
-                }else{
-                    segmentService.saveEvent(event, clientId)
-                    computeAndUpdateUser(metadata.segment, clientId, userId, segmentId)
-                }
+//                val eventExists = segmentService.isEventExists(event.id!!)
+//                if(eventExists){
+//                    computeAndUpdateUser(metadata.segment, clientId, userId, segmentId)
+//                }else{
+//                    segmentService.saveEvent(event, clientId)
+//                    computeAndUpdateUser(metadata.segment, clientId, userId, segmentId)
+//                }
+                segmentService.insertIfNotExists(event,clientId)
+                computeAndUpdateUser(metadata.segment, clientId, userId, segmentId)
 
             }
         }
