@@ -9,7 +9,6 @@ import com.und.web.model.*
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.aggregation.Aggregation
-import org.springframework.stereotype.Service
 import com.und.service.AggregationQuerybuilder.*
 import com.und.util.AGGREGATE_VALUE
 import com.und.util.NUM_OF_MINUTES
@@ -315,7 +314,7 @@ class UserEventAnalyticsServiceImpl : UserEventAnalyticsService {
     }
 
 
-    private fun      buildUserCountByEventResult(aggregate: List<AggregateOutput>): List<UserCountByEventForDate> {
+    private fun  buildUserCountByEventResult(aggregate: List<AggregateOutput>): List<UserCountByEventForDate> {
         return aggregate.map {
             UserCountByEventForDate(it.groupByInfo[Field.DateVal.fName].toString(),
                     listOf(UserCountByEvent(it.aggregateVal.toInt(), it.groupByInfo[Field.EventName.fName].toString())))

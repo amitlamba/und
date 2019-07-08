@@ -30,47 +30,47 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
     }
 
 
-    override fun findUserById(id: String, clientId: Long): Optional<EventUser> {
-        val q = Query(Criteria.where("_id").`is`(ObjectId(id)))
-        return queryEventUser(q, clientId)
-    }
-
-    override fun findUserByGoogleId(id: String, clientId: Long): Optional<EventUser> {
-        val q = Query(Criteria.where("identity.googleId").`is`(id))
-        return queryEventUser(q, clientId)
-
-    }
-
-    override fun findUserByFbId(id: String, clientId: Long): Optional<EventUser> {
-        val q = Query(Criteria.where("identity.fbId").`is`(id))
-        return queryEventUser(q, clientId)
-    }
-
-    override fun findUserBySysId(id: String, clientId: Long): Optional<EventUser> {
-        val q = Query(Criteria.where("identity.uid").`is`(id))
-        return queryEventUser(q, clientId)
-
-    }
-
-    override fun findUserByEmail(id: String, clientId: Long): Optional<EventUser> {
-        val q = Query(Criteria.where("identity.email").`is`(id))
-        return queryEventUser(q, clientId)
-
-    }
-
-    override fun findUserByMobile(id: String, clientId: Long): Optional<EventUser> {
-        val q = Query(Criteria.where("identity.mobile").`is`(id))
-        return queryEventUser(q, clientId)
-
-    }
-
-    override fun testUserProfile(id: String, clientId: Long, isTestUser: Boolean) {
-        val q = Query(Criteria.where("_id").`is`(ObjectId(id)))
-        val update = Update()
-        update.set("testUser", isTestUser)
-        updateEventUser(q, update, clientId)
-
-    }
+//    override fun findUserById(id: String, clientId: Long): Optional<EventUser> {
+//        val q = Query(Criteria.where("_id").`is`(ObjectId(id)))
+//        return queryEventUser(q, clientId)
+//    }
+//
+//    override fun findUserByGoogleId(id: String, clientId: Long): Optional<EventUser> {
+//        val q = Query(Criteria.where("identity.googleId").`is`(id))
+//        return queryEventUser(q, clientId)
+//
+//    }
+//
+//    override fun findUserByFbId(id: String, clientId: Long): Optional<EventUser> {
+//        val q = Query(Criteria.where("identity.fbId").`is`(id))
+//        return queryEventUser(q, clientId)
+//    }
+//
+//    override fun findUserBySysId(id: String, clientId: Long): Optional<EventUser> {
+//        val q = Query(Criteria.where("identity.uid").`is`(id))
+//        return queryEventUser(q, clientId)
+//
+//    }
+//
+//    override fun findUserByEmail(id: String, clientId: Long): Optional<EventUser> {
+//        val q = Query(Criteria.where("identity.email").`is`(id))
+//        return queryEventUser(q, clientId)
+//
+//    }
+//
+//    override fun findUserByMobile(id: String, clientId: Long): Optional<EventUser> {
+//        val q = Query(Criteria.where("identity.mobile").`is`(id))
+//        return queryEventUser(q, clientId)
+//
+//    }
+//
+//    override fun testUserProfile(id: String, clientId: Long, isTestUser: Boolean) {
+//        val q = Query(Criteria.where("_id").`is`(ObjectId(id)))
+//        val update = Update()
+//        update.set("testUser", isTestUser)
+//        updateEventUser(q, update, clientId)
+//
+//    }
 
     private fun queryEventUser(q: Query, clientId: Long): Optional<EventUser> {
         val eventUser = mongoTemplate.findOne(q, EventUser::class.java, "${clientId}_eventUser")
@@ -89,19 +89,19 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
         mongoTemplate.updateFirst(q, update, "${clientId}_eventUser")
     }
 
-    override fun findUsersNotIn(ids: Set<String>, clientId: Long): List<String> {
-
-        //val project = Aggregation.project("_id")
-        val match = Aggregation.match(Criteria.where("_id").nin(ids.map { id -> ObjectId(id) }))
-        //val group = Aggregation.group("_id")
-        val project=Aggregation.project("_id")
-        val query = Aggregation.newAggregation( match, project)
-        val output = mongoTemplate.aggregate(query, "${clientId}_eventUser", Document::class.java)
-        if(output!=null)
-            return extractids(output)
-        else
-            return emptyList<String>()
-    }
+//    override fun findUsersNotIn(ids: Set<String>, clientId: Long): List<String> {
+//
+//        //val project = Aggregation.project("_id")
+//        val match = Aggregation.match(Criteria.where("_id").nin(ids.map { id -> ObjectId(id) }))
+//        //val group = Aggregation.group("_id")
+//        val project=Aggregation.project("_id")
+//        val query = Aggregation.newAggregation( match, project)
+//        val output = mongoTemplate.aggregate(query, "${clientId}_eventUser", Document::class.java)
+//        if(output!=null)
+//            return extractids(output)
+//        else
+//            return emptyList<String>()
+//    }
 
     override  fun testSegmentUsers( clientId: Long): List<String> {
         val query = Query.query(Criteria.where("testUser").`is`(true))
@@ -135,7 +135,7 @@ class EventUserCustomRepositoryImpl : EventUserCustomRepository {
         return emptyList()
     }
 
-    override fun findAll(clientId: Long): List<EventUser> {
-        return mongoTemplate.findAll(EventUser::class.java,"${clientId}_eventUser")
-    }
+//    override fun findAll(clientId: Long): List<EventUser> {
+//        return mongoTemplate.findAll(EventUser::class.java,"${clientId}_eventUser")
+//    }
 }

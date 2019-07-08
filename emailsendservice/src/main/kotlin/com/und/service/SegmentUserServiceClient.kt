@@ -15,9 +15,4 @@ interface SegmentUserServiceClient {
     @GetMapping(value = ["/segment/users/{segmentId}/{clientId}"], consumes = ["application/json"])
     fun users(@PathVariable("segmentId") segmentId: Long, @PathVariable("clientId") clientId: Long,  @RequestHeader("Authorization") token: String,@RequestParam("include")includeUsers:IncludeUsers,@RequestParam("fromCampaign")fromCampaign:String): List<EventUser>
 
-
-    @GetMapping(value = ["/report/funnel/winner/template"])
-    fun getWinnerTemplate(@RequestParam("campaignId") campaignId:Long,@RequestParam("clientId") clientId: Long,@RequestHeader("Authorization")token: String,@RequestParam("include") include:String):Long
-
-
 }

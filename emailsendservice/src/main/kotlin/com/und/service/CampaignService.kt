@@ -63,7 +63,7 @@ class CampaignService {
     private lateinit var buildCampaignMessage: BuildCampaignMessage
 
     @Autowired
-    private lateinit var segmentUserServiceClient: SegmentUserServiceClient
+    private lateinit var reportServiceFeignClient: ReportServiceFeignClient
 
     @Autowired
     private lateinit var eventUserRecordRepository: EventUserRecordRepository
@@ -172,7 +172,7 @@ class CampaignService {
 
     fun executeCampaignForAb(campaignId: Long, clientId: Long) {
         val token = userRepository.findSystemUser().key ?: throw java.lang.Exception("Not Able to get system token.")
-        val templateId = segmentUserServiceClient.getWinnerTemplate(campaignId, clientId, token, "ALL")
+        val templateId = reportServiceFeignClient.getWinnerTemplate(campaignId, clientId, token, "ALL")
         //TODo update winner template in jpa
         val campaign = findCampaign(campaignId, clientId)
         when (campaign.abCampaign?.runType) {
@@ -343,7 +343,7 @@ class CampaignService {
 
                     val token = userRepository.findSystemUser().key
                             ?: throw java.lang.Exception("Not Able to get system token.")
-                    val winnerTemplateId = segmentUserServiceClient.getWinnerTemplate(campaign.id!!, clientId, token, "ALL").toInt()
+                    val winnerTemplateId = reportServiceFeignClient.getWinnerTemplate(campaign.id!!, clientId, token, "ALL").toInt()
                     //Updating live campaign ab test status to completed
                     updateCampaignStatus(CampaignStatus.AB_COMPLETED, clientId, campaign.segmentationID ?: -1)
                     redisUtiltiyService.settingWinnerTemplateForThisCampaign("$clientId:${campaign.id}:winner", winnerTemplateId)

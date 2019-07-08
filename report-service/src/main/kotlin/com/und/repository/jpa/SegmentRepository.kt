@@ -8,13 +8,8 @@ import java.util.*
 @Repository
 interface SegmentRepository : JpaRepository<Segment, Long> {
 
-
-
-    fun findByClientID(clientId: Long): List<Segment>
-
     fun findByIdAndClientID(id: Long, clientId: Long): Optional<Segment>
 
-    fun findByClientIDAndType(clientId: Long, type: String): List<Segment>
 }
 
 

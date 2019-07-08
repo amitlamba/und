@@ -44,37 +44,37 @@ class EventCustomRepositoryImpl : EventCustomRepository {
         } ?: emptyList()
     }
 
-    override fun findEventById(id: String, clientId: Long): Optional<Event> {
-        val q = Query(Criteria.where("_id").`is`(id))
-        return queryEvent(q, clientId)
-    }
+//    override fun findEventById(id: String, clientId: Long): Optional<Event> {
+//        val q = Query(Criteria.where("_id").`is`(id))
+//        return queryEvent(q, clientId)
+//    }
+//
+//    override fun findEventsListById(id: String, clientId: Long): List<Event>{
+//        val q = Query(Criteria.where("userId").`is`(id))
+//        return queryEventsList(q, clientId)
+//    }
+//
+//    override fun findEventByObjectId(id: ObjectId, clientId: Long): Optional<Event> {
+//        val q=Query(Criteria.where("_id").`is`(id))
+//        val eventDetails = mongoTemplate.findOne(q, Event::class.java, "${clientId}_event")
+//        return if (eventDetails == null) {
+//            Optional.empty()
+//        } else {
+//            Optional.of(eventDetails)
+//        }
+//    }
 
-    override fun findEventsListById(id: String, clientId: Long): List<Event>{
-        val q = Query(Criteria.where("userId").`is`(id))
-        return queryEventsList(q, clientId)
-    }
-
-    override fun findEventByObjectId(id: ObjectId, clientId: Long): Optional<Event> {
-        val q=Query(Criteria.where("_id").`is`(id))
-        val eventDetails = mongoTemplate.findOne(q, Event::class.java, "${clientId}_event")
-        return if (eventDetails == null) {
-            Optional.empty()
-        } else {
-            Optional.of(eventDetails)
-        }
-    }
-
-    private fun queryEvent(q: Query, clientId: Long): Optional<Event> {
-        val eventDetails = mongoTemplate.findOne(q, Event::class.java, "${clientId}_event")
-        return if (eventDetails == null) {
-            Optional.empty()
-        } else {
-            Optional.of(eventDetails)
-        }
-    }
-
-    private fun queryEventsList(q: Query, clientId: Long): List<Event> {
-        val eventList = mongoTemplate.find(q, Event::class.java, "${clientId}_event")
-        return eventList
-    }
+//    private fun queryEvent(q: Query, clientId: Long): Optional<Event> {
+//        val eventDetails = mongoTemplate.findOne(q, Event::class.java, "${clientId}_event")
+//        return if (eventDetails == null) {
+//            Optional.empty()
+//        } else {
+//            Optional.of(eventDetails)
+//        }
+//    }
+//
+//    private fun queryEventsList(q: Query, clientId: Long): List<Event> {
+//        val eventList = mongoTemplate.find(q, Event::class.java, "${clientId}_event")
+//        return eventList
+//    }
 }

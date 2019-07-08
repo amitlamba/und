@@ -1,0 +1,10 @@
+spring:
+  cloud:
+    config:
+      uri: http://${CONFIG_IP}:${CONFIG_PORT}
+      enabled: true
+      name: report-service
+  application:
+    name: report-service
+encrypt:
+  key: ${ENCRYPT_KEY}
