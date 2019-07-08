@@ -17,8 +17,8 @@ class SegmentJobService {
     private lateinit var jobService:JobService
 
     @StreamListener("inSegmentScheduleJob")
-    fun processSegment(jobDescriptor: JobDescriptor):JobActionStatus{
-        return performAction(jobDescriptor,jobService::createJob)
+    fun processSegment(jobDescriptor: JobDescriptor){
+         performAction(jobDescriptor,jobService::createJob)
     }
 
     private fun performAction(jobDescriptor: JobDescriptor,function:(JobDescriptor) -> JobActionStatus):JobActionStatus{

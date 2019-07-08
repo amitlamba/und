@@ -9,6 +9,7 @@ import com.und.repository.mongo.SegmentMetadataRepository
 import com.und.repository.mongo.SegmentUsersRepository
 import com.und.web.model.Unit
 import com.und.web.model.*
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.messaging.support.MessageBuilder
@@ -37,6 +38,10 @@ class CreateMetadataService {
 
     @Autowired
     private lateinit var clientSettingsRepository:ClientSettingsRepository
+
+    companion object {
+        val logger = LoggerFactory.getLogger(CreateMetadataService::class.java)
+    }
 
     fun createSegmentMetadata(segment: Segment, segmentId: Long, clientId: Long, type: String): Metadata {
 
@@ -359,6 +364,7 @@ class CreateMetadataService {
      */
     @StreamListener("inSegment")
     fun segmentPostProcessing(jpaSegment: com.und.model.jpa.Segment){
+        logger.info("Computing the segment and creating metadata")
         val segment:Segment = buildWebSegmentWithFilters(jpaSegment) //building webSegment from jpa segment
         val timeZoneId = clientSettingsRepository.findByClientID(jpaSegment.clientID!!)?.timezone?:"UTC"
         var error:Boolean = false
@@ -367,8 +373,8 @@ class CreateMetadataService {
             val users = segmentService.segmentUserIds(segment,jpaSegment.clientID!!,IncludeUsers.ALL)
             val segmentUsers = SegmentUsers()
             with(segmentUsers){
-                this.segmentId =segmentId
-                this.clientId = clientId
+                this.segmentId =jpaSegment.id
+                this.clientId = jpaSegment.clientID
                 this.users = users.toSet()
             }
             segmentUsersRepository.save(segmentUsers)
@@ -396,6 +402,7 @@ class CreateMetadataService {
      */
     @StreamListener("inComputeSegment")
     fun computeSegment(computeSegment:ComputeSegment){
+        logger.info("Segment is scheduled for computing.")
         val metadata = metadataRepository.findById(computeSegment.segmentId)
         var error:Boolean = false
         var message:String? = null
@@ -419,6 +426,7 @@ class CreateMetadataService {
             var triggerInfo = TriggerInfo(it.nextTriggerPoint,scheduleDate.first,message,error)
             triggerInfo = updateTriggerInfo(triggerInfo,it,scheduleDate.second)
             metadata.triggerInfo = triggerInfo
+            logger.info("Next segment schedule date is ${scheduleDate.first}")
             val jobDescriptor = buildSegmentJobDescriptor(JobDescriptor.Action.CREATE,computeSegment.clientId!!, computeSegment.timeZoneId,computeSegment.segmentName?:"",computeSegment.segmentId!!,metadata.type,scheduleDate.first)
             scheduleSegmentJob(jobDescriptor)
         }

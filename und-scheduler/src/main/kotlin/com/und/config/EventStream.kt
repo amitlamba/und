@@ -31,5 +31,6 @@ interface EventStream {
     @Output("outComputeSegment")
     fun computeSegment():MessageChannel
 
-
+    @Input("inSegmentScheduleJob")
+    fun inSegmentScheduleJob():SubscribableChannel
 }

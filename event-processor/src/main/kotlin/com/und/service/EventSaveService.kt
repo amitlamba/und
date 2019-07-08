@@ -70,7 +70,6 @@ class EventSaveService {
         with(mongoEvent.geoDetails) {
             ip = event.ipAddress
             //FIXME find a way to update coordinates
-
             var lat = event.latitude
             var long = event.longitude
             if (lat != null && long != null)
