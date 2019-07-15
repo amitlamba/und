@@ -4,6 +4,7 @@ import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.whenever
 import com.und.config.CacheTemplateLoader
 import com.und.config.DatabaseTemplateLoader
+import com.und.email.service.EmailHelperService
 import com.und.model.jpa.Template
 import com.und.model.utils.Email
 import com.und.repository.jpa.TemplateRepository

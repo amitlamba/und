@@ -1,18 +1,12 @@
-package com.und.kafkalisterner
+package com.und.campaign.listener
 
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.und.config.EventStream
 import com.und.exception.EventUserNotFoundException
 import com.und.model.jpa.*
 import com.und.model.livesegment.LiveSegmentUser
 import com.und.model.mongo.EventUser
-import com.und.model.mongo.LiveSegmentTrack
 import com.und.model.redis.LiveSegmentCampaign
 import com.und.model.redis.LiveSegmentCampaignCache
-import com.und.model.utils.JobDescriptor
 import com.und.model.utils.TestCampaign
-import com.und.repository.mongo.EventUserRepository
-import com.und.repository.mongo.LiveSegmentTrackRepository
 import com.und.repository.redis.LiveSegmentCampaignRepository
 import com.und.service.CampaignService
 import com.und.service.TestCampaignService
@@ -26,9 +20,7 @@ import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.query.Criteria
 import org.springframework.data.mongodb.core.query.Query
-import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
-import java.time.LocalDate
 import java.time.LocalDateTime
 
 @Service
@@ -40,20 +32,20 @@ class CampaignListener {
     @Autowired
     private lateinit var testCampaignService: TestCampaignService
 
-    @Autowired
-    private lateinit var eventUserRepository: EventUserRepository
-
-    @Autowired
-    private lateinit var liveSegmentTrackRepository: LiveSegmentTrackRepository
+//    @Autowired
+//    private lateinit var eventUserRepository: EventUserRepository
+//
+//    @Autowired
+//    private lateinit var liveSegmentTrackRepository: LiveSegmentTrackRepository
 
     @Autowired
     private lateinit var mongoTemplate: MongoTemplate
 
-    @Autowired
-    private lateinit var eventStream: EventStream
-
-    @Autowired
-    private lateinit var objectMapper: ObjectMapper
+//    @Autowired
+//    private lateinit var eventStream: EventStream
+//
+//    @Autowired
+//    private lateinit var objectMapper: ObjectMapper
 
     @Autowired
     private lateinit var liveSegmentCampaignRepository:LiveSegmentCampaignRepository

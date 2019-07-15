@@ -6,6 +6,7 @@ import com.amazonaws.auth.BasicAWSCredentials
 import com.amazonaws.services.simpleemail.AmazonSimpleEmailServiceClientBuilder
 import com.amazonaws.services.simpleemail.model.*
 import com.amazonaws.services.sns.model.ThrottledException
+import com.und.email.service.EmailHelperService
 import com.und.exception.Connection
 import com.und.exception.EmailError
 import com.und.exception.EmailFailureException

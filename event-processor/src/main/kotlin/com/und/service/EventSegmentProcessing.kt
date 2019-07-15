@@ -61,7 +61,7 @@ class EventSegmentProcessing {
         sendForLiveProcessing(mongoEvent)
         val pastSegments = getMetadataOfLiveSegment(event.clientId, "past", false)
         pastSegments.forEach {
-            checkEventEffectOnSegment(mongoEvent, Metadata())
+            checkEventEffectOnSegment(mongoEvent, it )
         }
     }
 

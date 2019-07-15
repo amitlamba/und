@@ -44,17 +44,17 @@
 ////    100->25->13->5
 //// */
 ////
-////    @PreAuthorize("hasRole('ROLE_ADMIN')")
-////    @PostMapping("/funnel")
-////    fun funnel(@RequestBody(required = true) body:FunnelStepAndFilter,
-////               funnelFilter: FunnelReport.FunnelReportFilter): List<FunnelReport.FunnelStep> {
-////        if((funnelFilter.splitProperty?.isEmpty())?:true) funnelFilter.splitProperty=null
-////        funnelFilter.steps=body.steps
-////        funnelFilter.filters=body.filters
-////        //FIXME All user make more sense then known.
-////        return funnelReportService.funnel(funnelFilter,IncludeUsers.KNOWN)
-////    }
-////
+//    @PreAuthorize("hasRole('ROLE_ADMIN')")
+//    @PostMapping("/funnel")
+//    fun funnel(@RequestBody(required = true) body:FunnelStepAndFilter,
+//               funnelFilter: FunnelReport.FunnelReportFilter): List<FunnelReport.FunnelStep> {
+//        if((funnelFilter.splitProperty?.isEmpty())?:true) funnelFilter.splitProperty=null
+//        funnelFilter.steps=body.steps
+//        funnelFilter.filters=body.filters
+//        //FIXME All user make more sense then known.
+//        return funnelReportService.funnel(funnelFilter,IncludeUsers.KNOWN)
+//    }
+//
 //    @PreAuthorize("hasRole('ROLE_SYSTEM')")
 //    @GetMapping("/winner/template")
 //    fun winnerTemplate(@RequestParam("campaignId",required = true)campaignId:Long,@RequestParam("clientId",required = true)clientId:Long,@RequestParam("include",required = true)includeUsers: String):Long{

@@ -1,15 +1,13 @@
-package com.und.kafkalisterner
+package com.und.email.listener
 
 import com.und.exception.EmailFailureException
-import com.und.factory.EmailServiceProviderConnectionFactory
 import com.und.model.utils.Email
 import com.und.model.utils.EmailUpdate
-import com.und.service.EmailHelperService
-import com.und.service.EmailService
+import com.und.email.service.EmailHelperService
+import com.und.email.service.EmailService
 import com.und.utils.loggerFor
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.cloud.stream.annotation.StreamListener
-import org.springframework.kafka.listener.AbstractMessageListenerContainer
 import org.springframework.stereotype.Service
 
 @Service
@@ -22,8 +20,8 @@ class EmailListener {
     @Autowired
     private lateinit var emailHelperService: EmailHelperService
 
-    @Autowired
-    private lateinit var emailServiceProviderCredentialsFactory: EmailServiceProviderConnectionFactory
+//    @Autowired
+//    private lateinit var emailServiceProviderCredentialsFactory: EmailServiceProviderConnectionFactory
 
     companion object {
         val logger = loggerFor(EmailListener::class.java)

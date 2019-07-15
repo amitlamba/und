@@ -1,15 +1,12 @@
 package com.und.service
 
-import com.netflix.discovery.converters.Auto
 import com.und.common.utils.SmsServiceUtility
-import com.und.model.mongo.Event
+import com.und.email.service.EmailService
 import com.und.model.mongo.SmsStatus
 import com.und.model.utils.ServiceProviderCredentials
 import com.und.model.utils.Sms
 import com.und.model.utils.eventapi.Identity
 import com.und.report.service.AWSSmsLambdaInvoker
-import com.und.report.service.Response
-import com.und.report.service.SmsData
 import com.und.repository.jpa.security.UserRepository
 import com.und.utils.loggerFor
 import org.bson.types.ObjectId

@@ -1,6 +1,5 @@
-package com.und.service
+package com.und.email.service
 
-import com.netflix.discovery.converters.Auto
 import com.und.factory.EmailServiceProviderConnectionFactory
 import com.und.model.mongo.EmailStatus
 import com.und.model.utils.Email
@@ -9,12 +8,12 @@ import com.und.model.jpa.ServiceProviderCredentials
 import com.und.repository.jpa.ClientEmailSettingsRepository
 import com.und.repository.jpa.ServiceProviderCredentialsRepository
 import com.und.repository.mongo.EmailSentRepository
-import com.und.utils.loggerFor
+import com.und.service.ServiceProviderCredentialsService
+import com.und.service.TemplateContentCreationService
 import org.jsoup.Jsoup
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.cache.annotation.Cacheable
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
 import java.net.URLEncoder

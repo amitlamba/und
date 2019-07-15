@@ -1,5 +1,6 @@
 package com.und.common.utils
 
+import com.und.email.service.EmailService
 import com.und.model.utils.ServiceProviderCredentials
 import com.und.model.utils.Sms
 import com.und.report.service.AWSSmsLambdaInvoker

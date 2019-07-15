@@ -1,14 +1,12 @@
 package com.und.service
 
-import com.und.model.utils.Email
-import com.und.model.utils.EmailSMTPConfig
+import com.und.email.service.EmailHelperService
 import org.junit.Before
 import org.junit.Test
 import org.mockito.InjectMocks
 import org.mockito.MockitoAnnotations
 import org.springframework.test.util.ReflectionTestUtils
 import java.util.regex.Pattern
-import javax.mail.internet.InternetAddress
 
 class EmailSendServiceTest {
 

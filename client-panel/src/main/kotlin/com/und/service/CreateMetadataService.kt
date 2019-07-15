@@ -379,6 +379,7 @@ class CreateMetadataService {
             }
             segmentUsersRepository.save(segmentUsers)
         }catch (ex:Exception){
+            logger.error("Exception occurred ${ex.localizedMessage}")
             error = true
             message = ex.localizedMessage
         }
@@ -394,6 +395,7 @@ class CreateMetadataService {
             scheduleSegmentJob(jobDescriptor)
         }
         metadataRepository.save(metadata)
+        logger.debug("Metadata saved.")
 
     }
 
@@ -444,6 +446,7 @@ class CreateMetadataService {
         return websegment
     }
     fun scheduleSegmentJob(jobDescriptor:JobDescriptor){
+        logger.debug("Job scheduled for ${jobDescriptor.clientId}")
         eventStream.outSegmentScheduleJob().send(MessageBuilder.withPayload(jobDescriptor).build())
     }
     fun buildSegmentJobDescriptor(action:JobDescriptor.Action,clientId: Long,timeZoneId: ZoneId,segmentName:String,segmentId:Long,type:String,scheduleDate:LocalDateTime):JobDescriptor{

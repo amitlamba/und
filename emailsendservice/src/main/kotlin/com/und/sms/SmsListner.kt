@@ -1,4 +1,4 @@
-package com.und.kafkalisterner
+package com.und.sms
 
 import com.und.model.utils.Sms
 import com.und.service.SmsService

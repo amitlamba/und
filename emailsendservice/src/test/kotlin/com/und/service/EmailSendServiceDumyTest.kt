@@ -53,6 +53,7 @@ class EmailSendServiceDumyTest {
 
         session = testSession(email.clientID, emailSMTPConfig)
 
+        session.debug = true
         val transport = testTransport(email.clientID)
 
 
@@ -108,6 +109,16 @@ class EmailSendServiceDumyTest {
         return msg
     }
 
+    @Test
+    fun testSession(){
+        val session = testSession(1,emailSMTPConfig)
+        session.debug = true
+
+        val transport1 = session.getTransport("smtp")
+        val transport2 = session.getTransport("smtp")
+        print(session)
+    }
+
     private fun testSession(clientID: Long, emailSMTPConfig: EmailSMTPConfig): Session {
 
         session = createSMTPSession(emailSMTPConfig.PORT)
@@ -125,11 +136,12 @@ class EmailSendServiceDumyTest {
         props.put("mail.smtp.starttls.enable", true);
         props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
         props.put("mail.smtp.socketFactory.port", 465);
+        props.put("mail.debug.auth",true)
 //	        //sslException
         props.put("mail.smtp.quitwait", false)
 
         // Create a Session object to represent a mail session with the specified properties.
-        return Session.getDefaultInstance(props)
+        return Session.getInstance(props)
 
     }
 

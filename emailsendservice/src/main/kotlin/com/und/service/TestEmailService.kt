@@ -2,16 +2,13 @@ package com.und.service
 
 import com.und.common.utils.EmailServiceUtility
 import com.und.common.utils.ReplaceNullPropertyOfEventUser
-import com.und.model.mongo.EmailStatus
+import com.und.email.service.EmailHelperService
+import com.und.email.service.EmailService
 import com.und.model.utils.Email
-import com.und.model.utils.eventapi.Event
-import com.und.model.utils.eventapi.Identity
 import com.und.repository.jpa.ClientSettingsRepository
 import org.apache.commons.lang.StringUtils
-import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import org.springframework.ui.freemarker.FreeMarkerTemplateUtils
 import java.util.regex.Pattern
 
 @Service("testemailservice")
@@ -27,7 +24,7 @@ class TestEmailService:CommonEmailService {
     private lateinit var clientSettingsRepository:ClientSettingsRepository
 
     @Autowired
-    private lateinit var emailHelperService:EmailHelperService
+    private lateinit var emailHelperService: EmailHelperService
 
     @Autowired
     private lateinit var emailService: EmailService

@@ -1,4 +1,4 @@
-package com.und.kafkalisterner
+package com.und.fcmpush
 
 import com.und.model.utils.FcmMessage
 import com.und.service.FcmSendService

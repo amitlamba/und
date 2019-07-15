@@ -2,7 +2,7 @@ package com.und.factory
 
 import com.und.exception.EmailFailureException
 import com.und.model.utils.EmailSMTPConfig
-import com.und.service.EmailHelperService
+import com.und.email.service.EmailHelperService
 import com.und.service.ServiceProviderCredentialsService
 import com.und.utils.loggerFor
 import org.slf4j.Logger

@@ -62,7 +62,7 @@
 //    private lateinit var campaignRepository:CampaignRepository
 //
 //
-//    private fun funnel(funnelFilter: FunnelReport.FunnelReportFilter,includeUsers: IncludeUsers,clientId: Long?): List<FunnelReport.FunnelStep> {
+//    override fun funnel(funnelFilter: FunnelReport.FunnelReportFilter,includeUsers: IncludeUsers,clientId: Long?): List<FunnelReport.FunnelStep> {
 //        logger.debug("Funnel data for funnelFilter : $funnelFilter")
 //        val clientID = if(clientId==null) AuthenticationUtils.clientID else clientId
 //        val userIdentified = when(includeUsers){

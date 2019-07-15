@@ -1,11 +1,9 @@
-package com.und.service
+package com.und.email.service
 
-import com.netflix.discovery.converters.Auto
 import com.und.common.utils.EmailServiceUtility
 import com.und.common.utils.ReplaceNullPropertyOfEventUser
 import com.und.config.EventStream
 import com.und.exception.EmailError
-import com.und.exception.EmailFailureException
 import com.und.model.mongo.EmailStatus.NOT_SENT
 import com.und.model.mongo.EmailStatus.SENT
 import com.und.model.mongo.EventUser
@@ -15,6 +13,10 @@ import com.und.model.utils.eventapi.Identity
 import com.und.repository.jpa.ClientSettingsRepository
 import com.und.repository.jpa.EmailTemplateRepository
 import com.und.repository.jpa.security.UserRepository
+import com.und.service.CommonEmailService
+import com.und.service.EmailSendService
+import com.und.service.EventApiFeignClient
+import com.und.service.ServiceProviderCredentialsService
 import com.und.utils.loggerFor
 import org.apache.commons.lang.StringUtils
 import org.bson.types.ObjectId
@@ -28,14 +30,14 @@ import com.amazonaws.services.simpleemail.model.Message as SESMessage
 
 
 @Service("emailservice")
-class EmailService:CommonEmailService {
+class EmailService: CommonEmailService {
     companion object {
         protected val logger = loggerFor(EmailService::class.java)
     }
 
 
-    @Autowired
-    private lateinit var serviceProviderCredentialsService: ServiceProviderCredentialsService
+//    @Autowired
+//    private lateinit var serviceProviderCredentialsService: ServiceProviderCredentialsService
 
     @Autowired
     private lateinit var clientSettingsRepository: ClientSettingsRepository
@@ -43,8 +45,8 @@ class EmailService:CommonEmailService {
     @Autowired
     private lateinit var emailHelperService: EmailHelperService
 
-    @Autowired
-    private lateinit var emailSendService: EmailSendService
+//    @Autowired
+//    private lateinit var emailSendService: EmailSendService
 
     @Autowired
     private lateinit var emailTemplateRepository: EmailTemplateRepository
@@ -53,7 +55,7 @@ class EmailService:CommonEmailService {
     private lateinit var eventStream: EventStream
 
     @Autowired
-    private lateinit var eventApiFeignClient:EventApiFeignClient
+    private lateinit var eventApiFeignClient: EventApiFeignClient
 
     @Autowired
     private lateinit var userRepository:UserRepository
