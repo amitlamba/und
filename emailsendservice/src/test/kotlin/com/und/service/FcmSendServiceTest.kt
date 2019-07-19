@@ -1,14 +1,10 @@
 package com.und.service
 
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.fasterxml.jackson.module.kotlin.readValue
-import com.und.model.utils.fcm.FcmResponse
+import com.und.fcmpush.service.FcmSendService
+import com.und.fcmpush.service.TestMessage
 import org.junit.Ignore
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.junit4.SpringRunner
 
 //@RunWith(SpringRunner::class)
 //@SpringBootTest
@@ -47,11 +43,11 @@ class FcmSendServiceTest {
 
     @Test
     fun sendMessage(){
-        var fcmSendService=FcmSendService()
-        var fcmMessage=FcmSendService.FcmMessage()
+        var fcmSendService= FcmSendService()
+        var fcmMessage= FcmSendService.FcmMessage()
         fcmMessage.project_id="cloudmessaging-d2f78"
-        var message=TestMessage()
-        var m=FcmSendService.TestMessage1()
+        var message= TestMessage()
+        var m= FcmSendService.TestMessage1()
 //        message.token="APA91bFnYNQZj-d5iWVkzDc0xTFf27ag97mC14VxIFkO2kVrL2tYFsjvit_I6pCvMF_tVJGrS01lszCCg7BJPLmO_HuA1deRJtdloKN2nuMUXOz472-uCjw"
         message.token="eEpmrv70drA:APA91bH8uGOUHhTi5AFMJuMx7tQ49vnQkphMNryaXE9IMV47MVQ8FDyaz2sSztyeGTxSZtpI1kA7hii-MnvFzq1Nh6IpdT8bhfaprjscWLNJfAxO3Wz3wQmhtZDB6BiIX2llcaVdjiAx"
         var map=HashMap<String,String>()

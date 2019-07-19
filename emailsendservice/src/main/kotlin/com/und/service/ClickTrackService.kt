@@ -4,7 +4,7 @@ import com.und.model.mongo.ClickTrackEvent
 import com.und.model.mongo.EmailStatus
 import com.und.model.mongo.EmailStatusUpdate
 import com.und.repository.mongo.ClickTrackEventRepository
-import com.und.repository.mongo.EmailSentRepository
+import com.und.email.repository.mongo.EmailSentRepository
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.ZoneId

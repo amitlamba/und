@@ -3,7 +3,7 @@ package com.und.model.utils
 import com.amazonaws.regions.Regions
 import com.und.exception.EmailError
 import com.und.exception.EmailFailureException
-import com.und.factory.Security
+import com.und.email.factory.Security
 import com.und.model.jpa.Status
 import java.time.LocalDateTime
 
@@ -88,7 +88,7 @@ data class EmailSMTPConfig(
         var PORT: Int,
         var SMTP_USERNAME: String,
         var SMTP_PASSWORD: String,
-        var security:Security,
+        var security: Security,
         var CONFIGSET: String? = null
 ) {
     companion object {
@@ -97,7 +97,7 @@ data class EmailSMTPConfig(
             val port = serviceProviderCredentials.credentialsMap["port"]
             val username = serviceProviderCredentials.credentialsMap["username"]
             val password = serviceProviderCredentials.credentialsMap["password"]
-            val security = serviceProviderCredentials.credentialsMap["security"]?.let {security->Security.valueOf(security)}?:Security.STARTTLS
+            val security = serviceProviderCredentials.credentialsMap["security"]?.let {security-> Security.valueOf(security)}?: Security.STARTTLS
             return if (host == null || port == null || username == null || password == null) {
                 val error = EmailError()
                 with(error) {
@@ -120,6 +120,32 @@ data class EmailSMTPConfig(
             }
         }
     }
+}
+
+data class SendGridConfig(var serviceProviderCredentialsId: Long?,
+                    var clientID: Long,
+                    var sendGridApiKey:String){
+ companion object {
+     fun build(serviceProviderCredentials: ServiceProviderCredentials,clientEmailSettingId: Long?):SendGridConfig{
+         val sendGridKey = serviceProviderCredentials.credentialsMap["sendGridApiKey"]
+         return if (sendGridKey.isNullOrBlank()){
+             val error = EmailError()
+             with(error) {
+                 clientid = serviceProviderCredentials.clientID
+                 causeMessage = "SendGridKey not found in credentials"
+                 failedSettingId = clientEmailSettingId
+                 failureType = EmailError.FailureType.CONNECTION
+             }
+             throw EmailFailureException("Email settings are incorrect", error)
+         }else{
+             SendGridConfig(
+                     serviceProviderCredentials.id,
+                     serviceProviderCredentials.clientID,
+                     sendGridKey?:""
+             )
+         }
+     }
+ }
 }
 
 data class SmsSNSConfig(

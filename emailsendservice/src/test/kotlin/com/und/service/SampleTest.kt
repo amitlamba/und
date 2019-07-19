@@ -1,6 +1,7 @@
 package com.und.service
 
-import com.und.factory.Security
+import com.und.email.factory.Security
+import com.und.email.service.EmailSendService
 import com.und.model.utils.Email
 import com.und.model.utils.EmailSMTPConfig
 import org.junit.Test

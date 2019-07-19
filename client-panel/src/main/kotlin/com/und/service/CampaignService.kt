@@ -1,6 +1,8 @@
 package com.und.service
 
+import com.fasterxml.jackson.databind.JavaType
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.und.common.utils.loggerFor
 import com.und.config.EventStream
 import com.und.model.*
@@ -9,10 +11,7 @@ import com.und.model.jpa.*
 import com.und.model.jpa.Campaign
 import com.und.model.redis.LiveSegmentCampaign
 import com.und.model.redis.LiveSegmentCampaignCache
-import com.und.repository.jpa.CampaignAuditLogRepository
-import com.und.repository.jpa.CampaignRepository
-import com.und.repository.jpa.ClientSettingsEmailRepository
-import com.und.repository.jpa.CustomFromAddrAndSrpRepository
+import com.und.repository.jpa.*
 import com.und.repository.redis.LiveSegmentCampaignRepository
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.controller.exception.CustomException
@@ -81,6 +80,9 @@ class CampaignService {
 
     @Autowired
     private lateinit var liveSegmentCampaignRepository: LiveSegmentCampaignRepository
+
+    @Autowired
+    private lateinit var serviceProviderCredentialsRepository: ServiceProviderCredentialsRepository
 
     fun getCampaigns(): List<WebCampaign> {
         val campaigns = AuthenticationUtils.clientID?.let {
@@ -494,6 +496,12 @@ class CampaignService {
             }
             CampaignType.SMS -> {
                 val smscampaign = SmsCampaign()
+                val spcred = serviceProviderCredentialsRepository.findByIdAndClientID(campaign.serviceProviderId?:-1,campaign.clientID?:-1)
+                val fromUser = spcred?.let {
+                    val map = objectMapper.readValue<Map<String,String>>(it.credentialsMap)
+                    map["fromUser"]
+                }
+                campaign.fromUser = fromUser
                 smscampaign.appuserId = campaign.appuserID
                 smscampaign.clientID = campaign.clientID
                 smscampaign.templateId = webCampaign.templateID

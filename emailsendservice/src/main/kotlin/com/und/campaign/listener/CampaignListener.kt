@@ -7,9 +7,9 @@ import com.und.model.mongo.EventUser
 import com.und.model.redis.LiveSegmentCampaign
 import com.und.model.redis.LiveSegmentCampaignCache
 import com.und.model.utils.TestCampaign
-import com.und.repository.redis.LiveSegmentCampaignRepository
-import com.und.service.CampaignService
-import com.und.service.TestCampaignService
+import com.und.campaign.repository.redis.LiveSegmentCampaignRepository
+import com.und.campaign.service.CampaignService
+import com.und.campaign.service.TestCampaignService
 import com.und.utils.loggerFor
 import org.bson.types.ObjectId
 import org.slf4j.Logger
@@ -48,7 +48,7 @@ class CampaignListener {
 //    private lateinit var objectMapper: ObjectMapper
 
     @Autowired
-    private lateinit var liveSegmentCampaignRepository:LiveSegmentCampaignRepository
+    private lateinit var liveSegmentCampaignRepository: LiveSegmentCampaignRepository
 
     companion object {
         val logger: Logger = loggerFor(CampaignListener::class.java)

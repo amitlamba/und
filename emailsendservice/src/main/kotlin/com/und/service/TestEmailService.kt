@@ -1,6 +1,6 @@
 package com.und.service
 
-import com.und.common.utils.EmailServiceUtility
+import com.und.email.utility.EmailServiceUtility
 import com.und.common.utils.ReplaceNullPropertyOfEventUser
 import com.und.email.service.EmailHelperService
 import com.und.email.service.EmailService

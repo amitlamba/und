@@ -44,7 +44,8 @@ dependencies {
     )
     compile('com.google.api-client:google-api-client:1.25.0')
 
-
+    compile('com.sendgrid:sendgrid-java:4.4.1')
+    compile group: "com.twilio.sdk", name: "twilio", version: "7.40.1"
 
 }
 

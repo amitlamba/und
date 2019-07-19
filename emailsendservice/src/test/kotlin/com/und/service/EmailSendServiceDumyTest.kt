@@ -1,13 +1,11 @@
 package com.und.service
 
-import com.und.factory.Security
+import com.und.email.factory.Security
 import com.und.model.utils.Email
 import com.und.model.utils.EmailSMTPConfig
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.junit4.SpringRunner
 import java.util.*
 import javax.mail.*

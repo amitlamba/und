@@ -36,3 +36,14 @@ class ServiceProviderCredentials {
 //    set(value) {isDefault=value}
 
 }
+
+enum class ServiceProvider(val desc: String) {
+    SMTP("SMTP"),
+    AWS_SES_API("AWS - Simple Email Service (API)"),
+    AWS_SES_SMTP("AWS - Simple Email Service (SMTP)"),
+    AWS_SNS("AWS - Simple Notification Service"),
+    GOOGLE_FCM("Google - FCM"),
+    Twillio("Twillio"),
+    Exotel("Exotel"),
+    SendGrid("SendGrid")
+}

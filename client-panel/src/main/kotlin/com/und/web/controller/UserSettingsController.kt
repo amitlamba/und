@@ -66,8 +66,13 @@ class UserSettingsController {
         serviceProviderCredentials.clientID = clientID
         serviceProviderCredentials.serviceProviderType = ServiceProviderType.EMAIL_SERVICE_PROVIDER.desc
         //check credential are correct or not
+        //FIXME test connection method have implementation of smtp only for sendgrid and aws implement also
         try {
-            val success = userSettingsService.testConnection(serviceProviderCredentials)
+            val success = when(serviceProviderCredentials.serviceProvider){
+                ServiceProvider.SMTP.desc -> userSettingsService.testConnection(serviceProviderCredentials)
+                else -> true
+            }
+
             return if (success) {
                 userSettingsService.saveEmailServiceProvider(serviceProviderCredentials, Status.ACTIVE)
                 return ResponseEntity(HttpStatus.OK)

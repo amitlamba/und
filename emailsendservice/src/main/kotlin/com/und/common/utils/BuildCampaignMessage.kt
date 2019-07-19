@@ -12,7 +12,7 @@ import javax.mail.internet.InternetAddress
 
 @Component
 class BuildCampaignMessage {
-    fun buildSms(clientId: Long, campaign: Campaign, user: EventUser, smsCampaign: SmsCampaign, smsTemplate: EmailTemplate): Sms {
+    fun buildSms(clientId: Long, campaign: Campaign, user: EventUser, smsCampaign: SmsCampaign, smsTemplate: SmsTemplate): Sms {
         return Sms(
                 clientId,
                 campaign.fromUser,
@@ -59,9 +59,9 @@ class BuildCampaignMessage {
 
     fun buildTestCampaignSms(clientId: Long, campaign: WebCampaign, user: EventUser, sms: SmsTemplate): Sms {
         return Sms(
-                clientId,
-                campaign.fromUser,
-                user.identity.mobile,
+                clientID = clientId,
+                fromSmsAddress = campaign.fromUser,
+                toSmsAddresses = user.identity.mobile,
                 smsBody = sms.smsTemplateBody,
                 smsTemplateId =  0L,
                 smsTemplateName = "",

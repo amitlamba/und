@@ -1,13 +1,13 @@
 package com.und.email.service
 
-import com.und.factory.EmailServiceProviderConnectionFactory
+import com.und.email.factory.EmailServiceProviderConnectionFactory
 import com.und.model.mongo.EmailStatus
 import com.und.model.utils.Email
 import com.und.model.utils.EmailSMTPConfig
 import com.und.model.jpa.ServiceProviderCredentials
-import com.und.repository.jpa.ClientEmailSettingsRepository
-import com.und.repository.jpa.ServiceProviderCredentialsRepository
-import com.und.repository.mongo.EmailSentRepository
+import com.und.email.repository.jpa.ClientEmailSettingsRepository
+import com.und.email.repository.jpa.ServiceProviderCredentialsRepository
+import com.und.email.repository.mongo.EmailSentRepository
 import com.und.service.ServiceProviderCredentialsService
 import com.und.service.TemplateContentCreationService
 import org.jsoup.Jsoup
@@ -39,8 +39,8 @@ class EmailHelperService {
     @Autowired
     lateinit var serviceProviderCredentialsRepository: ServiceProviderCredentialsRepository
 
-    @Autowired
-    private lateinit var serviceProviderCredentialsService: ServiceProviderCredentialsService
+//    @Autowired
+//    private lateinit var serviceProviderCredentialsService: ServiceProviderCredentialsService
 
     @Value("\${und.url.event}")
     private lateinit var eventApiUrl: String
@@ -113,11 +113,11 @@ class EmailHelperService {
         return Pair(subject, body)
     }
 
-    fun session(clientId: Long, emailSMTPConfig: EmailSMTPConfig) = emailServiceProviderConnectionFactory.getSMTPSession(clientId, emailSMTPConfig)
+    fun session(clientId: Long, emailSMTPConfig: EmailSMTPConfig,clientEmailSettingId: Long) = emailServiceProviderConnectionFactory.getSMTPSession(clientId, emailSMTPConfig,clientEmailSettingId)
 
     fun transport(clientId: Long,clientEmailSettingId: Long) = emailServiceProviderConnectionFactory.getSMTPTransportConnection(clientId,clientEmailSettingId)
 
-    fun closeTransport(clientId: Long) = emailServiceProviderConnectionFactory.closeSMTPTransportConnection(clientId)
+    fun closeTransport(clientId: Long,clientEmailSettingId: Long) = emailServiceProviderConnectionFactory.closeSMTPTransportConnection(clientId,clientEmailSettingId)
 
 
     fun insertUnsubscribeLinkIfApplicable(content: String, unsubscribeLink: String, clientId: Long, mongoEmailId: String): String {

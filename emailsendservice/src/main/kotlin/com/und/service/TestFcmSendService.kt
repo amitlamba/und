@@ -4,6 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.und.config.EventStream
 import com.und.exception.FcmFailureException
+import com.und.fcmpush.feign.FcmFeignClient
+import com.und.fcmpush.service.FcmHelperService
+import com.und.fcmpush.service.FcmSendService
+import com.und.fcmpush.service.FcmService
 import com.und.model.utils.FcmMessage
 import com.und.repository.jpa.security.UserRepository
 import com.und.utils.loggerFor
@@ -12,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service("testfcmservice")
-class TestFcmSendService:FcmService {
+class TestFcmSendService: FcmService {
 
     companion object {
         protected val logger = loggerFor(FcmSendService::class.java)

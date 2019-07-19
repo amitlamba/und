@@ -2,11 +2,11 @@ package com.und.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.und.email.repository.jpa.ServiceProviderCredentialsRepository
 import com.und.email.service.EmailHelperService
 import com.und.model.jpa.*
 import com.und.model.jpa.ServiceProviderCredentials
 import com.und.model.utils.*
-import com.und.repository.jpa.ServiceProviderCredentialsRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import com.und.model.utils.ServiceProviderCredentials as WebServiceProviderCredentials
@@ -108,6 +108,7 @@ class ServiceProviderCredentialsService {
         GOOGLE_FCM("Google - FCM"),
         Twillio("Twillio"),
         Exotel("Exotel"),
+        SendGrid("SendGrid")
 
 
     }

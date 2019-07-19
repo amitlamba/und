@@ -1,6 +1,6 @@
 package com.und.exception
 
-import com.und.service.NotificationError
+import com.und.fcmpush.service.NotificationError
 
 class FcmFailureException:RuntimeException {
 
