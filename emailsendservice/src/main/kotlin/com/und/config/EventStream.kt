@@ -65,4 +65,32 @@ interface EventStream {
     @Input("receiveManualTriggerCampaign")
     fun runManualCampaign():SubscribableChannel
 
+    @Output("outTestEmail")
+    fun testEmailCampaign():MessageChannel
+    @Output("outTestSms")
+    fun testSmsCampaign():MessageChannel
+    @Output("outTestFcm")
+    fun testFcmCampaign():MessageChannel
+
+    @Input("inTestEmail")
+    fun inTestEmailCampaign():SubscribableChannel
+    @Input("inTestSms")
+    fun inTestSmsCampaign():SubscribableChannel
+    @Input("inTestFcm")
+    fun inTestFcmCampaign():SubscribableChannel
+
+    @Output("outEmailLiveCampaign")
+    fun outEmailLiveCampaign():MessageChannel
+    @Output("outSmsLiveCampaign")
+    fun outSmsLiveCampaign():MessageChannel
+    @Output("outFcmLiveCampaign")
+    fun outFcmLiveCampaign():MessageChannel
+
+    @Input("inEmailLiveCampaign")
+    fun inEmailLiveCampaign():SubscribableChannel
+    @Input("inSmsLiveCampaign")
+    fun inSmsLiveCampaign():SubscribableChannel
+    @Input("inFcmLiveCampaign")
+    fun inFcmLiveCampaign():SubscribableChannel
+
 }

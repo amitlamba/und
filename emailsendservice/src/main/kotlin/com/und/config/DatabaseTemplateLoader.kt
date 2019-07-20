@@ -1,7 +1,7 @@
 package com.und.config
 
+import com.und.email.repository.jpa.EmailTemplateRepository
 import com.und.model.utils.EmailTemplate
-import com.und.repository.jpa.EmailTemplateRepository
 import com.und.repository.jpa.TemplateRepository
 import com.und.repository.redis.TemplateCacheRepository
 import freemarker.cache.TemplateLoader

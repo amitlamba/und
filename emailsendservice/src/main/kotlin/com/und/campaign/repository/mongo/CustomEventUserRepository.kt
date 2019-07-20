@@ -4,6 +4,7 @@ import com.und.model.mongo.EventUser
 import com.und.model.utils.CampaignType
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Repository
+import java.util.*
 
 @Repository
 interface CustomEventUserRepository {
@@ -22,6 +23,7 @@ interface CustomEventUserRepository {
     fun findByAndroidFcmTokenIn(clientId: Long,token:Array<String>):List<EventUser>
     fun findByWebFcmTokenIn(clientId: Long,token:Array<String>):List<EventUser>
 
+    fun findByIdAndClientId(id:ObjectId,clientId: Long):EventUser?
     fun findAllById(clientId: Long,ids:List<ObjectId>):List<EventUser>
 
     fun findAllByIdAndByCampaignType(clientId: Long, ids: List<ObjectId>, type:CampaignType):List<EventUser>

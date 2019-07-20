@@ -2,18 +2,16 @@ package com.und.campaign.service
 
 import com.und.campaign.repository.mongo.EventUserRepository
 import com.und.common.utils.BuildCampaignMessage
-import com.und.fcmpush.service.FcmService
+import com.und.config.EventStream
 import com.und.model.jpa.AndroidTemplate
 import com.und.model.jpa.SmsTemplate
 import com.und.model.jpa.WebPushTemplate
 import com.und.model.mongo.EventUser
 import com.und.model.utils.*
-import com.und.service.CommonEmailService
-import com.und.service.CommonSmsService
 import com.und.service.SegmentService
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
 import java.lang.Exception
 
@@ -29,19 +27,10 @@ class TestCampaignService {
     lateinit var buildCampaignMessage:BuildCampaignMessage
 
     @Autowired
-    @Qualifier("testemailservice")
-    lateinit var commonEmailService: CommonEmailService
-
-    @Autowired
-    @Qualifier("testsmsservice")
-    lateinit var commonSmsService: CommonSmsService
-
-    @Autowired
-    @Qualifier("testfcmservice")
-    lateinit var fcmService : FcmService
-
-    @Autowired
     lateinit var eventUserRepository: EventUserRepository
+
+    @Autowired
+    private lateinit var eventStream: EventStream
 
     fun executeTestCampaign(testCampaign:TestCampaign){
         logger.info("Test campaign is received for client ${testCampaign.clientId}")
@@ -126,14 +115,16 @@ class TestCampaignService {
         if (user.communication?.email==null || user.communication?.email?.dnd == true)
             return //Local lambda return
         val email=buildCampaignMessage.buildTestCampaignEmail(clientId,campaign,user,emailTemplate)
-        commonEmailService.sendEmail(email)
+        eventStream.testEmailCampaign().send(MessageBuilder.withPayload(email).build())
+        //commonEmailService.sendEmail(email)
     }
 
     private fun executeSmsCampaignForUser(campaign: Campaign, user: EventUser, clientId: Long,smsTemplate: SmsTemplate){
         if (user.communication?.mobile==null || user.communication?.mobile?.dnd == true)
             return //Local lambda return
         val sms=buildCampaignMessage.buildTestCampaignSms(clientId,campaign,user,smsTemplate)
-        commonSmsService.sendSms(sms)
+        eventStream.testSmsCampaign().send(MessageBuilder.withPayload(sms).build())
+        //commonSmsService.sendSms(sms)
     }
 
     private fun executeAndroidCampaignForUser(campaign: Campaign, user: EventUser, clientId: Long,androidTemplate: AndroidTemplate){
@@ -141,7 +132,8 @@ class TestCampaignService {
             return //Local lambda return
         val jpaCampaign=buildCampaign(campaign,clientId)
         val message=buildCampaignMessage.buildTestCampaignAndroidFcmMessage(clientId,user,jpaCampaign,androidTemplate)
-        fcmService.sendMessage(message)
+        eventStream.testFcmCampaign().send(MessageBuilder.withPayload(message).build())
+        //fcmService.sendMessage(message)
     }
 
     private fun executeWebCampaignForUser(campaign: Campaign, user: EventUser, clientId: Long,webPushTemplate: WebPushTemplate){
@@ -150,7 +142,8 @@ class TestCampaignService {
         val jpaCampaign=buildCampaign(campaign,clientId)
         user.identity.webFcmToken?.forEach {
             val message=buildCampaignMessage.buildTestCampaignWebFcmMessage(clientId,it,jpaCampaign,user,webPushTemplate)
-            fcmService.sendMessage(message)
+            eventStream.testFcmCampaign().send(MessageBuilder.withPayload(message).build())
+            //fcmService.sendMessage(message)
         }
     }
 

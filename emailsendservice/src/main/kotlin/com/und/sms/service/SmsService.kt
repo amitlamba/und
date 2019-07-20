@@ -1,13 +1,20 @@
 package com.und.sms.service
 
+import com.und.campaign.repository.jpa.CampaignRepository
+import com.und.campaign.repository.jpa.EmailCampaignRepository
+import com.und.campaign.repository.jpa.SmsCampaignRepository
+import com.und.campaign.repository.mongo.EventUserRepository
+import com.und.common.utils.BuildCampaignMessage
 import com.und.sms.utility.SmsServiceUtility
 import com.und.email.service.EmailService
 import com.und.model.mongo.SmsStatus
+import com.und.model.utils.LiveCampaignTriggerInfo
 import com.und.model.utils.Sms
 import com.und.model.utils.eventapi.Identity
 import com.und.repository.jpa.security.UserRepository
 import com.und.service.CommonSmsService
 import com.und.service.EventApiFeignClient
+import com.und.sms.repository.jpa.SmsTemplateRepository
 import com.und.utils.loggerFor
 import org.bson.types.ObjectId
 import org.slf4j.Logger
@@ -22,12 +29,24 @@ class SmsService : CommonSmsService {
         protected val logger: Logger = loggerFor(EmailService::class.java)
     }
 
-
-//    @Autowired
-//    private lateinit var serviceProviderCredentialsService: ServiceProviderCredentialsService
-
     @Autowired
     private lateinit var smsHelperService: SmsHelperService
+
+    @Autowired
+    private lateinit var buildCampaignMessage: BuildCampaignMessage
+
+    @Autowired
+    private lateinit var campaignRepository: CampaignRepository
+
+    @Autowired
+    private lateinit var smsCampaignRepository: SmsCampaignRepository
+
+    @Autowired
+    private lateinit var smsTemplateRepository : SmsTemplateRepository
+
+    @Autowired
+    private lateinit var eventUserRepository: EventUserRepository
+
 
 //    @Autowired
 //    private lateinit var smsLambdaInvoker: AWSSmsLambdaInvoker
@@ -41,6 +60,16 @@ class SmsService : CommonSmsService {
     @Autowired
     private lateinit var smsServiceUtility: SmsServiceUtility
 
+    fun sendLiveSms(infoModel:LiveCampaignTriggerInfo){
+        val campaign = campaignRepository.findById(infoModel.campaignId).get()
+        val smsCampaign = smsCampaignRepository.findByCampaignId(infoModel.campaignId).get()
+        val smsTemplate = smsTemplateRepository.findByIdAndClientID(infoModel.templateId,infoModel.clientId)
+        val user = eventUserRepository.findByIdAndClientId(ObjectId(infoModel.userId),infoModel.clientId)
+        user?.let {
+           smsTemplate?.let {  val sms = buildCampaignMessage.buildSms(infoModel.clientId,campaign,user,smsCampaign,smsTemplate)
+               sendSms(sms) }
+        }
+    }
 
     override fun sendSms(sms: Sms) {
         val mongoSmsId = ObjectId().toString()
@@ -69,6 +98,7 @@ class SmsService : CommonSmsService {
 
         } else {
             smsHelperService.updateSmsStatus(mongoSmsId, SmsStatus.ERROR, smsToSend.clientID, response.message)
+            throw Exception("400, invalid input values for sms")
         }
     }
 

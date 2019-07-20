@@ -4,6 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
+import com.und.campaign.repository.jpa.AndroidCampaignRepository
+import com.und.campaign.repository.jpa.CampaignRepository
+import com.und.campaign.repository.jpa.EmailCampaignRepository
+import com.und.campaign.repository.jpa.WebPushCampaignRepository
+import com.und.campaign.repository.mongo.EventUserRepository
+import com.und.common.utils.BuildCampaignMessage
 import com.und.config.EventStream
 import com.und.exception.FcmFailureException
 import com.und.model.mongo.FcmMessageStatus
@@ -12,6 +18,8 @@ import com.und.model.utils.eventapi.Identity
 import com.und.repository.jpa.security.UserRepository
 import com.und.service.EventApiFeignClient
 import com.und.fcmpush.feign.FcmFeignClient
+import com.und.model.utils.CampaignType
+import com.und.model.utils.LiveCampaignTriggerInfo
 import com.und.utils.loggerFor
 import feign.FeignException
 import org.bson.types.ObjectId
@@ -40,6 +48,24 @@ class FcmSendService: FcmService {
     private lateinit var eventApiFeignClient: EventApiFeignClient
     @Autowired
     private lateinit var userRepository:UserRepository
+
+    @Autowired
+    private lateinit var buildCampaignMessage: BuildCampaignMessage
+
+    @Autowired
+    private lateinit var campaignRepository: CampaignRepository
+
+    @Autowired
+    private lateinit var emailCampaignRepository: EmailCampaignRepository
+
+    @Autowired
+    private lateinit var eventUserRepository: EventUserRepository
+
+    @Autowired
+    private lateinit var androidCampaignRepository: AndroidCampaignRepository
+
+    @Autowired
+    private lateinit var webPushCampaignRepository: WebPushCampaignRepository
 
     fun sendMessage(clientId: Long, authKey: String, message: FcmMessage): ResponseEntity<Any?>? {
         try {
@@ -221,6 +247,30 @@ class FcmSendService: FcmService {
     }
      */
 
+    override fun sendLiveMessage(infoModel: LiveCampaignTriggerInfo) {
+        val campaign = campaignRepository.findById(infoModel.campaignId).get()
+        val user = eventUserRepository.findByIdAndClientId(ObjectId(infoModel.userId),infoModel.clientId)
+        user?.let {
+            when(campaign.campaignType){
+                CampaignType.PUSH_WEB.name -> {
+                    val androidCampaign = androidCampaignRepository.findByCampaignId(infoModel.campaignId).get()
+                    val message = buildCampaignMessage.buildAndroidFcmMessage(infoModel.clientId,androidCampaign,user,campaign,infoModel.templateId)
+                    sendMessage(message)
+                }
+                CampaignType.PUSH_WEB.name -> {
+                    val webPushCampaign = webPushCampaignRepository.findByCampaignId(infoModel.campaignId).get()
+                            user.identity.webFcmToken?.forEach {
+                                val message = buildCampaignMessage.buildWebFcmMessage(infoModel.clientId,webPushCampaign,it,campaign,user,infoModel.templateId)
+                                sendMessage(message)
+                            }
+                }
+                else -> {
+                    logger.info("wrong campaign type (${campaign.campaignType}) expected only web and android.")
+                }
+            }
+
+        }
+    }
     override fun sendMessage(message: com.und.model.utils.FcmMessage) {
         var fcmMessageToSend = buildFcmMessage(message)
         var credential = service.getCredentials(message.clientId,message.serviceProviderId,message.type)
@@ -236,7 +286,8 @@ class FcmSendService: FcmService {
                 serviceProvider=null
                 serviceProviderId=null
             }
-            toFcmFailureKafka(notificationError)
+            throw FcmFailureException(notificationError)
+            //toFcmFailureKafka(notificationError)
         } else {
             var mongoFcmId = ObjectId().toString()
             fcmMessageToSend.data.put("mongo_id", mongoFcmId)
@@ -287,7 +338,8 @@ class FcmSendService: FcmService {
                     serviceProviderId=credential.id
                     serviceProvider=credential.name
                 }
-                toFcmFailureKafka(notificationError)
+                throw FcmFailureException(notificationError)
+                //toFcmFailureKafka(notificationError)
             } catch (ex: FcmFailureException) {
                 service.updateStatus(mongoFcmId, FcmMessageStatus.ERROR, message.clientId,message.type)
                 logger.info("Fcm Failure Exception with status code $statusCode message ${ex.message}")
@@ -303,7 +355,8 @@ class FcmSendService: FcmService {
                     serviceProviderId=credential.id
                     serviceProvider=credential.name
                 }
-                toFcmFailureKafka(notificationError)
+                throw FcmFailureException(notificationError)
+                //toFcmFailureKafka(notificationError)
 
             } catch (ex: Exception) {
                 service.updateStatus(mongoFcmId, FcmMessageStatus.ERROR, message.clientId,message.type)
@@ -320,7 +373,8 @@ class FcmSendService: FcmService {
                     serviceProviderId=credential.id
                     serviceProvider=credential.name
                 }
-                toFcmFailureKafka(notificationError)
+                throw FcmFailureException(notificationError)
+                //toFcmFailureKafka(notificationError)
             }
 
         }
@@ -352,10 +406,6 @@ class FcmSendService: FcmService {
 
     private fun parseStringToMap(jsonString: String): HashMap<String, String> {
         return objectMapper.readValue(jsonString)
-    }
-
-    private fun toFcmFailureKafka(notificationError: NotificationError) {
-        eventStream.fcmFailureEventSend().send(MessageBuilder.withPayload(notificationError).build())
     }
 }
 

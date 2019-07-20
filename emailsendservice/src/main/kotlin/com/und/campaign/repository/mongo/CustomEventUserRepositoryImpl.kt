@@ -13,6 +13,11 @@ class CustomEventUserRepositoryImpl: CustomEventUserRepository {
     @Autowired
     private lateinit var mongoTemplate: MongoTemplate
 
+
+    override fun findByIdAndClientId(id: ObjectId, clientId: Long): EventUser? {
+        val query=Query().addCriteria(Criteria.where("clientId").`is`(clientId).and("_id").`is`(id))
+        return mongoTemplate.findOne(query,EventUser::class.java,"${clientId}_eventUser")
+    }
     override fun findByEmail(clientId: Long, email: String): List<EventUser> {
         val query=Query().addCriteria(Criteria.where("clientId").`is`(clientId).and("identity.email").`is`(email))
         return mongoTemplate.find(query,EventUser::class.java,"${clientId}_eventUser")

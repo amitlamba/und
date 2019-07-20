@@ -2,10 +2,10 @@ package com.und.service
 
 import com.und.email.utility.EmailServiceUtility
 import com.und.common.utils.ReplaceNullPropertyOfEventUser
+import com.und.email.repository.jpa.ClientSettingsRepository
 import com.und.email.service.EmailHelperService
 import com.und.email.service.EmailService
 import com.und.model.utils.Email
-import com.und.repository.jpa.ClientSettingsRepository
 import org.apache.commons.lang.StringUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -21,7 +21,7 @@ class TestEmailService:CommonEmailService {
     private lateinit var templateContentCreationService: TemplateContentCreationService
 
     @Autowired
-    private lateinit var clientSettingsRepository:ClientSettingsRepository
+    private lateinit var clientSettingsRepository: ClientSettingsRepository
 
     @Autowired
     private lateinit var emailHelperService: EmailHelperService

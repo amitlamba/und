@@ -1,5 +1,10 @@
 package com.und.email.service
 
+import com.netflix.discovery.converters.Auto
+import com.und.campaign.repository.jpa.CampaignRepository
+import com.und.campaign.repository.jpa.EmailCampaignRepository
+import com.und.campaign.repository.mongo.EventUserRepository
+import com.und.common.utils.BuildCampaignMessage
 import com.und.email.utility.EmailServiceUtility
 import com.und.common.utils.ReplaceNullPropertyOfEventUser
 import com.und.config.EventStream
@@ -62,6 +67,18 @@ class EmailService: CommonEmailService {
 
     @Autowired
     private lateinit var emailServiceUtility: EmailServiceUtility
+
+    @Autowired
+    private lateinit var buildCampaignMessage: BuildCampaignMessage
+
+    @Autowired
+    private lateinit var campaignRepository:CampaignRepository
+
+    @Autowired
+    private lateinit var emailCampaignRepository: EmailCampaignRepository
+
+    @Autowired
+    private lateinit var eventUserRepository:EventUserRepository
 
 
 //    fun sendEmailBySMTP(emailSMTPConfig: EmailSMTPConfig, email: Email) {
@@ -227,6 +244,17 @@ class EmailService: CommonEmailService {
 
         //var emailToSend=emailHelperService.updateSubjectAndBody(email)
         emailServiceUtility.sendEmailWithoutTracking(email)
+    }
+
+    fun sendLiveEmail(infoModel:LiveCampaignTriggerInfo){
+        val campaign = campaignRepository.findById(infoModel.campaignId).get()
+        val emailCampaign = emailCampaignRepository.findByCampaignId(infoModel.campaignId).get()
+        val emailTemplate = emailTemplateRepository.findByIdAndClientID(infoModel.templateId,infoModel.clientId).get()
+        val user = eventUserRepository.findByIdAndClientId(ObjectId(infoModel.userId),infoModel.clientId)
+        user?.let {
+            val email = buildCampaignMessage.buildEmail(infoModel.clientId,campaign,user,emailCampaign,emailTemplate)
+            sendEmail(email)
+        }
     }
 
     fun toKafkaEmailError(emailError: EmailError): Boolean =

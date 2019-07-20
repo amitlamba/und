@@ -16,9 +16,12 @@ import com.und.model.utils.*
 import com.und.repository.jpa.security.UserRepository
 import com.und.campaign.repository.mongo.EventUserRecordRepository
 import com.und.campaign.feign.ReportServiceFeignClient
+import com.und.campaign.model.CampaignTriggerInfo
 import com.und.campaign.model.CampaignUsers
+import com.und.campaign.model.ExecutionStatus
 import com.und.campaign.repository.mongo.CampaignUsersRepository
 import com.und.campaign.repository.mongo.EventUserRepository
+import com.und.repository.jpa.CampaignTriggerInfoRepository
 import com.und.service.SegmentService
 import com.und.sms.repository.jpa.SmsTemplateRepository
 import com.und.utils.loggerFor
@@ -97,6 +100,9 @@ class CampaignService {
     @Autowired
     private lateinit var campaignUsersRepository: CampaignUsersRepository
 
+    @Autowired
+    private lateinit var campaignTriggerInfoRepository: CampaignTriggerInfoRepository
+
 //    @Value(value = "\${und.system.email.setting.id}")
 //    var clientEmailSettingId:Long?=null
 
@@ -109,7 +115,7 @@ class CampaignService {
         //if client not trigger manual campaign then next time(if its multidate) we automatically send winner template.
         val campaign = findCampaign(campaignId, clientId)
         val executionId = ObjectId().toString()
-        //TODO save campaaign triffer info
+        updateCampaignTriggerInfo(campaignId, executionId, clientId)
         when {
             (campaign.typeOfCampaign == TypeOfCampaign.AB_TEST) && (campaign.variants?.find { it.winner == true } == null) -> {
                 runAbTest(executionId,campaign, clientId)
@@ -128,61 +134,104 @@ class CampaignService {
         }
     }
 
-    fun sendUsersInGroupToMessagingService(executionId: String,campaignId: Long, segmentId: Long, clientId: Long, campaignType: String, users: List<String>,groupStart:Int=1) {
+    private fun updateCampaignTriggerInfo(campaignId: Long, executionId: String, clientId: Long) {
+        logger.info("updating campaign trigger info for clientId $clientId executionId $executionId campaignId $campaignId")
+        val campaignTriggerInfo = campaignTriggerInfoRepository.findById(campaignId)
+        if (campaignTriggerInfo.isPresent) {
+            val cTInfo = campaignTriggerInfo.get()
+            val newExecutionStatus = ExecutionStatus()
+            with(newExecutionStatus) {
+                this.executionId = executionId
+                this.executionTime = LocalDateTime.now(ZoneId.systemDefault())
+            }
+            val executionStatus = cTInfo.executionStatus.toMutableList()
+            executionStatus.add(newExecutionStatus)
+            cTInfo.executionStatus = executionStatus
+            campaignTriggerInfoRepository.save(cTInfo)
+        } else {
+            val newCampaignTriggerInfo = CampaignTriggerInfo()
+            val executionStatus = ExecutionStatus()
+            with(executionStatus) {
+                this.executionId = executionId
+                this.executionTime = LocalDateTime.now(ZoneId.systemDefault())
+            }
+            with(newCampaignTriggerInfo) {
+                this.campaignId = campaignId
+                this.clientId = clientId
+                this.error = false
+                this.executionStatus = listOf(executionStatus)
+            }
+            campaignTriggerInfoRepository.save(newCampaignTriggerInfo)
+        }
+    }
+
+    fun sendUsersInGroupToMessagingService(executionId: String,campaignId: Long, segmentId: Long, clientId: Long, campaignType: String, users: List<String>) {
         val noOfUsers = users.size
         val noOfGroups = noOfUsers.div(paginateNumber)
         //if(noOfUsers.rem(paginateNumber)>0) noOfGroups.inc()
         //TODO here max lose of 9 users
-        for (groupId in groupStart..noOfGroups step 1) {
+        for (groupId in 1..noOfGroups step 1) {
             val groupUser = users.subList(fromIndex = ((groupId - 1) * 10), toIndex = (groupId * 10))
             saveCampaignUsers(executionId,campaignId, clientId, segmentId, groupId.toLong(), groupUser, campaignType)
         }
     }
 
     fun sendToEmailMessagingService(infoModel: CampaignUsers) {
-        //TODO send to kafka
+        eventStream.emailEventSend().send(MessageBuilder.withPayload(infoModel).build())
     }
 
     fun sendToSmsMessagingService(infoModel: CampaignUsers) {
-        //TODO send to kafka
+        eventStream.smsEventSend().send(MessageBuilder.withPayload(infoModel).build())
     }
 
     fun sendToFcmMessagingService(infoModel: CampaignUsers) {
-        //TODO send to kafka
+        eventStream.fcmEventSend().send(MessageBuilder.withPayload(infoModel).build())
     }
 
-    fun saveCampaignUsers(executionId:String,campaignId: Long, clientId: Long, segmentId: Long, groupId: Long, users: List<String>, campaignType: String, templateId: Long? = null) {
+    fun saveCampaignUsers(executionId:String,campaignId: Long, clientId: Long, segmentId: Long, groupId: Long,
+                          users: List<String>, campaignType: String, templateId: Long? = null,
+                          usersPartOfAbTest:Boolean = false,isAbType:Boolean = false) {
+        logger.debug("saving and sending campaign users in group for groupId ${groupId} campaignId ${campaignId} clientId ${clientId} " +
+                "templateId ${templateId} campaignType $campaignType isAbType $isAbType ")
         val userDoc = users.map {
             Document("userId", it)
         }
-        //sending to messaging service
-        val newTemplateId = when (CampaignType.valueOf(campaignType)) {
+        val campaignUsers = when (CampaignType.valueOf(campaignType)) {
             CampaignType.EMAIL -> {
-                if (templateId == null) {
+                val newTemplateId =if (templateId == null) {
                     val emailCampaign = emailCampaignRepository.findByCampaignId(campaignId)
                     if (!emailCampaign.isPresent) throw Exception("Email Campaign not exist for clientId ${clientId} and campaignId $campaignId}")
                     emailCampaign.get().templateId
                 } else {
                     templateId
                 }
+                val campaignUsers = CampaignUsers(campaignId, clientId, executionId, segmentId, groupId, newTemplateId!!, userDoc,usersPartOfAbTest,isAbType)
+                sendToEmailMessagingService(campaignUsers)
+                campaignUsers
             }
             CampaignType.PUSH_WEB -> {
-                if (templateId == null) {
+                val newTemplateId =if (templateId == null) {
                     val webCampaign = webCampaignRepository.findByCampaignId(campaignId)
                     if (!webCampaign.isPresent) throw Exception("Web Campaign not exist for clientId ${clientId} and campaignId ${campaignId}")
                     webCampaign.get().templateId
                 } else {
                     templateId
                 }
+                val campaignUsers = CampaignUsers(campaignId, clientId, executionId, segmentId, groupId, newTemplateId!!, userDoc,usersPartOfAbTest,isAbType)
+                sendToFcmMessagingService(campaignUsers)
+                campaignUsers
             }
             CampaignType.PUSH_ANDROID -> {
-                if (templateId == null) {
+                val newTemplateId =if (templateId == null) {
                     val androidCampaign = androidCampaignRepository.findByCampaignId(campaignId)
                     if (!androidCampaign.isPresent) throw Exception("Android Campaign not exist for clientId ${clientId} and campaignId ${campaignId}")
                     androidCampaign.get().templateId
                 } else {
                     templateId
                 }
+                val campaignUsers = CampaignUsers(campaignId, clientId, executionId, segmentId, groupId, newTemplateId!!, userDoc,usersPartOfAbTest,isAbType)
+                sendToFcmMessagingService(campaignUsers)
+                campaignUsers
 
             }
             CampaignType.PUSH_IOS -> {
@@ -190,20 +239,23 @@ class CampaignService {
                 return
             }
             CampaignType.SMS -> {
-                if (templateId == null) {
+                val newTemplateId = if (templateId == null) {
                     val smsCampaign = smsCampaignRepository.findByCampaignId(campaignId)
                     if (!smsCampaign.isPresent) throw Exception("Sms Campaign not exist for clientId ${clientId} and campaignId ${campaignId}")
                     smsCampaign.get().templateId
                 } else {
                     templateId
                 }
-
+                val campaignUsers = CampaignUsers(campaignId, clientId, executionId, segmentId, groupId, newTemplateId!!, userDoc,usersPartOfAbTest,isAbType)
+                sendToSmsMessagingService(campaignUsers)
+                campaignUsers
             }
         }
-        val campaignUsers = CampaignUsers(campaignId, clientId, executionId, segmentId, groupId, newTemplateId!!, userDoc)
-        sendToEmailMessagingService(campaignUsers)
-        //save in mongo
+
         campaignUsersRepository.save(campaignUsers)
+        logger.info("saved and send campaign users for campaign $campaignId , client $clientId , group $groupId")
+        logger.debug("saving and sending campaign users in group for groupId ${groupId} campaignId ${campaignId} " +
+                "clientId ${clientId} templateId ${templateId} campaignType $campaignType isAbType $isAbType")
     }
 
     fun usersInSegment(segmentId: Long, clientId: Long): Set<String> {
@@ -241,6 +293,7 @@ class CampaignService {
     }
 
     private fun multiTemplateCampaign(executionId: String,campaign: Campaign, clientId: Long): List<ObjectId> {
+        logger.info("sending ab test for clientId $clientId campaignId ${campaign.id} executionId $executionId ")
         val unsentUserIds = mutableListOf<ObjectId>()
         var listOfVariant = campaign.variants
         //val totalUsers = getUsersData(campaign.segmentationID!!, clientId, campaign.campaignType)
@@ -269,9 +322,13 @@ class CampaignService {
             start = startIndex
         }
         listOfGroups.shuffle()
+        logger.debug("campaign Ab test clientId $clientId campaignid ${campaign.id} totalUsers $totalUsers " +
+                "total sample users $sampleUserSize groups ${listOfGroups.size} unsentUser startIndex $startIndex ....")
         listOfGroups.forEach {
             val groupUser = totalUsers.subList(fromIndex = ((it.first - 1) * 10), toIndex = (it.first * 10))
-            saveCampaignUsers(executionId,campaign.id!!, clientId, campaign.segmentationID!!, it.first.toLong(), groupUser, campaign.campaignType, it.second.toLong())
+            logger.debug(".... campaign Ab test clientId $clientId campaignid ${campaign.id} groupId ${it.first} " +
+                    "fromIndex ${((it.first - 1) * 10)} toIndex ${(it.first * 10)}")
+            saveCampaignUsers(executionId,campaign.id!!, clientId, campaign.segmentationID!!, it.first.toLong(), groupUser, campaign.campaignType, it.second.toLong(),true,true)
         }
         totalUsers.listIterator(((startIndex - 1) * 10) + 1).forEach {
             unsentUserIds.add(ObjectId(it))
@@ -331,16 +388,44 @@ class CampaignService {
     }
 
     private fun executeRestOfCampaign(campaignId: Long, clientId: Long, campaign: Campaign, templateId: Long?) {
+        logger.info("executing rest of campaign for clientId $clientId campaignId $campaignId")
         val ids = eventUserRecordRepository.findById("$campaignId$clientId")
         ids.ifPresent {
-            //find last group id
-            val usersData = eventUserRepository.findAllById(clientId, ids.get().usersId)
-            usersData.forEach { user ->
-                executeCampaignForUser(campaign, user, clientId, templateId)
+            val campaignTriggerInfo = campaignTriggerInfoRepository.findById(campaignId)
+            if(campaignTriggerInfo.isPresent){
+                val executionId = getLastExecutionId(campaignTriggerInfo.get())
+                logger.debug(""" campaign trigger info for clientId $clientId campaignId $campaignId
+                    ${campaignTriggerInfo.get()} and last execution id is $executionId ....
+                """.trimMargin())
+                val campaignUsers = campaignUsersRepository.findByClientIdAndCampaignIdAndExecutionId(clientId,campaignId,executionId)
+                val groupEndIndex = campaignUsers.size
+                val noOfUsers = it.usersId.size
+                val noOfGroups = noOfUsers.div(paginateNumber)
+                //if(noOfUsers.rem(paginateNumber)>0) noOfGroups.inc()
+                //TODO here max lose of 9 users
+                logger.debug(".... group take part in ab test $groupEndIndex rest of users $noOfUsers totalgroup ${groupEndIndex+noOfGroups} ")
+                for (groupId in groupEndIndex+1..groupEndIndex+noOfGroups step 1) {
+                    val groupUser = it.usersId.subList(fromIndex = ((groupId - 1) * 10), toIndex = (groupId * 10)).map { it.toHexString() }
+                    saveCampaignUsers(executionId,campaignId, clientId, campaign.segmentationID!!, groupId.toLong(), groupUser, campaign.campaignType,templateId = templateId,isAbType = true)
+                }
             }
+
+//            val usersData = eventUserRepository.findAllById(clientId, ids.get().usersId)
+//            usersData.forEach { user ->
+//                executeCampaignForUser(campaign, user, clientId, templateId)
+//            }
+
         }
-        //we are deleting the reset of users when campaign execute successfully for them.
+        logger.info("deleting rest of users for clientId $clientId campaignId $campaignId")
         eventUserRecordRepository.deleteById("$campaignId$clientId")
+    }
+
+    fun getLastExecutionId(campaignTriggerInfo: CampaignTriggerInfo):String{
+        var executionStatus = campaignTriggerInfo.executionStatus
+        executionStatus = executionStatus.sortedWith( Comparator { obj1, obj2 ->
+            obj1.executionTime.compareTo(obj2.executionTime)
+        })
+        return executionStatus.last().executionId
     }
 
 
@@ -516,31 +601,39 @@ class CampaignService {
             if (campaign.campaignType == "EMAIL") {
                 if (user.communication?.email == null || user.communication?.email?.dnd == true)
                     return //Local lambda return
-                val email: Email = email(clientId, campaign, user, templateId)
-                toKafka(email)
+                eventStream.outEmailLiveCampaign().
+                        send(MessageBuilder.withPayload(LiveCampaignTriggerInfo(campaign.id!!,clientId,user.id!!,templateId!!)).build())
+//                val email: Email = email(clientId, campaign, user, templateId)
+//                toKafka(email)
             }
             //check mode of communication is sms
             if (campaign.campaignType == "SMS") {
 
                 if (user.communication?.mobile == null || user.communication?.mobile?.dnd == true)
                     return //Local lambda return
-                val sms: Sms = sms(clientId, campaign, user, templateId)
-                toKafka(sms)
+                eventStream.outSmsLiveCampaign().
+                        send(MessageBuilder.withPayload(LiveCampaignTriggerInfo(campaign.id!!,clientId,user.id!!,templateId!!)).build())
+//                val sms: Sms = sms(clientId, campaign, user, templateId)
+//                toKafka(sms)
             }
             //                check mode of communication is mobile push
             if (campaign.campaignType == "PUSH_ANDROID") {
                 if (user.communication?.android == null || user.communication?.android?.dnd == true)
                     return //Local lambda return
-                val notification = fcmAndroidMessage(clientId, campaign, user, templateId)
-                toKafka(notification)
+                eventStream.outFcmLiveCampaign().
+                        send(MessageBuilder.withPayload(LiveCampaignTriggerInfo(campaign.id!!,clientId,user.id!!,templateId!!)).build())
+//                val notification = fcmAndroidMessage(clientId, campaign, user, templateId)
+//                toKafka(notification)
             }
             if (campaign.campaignType == "PUSH_WEB") {
                 if (user.communication?.webpush == null || user.communication?.webpush?.dnd == true)
                     return //Local lambda return
-                user.identity.webFcmToken?.forEach {
-                    val notification = fcmWebMessage(clientId, campaign, user, it, templateId)
-                    toKafka(notification)
-                }
+                eventStream.outFcmLiveCampaign().
+                        send(MessageBuilder.withPayload(LiveCampaignTriggerInfo(campaign.id!!,clientId,user.id!!,templateId!!)).build())
+//                user.identity.webFcmToken?.forEach {
+//                    val notification = fcmWebMessage(clientId, campaign, user, it, templateId)
+//                    toKafka(notification)
+//                }
             }
             if (campaign.campaignType == "PUSH_IOS") {
                 if (user.communication?.ios == null || user.communication?.ios?.dnd == true)
