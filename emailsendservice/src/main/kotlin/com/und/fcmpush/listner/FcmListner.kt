@@ -10,6 +10,7 @@ import com.und.campaign.repository.mongo.EventUserRepository
 import com.und.common.utils.BuildCampaignMessage
 import com.und.config.EventStream
 import com.und.exception.FcmFailureException
+import com.und.fcmpush.service.FcmSendService
 import com.und.model.utils.FcmMessage
 import com.und.fcmpush.service.FcmService
 import com.und.fcmpush.service.NotificationError
@@ -33,11 +34,11 @@ import java.time.ZoneId
 class FcmListner {
 
     @Autowired
-    private lateinit var fcmSendService: FcmService
+    private lateinit var fcmSendService: FcmSendService
 
     @Autowired
     @Qualifier("testfcmservice")
-    lateinit var fcmService : FcmService
+    lateinit var fcmTestService : FcmService
 
     @Autowired
     private lateinit var buildCampaignMessage: BuildCampaignMessage
@@ -155,11 +156,11 @@ class FcmListner {
     }
     @StreamListener("inTestFcm")
     fun sendTestFcmMessage(message: FcmMessage){
-        fcmService.sendMessage(message)
+        fcmTestService.sendMessage(message)
     }
 
     @StreamListener("inFcmLiveCampaign")
     fun inFcmLiveCampaign(infoModel:LiveCampaignTriggerInfo){
-        fcmService.sendLiveMessage(infoModel)
+        fcmSendService.sendLiveMessage(infoModel)
     }
 }

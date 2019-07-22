@@ -247,7 +247,7 @@ class FcmSendService: FcmService {
     }
      */
 
-    override fun sendLiveMessage(infoModel: LiveCampaignTriggerInfo) {
+     fun sendLiveMessage(infoModel: LiveCampaignTriggerInfo) {
         val campaign = campaignRepository.findById(infoModel.campaignId).get()
         val user = eventUserRepository.findByIdAndClientId(ObjectId(infoModel.userId),infoModel.clientId)
         user?.let {

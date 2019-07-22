@@ -8,5 +8,4 @@ import org.springframework.stereotype.Service
 interface FcmService {
 
     fun sendMessage(message: FcmMessage)
-    fun sendLiveMessage(infoModel:LiveCampaignTriggerInfo)
 }

@@ -1,15 +1,17 @@
 package com.und.campaign.listener
 
+import com.und.campaign.repository.redis.LiveSegmentCampaignRepository
+import com.und.campaign.service.CampaignService
+import com.und.campaign.service.TestCampaignService
 import com.und.exception.EventUserNotFoundException
-import com.und.model.jpa.*
+import com.und.model.jpa.Campaign
+import com.und.model.jpa.CampaignStatus
+import com.und.model.jpa.TypeOfCampaign
 import com.und.model.livesegment.LiveSegmentUser
 import com.und.model.mongo.EventUser
 import com.und.model.redis.LiveSegmentCampaign
 import com.und.model.redis.LiveSegmentCampaignCache
 import com.und.model.utils.TestCampaign
-import com.und.campaign.repository.redis.LiveSegmentCampaignRepository
-import com.und.campaign.service.CampaignService
-import com.und.campaign.service.TestCampaignService
 import com.und.utils.loggerFor
 import org.bson.types.ObjectId
 import org.slf4j.Logger

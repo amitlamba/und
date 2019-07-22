@@ -59,11 +59,11 @@ class SmsSendService {
 
 
     fun sendTwillioSms(smsData: TwillioSmsData):Response{
-
-       Twilio.init(smsData.username, smsData.password)
-        var message  = Message.creator(PhoneNumber(smsData.to),PhoneNumber(smsData.from),smsData.body).create()
-        Response(status = 0,message = "")
-
-        return message.sid
+        Twilio.init(smsData.username, smsData.password)
+        val message  = Message.creator(PhoneNumber(smsData.to),PhoneNumber(smsData.from),smsData.body).create()
+        return when(message.status){
+            Message.Status.FAILED -> Response(message.errorCode,message.errorMessage)
+            else -> Response(200,"Message Successfull with id ${message.sid}")
+        }
     }
 }
