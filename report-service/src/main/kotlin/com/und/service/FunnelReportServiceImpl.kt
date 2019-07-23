@@ -72,7 +72,7 @@ class FunnelReportServiceImpl : FunnelReportService {
 
         return clientID?.let {
 
-            val tz = userSettingsService.getTimeZone()
+            val tz = userSettingsService.getTimeZoneByClientId(it)
             val aggregation = if (funnelFilter.segmentid == allUser) {
                 buildAggregationAllUsers(funnelFilter, clientID, tz,userIdentified)
             } else {

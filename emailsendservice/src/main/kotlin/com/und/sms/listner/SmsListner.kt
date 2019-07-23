@@ -58,8 +58,9 @@ class SmsListner {
     @StreamListener("smsEventReceive")
     fun sendSmsCampaign(campaignUsers: CampaignUsers) {
         //smsService.sendSms(sms)
-        //check error in campaign triggerinfo
         val campaignTriggerInfo = campaignTriggerInfoRepository.findById(campaignUsers.campaignId)
+        logger.debug("Sending sms for clientId ${campaignUsers.clientId} campaignId ${campaignUsers.campaignId} groupId " +
+                "${campaignUsers.groupId} executionId ${campaignUsers.executionId}")
         if(campaignTriggerInfo.isPresent && !campaignTriggerInfo.get().error) {
             val clientId = campaignUsers.clientId
             val campaignId = campaignUsers.campaignId
@@ -79,20 +80,19 @@ class SmsListner {
                                 CampaignUserStatus.UNDELIVERED -> {
                                     try {
                                         smsService.sendSms(sms)
-                                        updateCampaignUserDocument(null, campaignUsers)
                                     } catch (ex: Exception) {
+                                        //TODO pause campaign make a feign call
                                         campaignTriggerInfoRepository.updateErrorStatus(campaignId,true)
                                         updateCampaignUserDocument(index, campaignUsers)
+                                        logger.info("Error occurred during sending sms for clientId ${campaignUsers.clientId}" +
+                                                "campaignId ${campaignUsers.campaignId} groupId ${campaignUsers.groupId} error is ${ex.localizedMessage}")
                                         return@forEachIndexed
                                     }
                                 }
-                                else -> {
-
-                                }
                             }
                         }
-
                     }
+                    updateCampaignUserDocument(null, campaignUsers)
                 }
                 GroupStatus.UNDELIVERED -> {
                     campaignUsers.users.forEachIndexed { index, value ->
@@ -102,17 +102,22 @@ class SmsListner {
                             val sms = buildCampaignMessage.buildSms(clientId = clientId, campaign = campaign, user = eventUser, smsCampaign = smsCampaign, smsTemplate = smsTemplate)
                             try {
                                 smsService.sendSms(sms)
-                                updateCampaignUserDocument(null, campaignUsers)
                             } catch (ex: Exception) {
+                                //TODO pause campaign make a feign call
                                 campaignTriggerInfoRepository.updateErrorStatus(campaignId,true)
+                                logger.info("Error occurred during sending sms for clientId ${campaignUsers.clientId}" +
+                                        "campaignId ${campaignUsers.campaignId} groupId ${campaignUsers.groupId} error is ${ex.localizedMessage}")
                                 updateCampaignUserDocument(index, campaignUsers)
-                                // emailService.toKafkaEmailError(ex.error)
                                 return@forEachIndexed
                             }
                         }
                     }
+                    updateCampaignUserDocument(null, campaignUsers)
                 }
             }
+        }else{
+            logger.debug("Skipped (due to error) sending sms for clientId ${campaignUsers.clientId} campaignId ${campaignUsers.campaignId} groupId " +
+                    "${campaignUsers.groupId} executionId ${campaignUsers.executionId}")
         }
     }
     fun updateCampaignUserDocument(errorPosition:Int?,campaignUsers: CampaignUsers){
@@ -135,11 +140,14 @@ class SmsListner {
 
     @StreamListener("inTestSms")
     fun sendTestSms(sms:Sms){
+        logger.info("Sending sms for test campaign clientId ${sms.clientID}")
         commonSmsService.sendSms(sms)
     }
 
     @StreamListener("inSmsLiveCampaign")
     fun inSmsLiveCampaign(infoModel:LiveCampaignTriggerInfo){
+        logger.debug("sending sms for live campaign clientId ${infoModel.clientId} campaignId ${infoModel.campaignId} " +
+                "templateId ${infoModel.templateId}")
         smsService.sendLiveSms(infoModel)
     }
 

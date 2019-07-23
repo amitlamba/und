@@ -38,9 +38,6 @@ class EmailListener {
     @Autowired
     private lateinit var emailHelperService: EmailHelperService
 
-//    @Autowired
-//    private lateinit var emailServiceProviderCredentialsFactory: EmailServiceProviderConnectionFactory
-
     @Autowired
     private lateinit var buildCampaignMessage: BuildCampaignMessage
 
@@ -58,6 +55,7 @@ class EmailListener {
     @Autowired
     @Qualifier("testemailservice")
     lateinit var commonEmailService: CommonEmailService
+
     @Autowired
     private lateinit var campaignTriggerInfoRepository: CampaignTriggerInfoRepository
 
@@ -67,8 +65,9 @@ class EmailListener {
 
     @StreamListener("emailEventReceive")
     fun sendEmailCampaign(campaignUsers: CampaignUsers) {
-        //check error in campaign triggerinfo
         val campaignTriggerInfo = campaignTriggerInfoRepository.findById(campaignUsers.campaignId)
+        logger.debug("Sending email for clientId ${campaignUsers.clientId} campaignId ${campaignUsers.campaignId} groupId " +
+                "${campaignUsers.groupId} executionId ${campaignUsers.executionId}")
         if(campaignTriggerInfo.isPresent && !campaignTriggerInfo.get().error) {
             val clientId = campaignUsers.clientId
             val campaignId = campaignUsers.campaignId
@@ -88,21 +87,20 @@ class EmailListener {
                                 CampaignUserStatus.UNDELIVERED -> {
                                     try {
                                         sendEmail(email)
-                                        updateCampaignUserDocument(null, campaignUsers)
                                     } catch (ex: EmailFailureException) {
                                         campaignTriggerInfoRepository.updateErrorStatus(campaignId, true)
                                         updateCampaignUserDocument(index, campaignUsers)
+                                        //TODO pause campaign make a feign call
                                         emailService.toKafkaEmailError(ex.error)
+                                        logger.info("Error occurred during sending email.groupId ${campaignUsers.groupId} error is  ${ex.error.causeMessage}")
                                         return@forEachIndexed
                                     }
-                                }
-                                else -> {
-
                                 }
                             }
                         }
 
                     }
+                    updateCampaignUserDocument(null, campaignUsers)
                 }
                 GroupStatus.UNDELIVERED -> {
                     campaignUsers.users.forEachIndexed { index, value ->
@@ -112,17 +110,25 @@ class EmailListener {
                             val email = buildCampaignMessage.buildEmail(clientId = clientId, campaign = campaign, user = eventUser, emailCampaign = emailCampaign, emailTemplate = emailTemplate)
                             try {
                                 sendEmail(email)
-                                updateCampaignUserDocument(null, campaignUsers)
                             } catch (ex: EmailFailureException) {
                                 campaignTriggerInfoRepository.updateErrorStatus(campaignId, true)
                                 updateCampaignUserDocument(index, campaignUsers)
+                                //TODO pause campaign make a feign call
                                 emailService.toKafkaEmailError(ex.error)
+                                logger.info("Error occurred during sending email. groupId ${campaignUsers.groupId} error is ${ex.error.causeMessage}")
                                 return@forEachIndexed
                             }
                         }
                     }
+                    updateCampaignUserDocument(null, campaignUsers)
+                }
+                else -> {
+
                 }
             }
+        }else{
+            logger.debug("Skipped (due to error) sending email for clientId ${campaignUsers.clientId} campaignId ${campaignUsers.campaignId} groupId " +
+                    "${campaignUsers.groupId} executionId ${campaignUsers.executionId}")
         }
     }
     fun updateCampaignUserDocument(errorPosition:Int?,campaignUsers: CampaignUsers){
@@ -188,11 +194,14 @@ class EmailListener {
 
     @StreamListener("inTestEmail")
     fun sendTestEmail(email:Email){
+        logger.info("sending test email.")
         commonEmailService.sendEmail(email)
     }
 
     @StreamListener("inEmailLiveCampaign")
     fun inEmailLiveCampaign(infoModel:LiveCampaignTriggerInfo){
+        logger.debug("sending email for live campaign clientId ${infoModel.clientId} campaignId ${infoModel.campaignId} " +
+                "templateId ${infoModel.templateId}")
         emailService.sendLiveEmail(infoModel)
     }
 }

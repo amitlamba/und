@@ -1,6 +1,5 @@
 package com.und.campaign.model
 
-import com.sun.org.apache.xpath.internal.operations.Bool
 import com.und.sms.listner.GroupStatus
 import org.bson.Document
 import java.time.LocalDateTime

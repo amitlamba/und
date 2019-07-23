@@ -46,8 +46,6 @@ class CampaignService {
     @Autowired
     private lateinit var campaignRepository: CampaignRepository
     @Autowired
-    private lateinit var objectMapper: ObjectMapper
-    @Autowired
     private lateinit var segmentService: SegmentService
     @Autowired
     private lateinit var emailCampaignRepository: EmailCampaignRepository
@@ -63,9 +61,6 @@ class CampaignService {
     private lateinit var emailTemplateRepository: EmailTemplateRepository
     @Autowired
     private lateinit var eventStream: EventStream
-
-    @Autowired
-    private lateinit var eventUserRepository: EventUserRepository
 
     @Autowired
     private lateinit var clientSettingsRepository: ClientSettingsRepository
@@ -163,6 +158,7 @@ class CampaignService {
             }
             campaignTriggerInfoRepository.save(newCampaignTriggerInfo)
         }
+        logger.info("updating campaign trigger info for clientId $clientId executionId $executionId campaignId $campaignId is successful.")
     }
 
     fun sendUsersInGroupToMessagingService(executionId: String,campaignId: Long, segmentId: Long, clientId: Long, campaignType: String, users: List<String>) {
@@ -188,6 +184,9 @@ class CampaignService {
         eventStream.fcmEventSend().send(MessageBuilder.withPayload(infoModel).build())
     }
 
+    /**
+     * This function save and send the users in group to messaging service.
+     */
     fun saveCampaignUsers(executionId:String,campaignId: Long, clientId: Long, segmentId: Long, groupId: Long,
                           users: List<String>, campaignType: String, templateId: Long? = null,
                           usersPartOfAbTest:Boolean = false,isAbType:Boolean = false) {
@@ -339,7 +338,6 @@ class CampaignService {
     fun executeCampaignForAb(campaignId: Long, clientId: Long) {
         val token = userRepository.findSystemUser().key ?: throw java.lang.Exception("Not Able to get system token.")
         val templateId = reportServiceFeignClient.getWinnerTemplate(campaignId, clientId, token, "ALL")
-        //TODo update winner template in jpa
         val campaign = findCampaign(campaignId, clientId)
         when (campaign.abCampaign?.runType) {
             RunType.AUTO -> {
@@ -382,7 +380,6 @@ class CampaignService {
         val variant = campaign.variants?.find {
             it.winner
         }
-        //todo if there is no variant then don't send.
         variant?: throw Exception("No winner variant is selected for client ${clientId} and campaignId ${campaignId}")
         executeRestOfCampaign(campaignId, clientId, campaign, variant.templateId?.toLong())
     }
@@ -420,7 +417,7 @@ class CampaignService {
         eventUserRecordRepository.deleteById("$campaignId$clientId")
     }
 
-    fun getLastExecutionId(campaignTriggerInfo: CampaignTriggerInfo):String{
+    private fun getLastExecutionId(campaignTriggerInfo: CampaignTriggerInfo):String{
         var executionStatus = campaignTriggerInfo.executionStatus
         executionStatus = executionStatus.sortedWith( Comparator { obj1, obj2 ->
             obj1.executionTime.compareTo(obj2.executionTime)

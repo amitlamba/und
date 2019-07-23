@@ -34,20 +34,8 @@ class CampaignListener {
     @Autowired
     private lateinit var testCampaignService: TestCampaignService
 
-//    @Autowired
-//    private lateinit var eventUserRepository: EventUserRepository
-//
-//    @Autowired
-//    private lateinit var liveSegmentTrackRepository: LiveSegmentTrackRepository
-
     @Autowired
     private lateinit var mongoTemplate: MongoTemplate
-
-//    @Autowired
-//    private lateinit var eventStream: EventStream
-//
-//    @Autowired
-//    private lateinit var objectMapper: ObjectMapper
 
     @Autowired
     private lateinit var liveSegmentCampaignRepository: LiveSegmentCampaignRepository

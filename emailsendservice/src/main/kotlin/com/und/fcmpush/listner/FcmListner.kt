@@ -20,6 +20,7 @@ import com.und.model.utils.CampaignType
 import com.und.model.utils.LiveCampaignTriggerInfo
 import com.und.repository.jpa.CampaignTriggerInfoRepository
 import com.und.sms.listner.GroupStatus
+import com.und.utils.loggerFor
 import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
@@ -59,11 +60,17 @@ class FcmListner {
     @Autowired
     private lateinit var eventStream:EventStream
 
+    companion object {
+        val logger = loggerFor(FcmListner::class.java)
+    }
+
+
     //TODO make reties 0
     @StreamListener("fcmEventReceive")
     fun sendMessage(campaignUsers: CampaignUsers) {
-        //check error in campaign triggerinfo
         val campaignTriggerInfo = campaignTriggerInfoRepository.findById(campaignUsers.campaignId)
+        logger.debug("Sending fcm message for clientId ${campaignUsers.clientId} campaignId ${campaignUsers.campaignId} groupId " +
+                "${campaignUsers.groupId} executionId ${campaignUsers.executionId}")
         if(campaignTriggerInfo.isPresent && !campaignTriggerInfo.get().error) {
             val clientId = campaignUsers.clientId
             val campaignId = campaignUsers.campaignId
@@ -80,21 +87,21 @@ class FcmListner {
                                 CampaignUserStatus.UNDELIVERED -> {
                                     try {
                                         sendCampaignMessage(campaign, templateId, it)
-                                        updateCampaignUserDocument(null, campaignUsers)
                                     } catch (ex: FcmFailureException) {
+                                        //TODO pause campaign make a feign call
                                         campaignTriggerInfoRepository.updateErrorStatus(campaignId,true)
                                         updateCampaignUserDocument(index, campaignUsers)
+                                        logger.info("Error occured during sending fcm message for clientId ${campaignUsers.clientId}" +
+                                                "campaignId ${campaignUsers.campaignId} groupId ${campaignUsers.groupId} error is ${ex.error.message}")
                                         toFcmFailureKafka(ex.error)
                                         return@forEachIndexed
                                     }
-                                }
-                                else -> {
-
                                 }
                             }
                         }
 
                     }
+                    updateCampaignUserDocument(null, campaignUsers)
                 }
                 GroupStatus.UNDELIVERED -> {
                     campaignUsers.users.forEachIndexed { index, value ->
@@ -105,15 +112,22 @@ class FcmListner {
                                 sendCampaignMessage(campaign, templateId, it)
                                 updateCampaignUserDocument(null, campaignUsers)
                             } catch (ex: FcmFailureException) {
+                                //TODO pause campaign make a feign call
                                 campaignTriggerInfoRepository.updateErrorStatus(campaignId,true)
                                 updateCampaignUserDocument(index, campaignUsers)
                                 toFcmFailureKafka(ex.error)
+                                logger.info("Error occured during sending fcm message for clientId ${campaignUsers.clientId}" +
+                                        "campaignId ${campaignUsers.campaignId} groupId ${campaignUsers.groupId} error is ${ex.error.message}")
                                 return@forEachIndexed
                             }
                         }
                     }
+                    updateCampaignUserDocument(null, campaignUsers)
                 }
             }
+        }else{
+            logger.debug("Skipped (due to error) sending fcm message for clientId ${campaignUsers.clientId} campaignId ${campaignUsers.campaignId} groupId " +
+                    "${campaignUsers.groupId} executionId ${campaignUsers.executionId}")
         }
     }
     fun updateCampaignUserDocument(errorPosition:Int?,campaignUsers: CampaignUsers){
@@ -156,11 +170,14 @@ class FcmListner {
     }
     @StreamListener("inTestFcm")
     fun sendTestFcmMessage(message: FcmMessage){
+        logger.info("sending fcm test campaign for client ${message.clientId}.")
         fcmTestService.sendMessage(message)
     }
 
     @StreamListener("inFcmLiveCampaign")
     fun inFcmLiveCampaign(infoModel:LiveCampaignTriggerInfo){
+        logger.debug("sending fcm message for live campaign clientId ${infoModel.clientId} campaignId ${infoModel.campaignId} " +
+                "templateId ${infoModel.templateId}")
         fcmSendService.sendLiveMessage(infoModel)
     }
 }
