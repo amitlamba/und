@@ -1,7 +1,6 @@
 package com.und.service
 
 
-import com.sun.org.apache.xpath.internal.operations.Bool
 import com.und.config.StreamClass
 import com.und.exception.EventNotFoundException
 import com.und.model.*

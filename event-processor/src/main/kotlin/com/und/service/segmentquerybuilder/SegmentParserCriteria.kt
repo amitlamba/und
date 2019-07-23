@@ -1,6 +1,5 @@
 package com.und.service.segmentquerybuilder
 
-import com.sun.org.apache.xpath.internal.operations.Bool
 import com.und.model.*
 import com.und.model.Unit
 import com.und.utils.DateUtils

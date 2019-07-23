@@ -15,14 +15,12 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.fasterxml.jackson.databind.node.ArrayNode
 import com.fasterxml.jackson.databind.node.BooleanNode
 import com.fasterxml.jackson.databind.node.TextNode
-import com.sun.org.apache.xpath.internal.operations.Bool
 import com.und.model.*
 import com.und.model.Unit
 import com.und.service.SegmentCriteriaGroup
 import org.springframework.data.mongodb.core.mapping.Document
 import java.time.LocalDateTime
 import java.time.ZoneId
-import javax.xml.soap.Text
 
 /*
 * if a segment contain after,relative operator in any of did and did not then it will never end.
