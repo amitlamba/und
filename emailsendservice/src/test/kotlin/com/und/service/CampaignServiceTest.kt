@@ -1,10 +1,9 @@
 package com.und.service
 
-import com.und.repository.jpa.CampaignRepository
+import com.und.campaign.repository.jpa.CampaignRepository
 import org.junit.Before
 import org.junit.Test
 
-import org.junit.Assert.*
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
@@ -17,7 +16,7 @@ import org.springframework.test.context.junit4.SpringRunner
 class CampaignServiceTest {
 
     @Autowired
-    lateinit var campaignRepository:CampaignRepository
+    lateinit var campaignRepository: CampaignRepository
 
     var campaignId:Long=1004
     var clientId:Long=3
