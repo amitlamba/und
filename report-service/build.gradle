@@ -1,9 +1,9 @@
 
-jar {
-    group = 'com.und'
-    version = '0.0.1-RELEASE'
-    baseName = 'report-service'
-}
+//jar {
+//    group = 'com.und'
+//    version = '0.0.1-RELEASE'
+//    baseName = 'report-service'
+//}
 
 dependencies {
 //    implementation("org.springframework.boot:spring-boot-starter")
