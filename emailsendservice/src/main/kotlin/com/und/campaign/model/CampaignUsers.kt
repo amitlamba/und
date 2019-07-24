@@ -63,7 +63,7 @@ class CampaignTriggerInfo{
 }
 
 @Entity
-@Table(name = "campaignExecutionStatus")
+@Table(name = "executionStatus")
 class ExecutionStatus{
     @Id
     @Column(name = "execution_id")
