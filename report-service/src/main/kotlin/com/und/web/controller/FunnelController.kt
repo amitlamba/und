@@ -1,10 +1,10 @@
-package com.und.report.web.controller
+package com.und.web.controller
 
 import com.und.model.jpa.Campaign
 import com.und.model.IncludeUsers
-import com.und.report.service.FunnelReportService
-import com.und.report.web.model.FunnelReport
-import com.und.report.web.model.FunnelStepAndFilter
+import com.und.service.FunnelReportService
+import com.und.web.model.FunnelReport
+import com.und.web.model.FunnelStepAndFilter
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize

@@ -1,6 +1,6 @@
-package com.und.report.service
+package com.und.service
 
-import com.und.report.web.model.CampaignReached
+import com.und.web.model.CampaignReached
 import org.springframework.stereotype.Service
 
 @Service

@@ -1,6 +1,6 @@
-package com.und.report.repository.mongo
+package com.und.repository.mongo
 
-import com.und.report.web.model.ReachabilityResult
+import com.und.web.model.ReachabilityResult
 import org.bson.types.ObjectId
 import org.springframework.stereotype.Repository
 

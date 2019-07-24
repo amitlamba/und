@@ -1,8 +1,8 @@
-package com.und.report.service
+package com.und.service
 
-import com.und.report.repository.mongo.CampaignReachabilityRepository
-import com.und.report.web.model.CampaignReached
-import com.und.report.web.model.CampaignReachedResult
+import com.und.repository.mongo.CampaignReachabilityRepository
+import com.und.web.model.CampaignReached
+import com.und.web.model.CampaignReachedResult
 import com.und.service.CampaignService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service

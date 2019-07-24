@@ -1,9 +1,9 @@
-package com.und.report.web.controller
+package com.und.web.controller
 
 
-import com.und.report.service.CampaignReachedService
-import com.und.report.web.model.CampaignReached
-import com.und.report.web.model.FunnelReport
+import com.und.service.CampaignReachedService
+import com.und.web.model.CampaignReached
+import com.und.web.model.FunnelReport
 import com.und.security.utils.AuthenticationUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.access.prepost.PreAuthorize

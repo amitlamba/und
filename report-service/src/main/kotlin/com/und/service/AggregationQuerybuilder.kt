@@ -1,8 +1,8 @@
 package com.und.service
 
-import com.und.report.web.model.AggregateBy
-import com.und.report.web.model.EventReport
-import com.und.report.web.model.GroupBy
+import com.und.web.model.AggregateBy
+import com.und.web.model.EventReport
+import com.und.web.model.GroupBy
 import com.und.util.AGGREGATE_VALUE
 import com.und.util.NUM_OF_MINUTES
 import com.und.util.USER_COUNT

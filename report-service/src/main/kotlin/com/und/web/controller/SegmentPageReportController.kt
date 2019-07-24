@@ -1,10 +1,10 @@
-package com.und.report.web.controller
+package com.und.web.controller
 
 
 import com.und.model.IncludeUsers
 import com.und.model.SegmentTrendCount
-import com.und.report.service.ReachabilityService
-import com.und.report.web.model.Reachability
+import com.und.service.ReachabilityService
+import com.und.web.model.Reachability
 import com.und.security.utils.AuthenticationUtils
 import com.und.service.CampaignService
 import com.und.web.model.Campaign

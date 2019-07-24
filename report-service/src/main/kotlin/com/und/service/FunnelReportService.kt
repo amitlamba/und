@@ -1,7 +1,7 @@
-package com.und.report.service
+package com.und.service
 
 import com.und.model.IncludeUsers
-import com.und.report.web.model.FunnelReport
+import com.und.web.model.FunnelReport
 
 interface FunnelReportService {
 

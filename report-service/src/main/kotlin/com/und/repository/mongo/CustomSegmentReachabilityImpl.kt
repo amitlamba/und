@@ -1,7 +1,7 @@
 package com.und.repository.mongo
 
 import com.und.model.mongo.SegmentReachability
-import com.und.report.service.SegmentResult
+import com.und.service.SegmentResult
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.mongodb.core.MongoTemplate
 import org.springframework.data.mongodb.core.aggregation.Aggregation

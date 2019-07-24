@@ -1,8 +1,8 @@
-package com.und.report.repository.mongo
+package com.und.repository.mongo
 
 import com.und.model.AggregateOutput
 import com.und.model.UserData
-import com.und.report.web.model.Reachability
+import com.und.web.model.Reachability
 import com.und.util.AGGREGATE_VALUE
 import com.und.util.loggerFor
 

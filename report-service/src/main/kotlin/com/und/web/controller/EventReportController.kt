@@ -1,14 +1,14 @@
-package com.und.report.web.controller
+package com.und.web.controller
 
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.und.model.IncludeUsers
-import com.und.report.service.UserEventAnalyticsService
-import com.und.report.web.model.AggregateBy
-import com.und.report.web.model.EventReport
-import com.und.report.web.model.EventReport.EventCount
-import com.und.report.web.model.GroupBy
-import com.und.report.web.model.Reachability
+import com.und.service.UserEventAnalyticsService
+import com.und.web.model.AggregateBy
+import com.und.web.model.EventReport
+import com.und.web.model.EventReport.EventCount
+import com.und.web.model.GroupBy
+import com.und.web.model.Reachability
 import com.und.security.utils.AuthenticationUtils
 import com.und.web.model.EventUser
 import com.und.web.model.GlobalFilter

@@ -1,9 +1,9 @@
-package com.und.report.service
+package com.und.service
 
 import com.und.model.AggregateOutput
 import com.und.model.IncludeUsers
-import com.und.report.repository.mongo.UserAnalyticsRepository
-import com.und.report.web.model.*
+import com.und.repository.mongo.UserAnalyticsRepository
+import com.und.web.model.*
 import com.und.service.*
 import com.und.web.model.*
 import org.slf4j.Logger
@@ -13,7 +13,9 @@ import com.und.service.AggregationQuerybuilder.*
 import com.und.util.AGGREGATE_VALUE
 import com.und.util.NUM_OF_MINUTES
 import com.und.util.loggerFor
+import org.springframework.stereotype.Service
 
+@Service
 class UserEventAnalyticsServiceImpl : UserEventAnalyticsService {
 
     companion object {

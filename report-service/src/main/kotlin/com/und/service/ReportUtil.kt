@@ -1,4 +1,4 @@
-package com.und.report.service
+package com.und.service
 
 import com.und.web.model.DataType
 import com.und.web.model.GlobalFilter

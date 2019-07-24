@@ -1,4 +1,4 @@
-package com.und.report.web.model
+package com.und.web.model
 
 class Reachability {
     var totalUser: Int? =null

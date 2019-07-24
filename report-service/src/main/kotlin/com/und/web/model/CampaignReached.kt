@@ -1,4 +1,4 @@
-package com.und.report.web.model
+package com.und.web.model
 
 class CampaignReached {
     var delivered: Long = 0

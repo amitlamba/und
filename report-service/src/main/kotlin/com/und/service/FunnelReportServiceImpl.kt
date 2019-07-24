@@ -1,9 +1,9 @@
-package com.und.report.service
+package com.und.service
 
 import com.mongodb.BasicDBObject
 
 import com.und.model.FunnelData
-import com.und.report.web.model.FunnelReport
+import com.und.web.model.FunnelReport
 import com.und.web.model.GlobalFilter
 
 
@@ -12,7 +12,7 @@ import com.und.model.jpa.Variant
 
 import com.und.model.IncludeUsers
 import com.und.model.WinnerTemplate
-import com.und.report.repository.mongo.UserAnalyticsRepository
+import com.und.repository.mongo.UserAnalyticsRepository
 import com.und.repository.jpa.CampaignRepository
 import com.und.service.*
 import com.und.util.loggerFor

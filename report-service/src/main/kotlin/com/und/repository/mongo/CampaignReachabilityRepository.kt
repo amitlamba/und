@@ -1,6 +1,6 @@
-package com.und.report.repository.mongo
+package com.und.repository.mongo
 
-import com.und.report.web.model.CampaignReachedResult
+import com.und.web.model.CampaignReachedResult
 import org.springframework.stereotype.Repository
 
 @Repository

@@ -1,11 +1,11 @@
-package com.und.report.service
+package com.und.service
 
 import com.und.model.Count
 import com.und.model.IncludeUsers
 import com.und.model.SegmentTrendCount
 import com.und.model.mongo.SegmentReachability
-import com.und.report.repository.mongo.ReachabilityRepository
-import com.und.report.web.model.Reachability
+import com.und.repository.mongo.ReachabilityRepository
+import com.und.web.model.Reachability
 import com.und.repository.jpa.ClientSettingsRepository
 import com.und.repository.mongo.SegmentReachabilityRepository
 import com.und.service.SegmentService

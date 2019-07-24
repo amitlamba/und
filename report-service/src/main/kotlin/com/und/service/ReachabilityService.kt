@@ -1,8 +1,8 @@
-package com.und.report.service
+package com.und.service
 
 import com.und.model.IncludeUsers
 import com.und.model.SegmentTrendCount
-import com.und.report.web.model.Reachability
+import com.und.web.model.Reachability
 import org.springframework.stereotype.Service
 
 @Service

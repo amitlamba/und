@@ -1,4 +1,4 @@
-package com.und.report.service
+package com.und.service
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider
 import com.amazonaws.auth.BasicAWSCredentials
@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.und.model.FunnelData
-import com.und.report.web.model.FunnelReport
+import com.und.web.model.FunnelReport
 import com.und.util.loggerFor
 import org.slf4j.Logger
 import org.springframework.beans.factory.annotation.Autowired
