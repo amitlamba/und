@@ -8,5 +8,5 @@ import java.util.*
 @Repository
 interface SegmentUsersRepository:MongoRepository<SegmentUsers,Long> {
 
-    fun findByIdAndClientId(id:Long,clientId:Long): Optional<SegmentUsers>
+    fun findBySegmentIdAndClientId(id:Long,clientId:Long): Optional<SegmentUsers>
 }

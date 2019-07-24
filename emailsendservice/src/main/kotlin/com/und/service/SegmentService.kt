@@ -74,7 +74,7 @@ class SegmentService {
     }
 
     fun usersInSegment(segmentId:Long,clientId: Long):Set<String>{
-        val segmentUsers = segmentUsersRepository.findByIdAndClientId(segmentId,clientId)
+        val segmentUsers = segmentUsersRepository.findBySegmentIdAndClientId(segmentId,clientId)
         return if(segmentUsers.isPresent){
             val users= segmentUsers.get().users
             users

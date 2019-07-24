@@ -26,10 +26,12 @@ import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.messaging.support.MessageBuilder
+import org.springframework.stereotype.Service
 import java.io.*
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 
+@Service
 class FcmSendService: FcmService {
 
     companion object {
