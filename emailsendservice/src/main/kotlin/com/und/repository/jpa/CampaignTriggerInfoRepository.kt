@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface CampaignTriggerInfoRepository:JpaRepository<CampaignTriggerInfo,Long> {
-    @Query("update table campaignTriggerInfo set error = :status where campaign_id = :id")
+    @Query("update table campaignTriggerInfo set error = :status where campaign_id = :id",nativeQuery = true)
     fun updateErrorStatus(@Param("id")campaignId:Long, @Param("status")errorStatus:Boolean)
 }
