@@ -364,7 +364,7 @@ class CreateMetadataService {
      */
     @StreamListener("inSegment")
     fun segmentPostProcessing(jpaSegment: com.und.model.jpa.Segment){
-        logger.info("Computing the segment and creating metadata")
+        logger.info("Computing the segment ${jpaSegment.id} and creating metadata")
         val segment:Segment = buildWebSegmentWithFilters(jpaSegment) //building webSegment from jpa segment
         val timeZoneId = clientSettingsRepository.findByClientID(jpaSegment.clientID!!)?.timezone?:"UTC"
         var error:Boolean = false
