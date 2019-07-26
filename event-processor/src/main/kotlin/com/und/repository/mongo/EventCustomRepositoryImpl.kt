@@ -50,7 +50,20 @@ class EventCustomRepositoryImpl : EventCustomRepository {
 
     override fun insertIfNotExists(event: Event, clientId: Long) {
         val query = Query(Criteria("_id").`is`(ObjectId(event.id)))
-        val update = Update().set("name",event.name)
+        val update = Update().setOnInsert("name",event.name)
+                .setOnInsert("clientId",event.clientId)
+                .setOnInsert("lineItem",event.lineItem)
+                .setOnInsert("attributes",event.attributes)
+                .setOnInsert("system",event.system)
+                .setOnInsert("agentString",event.agentString)
+                .setOnInsert("creationTime",event.creationTime)
+                .setOnInsert("userIdentified",event.userIdentified)
+                .setOnInsert("userId",event.userId)
+                .setOnInsert("geogrophy",event.geogrophy)
+                .setOnInsert("timeZoneId",event.timeZoneId)
+                .setOnInsert("firstTime",event.firstTime)
+                .setOnInsert("clientTime",event.clientTime)
+                .setOnInsert("appfield",event.appfield)
         mongoTemplate.upsert(query,update,"${clientId}_event")
     }
 
@@ -60,6 +73,21 @@ class EventCustomRepositoryImpl : EventCustomRepository {
                 set("deviceId",event.deviceId).
                 set("notificationId",event.notificationId).
                 set("geoDetails",event.geoDetails)
+                .setOnInsert("name",event.name)
+                .setOnInsert("clientId",event.clientId)
+                .setOnInsert("lineItem",event.lineItem)
+                .setOnInsert("attributes",event.attributes)
+                .setOnInsert("system",event.system)
+                .setOnInsert("agentString",event.agentString)
+                .setOnInsert("creationTime",event.creationTime)
+                .setOnInsert("userIdentified",event.userIdentified)
+                .setOnInsert("userId",event.userId)
+                .setOnInsert("geogrophy",event.geogrophy)
+                .setOnInsert("timeZoneId",event.timeZoneId)
+                .setOnInsert("firstTime",event.firstTime)
+                .setOnInsert("clientTime",event.clientTime)
+                .setOnInsert("appfield",event.appfield)
+
         mongoTemplate.upsert(query,update,"${clientId}_event")
 
     }
