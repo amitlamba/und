@@ -36,6 +36,8 @@ class CampaignUsers{
         this.groupStatus = groupStatus
         this.deliveryTime = deliveryTime
     }
+    constructor():this(campaignId = -1,templateId = -1,clientId = -1,executionId = "",groupId = -1,segmentId = -1,users = emptyList()){
+    }
 }
 
 enum class CampaignUserStatus{

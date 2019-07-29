@@ -104,8 +104,8 @@ class CampaignService {
 
 //    @Value(value = "\${und.system.from.address}")
 //    lateinit var systemFromAddress:String
-    @Value(value="\${und.system.pagination.no}")
-    private var paginateNumber: Int = 10
+    @Value(value="\${und.system.paginationNo}")
+    private var paginateNumber: Int?=null
 
     fun executeCampaign(campaignId: Long, clientId: Long) {
         //if client not trigger manual campaign then next time(if its multidate) we automatically send winner template.
@@ -164,7 +164,7 @@ class CampaignService {
 
     fun sendUsersInGroupToMessagingService(executionId: String,campaignId: Long, segmentId: Long, clientId: Long, campaignType: String, users: List<String>) {
         val noOfUsers = users.size
-        val noOfGroups = noOfUsers.div(paginateNumber)
+        val noOfGroups = noOfUsers.div(paginateNumber?:10)
         //if(noOfUsers.rem(paginateNumber)>0) noOfGroups.inc()
         //TODO here max lose of 9 users
         for (groupId in 1..noOfGroups step 1) {
@@ -314,7 +314,7 @@ class CampaignService {
             } catch (ex: Exception) {
                 0
             }
-            val noOfGroups = users.div(paginateNumber)
+            val noOfGroups = users.div(paginateNumber?:10)
             for (i in start..(start + noOfGroups - 1) step 1) {
                 listOfGroups.add(Pair(i, it.templateId!!))
             }
@@ -398,7 +398,7 @@ class CampaignService {
                 val campaignUsers = campaignUsersRepository.findByClientIdAndCampaignIdAndExecutionId(clientId,campaignId,executionId)
                 val groupEndIndex = campaignUsers.size
                 val noOfUsers = it.usersId.size
-                val noOfGroups = noOfUsers.div(paginateNumber)
+                val noOfGroups = noOfUsers.div(paginateNumber?:10)
                 //if(noOfUsers.rem(paginateNumber)>0) noOfGroups.inc()
                 //TODO here max lose of 9 users
                 logger.debug(".... group take part in ab test $groupEndIndex rest of users $noOfUsers totalgroup ${groupEndIndex+noOfGroups} ")
