@@ -58,7 +58,7 @@ class SegmentServiceImpl : SegmentService {
 //        return getSegmentUsers(segment, clientId, includeUsers = includeUsers, campaign = campaign).first
 //    }
     override fun isUserPresentInSegment(segment: Segment, clientId: Long, includeUsers: IncludeUsers, campaign: String?,userId: String): Boolean{
-        return getSegmentUsers(segment, clientId, includeUsers = includeUsers, campaign = campaign,userId = userId).second.isNotEmpty()
+        return getSegmentUsers(segment, clientId, type ="userId",includeUsers = includeUsers, campaign = campaign,userId = userId).second.isNotEmpty()
     }
 
     override fun addUserInSegment(userId: String, clientId: Long,segmentId:Long) {

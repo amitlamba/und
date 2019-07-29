@@ -44,7 +44,7 @@ enum class CampaignUserStatus{
 }
 
 @Entity
-@Table(name = "campaignTriggerInfo")
+@Table(name = "campaigntriggerinfo")
 class CampaignTriggerInfo{
     @Id
     @Column(name = "campaign_id")
@@ -55,7 +55,7 @@ class CampaignTriggerInfo{
     var error:Boolean = false
     @OneToMany(cascade = [CascadeType.ALL],fetch = FetchType.EAGER)
     @JoinColumn(name = "campaign_id")
-    var executionStatus:List<ExecutionStatus> = emptyList()
+    var executionStatus:List<ExecutionStatus> = ArrayList()
 
     override fun toString(): String {
         return "campaignId $campaignId clientId $clientId error $error execution status ${executionStatus.toTypedArray()}"
@@ -63,7 +63,7 @@ class CampaignTriggerInfo{
 }
 
 @Entity
-@Table(name = "executionStatus")
+@Table(name = "executionstatus")
 class ExecutionStatus{
     @Id
     @Column(name = "execution_id")

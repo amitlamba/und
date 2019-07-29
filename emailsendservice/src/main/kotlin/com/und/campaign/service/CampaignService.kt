@@ -28,6 +28,7 @@ import com.und.utils.loggerFor
 import org.bson.Document
 import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.messaging.support.MessageBuilder
 import org.springframework.stereotype.Service
@@ -103,7 +104,7 @@ class CampaignService {
 
 //    @Value(value = "\${und.system.from.address}")
 //    lateinit var systemFromAddress:String
-
+    @Value(value="\${und.system.pagination.no}")
     private var paginateNumber: Int = 10
 
     fun executeCampaign(campaignId: Long, clientId: Long) {
@@ -131,7 +132,7 @@ class CampaignService {
 
     private fun updateCampaignTriggerInfo(campaignId: Long, executionId: String, clientId: Long) {
         logger.info("updating campaign trigger info for clientId $clientId executionId $executionId campaignId $campaignId")
-        val campaignTriggerInfo = campaignTriggerInfoRepository.findById(campaignId)
+        val campaignTriggerInfo = campaignTriggerInfoRepository.findByCampaignId(campaignId)
         if (campaignTriggerInfo.isPresent) {
             val cTInfo = campaignTriggerInfo.get()
             val newExecutionStatus = ExecutionStatus()
@@ -154,8 +155,8 @@ class CampaignService {
                 this.campaignId = campaignId
                 this.clientId = clientId
                 this.error = false
-                this.executionStatus = listOf(executionStatus)
             }
+            newCampaignTriggerInfo.executionStatus.plus(executionStatus)
             campaignTriggerInfoRepository.save(newCampaignTriggerInfo)
         }
         logger.info("updating campaign trigger info for clientId $clientId executionId $executionId campaignId $campaignId is successful.")
