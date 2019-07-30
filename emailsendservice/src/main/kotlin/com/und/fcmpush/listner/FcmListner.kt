@@ -75,7 +75,7 @@ class FcmListner {
             val clientId = campaignUsers.clientId
             val campaignId = campaignUsers.campaignId
             val templateId = campaignUsers.templateId
-            val campaign = campaignRepository.getCampaignByCampaignId(campaignId, clientId).get()
+            val campaign = campaignRepository.findById(campaignId).get()
             when (campaignUsers.groupStatus) {
                 GroupStatus.ERROR -> {
                     campaignUsers.users.forEachIndexed { index, value ->
