@@ -151,12 +151,16 @@ class CampaignService {
                 this.executionId = executionId
                 this.executionTime = LocalDateTime.now(ZoneId.systemDefault())
             }
+            val list = ArrayList<ExecutionStatus>()
+            list.add(executionStatus)
+
             with(newCampaignTriggerInfo) {
                 this.campaignId = campaignId
                 this.clientId = clientId
                 this.error = false
+                //this.executionStatus.plus(executionStatus)
             }
-            newCampaignTriggerInfo.executionStatus.plus(executionStatus)
+            newCampaignTriggerInfo.executionStatus = list
             campaignTriggerInfoRepository.save(newCampaignTriggerInfo)
         }
         logger.info("updating campaign trigger info for clientId $clientId executionId $executionId campaignId $campaignId is successful.")

@@ -22,6 +22,7 @@ import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cloud.stream.annotation.StreamListener
+import org.springframework.orm.jpa.JpaSystemException
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -71,18 +72,22 @@ class SmsListner {
             when (campaignUsers.groupStatus) {
                 GroupStatus.ERROR -> {
                     campaignUsers.users.forEachIndexed { index, value ->
-                        val status = value["status"]
+                        val status = value["status"] as String
                         val userId = value["userId"] as String
                         val eventUser = eventUserRepository.findByIdAndClientId(ObjectId(userId), clientId)
                         eventUser?.let {
                             val sms = buildCampaignMessage.buildSms(clientId, campaign, eventUser, smsCampaign, smsTemplate)
-                            when (status) {
+                            when (CampaignUserStatus.valueOf(status)) {
                                 CampaignUserStatus.UNDELIVERED -> {
                                     try {
                                         smsService.sendSms(sms)
                                     } catch (ex: Exception) {
                                         //TODO pause campaign make a feign call
-                                        campaignTriggerInfoRepository.updateErrorStatus(campaignId,true)
+                                        try {
+                                            campaignTriggerInfoRepository.updateErrorStatus(campaignId, true)
+                                        }catch(ex:JpaSystemException){
+
+                                        }
                                         updateCampaignUserDocument(index, campaignUsers)
                                         logger.info("Error occurred during sending sms for clientId ${campaignUsers.clientId}" +
                                                 "campaignId ${campaignUsers.campaignId} groupId ${campaignUsers.groupId} error is ${ex.localizedMessage}")
@@ -104,7 +109,11 @@ class SmsListner {
                                 smsService.sendSms(sms)
                             } catch (ex: Exception) {
                                 //TODO pause campaign make a feign call
-                                campaignTriggerInfoRepository.updateErrorStatus(campaignId,true)
+                                try {
+                                    campaignTriggerInfoRepository.updateErrorStatus(campaignId, true)
+                                }catch(ex:JpaSystemException){
+
+                                }
                                 logger.info("Error occurred during sending sms for clientId ${campaignUsers.clientId}" +
                                         "campaignId ${campaignUsers.campaignId} groupId ${campaignUsers.groupId} error is ${ex.localizedMessage}")
                                 updateCampaignUserDocument(index, campaignUsers)
@@ -124,9 +133,17 @@ class SmsListner {
         errorPosition?.let {
             val users = campaignUsers.users.mapIndexed { index, document ->
                 if(index>=errorPosition){
-                    Document(mapOf(Pair("userId",document["userId"]),Pair("status", CampaignUserStatus.UNDELIVERED)))
+                    var document1 = Document()
+                    document1.put("userId",document["userId"])
+                    document1.put("status",CampaignUserStatus.UNDELIVERED.name)
+                    document1
+                    //Document(mapOf(Pair("userId",document["userId"]),Pair("status", CampaignUserStatus.UNDELIVERED)))
                 }else{
-                    Document(mapOf(Pair("userId",document["userId"]),Pair("status", CampaignUserStatus.DELIVERED)))
+                    var document1 = Document()
+                    document1.put("userId",document["userId"])
+                    document1.put("status",CampaignUserStatus.DELIVERED.name)
+                    document1
+                    //Document(mapOf(Pair("userId",document["userId"]),Pair("status", CampaignUserStatus.DELIVERED)))
                 }
             }
             campaignUsers.groupStatus = GroupStatus.ERROR
@@ -136,6 +153,7 @@ class SmsListner {
         //make it client specific
         campaignUsers.deliveryTime = LocalDateTime.now(ZoneId.systemDefault())
         campaignUsersRepository.save(campaignUsers)
+
     }
 
     @StreamListener("inTestSms")

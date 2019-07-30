@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.cloud.stream.annotation.StreamListener
 import org.springframework.messaging.support.MessageBuilder
+import org.springframework.orm.jpa.JpaSystemException
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -79,19 +80,23 @@ class FcmListner {
             when (campaignUsers.groupStatus) {
                 GroupStatus.ERROR -> {
                     campaignUsers.users.forEachIndexed { index, value ->
-                        val status = value["status"]
+                        val status = value["status"] as String
                         val userId = value["userId"] as String
                         val eventUser = eventUserRepository.findByIdAndClientId(ObjectId(userId), clientId)
                         eventUser?.let {
-                            when (status) {
+                            when (CampaignUserStatus.valueOf(status)) {
                                 CampaignUserStatus.UNDELIVERED -> {
                                     try {
                                         sendCampaignMessage(campaign, templateId, it)
                                     } catch (ex: FcmFailureException) {
                                         //TODO pause campaign make a feign call
-                                        campaignTriggerInfoRepository.updateErrorStatus(campaignId,true)
+                                        try {
+                                            campaignTriggerInfoRepository.updateErrorStatus(campaignId, true)
+                                        }catch(ex: JpaSystemException){
+
+                                        }
                                         updateCampaignUserDocument(index, campaignUsers)
-                                        logger.info("Error occured during sending fcm message for clientId ${campaignUsers.clientId}" +
+                                        logger.info("Error occurred during sending fcm message for clientId ${campaignUsers.clientId}" +
                                                 "campaignId ${campaignUsers.campaignId} groupId ${campaignUsers.groupId} error is ${ex.error.message}")
                                         toFcmFailureKafka(ex.error)
                                         return@forEachIndexed
@@ -99,7 +104,6 @@ class FcmListner {
                                 }
                             }
                         }
-
                     }
                     updateCampaignUserDocument(null, campaignUsers)
                 }
@@ -110,10 +114,14 @@ class FcmListner {
                         eventUser?.let {
                             try {
                                 sendCampaignMessage(campaign, templateId, it)
-                                updateCampaignUserDocument(null, campaignUsers)
+                                //updateCampaignUserDocument(null, campaignUsers)
                             } catch (ex: FcmFailureException) {
                                 //TODO pause campaign make a feign call
-                                campaignTriggerInfoRepository.updateErrorStatus(campaignId,true)
+                                try {
+                                    campaignTriggerInfoRepository.updateErrorStatus(campaignId, true)
+                                }catch(ex:JpaSystemException){
+
+                                }
                                 updateCampaignUserDocument(index, campaignUsers)
                                 toFcmFailureKafka(ex.error)
                                 logger.info("Error occured during sending fcm message for clientId ${campaignUsers.clientId}" +
@@ -134,9 +142,16 @@ class FcmListner {
         errorPosition?.let {
             val users = campaignUsers.users.mapIndexed { index, document ->
                 if(index>=errorPosition){
-                    Document(mapOf(Pair("userId",document["userId"]),Pair("status", CampaignUserStatus.UNDELIVERED)))
-                }else{
-                    Document(mapOf(Pair("userId",document["userId"]),Pair("status", CampaignUserStatus.DELIVERED)))
+                    var document1 = Document()
+                    document1.put("userId",document["userId"])
+                    document1.put("status",CampaignUserStatus.UNDELIVERED.name)
+                    document1
+//                    Document(mapOf(Pair("userId",document["userId"]),Pair("status", CampaignUserStatus.UNDELIVERED)))
+                }else{ var document1 = Document()
+                    document1.put("userId",document["userId"])
+                    document1.put("status",CampaignUserStatus.DELIVERED.name)
+                    document1
+//                    Document(mapOf(Pair("userId",document["userId"]),Pair("status", CampaignUserStatus.DELIVERED)))
                 }
             }
             campaignUsers.groupStatus = GroupStatus.ERROR
