@@ -63,7 +63,8 @@ class SmsService : CommonSmsService {
     fun sendLiveSms(infoModel:LiveCampaignTriggerInfo){
         val campaign = campaignRepository.findById(infoModel.campaignId).get()
         val smsCampaign = smsCampaignRepository.findByCampaignId(infoModel.campaignId).get()
-        val smsTemplate = smsTemplateRepository.findByIdAndClientID(infoModel.templateId,infoModel.clientId)
+        val smsTemplate = infoModel.templateId?.let {  smsTemplateRepository.findByIdAndClientID(it,infoModel.clientId)}
+        ?:smsTemplateRepository.findByIdAndClientID(smsCampaign.templateId!!,infoModel.clientId)
         val user = eventUserRepository.findByIdAndClientId(ObjectId(infoModel.userId),infoModel.clientId)
         user?.let {
            smsTemplate?.let {  val sms = buildCampaignMessage.buildSms(infoModel.clientId,campaign,user,smsCampaign,smsTemplate)

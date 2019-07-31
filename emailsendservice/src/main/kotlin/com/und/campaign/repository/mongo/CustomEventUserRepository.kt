@@ -28,4 +28,5 @@ interface CustomEventUserRepository {
 
     fun findAllByIdAndByCampaignType(clientId: Long, ids: List<ObjectId>, type:CampaignType):List<EventUser>
 
+    fun testSegmentUsers( clientId: Long): List<String>
 }

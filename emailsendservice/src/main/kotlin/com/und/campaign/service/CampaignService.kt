@@ -595,7 +595,7 @@ class CampaignService {
         return campaignRepository.findAllByClientIDAndSegmentationIDAndStartDateBefore(segmentId, clientId)
     }
 
-    private fun executeCampaignForUser(campaign: Campaign, user: EventUser, clientId: Long, templateId: Long? = null) {
+    private fun executeCampaignForUser(campaign: Campaign, user: EventUser, clientId: Long, templateId: Long?=null) {
         try {
             //TODO: filter out unsubscribed and blacklisted users
             //TODO: How to skip transactional Messages
@@ -604,7 +604,9 @@ class CampaignService {
                 if (user.communication?.email == null || user.communication?.email?.dnd == true)
                     return //Local lambda return
                 eventStream.outEmailLiveCampaign().
-                        send(MessageBuilder.withPayload(LiveCampaignTriggerInfo(campaign.id!!,clientId,user.id!!,templateId!!)).build())
+                        send(MessageBuilder.withPayload(LiveCampaignTriggerInfo(campaign.id!!,clientId,user.id!!,templateId)).build())
+
+
 //                val email: Email = email(clientId, campaign, user, templateId)
 //                toKafka(email)
             }
@@ -614,7 +616,7 @@ class CampaignService {
                 if (user.communication?.mobile == null || user.communication?.mobile?.dnd == true)
                     return //Local lambda return
                 eventStream.outSmsLiveCampaign().
-                        send(MessageBuilder.withPayload(LiveCampaignTriggerInfo(campaign.id!!,clientId,user.id!!,templateId!!)).build())
+                        send(MessageBuilder.withPayload(LiveCampaignTriggerInfo(campaign.id!!,clientId,user.id!!,templateId)).build())
 //                val sms: Sms = sms(clientId, campaign, user, templateId)
 //                toKafka(sms)
             }
@@ -623,7 +625,7 @@ class CampaignService {
                 if (user.communication?.android == null || user.communication?.android?.dnd == true)
                     return //Local lambda return
                 eventStream.outFcmLiveCampaign().
-                        send(MessageBuilder.withPayload(LiveCampaignTriggerInfo(campaign.id!!,clientId,user.id!!,templateId!!)).build())
+                        send(MessageBuilder.withPayload(LiveCampaignTriggerInfo(campaign.id!!,clientId,user.id!!,templateId)).build())
 //                val notification = fcmAndroidMessage(clientId, campaign, user, templateId)
 //                toKafka(notification)
             }
@@ -631,7 +633,7 @@ class CampaignService {
                 if (user.communication?.webpush == null || user.communication?.webpush?.dnd == true)
                     return //Local lambda return
                 eventStream.outFcmLiveCampaign().
-                        send(MessageBuilder.withPayload(LiveCampaignTriggerInfo(campaign.id!!,clientId,user.id!!,templateId!!)).build())
+                        send(MessageBuilder.withPayload(LiveCampaignTriggerInfo(campaign.id!!,clientId,user.id!!,templateId)).build())
 //                user.identity.webFcmToken?.forEach {
 //                    val notification = fcmWebMessage(clientId, campaign, user, it, templateId)
 //                    toKafka(notification)

@@ -98,7 +98,7 @@ class EmailListener {
                                         //TODO pause campaign make a feign call
                                         emailService.toKafkaEmailError(ex.error)
                                         logger.info("Error occurred during sending email.groupId ${campaignUsers.groupId} error is  ${ex.error.causeMessage}")
-                                        return@forEachIndexed
+                                        return
                                     }
                                 }
                             }
@@ -125,7 +125,7 @@ class EmailListener {
                                 //TODO pause campaign make a feign call
                                 emailService.toKafkaEmailError(ex.error)
                                 logger.info("Error occurred during sending email. groupId ${campaignUsers.groupId} error is ${ex.error.causeMessage}")
-                                return@forEachIndexed
+                                return
                             }
                         }
                     }

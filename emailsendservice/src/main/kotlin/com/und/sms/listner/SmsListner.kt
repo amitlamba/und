@@ -91,7 +91,7 @@ class SmsListner {
                                         updateCampaignUserDocument(index, campaignUsers)
                                         logger.info("Error occurred during sending sms for clientId ${campaignUsers.clientId}" +
                                                 "campaignId ${campaignUsers.campaignId} groupId ${campaignUsers.groupId} error is ${ex.localizedMessage}")
-                                        return@forEachIndexed
+                                        return
                                     }
                                 }
                             }
@@ -117,7 +117,7 @@ class SmsListner {
                                 logger.info("Error occurred during sending sms for clientId ${campaignUsers.clientId}" +
                                         "campaignId ${campaignUsers.campaignId} groupId ${campaignUsers.groupId} error is ${ex.localizedMessage}")
                                 updateCampaignUserDocument(index, campaignUsers)
-                                return@forEachIndexed
+                                return
                             }
                         }
                     }

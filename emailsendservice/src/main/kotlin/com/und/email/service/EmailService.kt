@@ -249,7 +249,8 @@ class EmailService: CommonEmailService {
     fun sendLiveEmail(infoModel:LiveCampaignTriggerInfo){
         val campaign = campaignRepository.findById(infoModel.campaignId).get()
         val emailCampaign = emailCampaignRepository.findByCampaignId(infoModel.campaignId).get()
-        val emailTemplate = emailTemplateRepository.findByIdAndClientID(infoModel.templateId,infoModel.clientId).get()
+        val emailTemplate = infoModel.templateId?.let { emailTemplateRepository.findByIdAndClientID(it,infoModel.clientId).get() }
+        ?:emailTemplateRepository.findByIdAndClientID(emailCampaign.templateId!!,infoModel.clientId).get()
         val user = eventUserRepository.findByIdAndClientId(ObjectId(infoModel.userId),infoModel.clientId)
         user?.let {
             val email = buildCampaignMessage.buildEmail(infoModel.clientId,campaign,user,emailCampaign,emailTemplate)

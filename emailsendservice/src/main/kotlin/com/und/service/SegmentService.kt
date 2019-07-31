@@ -62,11 +62,20 @@ class SegmentService {
     }
 
     fun getUserData(segmentId:Long,clientId: Long,type:String):List<EventUser>{
-        val segmentUsers = segmentUsersRepository.findById(segmentId)
-        return if(segmentUsers.isPresent){
-            val users= segmentUsers.get().users
-            eventUserRepository.findAllByIdAndByCampaignType(clientId,users.map { ObjectId(it) },CampaignType.valueOf(type))
-        }else emptyList()
+        val users:List<String> = if(segmentId == -2L){
+            getTestSegmentUsers(clientId)
+        }else{
+           val segmentUsers =  segmentUsersRepository.findById(segmentId)
+            if(segmentUsers.isPresent){
+                segmentUsers.get().users.toList()
+            }else emptyList()
+        }
+        return eventUserRepository.findAllByIdAndByCampaignType(clientId,users.map { ObjectId(it) },CampaignType.valueOf(type))
+//        val segmentUsers = segmentUsersRepository.findById(segmentId)
+//        return if(segmentUsers.isPresent){
+//            val users= segmentUsers.get().users
+//            eventUserRepository.findAllByIdAndByCampaignType(clientId,users.map { ObjectId(it) },CampaignType.valueOf(type))
+//        }else emptyList()
 //        val token = userRepository.findSystemUser().key
 //        return if (token != null) {
 //            segmentUserServiceClient.users(segmentId, clientId, token,IncludeUsers.ALL,type)
@@ -81,5 +90,7 @@ class SegmentService {
         }else emptySet()
     }
 
-
+    private fun getTestSegmentUsers(clientId: Long): List<String> {
+       return eventUserRepository.testSegmentUsers(clientId)
+    }
 }

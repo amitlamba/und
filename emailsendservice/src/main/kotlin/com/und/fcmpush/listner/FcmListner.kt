@@ -99,7 +99,7 @@ class FcmListner {
                                         logger.info("Error occurred during sending fcm message for clientId ${campaignUsers.clientId}" +
                                                 "campaignId ${campaignUsers.campaignId} groupId ${campaignUsers.groupId} error is ${ex.error.message}")
                                         toFcmFailureKafka(ex.error)
-                                        return@forEachIndexed
+                                        return
                                     }
                                 }
                             }
@@ -126,7 +126,7 @@ class FcmListner {
                                 toFcmFailureKafka(ex.error)
                                 logger.info("Error occured during sending fcm message for clientId ${campaignUsers.clientId}" +
                                         "campaignId ${campaignUsers.campaignId} groupId ${campaignUsers.groupId} error is ${ex.error.message}")
-                                return@forEachIndexed
+                                return
                             }
                         }
                     }

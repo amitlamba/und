@@ -105,4 +105,12 @@ class CustomEventUserRepositoryImpl: CustomEventUserRepository {
         }
         return mongoTemplate.find(query,EventUser::class.java,"${clientId}_eventUser")
     }
+    override  fun testSegmentUsers( clientId: Long): List<String> {
+        val query = Query.query(Criteria.where("testUser").`is`(true))
+        val output = mongoTemplate.find(query,  EventUser::class.java,"${clientId}_eventUser")
+        if(output!=null)
+            return output.mapNotNull { it.id }
+        else
+            return emptyList()
+    }
 }

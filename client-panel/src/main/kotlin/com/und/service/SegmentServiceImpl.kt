@@ -166,10 +166,11 @@ class SegmentServiceImpl : SegmentService {
     }
 
     override fun segmentUsers(segmentId: Long, clientId: Long, includeUsers: IncludeUsers, campaign: String?): List<EventUser> {
-       return getEventUsersByIds(segmentId)
-//        if (segmentId == -2L) {
-//            return getTestSEgmentUsers(clientId)
-//        }
+        return if (segmentId == -2L) {
+             getTestSEgmentUsers(clientId)
+        }else{
+            getEventUsersByIds(segmentId)
+        }
 //        val segmentOption = segmentRepository.findByIdAndClientID(segmentId, clientId)
 //        return if (segmentOption.isPresent) {
 //            val segment = segmentOption.get()
