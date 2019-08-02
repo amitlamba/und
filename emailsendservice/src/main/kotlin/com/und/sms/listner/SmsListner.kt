@@ -111,7 +111,7 @@ class SmsListner {
                                 //TODO pause campaign make a feign call
                                 try {
                                     campaignTriggerInfoRepository.updateErrorStatus(campaignId, true)
-                                }catch(ex:JpaSystemException){
+                                }catch(ex:Exception){
 
                                 }
                                 logger.info("Error occurred during sending sms for clientId ${campaignUsers.clientId}" +
