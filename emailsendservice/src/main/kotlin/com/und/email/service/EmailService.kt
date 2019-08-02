@@ -169,7 +169,11 @@ class EmailService: CommonEmailService {
                 identity = Identity(userId = email.eventUser?.id, clientId = emailToSend.clientID.toInt(), idf = 1)
 
             }
+            try{
             eventApiFeignClient.pushEvent(token, event)
+            }catch(ex:Exception){
+                logger.error("Error during push event for system user campaignId ${email.campaignId} and clientId ${email.clientID} ")
+            }
         }
     }
 
