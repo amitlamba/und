@@ -169,11 +169,15 @@ class CampaignService {
     fun sendUsersInGroupToMessagingService(executionId: String,campaignId: Long, segmentId: Long, clientId: Long, campaignType: String, users: List<String>) {
         val noOfUsers = users.size
         val noOfGroups = noOfUsers.div(paginateNumber?:10)
-        //if(noOfUsers.rem(paginateNumber)>0) noOfGroups.inc()
+        val remainder = noOfUsers.rem(paginateNumber?:10)
         //TODO here max lose of 9 users
         for (groupId in 1..noOfGroups step 1) {
             val groupUser = users.subList(fromIndex = ((groupId - 1) * (paginateNumber?:10)), toIndex = (groupId * (paginateNumber?:10)))
             saveCampaignUsers(executionId,campaignId, clientId, segmentId, groupId.toLong(), groupUser, campaignType)
+        }
+        if(remainder>0){
+            val groupUser = users.subList(fromIndex =(noOfGroups*(paginateNumber?:10)) , toIndex = (noOfGroups*(paginateNumber?:10))+remainder)
+            saveCampaignUsers(executionId,campaignId, clientId, segmentId, (noOfGroups+1).toLong(), groupUser, campaignType)
         }
     }
 
@@ -403,12 +407,17 @@ class CampaignService {
                 val groupEndIndex = campaignUsers.size
                 val noOfUsers = it.usersId.size
                 val noOfGroups = noOfUsers.div(paginateNumber?:10)
+                val remainder = noOfUsers.rem(paginateNumber?:10)
                 //if(noOfUsers.rem(paginateNumber)>0) noOfGroups.inc()
                 //TODO here max lose of 9 users
                 logger.debug(".... group take part in ab test $groupEndIndex rest of users $noOfUsers totalgroup ${groupEndIndex+noOfGroups} ")
                 for (groupId in groupEndIndex+1..groupEndIndex+noOfGroups step 1) {
                     val groupUser = it.usersId.subList(fromIndex = ((groupId - 1) * (paginateNumber?:10)), toIndex = (groupId * (paginateNumber?:10))).map { it.toHexString() }
                     saveCampaignUsers(executionId,campaignId, clientId, campaign.segmentationID!!, groupId.toLong(), groupUser, campaign.campaignType,templateId = templateId,isAbType = true)
+                }
+                if(remainder>0){
+                    val groupUser = it.usersId.subList(fromIndex =(noOfGroups*(paginateNumber?:10)) , toIndex = (noOfGroups*(paginateNumber?:10))+remainder).map { it.toHexString() }
+                    saveCampaignUsers(executionId,campaignId, clientId, campaign.segmentationID!!, (noOfGroups+1).toLong(), groupUser, campaign.campaignType)
                 }
             }
 
