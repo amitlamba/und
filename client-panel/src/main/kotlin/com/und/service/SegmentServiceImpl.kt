@@ -181,9 +181,7 @@ class SegmentServiceImpl : SegmentService {
     override fun segmentUsers(segment: WebSegment, clientId: Long,userId: Long, includeUsers: IncludeUsers): List<EventUserMinimal> {
         var timestart = System.currentTimeMillis()
         val eventUsers = getSegmentUsersList(segment, clientId, includeUsers, null)
-        println(System.currentTimeMillis()-timestart)
         val build = buildEventUserList(eventUsers)
-        println(System.currentTimeMillis()-timestart)
         return build
     }
 
@@ -342,6 +340,7 @@ class SegmentServiceImpl : SegmentService {
             id = segment.id
             name = segment.name
             type = segment.type
+            creationDate = segment.dateCreated
         }
         return websegment
     }
@@ -357,6 +356,7 @@ class SegmentServiceImpl : SegmentService {
             id = segment.id
             name = segment.name
             type = segment.type
+            creationDate = segment.dateCreated
         }
         return websegment
     }

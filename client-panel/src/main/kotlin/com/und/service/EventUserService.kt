@@ -139,6 +139,7 @@ class EventUserService {
         eventUser.lastName = eventUserMongo.standardInfo.lastname
         eventUser.gender = eventUserMongo.standardInfo.gender
         eventUser.country = eventUserMongo.standardInfo.country
+        eventUser.mobile = eventUserMongo.identity.mobile
         eventUser.undId = eventUserMongo.id
         return eventUser
     }
