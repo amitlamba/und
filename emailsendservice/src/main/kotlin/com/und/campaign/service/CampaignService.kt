@@ -315,6 +315,7 @@ class CampaignService {
         var start = 1
         var startIndex = 1
         val listOfGroups = mutableListOf<Pair<Int, Int>>()
+        val remainderGroups = mutableListOf<Pair<Int,Int>>()
         listOfVariant?.forEach {
             //calculating the no of users for this variant from sample size
             val users = try {
@@ -323,8 +324,12 @@ class CampaignService {
                 0
             }
             val noOfGroups = users.div(paginateNumber?:10)
+            val remainder = users.rem(paginateNumber?:10)
             for (i in start..(start + noOfGroups - 1) step 1) {
                 listOfGroups.add(Pair(i, it.templateId!!))
+            }
+            if(remainder>0){
+                remainderGroups.add(Pair(remainder,it.templateId!!))
             }
             startIndex = start + noOfGroups
             start = startIndex
@@ -333,12 +338,22 @@ class CampaignService {
         logger.debug("campaign Ab test clientId $clientId campaignid ${campaign.id} totalUsers $totalUsers " +
                 "total sample users $sampleUserSize groups ${listOfGroups.size} unsentUser startIndex $startIndex ....")
         listOfGroups.forEach {
-            val groupUser = totalUsers.subList(fromIndex = ((it.first - 1) * 10), toIndex = (it.first * 10))
+            val groupUser = totalUsers.subList(fromIndex = ((it.first - 1) * (paginateNumber?:10)), toIndex = (it.first * (paginateNumber?:10)))
             logger.debug(".... campaign Ab test clientId $clientId campaignid ${campaign.id} groupId ${it.first} " +
-                    "fromIndex ${((it.first - 1) * 10)} toIndex ${(it.first * 10)}")
+                    "fromIndex ${((it.first - 1) * (paginateNumber?:10))} toIndex ${(it.first * (paginateNumber?:10))}")
             saveCampaignUsers(executionId,campaign.id!!, clientId, campaign.segmentationID!!, it.first.toLong(), groupUser, campaign.campaignType, it.second.toLong(),true,true)
         }
-        totalUsers.listIterator(((startIndex - 1) * 10) + 1).forEach {
+        var remainderIndex = (startIndex-1)*(paginateNumber?:10)
+        val totalGroups = listOfGroups.size
+        remainderGroups.forEach {
+            val remainderUsers = it.first
+            val groupUser = totalUsers.subList(fromIndex = remainderIndex, toIndex = (remainderIndex+remainderUsers))
+            logger.debug(".... campaign Ab test clientId $clientId campaignid ${campaign.id} groupId ${it.first} " +
+                    "fromIndex ${remainderIndex} toIndex ${remainderIndex+remainderUsers}")
+            saveCampaignUsers(executionId,campaign.id!!, clientId, campaign.segmentationID!!, totalGroups.inc().toLong(), groupUser, campaign.campaignType, it.second.toLong(),true,true)
+            remainderIndex+=remainderUsers
+        }
+        totalUsers.listIterator(remainderIndex).forEach {
             unsentUserIds.add(ObjectId(it))
         }
         return unsentUserIds

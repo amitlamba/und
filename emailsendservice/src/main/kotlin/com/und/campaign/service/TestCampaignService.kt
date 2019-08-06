@@ -58,7 +58,7 @@ class TestCampaignService {
                 else -> emptyList()
             }
         }
-
+        logger.info("No of users to send test mail are ${userList?.size}")
         execute(testCampaign, userList, campaign)
 
     }
