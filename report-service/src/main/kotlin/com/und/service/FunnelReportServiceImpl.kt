@@ -116,7 +116,7 @@ class FunnelReportServiceImpl : FunnelReportService {
             listOfFunnelResult.forEachIndexed { index, v ->
 
                 for (i in 0..(noOfSteps - 2) step 1) {
-                    var percentageOfClick= (v[i+1].count*100)/v[0].count
+                    var percentageOfClick=if(v[0].count==0L) 0 else (v[i+1].count*100)/v[0].count
 
                     val value=map[i]!!
                     if(value.percentage<percentageOfClick){
