@@ -7,15 +7,15 @@ import javax.persistence.*
 
 @org.springframework.data.mongodb.core.mapping.Document("campaign_users")
 class CampaignUsers{
-    val campaignId:Long
-    val clientId:Long
+    var campaignId:Long
+    var clientId:Long
     @org.springframework.data.annotation.Id
-    val executionId:String
-    val isAbType:Boolean
-    val usersPartOfAbTest:Boolean
-    val segmentId:Long
-    val templateId:Long
-    val groupId:Long
+    var executionId:String
+    var isAbType:Boolean
+    var usersPartOfAbTest:Boolean
+    var segmentId:Long
+    var templateId:Long
+    var groupId:Long
     var groupStatus: GroupStatus = GroupStatus.UNDELIVERED
     var deliveryTime: LocalDateTime?=null
     var users:List<Document> = emptyList()

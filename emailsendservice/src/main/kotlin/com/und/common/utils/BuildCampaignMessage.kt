@@ -18,7 +18,7 @@ class BuildCampaignMessage {
                 campaign.fromUser,
                 user.identity.mobile,
                 smsBody = null,
-                smsTemplateId = smsCampaign.templateId ?: 0L,
+                smsTemplateId = smsTemplate.id ?: 0L,
                 smsTemplateName = smsTemplate.name,
                 eventUser = user,
                 serviceProviderId = campaign.serviceProviderId,

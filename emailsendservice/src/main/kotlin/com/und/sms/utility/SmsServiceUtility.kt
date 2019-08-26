@@ -60,7 +60,7 @@ class SmsServiceUtility {
             }
         } catch (e: Exception) {
             logger.error("Couldn't build smsData to invoke sms api", e)
-            Response(400, "invalid input values for sms ${e.message}")
+            Response(400, "invalid input values for sms ${e.printStackTrace()}")
         }
 
     }
