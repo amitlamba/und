@@ -45,9 +45,11 @@ class SmsServiceUtility {
 
     fun sendSmsWithoutTracking(sms: Sms): Response {
         val serviceProviderCredential = serviceProviderCredentials(sms)
+        logger.info("serviceprovider is ${serviceProviderCredential.serviceProvider}")
         return try {
             when(serviceProviderCredential.serviceProvider){
                 ServiceProviderCredentialsService.ServiceProvider.Twillio.desc -> {
+                    logger.info("insid etwillio")
                     val smsData = buildTwillioSmsData(serviceProviderCredential,sms)
                     logger.info("senfing sms")
                     val response  = smsSendService.sendTwillioSms(smsData)
