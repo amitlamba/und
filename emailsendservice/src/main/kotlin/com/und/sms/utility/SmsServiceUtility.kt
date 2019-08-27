@@ -36,7 +36,7 @@ class SmsServiceUtility {
     @Autowired
     private lateinit var smsSendService:SmsSendService
 
-    private var wspCredsMap: MutableMap<Long, ServiceProviderCredentials> = mutableMapOf()
+    private var wspCredsMap: MutableMap<String, ServiceProviderCredentials> = mutableMapOf()
 
 //    @Autowired
 //    private lateinit var userRepository: UserRepository
@@ -68,12 +68,13 @@ class SmsServiceUtility {
     fun serviceProviderCredentials(sms: Sms): ServiceProviderCredentials {
         synchronized(sms.clientID) {
             //TODO: This code can be cached in Redis
-            if (!wspCredsMap.containsKey(sms.clientID)) {
+            val id = "${sms.clientID}${sms.serviceProviderId}"
+            if (!wspCredsMap.containsKey(id)) {
                 val webServiceProviderCred = serviceProviderCredentialsService.getServiceProviderCredentials(sms.clientID, sms.serviceProviderId)
-                wspCredsMap[sms.clientID] = webServiceProviderCred
+                wspCredsMap["${sms.clientID}${webServiceProviderCred.id}"] = webServiceProviderCred
             }
         }
-        return wspCredsMap[sms.clientID]!!
+        return wspCredsMap["${sms.clientID}${sms.serviceProviderId}"]!!
     }
 
     fun buildSmsData(sms: Sms, serviceProviderCredentials: ServiceProviderCredentials): SmsData {
