@@ -44,7 +44,9 @@ class SmsServiceUtility {
 //    private lateinit var eventApiFeignClient: EventApiFeignClient
 
     fun sendSmsWithoutTracking(sms: Sms): Response {
+        logger.info("sending sms without tracking")
         val serviceProviderCredential = serviceProviderCredentials(sms)
+        logger.info("sending sms without tracking complete")
         return try {
             when(serviceProviderCredential.serviceProvider){
                 ServiceProviderCredentialsService.ServiceProvider.Twillio.desc -> {
