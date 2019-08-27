@@ -101,6 +101,7 @@ class SmsServiceUtility {
         val username = serviceProviderCredentials.credentialsMap["username"]
         val password = serviceProviderCredentials.credentialsMap["password"]
         val fromUser = serviceProviderCredentials.credentialsMap["fromUser"]
+        logger.info("Username is $username toaddress is ${sms.toSmsAddresses} body is ${sms.smsBody}")
         return when{
             !(username.isNullOrBlank() || password.isNullOrBlank()) -> {
                  TwillioSmsData(username!!,
