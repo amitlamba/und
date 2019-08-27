@@ -44,10 +44,13 @@ class SmsServiceUtility {
 //    private lateinit var eventApiFeignClient: EventApiFeignClient
 
     fun sendSmsWithoutTracking(sms: Sms): Response {
+        logger.info("sending without tracking")
         val serviceProviderCredential = serviceProviderCredentials(sms)
+        logger.info("service provide rtypeis ${serviceProviderCredential.serviceProvider}")
         return try {
             when(serviceProviderCredential.serviceProvider){
                 ServiceProviderCredentialsService.ServiceProvider.Twillio.desc -> {
+                    logger.info("inside twillio")
                     val smsData = buildTwillioSmsData(serviceProviderCredential,sms)
                     val response  = smsSendService.sendTwillioSms(smsData)
                     return response
@@ -102,6 +105,7 @@ class SmsServiceUtility {
         val username = serviceProviderCredentials.credentialsMap["username"]
         val password = serviceProviderCredentials.credentialsMap["password"]
         val fromUser = serviceProviderCredentials.credentialsMap["fromUser"]
+        logger.info("username is $username from is $fromUser pass is $password to ${sms.toSmsAddresses} body is ${sms.smsBody}")
         return when{
             !(username.isNullOrBlank() || password.isNullOrBlank()) -> {
                  TwillioSmsData(username!!,
