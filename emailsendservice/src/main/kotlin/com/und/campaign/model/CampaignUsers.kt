@@ -31,7 +31,7 @@ class CampaignUsers{
         this.usersPartOfAbTest = usersPartOfAbTest
         this.isAbType = isAbType
     }
-    constructor(campaignId: Long, clientId: Long, executionId:String, templateId: Long,segmentId: Long, groupId:Long, groupStatus: GroupStatus,
+    constructor(campaignId: Long, clientId: Long, executionId:String,segmentId: Long, groupId:Long, templateId: Long,groupStatus: GroupStatus,
                 deliveryTime: LocalDateTime, users: List<Document>,partOfAbTest: Boolean=false): this(campaignId,clientId,executionId,segmentId,groupId,templateId,users,partOfAbTest){
         this.groupStatus = groupStatus
         this.deliveryTime = deliveryTime

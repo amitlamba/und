@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component
 class SmsServiceUtility {
 
     companion object {
-        protected val logger: Logger = loggerFor(EmailService::class.java)
+        protected val logger: Logger = loggerFor(SmsServiceUtility::class.java)
     }
 
 

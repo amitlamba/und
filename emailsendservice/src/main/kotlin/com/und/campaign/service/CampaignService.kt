@@ -261,7 +261,7 @@ class CampaignService {
         }
 
         campaignUsersRepository.save(campaignUsers)
-        logger.info("saved and send campaign users for campaign $campaignId , client $clientId , group $groupId")
+        logger.info("saved and send campaign users for campaign $campaignId , client $clientId , group $groupId , templateId ${campaignUsers.templateId}")
         logger.debug("saving and sending campaign users in group for groupId ${groupId} campaignId ${campaignId} " +
                 "clientId ${clientId} templateId ${templateId} campaignType $campaignType isAbType $isAbType")
     }
