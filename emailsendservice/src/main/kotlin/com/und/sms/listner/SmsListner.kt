@@ -60,8 +60,8 @@ class SmsListner {
     fun sendSmsCampaign(campaignUsers: CampaignUsers) {
         //smsService.sendSms(sms)
         val campaignTriggerInfo = campaignTriggerInfoRepository.findById(campaignUsers.campaignId)
-        logger.debug("Sending sms for clientId ${campaignUsers.clientId} campaignId ${campaignUsers.campaignId} groupId " +
-                "${campaignUsers.groupId} executionId ${campaignUsers.executionId}")
+        logger.info("Sending sms for clientId ${campaignUsers.clientId} campaignId ${campaignUsers.campaignId} groupId " +
+                "${campaignUsers.groupId} executionId ${campaignUsers.executionId} templateId ${campaignUsers.templateId}")
         if(campaignTriggerInfo.isPresent && !campaignTriggerInfo.get().error) {
             val clientId = campaignUsers.clientId
             val campaignId = campaignUsers.campaignId
