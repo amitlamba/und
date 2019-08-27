@@ -199,7 +199,7 @@ class CampaignService {
     fun saveCampaignUsers(executionId:String,campaignId: Long, clientId: Long, segmentId: Long, groupId: Long,
                           users: List<String>, campaignType: String, templateId: Long? = null,
                           usersPartOfAbTest:Boolean = false,isAbType:Boolean = false) {
-        logger.debug("saving and sending campaign users in group for groupId ${groupId} campaignId ${campaignId} clientId ${clientId} " +
+        logger.info("saving and sending campaign users in group for groupId ${groupId} campaignId ${campaignId} clientId ${clientId} " +
                 "templateId ${templateId} campaignType $campaignType isAbType $isAbType ")
         val userDoc = users.map {
             Document("userId", it)
