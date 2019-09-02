@@ -16,7 +16,7 @@ dependencies {
     }
     compile('org.springframework.boot:spring-boot-starter-data-rest')
     runtime('org.postgresql:postgresql')
-    compile('org.springframework.cloud:spring-cloud-starter-stream-kafka')
-    compile('org.springframework.cloud:spring-cloud-stream-binder-kafka')
+//    compile('org.springframework.cloud:spring-cloud-starter-stream-kafka')
+//    compile('org.springframework.cloud:spring-cloud-stream-binder-kafka')
     compile ("com.und:auth-client:0.4.0-SNAPSHOT")
 }
