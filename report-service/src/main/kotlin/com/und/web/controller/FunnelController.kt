@@ -2,6 +2,7 @@ package com.und.web.controller
 
 import com.und.model.jpa.Campaign
 import com.und.model.IncludeUsers
+import com.und.security.utils.AuthenticationUtils
 import com.und.service.FunnelReportService
 import com.und.web.model.FunnelReport
 import com.und.web.model.FunnelStepAndFilter
@@ -52,7 +53,7 @@ class FunnelController {
         funnelFilter.steps=body.steps
         funnelFilter.filters=body.filters
         //FIXME All user make more sense then known.
-        return funnelReportService.funnel(funnelFilter,IncludeUsers.KNOWN)
+        return funnelReportService.funnel(funnelFilter,IncludeUsers.KNOWN, AuthenticationUtils.clientID)
     }
 
     @PreAuthorize("hasRole('ROLE_SYSTEM')")
