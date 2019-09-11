@@ -67,7 +67,6 @@ class SmsListner {
             val campaignId = campaignUsers.campaignId
             val templateId = campaignUsers.templateId
             val campaign = campaignRepository.findById(campaignId).get()
-            logger.info("service provider id is ${campaign.serviceProviderId}")
             val smsTemplate = smsTemplateRepository.findByIdAndClientID(templateId, clientId)!!
             val smsCampaign = smsCampaignRepository.findByCampaignId(campaignId).get()
             when (campaignUsers.groupStatus) {
