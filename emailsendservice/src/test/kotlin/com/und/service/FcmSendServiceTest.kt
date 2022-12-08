@@ -26,9 +26,9 @@ class FcmSendServiceTest {
      */
     @Test
     fun testFcmSendService() {
-        //server key AAAAHxikc0w:APA91bHBzujPVoTOBrrkUolCzFWIsXhz-LJHYsDuw4kHCPULto7TdpZCUYfUjPTN7Ff4fYHJuacqbAQMFQa7isxwmACj89dCzKa2awR2xMZIx7QkbtU0jTOVlHe-qYKDrbiB-a2kRA0l
-        //legacy server key AIzaSyDxc94h8UKCYhrVCcvybgd6H7PWjGaHzM4
-        val response = fcmSendService.sendMessage(1, "AAAAHxikc0w:APA91bHBzujPVoTOBrrkUolCzFWIsXhz-LJHYsDuw4kHCPULto7TdpZCUYfUjPTN7Ff4fYHJuacqbAQMFQa7isxwmACj89dCzKa2awR2xMZIx7QkbtU0jTOVlHe-qYKDrbiB-a2kRA0l", "Hello",
+        //server key --- server key can be put here for fcm
+        //legacy server key -- legacy srever key for fcm
+        val response = fcmSendService.sendMessage(1, "Replece with the server key for fcm", "Hello",
                 "Hello World", "abc")
         val jsonString = jacksonObjectMapper().writeValueAsString(response!!.body)
         var fcmResponse: FcmResponse = jacksonObjectMapper().readValue<FcmResponse>(jsonString)
