@@ -2,14 +2,14 @@
 
 ## UserNDot
 
-This contains majority of the backend services https://github.com/amitlamba/und
+This [und repo](https://github.com/amitlamba/und) of the backend services 
 
-The clinet panel ui code is here https://github.com/amitlamba/und-ui
+The clinet panel ui code is [here](https://github.com/amitlamba/und-ui)
 
-The scheduler codebase is here https://github.com/amitlamba/und-scheduler
+The scheduler codebase is [here](https://github.com/amitlamba/und-scheduler)
 
-The infra codebase is here https://github.com/amitlamba/und-infra
+The infra codebase is [here](https://github.com/amitlamba/und-infra)
 
-The integration sdks are here https://github.com/amitlamba/sdks
+The integration sdks are [here](https://github.com/amitlamba/sdks)
 
-The ducumentation service is here https://github.com/amitlamba/docs-und
+The ducumentation service is [here](https://github.com/amitlamba/docs-und)
