@@ -2,7 +2,7 @@
 
 ## UserNDot
 
-This [und repo](https://github.com/amitlamba/und) of the backend services 
+This is [und repo](https://github.com/amitlamba/und) of the backend services 
 
 The clinet panel ui code is [here](https://github.com/amitlamba/und-ui)
 
